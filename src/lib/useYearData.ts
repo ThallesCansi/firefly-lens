@@ -11,15 +11,16 @@ export interface YearData {
   summary: YearSummary;
 }
 
-/** Loads one region's year and harmonizes it. Keeps the last region on screen while the next loads. */
+/** Loads the latest year of one preset area and harmonizes it on its own: what the landing page shows. */
 export function useYearData(regionId: string): { data: YearData | null; loading: boolean; error: string | null } {
   const [data, setData] = useState<YearData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let live = true;
+    const region = fireData.presets().find((r) => r.id === regionId) ?? fireData.presets()[0];
     fireData
-      .hotspots(regionId, DATA_YEAR)
+      .hotspots(region.bbox, `${DATA_YEAR}-01-01`, `${DATA_YEAR}-12-31`)
       .then((hotspots) => {
         if (!live) return;
         setError(null);
