@@ -15,6 +15,7 @@ const eslintConfig = defineConfig([
     ".claude/**",
     ".taste-skill/**",
     "public/maplibre/**",
+    ".pnpm-store/**",
   ]),
 ]);
 
