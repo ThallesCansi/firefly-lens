@@ -1,0 +1,3441 @@
+{
+  "schema_version": 1,
+  "python_version": "3.13.15",
+  "auditor_sha256": "27da757d0ae62fcee8a24604ac90bb76c9458e1d16716fa8d980432b88f9e1cb",
+  "reference_date": "2026-11-14",
+  "commit": "6ea44c7a8962e2e462cba0cb48cd8883a1f8757c",
+  "branch": "feature/data-quality-audit",
+  "data_origin": "NASA FIRMS: MODIS C6.1 Aqua (SP to Aug 2026, NRT after), VIIRS NOAA-20 375 m (SP to Jul 2026, NRT after)",
+  "period": {
+    "firstDay": "2002-07-04",
+    "lastDay": "2026-11-14",
+    "seriesEnd": "2026-10",
+    "partialMonth": "2026-11"
+  },
+  "summary": {
+    "pass": 86,
+    "error": 0,
+    "warning": 3,
+    "not_run": 3,
+    "not_applicable": 1
+  },
+  "checks": [
+    {
+      "id": "metadata.schema",
+      "status": "pass",
+      "message": "Metadados suportados e cronologia consistente.",
+      "evidence": {}
+    },
+    {
+      "id": "metadata.future",
+      "status": "pass",
+      "message": "Fim declarado comparado à data de referência.",
+      "evidence": {
+        "lastDay": "2026-11-14",
+        "reference_date": "2026-11-14"
+      }
+    },
+    {
+      "id": "metadata.partial",
+      "status": "pass",
+      "message": "Último mês completo e mês parcial conferidos pelo último dia disponível.",
+      "evidence": {
+        "seriesEnd": "2026-10",
+        "partialMonth": "2026-11",
+        "first_month_partial": true
+      }
+    },
+    {
+      "id": "metadata.first_month",
+      "status": "warning",
+      "message": "Cobertura inicial começa no dia 4; julho/2002 não é um mês completo.",
+      "evidence": {}
+    },
+    {
+      "id": "files.manifest",
+      "status": "pass",
+      "message": "Manifesto comparado com arquivos disponíveis.",
+      "evidence": {
+        "missing": [],
+        "unlisted": [],
+        "declared": 67
+      }
+    },
+    {
+      "id": "public/data/brazil/t_0_5.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 14,
+        "daily_rows": 178,
+        "monthly_rows": 1456,
+        "variance_rows": 154
+      }
+    },
+    {
+      "id": "public/data/brazil/t_0_6.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 222,
+        "daily_rows": 52607,
+        "monthly_rows": 23088,
+        "variance_rows": 2442
+      }
+    },
+    {
+      "id": "public/data/brazil/t_0_7.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 80,
+        "daily_rows": 822,
+        "monthly_rows": 8320,
+        "variance_rows": 880
+      }
+    },
+    {
+      "id": "public/data/brazil/t_0_8.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 4,
+        "daily_rows": 40,
+        "monthly_rows": 416,
+        "variance_rows": 44
+      }
+    },
+    {
+      "id": "public/data/brazil/t_1_5.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 46,
+        "daily_rows": 26137,
+        "monthly_rows": 4784,
+        "variance_rows": 506
+      }
+    },
+    {
+      "id": "public/data/brazil/t_1_6.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 256,
+        "daily_rows": 59487,
+        "monthly_rows": 26624,
+        "variance_rows": 2816
+      }
+    },
+    {
+      "id": "public/data/brazil/t_1_7.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 251,
+        "daily_rows": 7215,
+        "monthly_rows": 26104,
+        "variance_rows": 2761
+      }
+    },
+    {
+      "id": "public/data/brazil/t_1_8.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 226,
+        "daily_rows": 3978,
+        "monthly_rows": 23504,
+        "variance_rows": 2486
+      }
+    },
+    {
+      "id": "public/data/brazil/t_1_9.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 3,
+        "daily_rows": 1,
+        "monthly_rows": 312,
+        "variance_rows": 33
+      }
+    },
+    {
+      "id": "public/data/brazil/t_2_5.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 152,
+        "daily_rows": 56803,
+        "monthly_rows": 15808,
+        "variance_rows": 1672
+      }
+    },
+    {
+      "id": "public/data/brazil/t_2_6.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 256,
+        "daily_rows": 91523,
+        "monthly_rows": 26624,
+        "variance_rows": 2816
+      }
+    },
+    {
+      "id": "public/data/brazil/t_2_7.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 256,
+        "daily_rows": 17322,
+        "monthly_rows": 26624,
+        "variance_rows": 2816
+      }
+    },
+    {
+      "id": "public/data/brazil/t_2_8.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 237,
+        "daily_rows": 2355,
+        "monthly_rows": 24648,
+        "variance_rows": 2607
+      }
+    },
+    {
+      "id": "public/data/brazil/t_2_9.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 84,
+        "daily_rows": 1604,
+        "monthly_rows": 8736,
+        "variance_rows": 924
+      }
+    },
+    {
+      "id": "public/data/brazil/t_3_3.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 6,
+        "daily_rows": 982,
+        "monthly_rows": 624,
+        "variance_rows": 66
+      }
+    },
+    {
+      "id": "public/data/brazil/t_3_4.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 105,
+        "daily_rows": 33681,
+        "monthly_rows": 10920,
+        "variance_rows": 1155
+      }
+    },
+    {
+      "id": "public/data/brazil/t_3_5.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 251,
+        "daily_rows": 82575,
+        "monthly_rows": 26104,
+        "variance_rows": 2761
+      }
+    },
+    {
+      "id": "public/data/brazil/t_3_6.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 256,
+        "daily_rows": 70840,
+        "monthly_rows": 26624,
+        "variance_rows": 2816
+      }
+    },
+    {
+      "id": "public/data/brazil/t_3_7.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 256,
+        "daily_rows": 51373,
+        "monthly_rows": 26624,
+        "variance_rows": 2816
+      }
+    },
+    {
+      "id": "public/data/brazil/t_3_8.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 247,
+        "daily_rows": 22579,
+        "monthly_rows": 25688,
+        "variance_rows": 2717
+      }
+    },
+    {
+      "id": "public/data/brazil/t_3_9.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 111,
+        "daily_rows": 43772,
+        "monthly_rows": 11544,
+        "variance_rows": 1221
+      }
+    },
+    {
+      "id": "public/data/brazil/t_4_0.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 66,
+        "daily_rows": 3430,
+        "monthly_rows": 6864,
+        "variance_rows": 726
+      }
+    },
+    {
+      "id": "public/data/brazil/t_4_1.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 98,
+        "daily_rows": 10362,
+        "monthly_rows": 10192,
+        "variance_rows": 1078
+      }
+    },
+    {
+      "id": "public/data/brazil/t_4_2.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 85,
+        "daily_rows": 12553,
+        "monthly_rows": 8840,
+        "variance_rows": 935
+      }
+    },
+    {
+      "id": "public/data/brazil/t_4_3.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 253,
+        "daily_rows": 67949,
+        "monthly_rows": 26312,
+        "variance_rows": 2783
+      }
+    },
+    {
+      "id": "public/data/brazil/t_4_4.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 255,
+        "daily_rows": 74159,
+        "monthly_rows": 26520,
+        "variance_rows": 2805
+      }
+    },
+    {
+      "id": "public/data/brazil/t_4_5.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 256,
+        "daily_rows": 148176,
+        "monthly_rows": 26624,
+        "variance_rows": 2816
+      }
+    },
+    {
+      "id": "public/data/brazil/t_4_6.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 256,
+        "daily_rows": 85288,
+        "monthly_rows": 26624,
+        "variance_rows": 2816
+      }
+    },
+    {
+      "id": "public/data/brazil/t_4_7.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 256,
+        "daily_rows": 91871,
+        "monthly_rows": 26624,
+        "variance_rows": 2816
+      }
+    },
+    {
+      "id": "public/data/brazil/t_4_8.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 254,
+        "daily_rows": 35761,
+        "monthly_rows": 26416,
+        "variance_rows": 2794
+      }
+    },
+    {
+      "id": "public/data/brazil/t_4_9.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 21,
+        "daily_rows": 1644,
+        "monthly_rows": 2184,
+        "variance_rows": 231
+      }
+    },
+    {
+      "id": "public/data/brazil/t_5_0.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 141,
+        "daily_rows": 17043,
+        "monthly_rows": 14664,
+        "variance_rows": 1551
+      }
+    },
+    {
+      "id": "public/data/brazil/t_5_1.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 253,
+        "daily_rows": 84166,
+        "monthly_rows": 26312,
+        "variance_rows": 2783
+      }
+    },
+    {
+      "id": "public/data/brazil/t_5_2.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 256,
+        "daily_rows": 71149,
+        "monthly_rows": 26624,
+        "variance_rows": 2816
+      }
+    },
+    {
+      "id": "public/data/brazil/t_5_3.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 256,
+        "daily_rows": 35784,
+        "monthly_rows": 26624,
+        "variance_rows": 2816
+      }
+    },
+    {
+      "id": "public/data/brazil/t_5_4.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 256,
+        "daily_rows": 72357,
+        "monthly_rows": 26624,
+        "variance_rows": 2816
+      }
+    },
+    {
+      "id": "public/data/brazil/t_5_5.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 256,
+        "daily_rows": 115587,
+        "monthly_rows": 26624,
+        "variance_rows": 2816
+      }
+    },
+    {
+      "id": "public/data/brazil/t_5_6.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 256,
+        "daily_rows": 89283,
+        "monthly_rows": 26624,
+        "variance_rows": 2816
+      }
+    },
+    {
+      "id": "public/data/brazil/t_5_7.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 256,
+        "daily_rows": 118595,
+        "monthly_rows": 26624,
+        "variance_rows": 2816
+      }
+    },
+    {
+      "id": "public/data/brazil/t_5_8.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 256,
+        "daily_rows": 56887,
+        "monthly_rows": 26624,
+        "variance_rows": 2816
+      }
+    },
+    {
+      "id": "public/data/brazil/t_5_9.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 70,
+        "daily_rows": 8912,
+        "monthly_rows": 7280,
+        "variance_rows": 770
+      }
+    },
+    {
+      "id": "public/data/brazil/t_6_1.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 79,
+        "daily_rows": 20327,
+        "monthly_rows": 8216,
+        "variance_rows": 869
+      }
+    },
+    {
+      "id": "public/data/brazil/t_6_2.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 208,
+        "daily_rows": 68154,
+        "monthly_rows": 21632,
+        "variance_rows": 2288
+      }
+    },
+    {
+      "id": "public/data/brazil/t_6_3.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 256,
+        "daily_rows": 89210,
+        "monthly_rows": 26624,
+        "variance_rows": 2816
+      }
+    },
+    {
+      "id": "public/data/brazil/t_6_4.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 256,
+        "daily_rows": 98795,
+        "monthly_rows": 26624,
+        "variance_rows": 2816
+      }
+    },
+    {
+      "id": "public/data/brazil/t_6_5.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 256,
+        "daily_rows": 150711,
+        "monthly_rows": 26624,
+        "variance_rows": 2816
+      }
+    },
+    {
+      "id": "public/data/brazil/t_6_6.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 256,
+        "daily_rows": 189547,
+        "monthly_rows": 26624,
+        "variance_rows": 2816
+      }
+    },
+    {
+      "id": "public/data/brazil/t_6_7.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 256,
+        "daily_rows": 216315,
+        "monthly_rows": 26624,
+        "variance_rows": 2816
+      }
+    },
+    {
+      "id": "public/data/brazil/t_6_8.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 116,
+        "daily_rows": 64244,
+        "monthly_rows": 12064,
+        "variance_rows": 1276
+      }
+    },
+    {
+      "id": "public/data/brazil/t_7_2.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 89,
+        "daily_rows": 24814,
+        "monthly_rows": 9256,
+        "variance_rows": 979
+      }
+    },
+    {
+      "id": "public/data/brazil/t_7_3.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 256,
+        "daily_rows": 94299,
+        "monthly_rows": 26624,
+        "variance_rows": 2816
+      }
+    },
+    {
+      "id": "public/data/brazil/t_7_4.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 256,
+        "daily_rows": 93622,
+        "monthly_rows": 26624,
+        "variance_rows": 2816
+      }
+    },
+    {
+      "id": "public/data/brazil/t_7_5.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 256,
+        "daily_rows": 121060,
+        "monthly_rows": 26624,
+        "variance_rows": 2816
+      }
+    },
+    {
+      "id": "public/data/brazil/t_7_6.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 256,
+        "daily_rows": 193968,
+        "monthly_rows": 26624,
+        "variance_rows": 2816
+      }
+    },
+    {
+      "id": "public/data/brazil/t_7_7.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 244,
+        "daily_rows": 211800,
+        "monthly_rows": 25376,
+        "variance_rows": 2684
+      }
+    },
+    {
+      "id": "public/data/brazil/t_7_8.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 20,
+        "daily_rows": 9883,
+        "monthly_rows": 2080,
+        "variance_rows": 220
+      }
+    },
+    {
+      "id": "public/data/brazil/t_8_2.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 8,
+        "daily_rows": 1505,
+        "monthly_rows": 832,
+        "variance_rows": 88
+      }
+    },
+    {
+      "id": "public/data/brazil/t_8_3.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 126,
+        "daily_rows": 34856,
+        "monthly_rows": 13104,
+        "variance_rows": 1386
+      }
+    },
+    {
+      "id": "public/data/brazil/t_8_4.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 200,
+        "daily_rows": 81280,
+        "monthly_rows": 20800,
+        "variance_rows": 2200
+      }
+    },
+    {
+      "id": "public/data/brazil/t_8_5.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 246,
+        "daily_rows": 64581,
+        "monthly_rows": 25584,
+        "variance_rows": 2706
+      }
+    },
+    {
+      "id": "public/data/brazil/t_8_6.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 256,
+        "daily_rows": 95592,
+        "monthly_rows": 26624,
+        "variance_rows": 2816
+      }
+    },
+    {
+      "id": "public/data/brazil/t_8_7.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 195,
+        "daily_rows": 107828,
+        "monthly_rows": 20280,
+        "variance_rows": 2145
+      }
+    },
+    {
+      "id": "public/data/brazil/t_9_5.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 43,
+        "daily_rows": 12699,
+        "monthly_rows": 4472,
+        "variance_rows": 473
+      }
+    },
+    {
+      "id": "public/data/brazil/t_9_6.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 195,
+        "daily_rows": 64387,
+        "monthly_rows": 20280,
+        "variance_rows": 2145
+      }
+    },
+    {
+      "id": "public/data/brazil/t_9_7.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 56,
+        "daily_rows": 16043,
+        "monthly_rows": 5824,
+        "variance_rows": 616
+      }
+    },
+    {
+      "id": "public/data/brazil/t_10_7.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 1,
+        "daily_rows": 0,
+        "monthly_rows": 104,
+        "variance_rows": 11
+      }
+    },
+    {
+      "id": "public/data/brazil/t_11_3.bin.gz",
+      "status": "pass",
+      "message": "CRC gzip, layout, datas, chaves, grade, completude mensal e valores inspecionados.",
+      "evidence": {
+        "issues": {},
+        "cells": 2,
+        "daily_rows": 0,
+        "monthly_rows": 208,
+        "variance_rows": 22
+      }
+    },
+    {
+      "id": "coverage.no_detection.Aqua",
+      "status": "warning",
+      "message": "Dias sem detecções no Brasil: investigar cobertura; não comprovam ausência de incêndios nem falha de aquisição.",
+      "evidence": {
+        "days": [
+          "2002-07-30",
+          "2002-07-31",
+          "2002-08-01",
+          "2002-08-02",
+          "2002-08-03",
+          "2002-08-04",
+          "2002-08-05",
+          "2002-08-06",
+          "2002-08-07",
+          "2002-09-13",
+          "2002-11-15",
+          "2016-02-19",
+          "2016-02-28",
+          "2020-08-28",
+          "2021-09-24",
+          "2022-04-01",
+          "2022-04-02",
+          "2022-04-03",
+          "2022-04-04",
+          "2022-04-05",
+          "2022-04-06",
+          "2022-04-07",
+          "2022-04-08",
+          "2022-04-09",
+          "2022-04-10",
+          "2022-04-11",
+          "2022-04-12",
+          "2022-04-13",
+          "2022-04-14",
+          "2022-04-15",
+          "2022-04-16",
+          "2025-12-24"
+        ],
+        "count": 32
+      }
+    },
+    {
+      "id": "coverage.no_detection.NOAA20",
+      "status": "warning",
+      "message": "Dias sem detecções no Brasil: investigar cobertura; não comprovam ausência de incêndios nem falha de aquisição.",
+      "evidence": {
+        "days": [
+          "2023-07-19",
+          "2023-07-20",
+          "2023-07-21",
+          "2023-07-22",
+          "2023-09-30",
+          "2024-02-04"
+        ],
+        "count": 6
+      }
+    },
+    {
+      "id": "coverage.acquisition",
+      "status": "not_run",
+      "message": "Blocos esparsos não contêm máscaras de nuvem, passagens ou disponibilidade de aquisição; zero e ausência de observação não podem ser separados.",
+      "evidence": {}
+    },
+    {
+      "id": "metadata.pipeline",
+      "status": "pass",
+      "message": "Metadados do app comparados com parâmetros exportados.",
+      "evidence": {}
+    },
+    {
+      "id": "geometry.container",
+      "status": "pass",
+      "message": "GeoJSON com feições poligonais; topologia e fidelidade ao IBGE não verificadas.",
+      "evidence": {}
+    },
+    {
+      "id": "provenance.sources",
+      "status": "pass",
+      "message": "Origem declarada nos metadados.",
+      "evidence": {
+        "sources": "NASA FIRMS: MODIS C6.1 Aqua (SP to Aug 2026, NRT after), VIIRS NOAA-20 375 m (SP to Jul 2026, NRT after)"
+      }
+    },
+    {
+      "id": "provenance.authentication",
+      "status": "not_run",
+      "message": "Sem hashes oficiais FIRMS ou arquivos brutos: hashes locais identificam os bytes, mas não autenticam a origem nem os filtros.",
+      "evidence": {}
+    },
+    {
+      "id": "harmonization/output/validation_metrics.csv",
+      "status": "pass",
+      "message": "Tabela publicada lida; não equivale a recalcular validação.",
+      "evidence": {
+        "rows": 36,
+        "nonfinite": [],
+        "brazil_rows": [
+          {
+            "periodo": "LOYO 2018–2023",
+            "escala": "Brasil × mês",
+            "metodo": "VIIRS bruto",
+            "n": "67",
+            "vies_rel_pct": "505.79312276025365",
+            "mae_log1p": "1.7663750483901222",
+            "pearson_anomalias": "0.9809157936606909",
+            "cobertura95_pct": "",
+            "cobertura95_normal_pct": ""
+          },
+          {
+            "periodo": "LOYO 2018–2023",
+            "escala": "Brasil × mês",
+            "metodo": "Nível 1",
+            "n": "67",
+            "vies_rel_pct": "-0.3158919789236103",
+            "mae_log1p": "0.07204360281064004",
+            "pearson_anomalias": "0.981466194940367",
+            "cobertura95_pct": "",
+            "cobertura95_normal_pct": ""
+          },
+          {
+            "periodo": "LOYO 2018–2023",
+            "escala": "Brasil × mês",
+            "metodo": "Nível 2",
+            "n": "67",
+            "vies_rel_pct": "-0.08297131554640957",
+            "mae_log1p": "0.09578592570974631",
+            "pearson_anomalias": "0.9745020112417824",
+            "cobertura95_pct": "31.343283582089555",
+            "cobertura95_normal_pct": "32.83582089552239"
+          },
+          {
+            "periodo": "2024",
+            "escala": "Brasil × mês",
+            "metodo": "VIIRS bruto",
+            "n": "12",
+            "vies_rel_pct": "501.1567182879768",
+            "mae_log1p": "1.7084802353665438",
+            "pearson_anomalias": "",
+            "cobertura95_pct": "",
+            "cobertura95_normal_pct": ""
+          },
+          {
+            "periodo": "2024",
+            "escala": "Brasil × mês",
+            "metodo": "Nível 1",
+            "n": "12",
+            "vies_rel_pct": "-15.389315565765948",
+            "mae_log1p": "0.19211722422444844",
+            "pearson_anomalias": "",
+            "cobertura95_pct": "",
+            "cobertura95_normal_pct": ""
+          },
+          {
+            "periodo": "2024",
+            "escala": "Brasil × mês",
+            "metodo": "Nível 2",
+            "n": "12",
+            "vies_rel_pct": "-16.330369980525372",
+            "mae_log1p": "0.1930344242583669",
+            "pearson_anomalias": "",
+            "cobertura95_pct": "8.333333333333332",
+            "cobertura95_normal_pct": "0.0"
+          },
+          {
+            "periodo": "2025",
+            "escala": "Brasil × mês",
+            "metodo": "VIIRS bruto",
+            "n": "12",
+            "vies_rel_pct": "431.6149297856615",
+            "mae_log1p": "1.6186006429387",
+            "pearson_anomalias": "",
+            "cobertura95_pct": "",
+            "cobertura95_normal_pct": ""
+          },
+          {
+            "periodo": "2025",
+            "escala": "Brasil × mês",
+            "metodo": "Nível 1",
+            "n": "12",
+            "vies_rel_pct": "-14.458458001498842",
+            "mae_log1p": "0.17380176998098565",
+            "pearson_anomalias": "",
+            "cobertura95_pct": "",
+            "cobertura95_normal_pct": ""
+          },
+          {
+            "periodo": "2025",
+            "escala": "Brasil × mês",
+            "metodo": "Nível 2",
+            "n": "12",
+            "vies_rel_pct": "-15.71870106390576",
+            "mae_log1p": "0.1843449787129813",
+            "pearson_anomalias": "",
+            "cobertura95_pct": "25.0",
+            "cobertura95_normal_pct": "25.0"
+          },
+          {
+            "periodo": "2026",
+            "escala": "Brasil × mês",
+            "metodo": "VIIRS bruto",
+            "n": "10",
+            "vies_rel_pct": "469.6482334721675",
+            "mae_log1p": "1.6668783961491562",
+            "pearson_anomalias": "",
+            "cobertura95_pct": "",
+            "cobertura95_normal_pct": ""
+          },
+          {
+            "periodo": "2026",
+            "escala": "Brasil × mês",
+            "metodo": "Nível 1",
+            "n": "10",
+            "vies_rel_pct": "-7.492272887394524",
+            "mae_log1p": "0.12123773930223791",
+            "pearson_anomalias": "",
+            "cobertura95_pct": "",
+            "cobertura95_normal_pct": ""
+          },
+          {
+            "periodo": "2026",
+            "escala": "Brasil × mês",
+            "metodo": "Nível 2",
+            "n": "10",
+            "vies_rel_pct": "-7.848397831220932",
+            "mae_log1p": "0.12958265479144648",
+            "pearson_anomalias": "",
+            "cobertura95_pct": "30.0",
+            "cobertura95_normal_pct": "40.0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "harmonization/output/validation_rankings.csv",
+      "status": "pass",
+      "message": "Tabela publicada lida; não equivale a recalcular validação.",
+      "evidence": {
+        "rows": 21,
+        "nonfinite": [],
+        "brazil_rows": [
+          {
+            "bioma": "Brasil",
+            "metodo": "VIIRS bruto",
+            "spearman_meses": "1.0",
+            "top3_meses_iguais": "True",
+            "spearman_anos_2018_2023": "0.942857142857143",
+            "spearman_anos_2018_2026": "0.9666666666666667"
+          },
+          {
+            "bioma": "Brasil",
+            "metodo": "Nível 1",
+            "spearman_meses": "1.0",
+            "top3_meses_iguais": "True",
+            "spearman_anos_2018_2023": "1.0",
+            "spearman_anos_2018_2026": "0.9833333333333333"
+          },
+          {
+            "bioma": "Brasil",
+            "metodo": "Nível 2",
+            "spearman_meses": "0.9930069930069931",
+            "top3_meses_iguais": "True",
+            "spearman_anos_2018_2023": "0.942857142857143",
+            "spearman_anos_2018_2026": "0.9666666666666667"
+          }
+        ]
+      }
+    },
+    {
+      "id": "harmonization/output/grid_monthly.parquet.envelope",
+      "status": "pass",
+      "message": "Assinatura externa Parquet; não valida páginas internas.",
+      "evidence": {}
+    },
+    {
+      "id": "harmonization/output/grid_monthly.parquet.content",
+      "status": "pass",
+      "message": "Leitura Parquet e regras numéricas, de mês e intervalo.",
+      "evidence": {
+        "rows": 6893118,
+        "invalid": {
+          "n_modis": 0,
+          "n_viirs_raw": 0,
+          "n_viirs_1km": 0,
+          "n_viirs_harmonized": 0,
+          "n_harmonized": 0,
+          "var_harmonized": 0,
+          "lo95": 0,
+          "hi95": 0,
+          "interval": 0,
+          "source_nulls": 0,
+          "month": 0,
+          "period": 0,
+          "partial": 0,
+          "source": 0,
+          "required_counts": 0,
+          "viirs_nullability": 0,
+          "daynight": 0,
+          "duplicate": 0,
+          "missing_rows": 0
+        },
+        "engine": "1.5.6"
+      }
+    },
+    {
+      "id": "harmonization/output/grid_monthly_total.parquet.envelope",
+      "status": "pass",
+      "message": "Assinatura externa Parquet; não valida páginas internas.",
+      "evidence": {}
+    },
+    {
+      "id": "parity.tiles_parquet",
+      "status": "pass",
+      "message": "Somas Brasil por mês: contagens diárias, média mensal e variância binárias versus Parquet; tolerância relativa 1e-6 para float32.",
+      "evidence": {
+        "mismatches": [],
+        "months": 293
+      }
+    },
+    {
+      "id": "climatology.brazil_september",
+      "status": "pass",
+      "message": "Mediana de setembro recalculada das somas nacionais (2003–2025); comparação documental manual.",
+      "evidence": {
+        "median_of_sums": 65527.0
+      }
+    },
+    {
+      "id": "harmonization/output/grid_monthly_total.parquet.content",
+      "status": "pass",
+      "message": "Leitura Parquet e regras numéricas, de mês e intervalo.",
+      "evidence": {
+        "rows": 3446559,
+        "invalid": {
+          "n_modis": 0,
+          "n_viirs_raw": 0,
+          "n_viirs_1km": 0,
+          "n_viirs_harmonized": 0,
+          "n_harmonized": 0,
+          "var_harmonized": 0,
+          "lo95": 0,
+          "hi95": 0,
+          "interval": 0,
+          "source_nulls": 0,
+          "month": 0,
+          "period": 0,
+          "partial": 0,
+          "source": 0,
+          "required_counts": 0,
+          "viirs_nullability": 0,
+          "duplicate": 0,
+          "missing_rows": 0
+        },
+        "engine": "1.5.6"
+      }
+    },
+    {
+      "id": "harmonization/output/climatology.parquet.envelope",
+      "status": "pass",
+      "message": "Assinatura externa Parquet; não valida páginas internas.",
+      "evidence": {}
+    },
+    {
+      "id": "harmonization/output/climatology.parquet.content",
+      "status": "pass",
+      "message": "Leitura Parquet e regras numéricas, de mês e intervalo.",
+      "evidence": {
+        "rows": 141156,
+        "invalid": {
+          "median": 0,
+          "p25": 0,
+          "p75": 0,
+          "n_years": 0,
+          "month": 0,
+          "quartiles": 0
+        },
+        "engine": "1.5.6"
+      }
+    },
+    {
+      "id": "harmonization/output/level1_factors.parquet.envelope",
+      "status": "pass",
+      "message": "Assinatura externa Parquet; não valida páginas internas.",
+      "evidence": {}
+    },
+    {
+      "id": "harmonization/output/level1_factors.parquet.content",
+      "status": "pass",
+      "message": "Leitura Parquet e regras numéricas, de mês e intervalo.",
+      "evidence": {
+        "rows": 144,
+        "invalid": {
+          "n_rows": 0,
+          "k": 0,
+          "month": 0
+        },
+        "engine": "1.5.6"
+      }
+    },
+    {
+      "id": "validation.reproduction",
+      "status": "not_run",
+      "message": "Reajuste LOYO, filtros e cobertura com erro comum não executados; requerem intermediários e ambiente científico.",
+      "evidence": {
+        "missing": [
+          "harmonization/data/raw",
+          "harmonization/data/interim/validation_pred.parquet",
+          "harmonization/data/interim/validation_groups.parquet",
+          "harmonization/output/points"
+        ]
+      }
+    },
+    {
+      "id": "uncertainty.daily",
+      "status": "not_applicable",
+      "message": "Dados binários fornecem variância mensal, sem intervalos diários independentes.",
+      "evidence": {}
+    }
+  ],
+  "inventory": [
+    {
+      "path": "public/data/brazil/meta.json",
+      "bytes": 3232,
+      "sha256": "d369dc57783df59423d9ea34863a683502110db7ac9c7b49373abeb35fcbd99d"
+    },
+    {
+      "path": "public/data/brazil/t_0_5.bin.gz",
+      "bytes": 1678,
+      "sha256": "fef4c1f9f31ad1cf331e6c495c48e5d553d9f18fe169e33cb49e3bf78af065f2"
+    },
+    {
+      "path": "public/data/brazil/t_0_6.bin.gz",
+      "bytes": 125355,
+      "sha256": "b3708621dfd8b52c2fb1ec991c3fa317102bd01b064403c6a944690d02b820f5"
+    },
+    {
+      "path": "public/data/brazil/t_0_7.bin.gz",
+      "bytes": 6379,
+      "sha256": "4c1a6a634324e6e79fd8cdf74a64aba65db21b8b1741204b65c80860a9005ab8"
+    },
+    {
+      "path": "public/data/brazil/t_0_8.bin.gz",
+      "bytes": 776,
+      "sha256": "3d6368535d809df6fcf65754aa3e642ebd2ab62c89749f098cbde596bc158cc0"
+    },
+    {
+      "path": "public/data/brazil/t_1_5.bin.gz",
+      "bytes": 65099,
+      "sha256": "dbfff6b0a1f3d6db2506b5e7ad6ff8a77219ae4bb6f4b127e95907976f375b42"
+    },
+    {
+      "path": "public/data/brazil/t_1_6.bin.gz",
+      "bytes": 151946,
+      "sha256": "80651419a6de79331a55f5aae23d84874572576a3865dcb2530e3224ea4e9cbc"
+    },
+    {
+      "path": "public/data/brazil/t_1_7.bin.gz",
+      "bytes": 29302,
+      "sha256": "a5beb89e1d143713fcd2f99c53e37eef9c354c4155a49d9338bf492082873592"
+    },
+    {
+      "path": "public/data/brazil/t_1_8.bin.gz",
+      "bytes": 20559,
+      "sha256": "6ca69bb711920e0528e65d293f119d100559d03ede90c598bd2a6057c6895e48"
+    },
+    {
+      "path": "public/data/brazil/t_1_9.bin.gz",
+      "bytes": 485,
+      "sha256": "32fae210b308f9ce547b4f0d28091c211f853f3292c5f5ab94944699ee333ea4"
+    },
+    {
+      "path": "public/data/brazil/t_2_5.bin.gz",
+      "bytes": 139041,
+      "sha256": "2111dec941bd4fb87aa14b5270477ac541f9105072229985f95893a731234240"
+    },
+    {
+      "path": "public/data/brazil/t_2_6.bin.gz",
+      "bytes": 237783,
+      "sha256": "9b515fcf8e6018cd9b1933e9ca9b1af9c93945fc8183237b55b9c8fba2989892"
+    },
+    {
+      "path": "public/data/brazil/t_2_7.bin.gz",
+      "bytes": 52878,
+      "sha256": "0c0e18a75c38bb30cf73129208b6e7e2a8e153ba6fa991270c48b8024428209a"
+    },
+    {
+      "path": "public/data/brazil/t_2_8.bin.gz",
+      "bytes": 16582,
+      "sha256": "3afde1419501b8fcf870c2ee7cb5cf78c313c8f34d7418b460f21fc66fe658f3"
+    },
+    {
+      "path": "public/data/brazil/t_2_9.bin.gz",
+      "bytes": 9519,
+      "sha256": "837865636063ac4b7065fb173088db5b3143d190f6f2428db08ad1ebd7003f1c"
+    },
+    {
+      "path": "public/data/brazil/t_3_3.bin.gz",
+      "bytes": 5040,
+      "sha256": "08c3bb41d2809a9d3179d930919630a33c2bf7c0e930288b7e9b70aa3e9a7ad6"
+    },
+    {
+      "path": "public/data/brazil/t_3_4.bin.gz",
+      "bytes": 103426,
+      "sha256": "62b2a2bdc57333ec8c0158d93c26bd949895fa1fdea2e6311e3bdbd672c74181"
+    },
+    {
+      "path": "public/data/brazil/t_3_5.bin.gz",
+      "bytes": 208469,
+      "sha256": "7ddc2ecfb5ad6dad1cb768d6a05e078ea97c0de0bf557e982e768310753e40da"
+    },
+    {
+      "path": "public/data/brazil/t_3_6.bin.gz",
+      "bytes": 200255,
+      "sha256": "2d4eb91c4ebf19ad2c2b4b412683f6d2c2ed0e5f03183f9300bc33eb0b9c4dfb"
+    },
+    {
+      "path": "public/data/brazil/t_3_7.bin.gz",
+      "bytes": 126952,
+      "sha256": "12de66851afac8b8e72cd27f9e74b0f74ae3bf3ff39ebd2e1dd75217c5714a07"
+    },
+    {
+      "path": "public/data/brazil/t_3_8.bin.gz",
+      "bytes": 72210,
+      "sha256": "b28a57a11db70a611cc92b438a764dc9b2c3d4930cf7e9a19dea7a3638859fbf"
+    },
+    {
+      "path": "public/data/brazil/t_3_9.bin.gz",
+      "bytes": 116911,
+      "sha256": "52db2b579e67212756e30b069843e48f7fb6c23ed573a78cd716302a1e26b305"
+    },
+    {
+      "path": "public/data/brazil/t_4_0.bin.gz",
+      "bytes": 15990,
+      "sha256": "4eb50f9a5caf8573b7f2213b70a8b5b86d45608c1ea32428dfbc8341a411ece5"
+    },
+    {
+      "path": "public/data/brazil/t_4_1.bin.gz",
+      "bytes": 35260,
+      "sha256": "aee6f063cebc486faaa2e554dec3ee873cf0efbaf7d7f542a49c109efda44eb0"
+    },
+    {
+      "path": "public/data/brazil/t_4_2.bin.gz",
+      "bytes": 46995,
+      "sha256": "724b3c8e1dc95c1972cc3bf912849da5d070942a39bb03f863cd18b280ffe33b"
+    },
+    {
+      "path": "public/data/brazil/t_4_3.bin.gz",
+      "bytes": 211195,
+      "sha256": "696995ba7079c40a05814c8598aad6d011609a1176c45375add60d507b297e79"
+    },
+    {
+      "path": "public/data/brazil/t_4_4.bin.gz",
+      "bytes": 222605,
+      "sha256": "35e52b3a266f5cdf6fd7b1ca007db132edcf1e21556dd31ee7667bbe26de495c"
+    },
+    {
+      "path": "public/data/brazil/t_4_5.bin.gz",
+      "bytes": 350625,
+      "sha256": "9cd9d13f08bf5aa1050f72c70e46921278a423fbe819369676b3aceed7fb53d6"
+    },
+    {
+      "path": "public/data/brazil/t_4_6.bin.gz",
+      "bytes": 227579,
+      "sha256": "45ce06839883ef22cee3a63a0899b73af2c648b119ddf7013220d57424211a7d"
+    },
+    {
+      "path": "public/data/brazil/t_4_7.bin.gz",
+      "bytes": 219935,
+      "sha256": "b34ded9cf8913f98ad51657aa9b95bea8da92bf9c540f22f2ceec1c26038918b"
+    },
+    {
+      "path": "public/data/brazil/t_4_8.bin.gz",
+      "bytes": 93362,
+      "sha256": "7f8f17e6efb5dd7660c79ecbf6d5b29bd87205b32fd1df632d3964c518175f12"
+    },
+    {
+      "path": "public/data/brazil/t_4_9.bin.gz",
+      "bytes": 7607,
+      "sha256": "646ebb9ff96a9cadc24a237fe0f6c32f7c3b1b774beb74e484d422f39e21645c"
+    },
+    {
+      "path": "public/data/brazil/t_5_0.bin.gz",
+      "bytes": 52315,
+      "sha256": "cf41241eb9062a198c57aff88c47ea8214a1a456fb7623fd0adcf8986aeec8e3"
+    },
+    {
+      "path": "public/data/brazil/t_5_1.bin.gz",
+      "bytes": 181425,
+      "sha256": "a3b302efd23c334fbfb506125ac382cb373c1c220961e9002733089fe19fcea1"
+    },
+    {
+      "path": "public/data/brazil/t_5_2.bin.gz",
+      "bytes": 172840,
+      "sha256": "7025cb4635d416c0bce3534f0b3186933ab1405e52404da0fe6c9df706305342"
+    },
+    {
+      "path": "public/data/brazil/t_5_3.bin.gz",
+      "bytes": 122327,
+      "sha256": "8e02362a98a4b7233ef3672cd0858000ee1a05a2bc289af5271123e4d330a8fa"
+    },
+    {
+      "path": "public/data/brazil/t_5_4.bin.gz",
+      "bytes": 208276,
+      "sha256": "bd6e7ac981b51f6553191bc200f0fec07b6368093c19323bf207ba915be12761"
+    },
+    {
+      "path": "public/data/brazil/t_5_5.bin.gz",
+      "bytes": 315190,
+      "sha256": "c302184904a367792fe5bd9d32df2895f5518170571f25579b6a65d772df3ea6"
+    },
+    {
+      "path": "public/data/brazil/t_5_6.bin.gz",
+      "bytes": 227404,
+      "sha256": "800e5a4762d90961e2d8cdc47297eb9b4686183f5616d7b9281a89956dced55a"
+    },
+    {
+      "path": "public/data/brazil/t_5_7.bin.gz",
+      "bytes": 286713,
+      "sha256": "24f56395185e46257a54c3af75e8f932af4857f932b1305a54a134f2b3ba3353"
+    },
+    {
+      "path": "public/data/brazil/t_5_8.bin.gz",
+      "bytes": 138488,
+      "sha256": "d3105bc6809954edadf1097c2bc1b6a1855cc5c5c463cd7dcac521635a67d6b7"
+    },
+    {
+      "path": "public/data/brazil/t_5_9.bin.gz",
+      "bytes": 27073,
+      "sha256": "6ddc960ed05475761cddda261d2936969c9612d2ff30f080c6ed20f99de4acbc"
+    },
+    {
+      "path": "public/data/brazil/t_6_1.bin.gz",
+      "bytes": 50632,
+      "sha256": "a5ba6d296dfa60d3db2c63ab62ec433a89fb732348fd58eece94bdcb2228b259"
+    },
+    {
+      "path": "public/data/brazil/t_6_2.bin.gz",
+      "bytes": 169928,
+      "sha256": "273c64c952e85d020383f80b5cc5d9bc59c5fb182f4a4a2cbabda8e5b7f255e9"
+    },
+    {
+      "path": "public/data/brazil/t_6_3.bin.gz",
+      "bytes": 246997,
+      "sha256": "3c3aeff3afc4f9a55daa16ab5cb8dffacae080eed1f4864a972f32fe831ba2d0"
+    },
+    {
+      "path": "public/data/brazil/t_6_4.bin.gz",
+      "bytes": 256939,
+      "sha256": "f04f4e20fcddd925623bbb73993715c10b02982a5a6722c03a357ca8b9fb7872"
+    },
+    {
+      "path": "public/data/brazil/t_6_5.bin.gz",
+      "bytes": 387480,
+      "sha256": "564580bdf2fccb24ea0318ec67b58c081053383e6e2f75aa68c0beecc3659440"
+    },
+    {
+      "path": "public/data/brazil/t_6_6.bin.gz",
+      "bytes": 439224,
+      "sha256": "8c79a13b9ec42ad1a2ffa8adb12460a8b7bfc593cca5efcff925104c89f9a95e"
+    },
+    {
+      "path": "public/data/brazil/t_6_7.bin.gz",
+      "bytes": 470583,
+      "sha256": "5537c37f32135aa2e3677b7e37b8c52023a42daba7d9f16a6cb25266d735c4c5"
+    },
+    {
+      "path": "public/data/brazil/t_6_8.bin.gz",
+      "bytes": 130847,
+      "sha256": "ed3fc53ebf165096e10609310f25cb0eb0f41dcf4605c69b7904029ed0fe4480"
+    },
+    {
+      "path": "public/data/brazil/t_7_2.bin.gz",
+      "bytes": 68109,
+      "sha256": "0e3dd733ba98d8867fcb31ab5a73e9ff0bc76333635b36d0e61cba2494827e89"
+    },
+    {
+      "path": "public/data/brazil/t_7_3.bin.gz",
+      "bytes": 237555,
+      "sha256": "92a64bc76eafc5009d2db0c1b0c3f9717221d86673a2ca12923db6f43b47036a"
+    },
+    {
+      "path": "public/data/brazil/t_7_4.bin.gz",
+      "bytes": 241276,
+      "sha256": "f2f75e7718da52729c0f88be86f7bdc2b413286c3f03af8f592d8c7a651ef2c6"
+    },
+    {
+      "path": "public/data/brazil/t_7_5.bin.gz",
+      "bytes": 319011,
+      "sha256": "01e30575b06c8117ca45431b919cba725e42210c8eae4d37841dbba93cd2aaa6"
+    },
+    {
+      "path": "public/data/brazil/t_7_6.bin.gz",
+      "bytes": 467404,
+      "sha256": "69ade7381735d9f4ed1f0b21442fc122c76f73ad37ee55a51eaeba5c52b883f6"
+    },
+    {
+      "path": "public/data/brazil/t_7_7.bin.gz",
+      "bytes": 445755,
+      "sha256": "f0c9e9f3715d7c202f4db51c87c235aac39115d7636109e15cd72209b2a8968c"
+    },
+    {
+      "path": "public/data/brazil/t_7_8.bin.gz",
+      "bytes": 26026,
+      "sha256": "caa5fb45ce54ab9a9973e73651af59b280c76e422c45cacb36d7351bb8525000"
+    },
+    {
+      "path": "public/data/brazil/t_8_2.bin.gz",
+      "bytes": 6857,
+      "sha256": "a247bfe7fb8241e508a745bd80c745fffef4f3e7670a11d9855de41ec7fbd681"
+    },
+    {
+      "path": "public/data/brazil/t_8_3.bin.gz",
+      "bytes": 96132,
+      "sha256": "024ad10771929a55ed0a5baaf4f2978ec3d1cc1b685447a12b0803a24e6695c8"
+    },
+    {
+      "path": "public/data/brazil/t_8_4.bin.gz",
+      "bytes": 183566,
+      "sha256": "42cfb848eb6e8ba6bf3b8d6d772c53a6b8ea43d6665cf60c8e14a1e36ae3dea4"
+    },
+    {
+      "path": "public/data/brazil/t_8_5.bin.gz",
+      "bytes": 160396,
+      "sha256": "b8bc8c6af430e9fa81a235a48073cb4db2ec49e3ceb3fb1370d20811385cccfe"
+    },
+    {
+      "path": "public/data/brazil/t_8_6.bin.gz",
+      "bytes": 226888,
+      "sha256": "5e76f2e4ff4d42746ee3ce552e722cce6bf5f507f947b631e76ce96da60f0a9c"
+    },
+    {
+      "path": "public/data/brazil/t_8_7.bin.gz",
+      "bytes": 226634,
+      "sha256": "9dd6dba9d02ea69cc7e35bf7b41ceba360b077a4ac47b97e3f59fd240817b0b5"
+    },
+    {
+      "path": "public/data/brazil/t_9_5.bin.gz",
+      "bytes": 39507,
+      "sha256": "df6bef6ebdfec228327f44c2b6e5080948831f37addd7916437904104f1cef48"
+    },
+    {
+      "path": "public/data/brazil/t_9_6.bin.gz",
+      "bytes": 158048,
+      "sha256": "d1115c63aa0e3166f42f3ce35b6d1ac3d8e186ffd10b69ecf7236893fe2d0fcf"
+    },
+    {
+      "path": "public/data/brazil/t_9_7.bin.gz",
+      "bytes": 49586,
+      "sha256": "9192c95e7a44bc98dfac96f3989bc887fd93f1773dabe0fea2f43e2fe7a4402a"
+    },
+    {
+      "path": "public/data/brazil/t_10_7.bin.gz",
+      "bytes": 355,
+      "sha256": "08ed0f88624c1e978bb5270b23af68589753f80f805e1cbb712e9c987f190527"
+    },
+    {
+      "path": "public/data/brazil/t_11_3.bin.gz",
+      "bytes": 400,
+      "sha256": "c3e32a9b0c6b827fd6e50e5ffbde694d2b3225273008047dd0b03bc2542374e6"
+    },
+    {
+      "path": "harmonization/output/harmonization_params.json",
+      "bytes": 351,
+      "sha256": "c75390256ea42bca3d80a742b634c8b6f158a980d192f1d153adb145b4e91479"
+    },
+    {
+      "path": "public/data/brazil/brazil.geojson",
+      "bytes": 198104,
+      "sha256": "596393e06f2650498a651e4860a271b5f95c329b1d787554974e6a7def45a6b9"
+    },
+    {
+      "path": "harmonization/output/validation_metrics.csv",
+      "bytes": 3560,
+      "sha256": "cc9faf93417b056cd0d8ed76fc6ff147e3f0099aec8c3ce609ec0498ba79e934"
+    },
+    {
+      "path": "harmonization/output/validation_rankings.csv",
+      "bytes": 1531,
+      "sha256": "5014c6639c4b68f77ae9a7372520f42f8292ac72309f788b4e76e478d2ff785f"
+    },
+    {
+      "path": "harmonization/output/grid_monthly.parquet",
+      "bytes": 14525941,
+      "sha256": "4fc70b45c90b358f29756442db1bad05d1395bff6bd30c1fc5b1b799cf2a1783"
+    },
+    {
+      "path": "harmonization/output/grid_monthly_total.parquet",
+      "bytes": 9619415,
+      "sha256": "9c0d842197ba6355e094709ed19a5ad25faa843342c8df99c349f14cb4b836e1"
+    },
+    {
+      "path": "harmonization/output/climatology.parquet",
+      "bytes": 177650,
+      "sha256": "f762cffcdc2839c3b7002cfe55326fcce347f30c846f0c30a24c08f206b38908"
+    },
+    {
+      "path": "harmonization/output/level1_factors.parquet",
+      "bytes": 10212,
+      "sha256": "8d2826693b806a6baaa0059bcf3ed516a358fb8eca5ce355e613be2ba10b970b"
+    }
+  ],
+  "monthly_brazil": {
+    "2002-07": {
+      "aqua": 17475,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2002-08": {
+      "aqua": 76889,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2002-09": {
+      "aqua": 97659,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2002-10": {
+      "aqua": 63195,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2002-11": {
+      "aqua": 40806,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2002-12": {
+      "aqua": 16978,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2003-01": {
+      "aqua": 6732,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2003-02": {
+      "aqua": 3333,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2003-03": {
+      "aqua": 4363,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2003-04": {
+      "aqua": 3532,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2003-05": {
+      "aqua": 6220,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2003-06": {
+      "aqua": 16122,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2003-07": {
+      "aqua": 31121,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2003-08": {
+      "aqua": 60431,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2003-09": {
+      "aqua": 102847,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2003-10": {
+      "aqua": 58835,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2003-11": {
+      "aqua": 35153,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2003-12": {
+      "aqua": 22716,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2004-01": {
+      "aqua": 3716,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2004-02": {
+      "aqua": 1804,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2004-03": {
+      "aqua": 2758,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2004-04": {
+      "aqua": 2735,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2004-05": {
+      "aqua": 5766,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2004-06": {
+      "aqua": 16241,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2004-07": {
+      "aqua": 30106,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2004-08": {
+      "aqua": 68233,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2004-09": {
+      "aqua": 128472,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2004-10": {
+      "aqua": 57169,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2004-11": {
+      "aqua": 46006,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2004-12": {
+      "aqua": 28524,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2005-01": {
+      "aqua": 7240,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2005-02": {
+      "aqua": 2826,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2005-03": {
+      "aqua": 2513,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2005-04": {
+      "aqua": 2706,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2005-05": {
+      "aqua": 5087,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2005-06": {
+      "aqua": 8147,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2005-07": {
+      "aqua": 31311,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2005-08": {
+      "aqua": 99555,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2005-09": {
+      "aqua": 112271,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2005-10": {
+      "aqua": 68534,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2005-11": {
+      "aqua": 32646,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2005-12": {
+      "aqua": 13883,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2006-01": {
+      "aqua": 4351,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2006-02": {
+      "aqua": 2349,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2006-03": {
+      "aqua": 2322,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2006-04": {
+      "aqua": 2277,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2006-05": {
+      "aqua": 4502,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2006-06": {
+      "aqua": 7813,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2006-07": {
+      "aqua": 18574,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2006-08": {
+      "aqua": 58351,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2006-09": {
+      "aqua": 82055,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2006-10": {
+      "aqua": 32432,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2006-11": {
+      "aqua": 29325,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2006-12": {
+      "aqua": 15315,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2007-01": {
+      "aqua": 4075,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2007-02": {
+      "aqua": 2865,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2007-03": {
+      "aqua": 3413,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2007-04": {
+      "aqua": 2521,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2007-05": {
+      "aqua": 5042,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2007-06": {
+      "aqua": 12919,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2007-07": {
+      "aqua": 20896,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2007-08": {
+      "aqua": 97511,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2007-09": {
+      "aqua": 155703,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2007-10": {
+      "aqua": 72961,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2007-11": {
+      "aqua": 33143,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2007-12": {
+      "aqua": 12032,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2008-01": {
+      "aqua": 2776,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2008-02": {
+      "aqua": 1761,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2008-03": {
+      "aqua": 1911,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2008-04": {
+      "aqua": 1874,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2008-05": {
+      "aqua": 3043,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2008-06": {
+      "aqua": 4891,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2008-07": {
+      "aqua": 14987,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2008-08": {
+      "aqua": 36972,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2008-09": {
+      "aqua": 53716,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2008-10": {
+      "aqua": 54433,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2008-11": {
+      "aqua": 31318,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2008-12": {
+      "aqua": 14292,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2009-01": {
+      "aqua": 3936,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2009-02": {
+      "aqua": 1387,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2009-03": {
+      "aqua": 1934,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2009-04": {
+      "aqua": 2546,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2009-05": {
+      "aqua": 3397,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2009-06": {
+      "aqua": 4052,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2009-07": {
+      "aqua": 8253,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2009-08": {
+      "aqua": 22554,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2009-09": {
+      "aqua": 36809,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2009-10": {
+      "aqua": 31998,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2009-11": {
+      "aqua": 30534,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2009-12": {
+      "aqua": 12277,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2010-01": {
+      "aqua": 3606,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2010-02": {
+      "aqua": 2944,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2010-03": {
+      "aqua": 2774,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2010-04": {
+      "aqua": 2837,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2010-05": {
+      "aqua": 4468,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2010-06": {
+      "aqua": 10755,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2010-07": {
+      "aqua": 22571,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2010-08": {
+      "aqua": 99631,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2010-09": {
+      "aqua": 123360,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2010-10": {
+      "aqua": 41669,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2010-11": {
+      "aqua": 23732,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2010-12": {
+      "aqua": 9691,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2011-01": {
+      "aqua": 1844,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2011-02": {
+      "aqua": 1130,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2011-03": {
+      "aqua": 1207,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2011-04": {
+      "aqua": 1612,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2011-05": {
+      "aqua": 2785,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2011-06": {
+      "aqua": 5971,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2011-07": {
+      "aqua": 10390,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2011-08": {
+      "aqua": 25891,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2011-09": {
+      "aqua": 59679,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2011-10": {
+      "aqua": 24065,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2011-11": {
+      "aqua": 18304,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2011-12": {
+      "aqua": 13311,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2012-01": {
+      "aqua": 2982,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2012-02": {
+      "aqua": 1741,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2012-03": {
+      "aqua": 2577,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2012-04": {
+      "aqua": 2556,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2012-05": {
+      "aqua": 4115,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2012-06": {
+      "aqua": 7019,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2012-07": {
+      "aqua": 15733,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2012-08": {
+      "aqua": 54402,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2012-09": {
+      "aqua": 69972,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2012-10": {
+      "aqua": 43014,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2012-11": {
+      "aqua": 19056,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2012-12": {
+      "aqua": 9480,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2013-01": {
+      "aqua": 2635,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2013-02": {
+      "aqua": 1746,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2013-03": {
+      "aqua": 2252,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2013-04": {
+      "aqua": 1872,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2013-05": {
+      "aqua": 2979,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2013-06": {
+      "aqua": 4788,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2013-07": {
+      "aqua": 9171,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2013-08": {
+      "aqua": 22503,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2013-09": {
+      "aqua": 37963,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2013-10": {
+      "aqua": 22797,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2013-11": {
+      "aqua": 11844,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2013-12": {
+      "aqua": 11586,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2014-01": {
+      "aqua": 3050,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2014-02": {
+      "aqua": 1397,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2014-03": {
+      "aqua": 1959,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2014-04": {
+      "aqua": 1990,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2014-05": {
+      "aqua": 3038,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2014-06": {
+      "aqua": 6510,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2014-07": {
+      "aqua": 10951,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2014-08": {
+      "aqua": 43154,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2014-09": {
+      "aqua": 44705,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2014-10": {
+      "aqua": 39189,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2014-11": {
+      "aqua": 17777,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2014-12": {
+      "aqua": 10579,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2015-01": {
+      "aqua": 4347,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2015-02": {
+      "aqua": 2062,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2015-03": {
+      "aqua": 1592,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2015-04": {
+      "aqua": 1998,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2015-05": {
+      "aqua": 2222,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2015-06": {
+      "aqua": 5824,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2015-07": {
+      "aqua": 8971,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2015-08": {
+      "aqua": 39990,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2015-09": {
+      "aqua": 66416,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2015-10": {
+      "aqua": 51873,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2015-11": {
+      "aqua": 29297,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2015-12": {
+      "aqua": 21189,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2016-01": {
+      "aqua": 6757,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2016-02": {
+      "aqua": 3454,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2016-03": {
+      "aqua": 3897,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2016-04": {
+      "aqua": 3419,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2016-05": {
+      "aqua": 3374,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2016-06": {
+      "aqua": 6504,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2016-07": {
+      "aqua": 20062,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2016-08": {
+      "aqua": 42188,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2016-09": {
+      "aqua": 45370,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2016-10": {
+      "aqua": 32091,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2016-11": {
+      "aqua": 19483,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2016-12": {
+      "aqua": 8122,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2017-01": {
+      "aqua": 2246,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2017-02": {
+      "aqua": 1233,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2017-03": {
+      "aqua": 1744,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2017-04": {
+      "aqua": 1568,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2017-05": {
+      "aqua": 2658,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2017-06": {
+      "aqua": 5565,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2017-07": {
+      "aqua": 18127,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2017-08": {
+      "aqua": 39726,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2017-09": {
+      "aqua": 80432,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2017-10": {
+      "aqua": 37320,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2017-11": {
+      "aqua": 19813,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2017-12": {
+      "aqua": 12320,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2018-01": {
+      "aqua": 2451,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2018-02": {
+      "aqua": 1489,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2018-03": {
+      "aqua": 2511,
+      "viirs_raw": 0,
+      "viirs_harmonized": 0.0,
+      "variance_sum": 0.0
+    },
+    "2018-04": {
+      "aqua": 1656,
+      "viirs_raw": 9863,
+      "viirs_harmonized": 2034.1730261929333,
+      "variance_sum": 0.0
+    },
+    "2018-05": {
+      "aqua": 3316,
+      "viirs_raw": 19346,
+      "viirs_harmonized": 3303.8048440925777,
+      "variance_sum": 0.0
+    },
+    "2018-06": {
+      "aqua": 5598,
+      "viirs_raw": 32741,
+      "viirs_harmonized": 5640.857796438038,
+      "variance_sum": 0.0
+    },
+    "2018-07": {
+      "aqua": 12721,
+      "viirs_raw": 66776,
+      "viirs_harmonized": 12572.255073916167,
+      "variance_sum": 0.0
+    },
+    "2018-08": {
+      "aqua": 22826,
+      "viirs_raw": 132951,
+      "viirs_harmonized": 24453.85885632783,
+      "variance_sum": 0.0
+    },
+    "2018-09": {
+      "aqua": 43804,
+      "viirs_raw": 247658,
+      "viirs_harmonized": 45378.67203730345,
+      "variance_sum": 0.0
+    },
+    "2018-10": {
+      "aqua": 20535,
+      "viirs_raw": 139778,
+      "viirs_harmonized": 23497.63684018515,
+      "variance_sum": 0.0
+    },
+    "2018-11": {
+      "aqua": 13303,
+      "viirs_raw": 76455,
+      "viirs_harmonized": 12969.962940106168,
+      "variance_sum": 0.0
+    },
+    "2018-12": {
+      "aqua": 5045,
+      "viirs_raw": 31671,
+      "viirs_harmonized": 6082.254300970584,
+      "variance_sum": 0.0
+    },
+    "2019-01": {
+      "aqua": 3839,
+      "viirs_raw": 21711,
+      "viirs_harmonized": 3773.005281869322,
+      "variance_sum": 0.0
+    },
+    "2019-02": {
+      "aqua": 2806,
+      "viirs_raw": 15819,
+      "viirs_harmonized": 2956.6453041918576,
+      "variance_sum": 0.0
+    },
+    "2019-03": {
+      "aqua": 6058,
+      "viirs_raw": 39623,
+      "viirs_harmonized": 5440.0188295692205,
+      "variance_sum": 0.0
+    },
+    "2019-04": {
+      "aqua": 3135,
+      "viirs_raw": 19999,
+      "viirs_harmonized": 2860.5022084861994,
+      "variance_sum": 0.0
+    },
+    "2019-05": {
+      "aqua": 3050,
+      "viirs_raw": 16268,
+      "viirs_harmonized": 2876.443321187049,
+      "variance_sum": 0.0
+    },
+    "2019-06": {
+      "aqua": 7381,
+      "viirs_raw": 39598,
+      "viirs_harmonized": 6886.964198410511,
+      "variance_sum": 0.0
+    },
+    "2019-07": {
+      "aqua": 14014,
+      "viirs_raw": 78124,
+      "viirs_harmonized": 14461.273122113198,
+      "variance_sum": 0.0
+    },
+    "2019-08": {
+      "aqua": 55678,
+      "viirs_raw": 323986,
+      "viirs_harmonized": 53385.72136704251,
+      "variance_sum": 0.0
+    },
+    "2019-09": {
+      "aqua": 58161,
+      "viirs_raw": 363731,
+      "viirs_harmonized": 56028.98087532818,
+      "variance_sum": 0.0
+    },
+    "2019-10": {
+      "aqua": 27431,
+      "viirs_raw": 183571,
+      "viirs_harmonized": 29563.573290778324,
+      "variance_sum": 0.0
+    },
+    "2019-11": {
+      "aqua": 21514,
+      "viirs_raw": 127000,
+      "viirs_harmonized": 21043.11438430287,
+      "variance_sum": 0.0
+    },
+    "2019-12": {
+      "aqua": 7756,
+      "viirs_raw": 53058,
+      "viirs_harmonized": 8852.837685462087,
+      "variance_sum": 0.0
+    },
+    "2020-01": {
+      "aqua": 2813,
+      "viirs_raw": 18789,
+      "viirs_harmonized": 3144.2449411712587,
+      "variance_sum": 0.0
+    },
+    "2020-02": {
+      "aqua": 2412,
+      "viirs_raw": 11229,
+      "viirs_harmonized": 2394.733192268759,
+      "variance_sum": 0.0
+    },
+    "2020-03": {
+      "aqua": 3782,
+      "viirs_raw": 20140,
+      "viirs_harmonized": 4018.3118930608034,
+      "variance_sum": 0.0
+    },
+    "2020-04": {
+      "aqua": 3916,
+      "viirs_raw": 18836,
+      "viirs_harmonized": 3771.3649181835353,
+      "variance_sum": 0.0
+    },
+    "2020-05": {
+      "aqua": 3948,
+      "viirs_raw": 22036,
+      "viirs_harmonized": 3970.0699319280684,
+      "variance_sum": 0.0
+    },
+    "2020-06": {
+      "aqua": 7376,
+      "viirs_raw": 39011,
+      "viirs_harmonized": 6663.342826426029,
+      "variance_sum": 0.0
+    },
+    "2020-07": {
+      "aqua": 16344,
+      "viirs_raw": 86223,
+      "viirs_harmonized": 16971.051068302244,
+      "variance_sum": 0.0
+    },
+    "2020-08": {
+      "aqua": 37379,
+      "viirs_raw": 302835,
+      "viirs_harmonized": 52426.201791867614,
+      "variance_sum": 0.0
+    },
+    "2020-09": {
+      "aqua": 76054,
+      "viirs_raw": 510415,
+      "viirs_harmonized": 78328.13475856557,
+      "variance_sum": 0.0
+    },
+    "2020-10": {
+      "aqua": 45889,
+      "viirs_raw": 297433,
+      "viirs_harmonized": 44009.22786646709,
+      "variance_sum": 0.0
+    },
+    "2020-11": {
+      "aqua": 13617,
+      "viirs_raw": 88159,
+      "viirs_harmonized": 14792.766418172047,
+      "variance_sum": 0.0
+    },
+    "2020-12": {
+      "aqua": 7288,
+      "viirs_raw": 46418,
+      "viirs_harmonized": 8169.384481631219,
+      "variance_sum": 0.0
+    },
+    "2021-01": {
+      "aqua": 2154,
+      "viirs_raw": 15103,
+      "viirs_harmonized": 2543.0475256126374,
+      "variance_sum": 0.0
+    },
+    "2021-02": {
+      "aqua": 2042,
+      "viirs_raw": 12747,
+      "viirs_harmonized": 2504.042427159846,
+      "variance_sum": 0.0
+    },
+    "2021-03": {
+      "aqua": 2320,
+      "viirs_raw": 13837,
+      "viirs_harmonized": 3017.7923939302564,
+      "variance_sum": 0.0
+    },
+    "2021-04": {
+      "aqua": 2452,
+      "viirs_raw": 13091,
+      "viirs_harmonized": 2581.5182213261724,
+      "variance_sum": 0.0
+    },
+    "2021-05": {
+      "aqua": 5302,
+      "viirs_raw": 29769,
+      "viirs_harmonized": 4789.9760680273175,
+      "variance_sum": 0.0
+    },
+    "2021-06": {
+      "aqua": 7855,
+      "viirs_raw": 43958,
+      "viirs_harmonized": 6932.787118744105,
+      "variance_sum": 0.0
+    },
+    "2021-07": {
+      "aqua": 16436,
+      "viirs_raw": 88803,
+      "viirs_harmonized": 16221.189367998391,
+      "variance_sum": 0.0
+    },
+    "2021-08": {
+      "aqua": 56764,
+      "viirs_raw": 341022,
+      "viirs_harmonized": 51210.712820358574,
+      "variance_sum": 0.0
+    },
+    "2021-09": {
+      "aqua": 52216,
+      "viirs_raw": 339858,
+      "viirs_harmonized": 56248.325608644634,
+      "variance_sum": 0.0
+    },
+    "2021-10": {
+      "aqua": 30222,
+      "viirs_raw": 186745,
+      "viirs_harmonized": 30739.13717015274,
+      "variance_sum": 0.0
+    },
+    "2021-11": {
+      "aqua": 11325,
+      "viirs_raw": 63194,
+      "viirs_harmonized": 12574.715885411948,
+      "variance_sum": 0.0
+    },
+    "2021-12": {
+      "aqua": 4278,
+      "viirs_raw": 25146,
+      "viirs_harmonized": 4722.789356060326,
+      "variance_sum": 0.0
+    },
+    "2022-01": {
+      "aqua": 2789,
+      "viirs_raw": 18020,
+      "viirs_harmonized": 2925.072389056906,
+      "variance_sum": 0.0
+    },
+    "2022-02": {
+      "aqua": 1780,
+      "viirs_raw": 10435,
+      "viirs_harmonized": 2085.8648879379034,
+      "variance_sum": 0.0
+    },
+    "2022-03": {
+      "aqua": 1553,
+      "viirs_raw": 8719,
+      "viirs_harmonized": 2034.280555408448,
+      "variance_sum": 0.0
+    },
+    "2022-04": {
+      "aqua": 1630,
+      "viirs_raw": 16330,
+      "viirs_harmonized": 2915.0600561462343,
+      "variance_sum": 0.0
+    },
+    "2022-05": {
+      "aqua": 6678,
+      "viirs_raw": 37930,
+      "viirs_harmonized": 5553.163910463452,
+      "variance_sum": 0.0
+    },
+    "2022-06": {
+      "aqua": 8255,
+      "viirs_raw": 48307,
+      "viirs_harmonized": 7524.450097605586,
+      "variance_sum": 0.0
+    },
+    "2022-07": {
+      "aqua": 14951,
+      "viirs_raw": 82877,
+      "viirs_harmonized": 14617.215570989996,
+      "variance_sum": 0.0
+    },
+    "2022-08": {
+      "aqua": 51422,
+      "viirs_raw": 311592,
+      "viirs_harmonized": 48162.47324785218,
+      "variance_sum": 0.0
+    },
+    "2022-09": {
+      "aqua": 65527,
+      "viirs_raw": 402120,
+      "viirs_harmonized": 66437.46821398288,
+      "variance_sum": 0.0
+    },
+    "2022-10": {
+      "aqua": 34726,
+      "viirs_raw": 236262,
+      "viirs_harmonized": 36334.802402501926,
+      "variance_sum": 0.0
+    },
+    "2022-11": {
+      "aqua": 17485,
+      "viirs_raw": 101328,
+      "viirs_harmonized": 17096.408835414797,
+      "variance_sum": 0.0
+    },
+    "2022-12": {
+      "aqua": 6785,
+      "viirs_raw": 37254,
+      "viirs_harmonized": 7235.548798618838,
+      "variance_sum": 0.0
+    },
+    "2023-01": {
+      "aqua": 2326,
+      "viirs_raw": 14883,
+      "viirs_harmonized": 2642.863423936069,
+      "variance_sum": 0.0
+    },
+    "2023-02": {
+      "aqua": 1838,
+      "viirs_raw": 9979,
+      "viirs_harmonized": 2074.8188219480217,
+      "variance_sum": 0.0
+    },
+    "2023-03": {
+      "aqua": 2368,
+      "viirs_raw": 12517,
+      "viirs_harmonized": 2668.101096112281,
+      "variance_sum": 0.0
+    },
+    "2023-04": {
+      "aqua": 2261,
+      "viirs_raw": 12449,
+      "viirs_harmonized": 2395.5729992836714,
+      "variance_sum": 0.0
+    },
+    "2023-05": {
+      "aqua": 5360,
+      "viirs_raw": 30713,
+      "viirs_harmonized": 4670.011507384479,
+      "variance_sum": 0.0
+    },
+    "2023-06": {
+      "aqua": 9162,
+      "viirs_raw": 52455,
+      "viirs_harmonized": 8181.524161044508,
+      "variance_sum": 0.0
+    },
+    "2023-07": {
+      "aqua": 14433,
+      "viirs_raw": 62906,
+      "viirs_harmonized": 11564.965075179935,
+      "variance_sum": 0.0
+    },
+    "2023-08": {
+      "aqua": 29713,
+      "viirs_raw": 176613,
+      "viirs_harmonized": 30706.488899230957,
+      "variance_sum": 0.0
+    },
+    "2023-09": {
+      "aqua": 48698,
+      "viirs_raw": 271852,
+      "viirs_harmonized": 48991.88612860441,
+      "variance_sum": 0.0
+    },
+    "2023-10": {
+      "aqua": 42474,
+      "viirs_raw": 259656,
+      "viirs_harmonized": 42541.5263930019,
+      "variance_sum": 0.0
+    },
+    "2023-11": {
+      "aqua": 29852,
+      "viirs_raw": 203963,
+      "viirs_harmonized": 27921.683248749003,
+      "variance_sum": 0.0
+    },
+    "2023-12": {
+      "aqua": 11608,
+      "viirs_raw": 61711,
+      "viirs_harmonized": 9505.125083718449,
+      "variance_sum": 0.0
+    },
+    "2024-01": {
+      "aqua": 4450,
+      "viirs_raw": 27841,
+      "viirs_harmonized": 4194.213567273691,
+      "variance_sum": 0.0
+    },
+    "2024-02": {
+      "aqua": 4682,
+      "viirs_raw": 28015,
+      "viirs_harmonized": 3650.9938665032387,
+      "variance_sum": 0.0
+    },
+    "2024-03": {
+      "aqua": 5421,
+      "viirs_raw": 26339,
+      "viirs_harmonized": 3996.1830950789154,
+      "variance_sum": 0.0
+    },
+    "2024-04": {
+      "aqua": 2508,
+      "viirs_raw": 11399,
+      "viirs_harmonized": 2164.179129038006,
+      "variance_sum": 0.0
+    },
+    "2024-05": {
+      "aqua": 6235,
+      "viirs_raw": 34721,
+      "viirs_harmonized": 5122.338129222393,
+      "variance_sum": 0.0
+    },
+    "2024-06": {
+      "aqua": 13272,
+      "viirs_raw": 74234,
+      "viirs_harmonized": 11531.876386374235,
+      "variance_sum": 0.0
+    },
+    "2024-07": {
+      "aqua": 22799,
+      "viirs_raw": 122072,
+      "viirs_harmonized": 19634.437708694488,
+      "variance_sum": 0.0
+    },
+    "2024-08": {
+      "aqua": 72335,
+      "viirs_raw": 479086,
+      "viirs_harmonized": 65123.290410060436,
+      "variance_sum": 0.0
+    },
+    "2024-09": {
+      "aqua": 94735,
+      "viirs_raw": 598869,
+      "viirs_harmonized": 76336.70529823005,
+      "variance_sum": 0.0
+    },
+    "2024-10": {
+      "aqua": 36220,
+      "viirs_raw": 211437,
+      "viirs_harmonized": 30956.505120404065,
+      "variance_sum": 0.0
+    },
+    "2024-11": {
+      "aqua": 24359,
+      "viirs_raw": 130757,
+      "viirs_harmonized": 18996.98690252751,
+      "variance_sum": 0.0
+    },
+    "2024-12": {
+      "aqua": 12279,
+      "viirs_raw": 54462,
+      "viirs_harmonized": 8711.309558086097,
+      "variance_sum": 0.0
+    },
+    "2025-01": {
+      "aqua": 2974,
+      "viirs_raw": 14500,
+      "viirs_harmonized": 2498.400490095839,
+      "variance_sum": 0.0
+    },
+    "2025-02": {
+      "aqua": 1637,
+      "viirs_raw": 9300,
+      "viirs_harmonized": 1888.352869976312,
+      "variance_sum": 0.0
+    },
+    "2025-03": {
+      "aqua": 2220,
+      "viirs_raw": 12235,
+      "viirs_harmonized": 2544.123013779521,
+      "variance_sum": 0.0
+    },
+    "2025-04": {
+      "aqua": 1664,
+      "viirs_raw": 7258,
+      "viirs_harmonized": 1686.758707601577,
+      "variance_sum": 0.0
+    },
+    "2025-05": {
+      "aqua": 4434,
+      "viirs_raw": 24523,
+      "viirs_harmonized": 3811.6980528719723,
+      "variance_sum": 0.0
+    },
+    "2025-06": {
+      "aqua": 6490,
+      "viirs_raw": 33397,
+      "viirs_harmonized": 5113.947104554623,
+      "variance_sum": 0.0
+    },
+    "2025-07": {
+      "aqua": 10138,
+      "viirs_raw": 51875,
+      "viirs_harmonized": 9498.73161162436,
+      "variance_sum": 0.0
+    },
+    "2025-08": {
+      "aqua": 19468,
+      "viirs_raw": 117593,
+      "viirs_harmonized": 18774.611639168113,
+      "variance_sum": 0.0
+    },
+    "2025-09": {
+      "aqua": 29479,
+      "viirs_raw": 182665,
+      "viirs_harmonized": 28473.622853331268,
+      "variance_sum": 0.0
+    },
+    "2025-10": {
+      "aqua": 30415,
+      "viirs_raw": 181013,
+      "viirs_harmonized": 25708.223478304222,
+      "variance_sum": 0.0
+    },
+    "2025-11": {
+      "aqua": 21388,
+      "viirs_raw": 77271,
+      "viirs_harmonized": 12249.77671023272,
+      "variance_sum": 0.0
+    },
+    "2025-12": {
+      "aqua": 10405,
+      "viirs_raw": 36416,
+      "viirs_harmonized": 6345.654922207817,
+      "variance_sum": 0.0
+    },
+    "2026-01": {
+      "aqua": 4460,
+      "viirs_raw": 20589,
+      "viirs_harmonized": 3371.67261653021,
+      "variance_sum": 8408.105156197213
+    },
+    "2026-02": {
+      "aqua": 1831,
+      "viirs_raw": 10309,
+      "viirs_harmonized": 2061.52739591524,
+      "variance_sum": 4546.154283300042
+    },
+    "2026-03": {
+      "aqua": 1977,
+      "viirs_raw": 10157,
+      "viirs_harmonized": 2184.076242648065,
+      "variance_sum": 5004.54523574654
+    },
+    "2026-04": {
+      "aqua": 1771,
+      "viirs_raw": 8517,
+      "viirs_harmonized": 1835.5681527890265,
+      "variance_sum": 3181.7743468028493
+    },
+    "2026-05": {
+      "aqua": 3912,
+      "viirs_raw": 18687,
+      "viirs_harmonized": 3060.340928941965,
+      "variance_sum": 9624.695328476839
+    },
+    "2026-06": {
+      "aqua": 5439,
+      "viirs_raw": 26762,
+      "viirs_harmonized": 4413.964699305594,
+      "variance_sum": 14636.755154591054
+    },
+    "2026-07": {
+      "aqua": 6383,
+      "viirs_raw": 35330,
+      "viirs_harmonized": 6719.805649984628,
+      "variance_sum": 33339.58893919177
+    },
+    "2026-08": {
+      "aqua": 20839,
+      "viirs_raw": 125849,
+      "viirs_harmonized": 20645.57483062893,
+      "variance_sum": 239841.99828350637
+    },
+    "2026-09": {
+      "aqua": 25617,
+      "viirs_raw": 153044,
+      "viirs_harmonized": 26182.75200029835,
+      "variance_sum": 273761.5585439671
+    },
+    "2026-10": {
+      "aqua": 31732,
+      "viirs_raw": 182968,
+      "viirs_harmonized": 25326.444664930925,
+      "variance_sum": 308702.3305630721
+    },
+    "2026-11": {
+      "aqua": 13349,
+      "viirs_raw": 60069,
+      "viirs_harmonized": 7714.742258453742,
+      "variance_sum": 43562.154023201205
+    }
+  },
+  "recommendations": [
+    "Investigar dias sem detecções usando disponibilidade de aquisição.",
+    "Não comparar meses parciais com medianas de meses completos.",
+    "Preservar intermediários e publicar reprodução da validação e cobertura com c.",
+    "Revisar DOCUMENTATION_AUDIT.md antes de divulgar resultados."
+  ],
+  "limitations": [
+    "Integridade interna não autentica origem FIRMS.",
+    "Zeros não distinguem ausência de detecção e falta de observação.",
+    "Não se testa uniformidade sazonal; não se contam incêndios independentes.",
+    "Revisão documental é manual, fixada no commit indicado em DOCUMENTATION_AUDIT.md."
+  ]
+}

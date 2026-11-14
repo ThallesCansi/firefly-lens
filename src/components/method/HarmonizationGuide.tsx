@@ -2,6 +2,7 @@ import { Equation } from "./Equation";
 import { MethodSection } from "./MethodSection";
 import { References } from "./References";
 import { STEPS } from "./RealDataNotes";
+import { ValidationEvidence } from "./MethodEvidence";
 
 export function HarmonizationGuide() {
   return (
@@ -173,12 +174,14 @@ export function HarmonizationGuide() {
       >
         <p>{STEPS[4].body}</p>
         <p>
-          These are the pipeline’s reported held-out validation results, not new
-          measurements from this UI change or guarantees for every selected
-          area. Reproducible metrics and rankings are committed under{" "}
-          <code>harmonization/output/</code>. Day allocation and the heuristic
-          anomaly flags are not validated as independent fire-event predictions.
+          These are the pipeline’s published held-out validation results, not
+          guarantees for every selected area. Committed tables and figures
+          support the summaries below; full independent reproduction requires
+          raw and intermediate data that are not included in this checkout.
+          Day allocation and heuristic anomaly flags are not validated as
+          independent fire-event predictions.
         </p>
+        <ValidationEvidence />
         <p>
           <a href="https://github.com/ThallesCansi/firefly-lens/blob/main/harmonization/docs/METHODOLOGY.md">
             Full methodology and validation ↗

@@ -4,8 +4,8 @@ export const STEPS = [
     body: "MODIS on Aqua, July 2002 to November 2026, and VIIRS on NOAA-20, April 2018 to November 2026, for Brazil, from NASA FIRMS: the yearly country archives in standard processing, then the area API for 2026, near real time for the latest months. Terra, Suomi NPP and NOAA-21 are left out so each sensor is one satellite with one overpass time.",
   },
   {
-    title: "Keep vegetation fire only",
-    body: "MODIS detections with confidence of at least 30, VIIRS detections of nominal or high confidence, and only the type flagged as presumed vegetation fire (volcanoes, other static sources and offshore detections are dropped). Exact duplicates go, and each detection is placed in one of Brazil's six IBGE biomes.",
+    title: "Filter confidence, fire type and duplicates",
+    body: "MODIS detections need confidence of at least 30; VIIRS detections need nominal or high confidence. Where the fire-type field exists, only presumed vegetation fire is kept. Near-real-time records lack this field and pass without that filter. Exact duplicates are removed, and detections are assigned to Brazil's six IBGE biomes.",
   },
   {
     title: "Count on a 0.25° grid",
@@ -13,11 +13,11 @@ export const STEPS = [
   },
   {
     title: "Learn how VIIRS relates to MODIS Aqua",
-    body: "Over April 2018 to December 2023, when both flew and Aqua kept its orbit, a negative binomial model predicts the MODIS Aqua count of each cell and month from the degraded VIIRS count, by biome, month and day or night. Later years are left out of the fit because Aqua's overpass drifted about two hours later by 2026. A plain scale factor per biome, month and day or night is kept as a baseline.",
+    body: "Over the available April 2018 to December 2023 overlap, a negative binomial model predicts the MODIS Aqua count of each cell and month from degraded VIIRS counts, by biome, month and day or night. August 2020 and April 2022 are excluded because of Aqua outages. Years after 2023 are left out of the fit because of increasing Aqua orbital drift. A scale factor per biome, month and day or night is retained as a baseline.",
   },
   {
     title: "Check it on years it never saw",
-    body: "Each year from 2018 to 2023 is predicted by a model fitted without it. Over Brazil, raw VIIRS reads 506% above MODIS Aqua; harmonized, the bias falls below 1% and the typical monthly error is about 10%. The ranking of the worst months matches MODIS (Spearman 0.99). The 95% range of a sum of cells includes an error common to all cells, calibrated so 95% of biome-months fall inside it.",
+    body: "Each calibration-period year from 2018 to 2023 is predicted by a model fitted without that year. Published national totals show raw VIIRS bias of about +506%, versus −0.08% after L2 harmonization. Spearman 0.993 describes the average seasonal cycle across 12 calendar months. The adjusted area interval targets 95% coverage; reported coverage is 94.8% of LOYO biome-months, with substantial variation by biome and evaluation period.",
   },
   {
     title: "Write one series",

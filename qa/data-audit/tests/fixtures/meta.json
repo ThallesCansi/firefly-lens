@@ -1,0 +1,10 @@
+{
+  "version": 1, "tileCells": 16, "cellDeg": 0.25,
+  "epochDay": "2026-01-01", "epochYear": 2026,
+  "firstDay": "2026-01-01", "lastDay": "2026-01-14",
+  "viirsStart": "2026-01-01", "observedUntil": 2026,
+  "seriesEnd": "2025-12", "partialMonth": "2026-01",
+  "climatologyBase": [2026, 2026], "commonErrorC": 0.213,
+  "sources": "ISOLATED SYNTHETIC TEST FIXTURE; not NASA data",
+  "biomes": ["Test biome"], "tiles": [[0, 0]]
+}
