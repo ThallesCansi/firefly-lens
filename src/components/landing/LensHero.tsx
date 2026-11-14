@@ -7,10 +7,12 @@ import { fireData } from "@/lib/data/source";
 import { shortDate } from "@/lib/format";
 import { useYearData } from "@/lib/useYearData";
 
+/** One 0.25° grid cell on the peak day: MODIS Aqua and VIIRS NOAA-20 detections in it. */
 interface Point {
   x: number;
   y: number;
-  modis: boolean;
+  modis: number;
+  viirs: number;
 }
 
 interface Fly {
@@ -25,8 +27,9 @@ interface Fly {
 
 /**
  * The first screen is the product in miniature: a dark field, and a lens that
- * shows what two satellites saw underneath it on one day. The counts beside
- * the lens are real counts of the points inside it.
+ * shows what two satellites saw underneath it on one day. Each mark is one
+ * 0.25° grid cell of real NASA FIRMS detections; the counts beside the lens
+ * are the detections in the cells inside it.
  */
 export function LensHero() {
   const section = useRef<HTMLElement>(null);
@@ -37,7 +40,7 @@ export function LensHero() {
   const viirsOut = useRef<HTMLSpanElement>(null);
   const { data } = useYearData("amazon");
 
-  const peak = data ? data.summary.days.reduce((best, d) => (d.index > best.index ? d : best)).date : null;
+  const peak = data?.peak ?? null;
 
   useEffect(() => {
     const host = section.current;
@@ -90,15 +93,19 @@ export function LensHero() {
         ectx.lineTo(w, y);
       }
       ectx.stroke();
+      const topM = Math.max(1, ...points.map((p) => p.modis));
+      const topV = Math.max(1, ...points.map((p) => p.viirs));
       for (const p of points) {
-        ectx.beginPath();
-        if (p.modis) {
-          ectx.arc(p.x, p.y, 7, 0, Math.PI * 2);
+        if (p.modis > 0) {
+          ectx.beginPath();
+          ectx.arc(p.x, p.y, 3 + 9 * Math.sqrt(p.modis / topM), 0, Math.PI * 2);
           ectx.strokeStyle = "#3f8fe6";
           ectx.lineWidth = 1.5;
           ectx.stroke();
-        } else {
-          ectx.arc(p.x, p.y, 2.6, 0, Math.PI * 2);
+        }
+        if (p.viirs > 0) {
+          ectx.beginPath();
+          ectx.arc(p.x, p.y, 1.6 + 5 * Math.sqrt(p.viirs / topV), 0, Math.PI * 2);
           ectx.fillStyle = "#d9569a";
           ectx.fill();
         }
@@ -118,19 +125,18 @@ export function LensHero() {
 
       if (data && peak) {
         const [west, south, east, north] = fireData.presets()[0].bbox;
-        const day = data.hotspots
-          .filter((p) => p.acq_date === peak)
-          .map((p) => ({
-            u: (p.longitude - west) / (east - west),
-            v: (north - p.latitude) / (north - south),
-            modis: p.instrument === "MODIS",
-          }));
+        const day = data.peakCells.map((c) => ({
+          u: (c.lon - west) / (east - west),
+          v: (north - c.lat) / (north - south),
+          modis: c.modis,
+          viirs: c.viirs,
+        }));
         // Frame the map so the busiest fire front sits where the lens rests.
         const bins = new Map<string, number>();
         let busiest = { u: 0.5, v: 0.5, n: 0 };
         for (const p of day) {
           const key = `${Math.floor(p.u * 8)}:${Math.floor(p.v * 6)}`;
-          const n = (bins.get(key) ?? 0) + 1;
+          const n = (bins.get(key) ?? 0) + p.modis + p.viirs;
           bins.set(key, n);
           if (n > busiest.n) busiest = { u: (Math.floor(p.u * 8) + 0.5) / 8, v: (Math.floor(p.v * 6) + 0.5) / 6, n };
         }
@@ -141,6 +147,7 @@ export function LensHero() {
             x: rest.x + (p.u - busiest.u) * w * zoom,
             y: rest.y + (p.v - busiest.v) * h * zoom,
             modis: p.modis,
+            viirs: p.viirs,
           }))
           .filter((p) => p.x > -20 && p.x < w + 20 && p.y > -20 && p.y < h + 20);
       }
@@ -181,8 +188,8 @@ export function LensHero() {
         const dx = p.x - lens.x;
         const dy = p.y - lens.y;
         if (dx * dx + dy * dy <= r2) {
-          if (p.modis) modis++;
-          else viirs++;
+          modis += p.modis;
+          viirs += p.viirs;
         }
       }
       if (modisOut.current) modisOut.current.textContent = String(modis);
@@ -300,8 +307,8 @@ export function LensHero() {
             One fire calendar from two satellite sensors
           </h1>
           <p className="rise mt-5 max-w-[32rem] text-lg text-dim" style={{ ["--i" as string]: 1 }}>
-            MODIS sees fire in 1 km pixels and VIIRS in 375 m pixels, so their counts never match. FireFly Lens puts both
-            on one grid and shows a year of burning, day by day.
+            MODIS sees fire in 1 km pixels and VIIRS in 375 m pixels, so their counts never match. FireFly Lens converts
+            VIIRS to the MODIS scale and shows 24 years of burning in Brazil as one calendar, from real NASA records.
           </p>
           <div className="rise mt-7 flex flex-wrap gap-3" style={{ ["--i" as string]: 2 }}>
             <Link href="/lens" className="btn btn-primary">
@@ -312,7 +319,7 @@ export function LensHero() {
             </Link>
           </div>
           <p className="rise mt-8 text-[0.875rem] text-faint" style={{ ["--i" as string]: 3 }}>
-            Under the lens: the Southern Amazon{peak ? ` on ${shortDate(peak)}` : ""}, simulated.
+            Under the lens: the Southern Amazon{peak ? ` on ${shortDate(peak)}` : ""}, NASA FIRMS detections per 0.25° cell.
           </p>
         </div>
       </div>

@@ -5,6 +5,12 @@ import type { MonthCell } from "./harmonize";
 describe("scientific SVG presentation", () => {
   it("retains scientific values and rings, escapes labels, and identifies simulation and range", () => {
     const month: MonthCell = {
+      source: "observed",
+      lo: null,
+      hi: null,
+      partial: false,
+      rankOf: 23,
+      viirsHarmonized: null,
       year: 2025,
       month: 0,
       value: 320,
@@ -25,7 +31,7 @@ describe("scientific SVG presentation", () => {
     });
     expect(month).toEqual(before);
     expect(svg).toContain(
-      "320 cell-days; median 100; rank 1; outside selected range",
+      "320 Aqua-equivalent hot spots (observed); median 100; rank 1; outside selected range",
     );
     expect(svg).toContain('opacity="0.25"');
     expect(svg).toContain('stroke="#d8f24e"');

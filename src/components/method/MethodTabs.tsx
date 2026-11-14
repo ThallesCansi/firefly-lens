@@ -45,7 +45,11 @@ export function MethodTabs({ panels }: { panels: Record<Tab, ReactNode> }) {
   const root = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!sectionTabs[hash]) return;
-    const frame = requestAnimationFrame(() => document.getElementById(hash)?.scrollIntoView({ block: "start", behavior: "instant" }));
+    const frame = requestAnimationFrame(() =>
+      document
+        .getElementById(hash)
+        ?.scrollIntoView({ block: "start", behavior: "instant" }),
+    );
     return () => cancelAnimationFrame(frame);
   }, [hash]);
   const change = (id: Tab) => {

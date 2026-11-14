@@ -41,12 +41,12 @@ export function AnomaliesGuide() {
             {
               symbol: "Xʏ,ₘ",
               meaning:
-                "Sum of daily harmonized values in year y, month m: VIIRS-equivalent cell-days.",
+                "Sum of daily harmonized values in year y, month m: MODIS-Aqua-equivalent hot spots.",
             },
             {
               symbol: "Bₘ",
               meaning:
-                "Median of the same month across every year in the area’s available record, including the selected year.",
+                "Median of the same calendar month over 2003-2025; a selected year is included only when it lies in that reference period.",
             },
             {
               symbol: "Aʏ,ₘ",
@@ -58,8 +58,9 @@ export function AnomaliesGuide() {
           <p>
             The monthly grid rings ratios ≥ 2. A positive total with zero median
             is described as activity in a usually quiet month, without an
-            infinite ratio. Rank is 1 plus the number of same-month totals
-            strictly greater than the selected value; ties share a rank.
+            infinite ratio. Rank is 1 plus the number of complete same-month
+            totals strictly greater than the selected value; ties share a rank.
+            Partial months are identified separately.
           </p>
         </Equation>
         <p>
@@ -117,7 +118,7 @@ export function AnomaliesGuide() {
             {
               symbol: "μₘ, sₘ",
               meaning:
-                "Reference mean and sample standard deviation, both in cell-days.",
+                "Reference mean and sample standard deviation, both in Aqua-equivalent hot spots.",
             },
           ]}
         >
@@ -166,9 +167,9 @@ export function AnomaliesGuide() {
           Use of the symbol σ for a population standard deviation is also
           common; here s denotes an estimated sample spread. A z-score is not a
           probability unless additional distributional assumptions are
-          justified. The repository contains no Python integration; this section
-          is methodological context for future integration, not a claim about an
-          external module.
+          justified. The offline Python pipeline is integrated through exported
+          data tiles. This seasonal z-score is methodological context, not a
+          currently displayed indicator.
         </p>
       </MethodSection>
       <MethodSection
@@ -235,9 +236,12 @@ export function AnomaliesGuide() {
         </p>
         <p>
           The frontend’s historical rank is an ordinal rank, not a percentile.
-          Its 95th-percentile daily normalizer and 98th-percentile colour
-          reference are separate, non-seasonal quantities and must not be read
-          as seasonal percentile ranks.
+          The Python reference calendar separately computes p25/p75 and an
+          empirical percentile with midpoint treatment of ties; those are not
+          currently displayed in the frontend. Its 95th-percentile daily
+          normalizer and 98th-percentile colour reference are separate,
+          non-seasonal quantities and must not be read as seasonal percentile
+          ranks.
         </p>
       </MethodSection>
       <MethodSection id="example" title="Interpreting results">
@@ -249,7 +253,8 @@ export function AnomaliesGuide() {
             </strong>
             <p>
               Five reference-year totals for the same month: 40, 60, 80, 100 and
-              120 cell-days. A separate illustrative target year has 160.
+              120 Aqua-equivalent hot spots. A separate illustrative target year
+              has 160.
             </p>
           </figcaption>
           <div className="example-bars" aria-hidden="true">
@@ -267,15 +272,15 @@ export function AnomaliesGuide() {
           <dl>
             <div>
               <dt>Mean / median</dt>
-              <dd>80 / 80 cell-days</dd>
+              <dd>80 / 80 Aqua-equivalent hot spots</dd>
             </div>
             <div>
               <dt>Sample standard deviation</dt>
-              <dd>√1000 ≈ 31.62 cell-days</dd>
+              <dd>√1000 ≈ 31.62 Aqua-equivalent hot spots</dd>
             </div>
             <div>
               <dt>Departure / ratio to median</dt>
-              <dd>+80 cell-days / 2×</dd>
+              <dd>+80 Aqua-equivalent hot spots / 2×</dd>
             </div>
             <div>
               <dt>Illustrative z-score</dt>
@@ -286,7 +291,7 @@ export function AnomaliesGuide() {
             The target exceeds all five reference values; no precise extreme
             percentile is inferred. This example holds out the target to explain
             a seasonal reference. The current frontend’s monthly baseline
-            instead includes every available year, including the selected year.
+            uses 2003–2025, including the selected year only when it belongs to that reference period.
           </p>
         </figure>
       </MethodSection>

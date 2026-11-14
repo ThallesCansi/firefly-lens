@@ -52,7 +52,7 @@ export function renderHistorySvg(
     `<text x="${left}" y="32" fill="#d8f24e" font-size="12" letter-spacing="2">FIREFLY LENS</text>`,
     `<text x="${left}" y="58" fill="#eef0e6" font-size="18">${xml(area.slice(0, 72))}</text>`,
     `<text x="${left}" y="80" fill="#a6ae9f">${xml(provenance?.period ?? "Selected years")} · Harmonized monthly activity</text>`,
-    `<text x="${left}" y="99" fill="#a6ae9f">VIIRS-equivalent cell-days · common colour scale across months</text>`,
+    `<text x="${left}" y="99" fill="#a6ae9f">MODIS-Aqua-equivalent hot spots · common colour scale across months</text>`,
   ];
   MONTHS.forEach((name, m) =>
     parts.push(
@@ -72,7 +72,7 @@ export function renderHistorySvg(
       const inRange =
         !provenance || (stamp >= provenance.from && stamp <= provenance.to);
       parts.push(
-        `<g opacity="${inRange ? 1 : 0.25}"><title>${MONTHS[m]} ${year}: ${c.value} cell-days; median ${c.median}; rank ${c.rank}${inRange ? "" : "; outside selected range"}</title><rect x="${x + 1}" y="${y + 1}" width="24" height="24" rx="3" fill="${EMBER[c.level]}"/>`,
+        `<g opacity="${inRange ? 1 : 0.25}"><title>${MONTHS[m]} ${year}: ${c.value} Aqua-equivalent hot spots (${c.source}${c.partial ? ", partial" : ""}); median ${c.median}; rank ${c.rank}${inRange ? "" : "; outside selected range"}</title><rect x="${x + 1}" y="${y + 1}" width="24" height="24" rx="3" fill="${EMBER[c.level]}"/>`,
       );
       if (c.ratio !== null && c.ratio >= 2)
         parts.push(
@@ -98,9 +98,9 @@ export function renderHistorySvg(
     `<text x="${legendX}" y="284" fill="#a6ae9f">Hot spots are not independent fires.</text>`,
     `<path d="M${left} ${height - 124}H${width - 32}" stroke="#2b332c"/>`,
     `<text x="${left}" y="${height - 101}" fill="#eef0e6">${xml(provenance?.source ?? "Source not specified — consult the generating application")}</text>`,
-    `<text x="${left}" y="${height - 80}" fill="#a6ae9f">${xml(provenance?.processing ?? "FireFly Lens provisional harmonization")}</text>`,
+    `<text x="${left}" y="${height - 80}" fill="#a6ae9f">${xml(provenance?.processing ?? "FireFly Lens offline NB2 harmonization")}</text>`,
     `<text x="${left}" y="${height - 59}" fill="#a6ae9f">${xml(provenance ? `Exported ${provenance.exportedAt}` : "No export timestamp supplied")}</text>`,
-    `<text x="${left}" y="${height - 38}" fill="#a6ae9f">Provisional method · not validated against real observations</text>`,
+    `<text x="${left}" y="${height - 38}" fill="#a6ae9f">Observed / modeled series - see Method for validation scope and limitations</text>`,
     `<text x="${left}" y="${height - 17}" fill="#a6ae9f">Method: /method · NASA Space Apps Challenge 2026 · not endorsed by NASA</text>`,
     `</svg>`,
   );

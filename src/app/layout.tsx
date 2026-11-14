@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     template: "%s · FireFly Lens",
   },
   description:
-    "FireFly Lens brings MODIS and VIIRS hot spots onto one shared grid and shows a year of fire activity as a calendar, with unusual days and the fire season marked.",
+    "FireFly Lens harmonizes real MODIS and VIIRS hot spots for Brazil into one series and shows 24 years of fire activity as a calendar, with unusual days and the fire season marked.",
 };
 
 export const viewport: Viewport = {

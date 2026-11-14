@@ -5,7 +5,7 @@ import { useState } from "react";
 import { CalendarLegend, FireCalendar } from "@/components/lens/FireCalendar";
 import { SoftText } from "@/components/ui/SoftText";
 import { LEVEL_NAMES } from "@/lib/harmonize";
-import { indexScore, longDate } from "@/lib/format";
+import { count, indexScore, longDate } from "@/lib/format";
 import { useYearData } from "@/lib/useYearData";
 
 const MONTHS_SHOWN = [6, 7, 8, 9];
@@ -25,8 +25,8 @@ export function CalendarPreview() {
             The fire season, one light per day
           </h2>
           <p className="mt-5 text-lg text-dim">
-            Four months of the Southern Amazon. The lights swell as the dry season sets in; a ring marks a day that
-            burned far above the weeks around it. Pick any day.
+            Four months of 2025 in the Southern Amazon, from real MODIS Aqua detections. The lights swell as the dry
+            season sets in; a ring marks a day that burned far above the weeks around it. Pick any day.
           </p>
         </div>
 
@@ -64,10 +64,10 @@ export function CalendarPreview() {
                   </span>
                 </p>
                 <p className="mt-4 text-[0.9375rem] text-dim">
-                  MODIS lit <span className="num text-ink">{day.sensors.MODIS.cells}</span> cells from{" "}
-                  <span className="num text-ink">{day.sensors.MODIS.detections}</span> detections. VIIRS lit{" "}
-                  <span className="num text-ink">{day.sensors.VIIRS.cells}</span> from{" "}
-                  <span className="num text-ink">{day.sensors.VIIRS.detections}</span>.
+                  MODIS Aqua reported <span className="num text-ink">{count(day.sensors.MODIS.detections)}</span>{" "}
+                  detections and VIIRS NOAA-20 <span className="num text-ink">{count(day.sensors.VIIRS.detections)}</span>
+                  , which the harmonization puts at{" "}
+                  <span className="num text-ink">{count(day.sensors.VIIRS.estimate ?? 0)}</span> on the MODIS scale.
                   {day.anomaly ? " Marked as unusual burning." : ""}
                 </p>
               </div>

@@ -1,0 +1,364 @@
+{
+ "version": 1,
+ "origin": [
+  -74.0,
+  -34.0
+ ],
+ "cellDeg": 0.25,
+ "tileCells": 16,
+ "epochDay": "2002-01-01",
+ "epochYear": 2002,
+ "firstDay": "2002-07-04",
+ "lastDay": "2026-11-14",
+ "viirsStart": "2018-04-01",
+ "observedUntil": 2025,
+ "seriesEnd": "2026-10",
+ "partialMonth": "2026-11",
+ "climatologyBase": [
+  2003,
+  2025
+ ],
+ "commonErrorC": 0.213,
+ "biomes": [
+  "Amazônia",
+  "Caatinga",
+  "Cerrado",
+  "Mata Atlântica",
+  "Pampa",
+  "Pantanal"
+ ],
+ "presets": [
+  {
+   "id": "amazon",
+   "name": "Southern Amazon",
+   "place": "Brazil, arc of deforestation (Pará, Mato Grosso, Rondônia)",
+   "bbox": [
+    -62,
+    -13,
+    -50,
+    -5
+   ]
+  },
+  {
+   "id": "matopiba",
+   "name": "Matopiba",
+   "place": "Brazil, Cerrado frontier (Maranhão, Tocantins, Piauí, Bahia)",
+   "bbox": [
+    -50,
+    -14,
+    -42,
+    -6
+   ]
+  },
+  {
+   "id": "pantanal",
+   "name": "Pantanal",
+   "place": "Brazil, wetlands of Mato Grosso and Mato Grosso do Sul",
+   "bbox": [
+    -58.5,
+    -22,
+    -54.5,
+    -16
+   ]
+  },
+  {
+   "id": "caatinga",
+   "name": "Sertão",
+   "place": "Brazil, Caatinga of the northeast",
+   "bbox": [
+    -42,
+    -11,
+    -36,
+    -5
+   ]
+  },
+  {
+   "id": "pampa",
+   "name": "Pampa",
+   "place": "Brazil, grasslands of Rio Grande do Sul",
+   "bbox": [
+    -57.5,
+    -33.5,
+    -50,
+    -28
+   ]
+  }
+ ],
+ "tiles": [
+  [
+   0,
+   5
+  ],
+  [
+   0,
+   6
+  ],
+  [
+   0,
+   7
+  ],
+  [
+   0,
+   8
+  ],
+  [
+   1,
+   5
+  ],
+  [
+   1,
+   6
+  ],
+  [
+   1,
+   7
+  ],
+  [
+   1,
+   8
+  ],
+  [
+   1,
+   9
+  ],
+  [
+   2,
+   5
+  ],
+  [
+   2,
+   6
+  ],
+  [
+   2,
+   7
+  ],
+  [
+   2,
+   8
+  ],
+  [
+   2,
+   9
+  ],
+  [
+   3,
+   3
+  ],
+  [
+   3,
+   4
+  ],
+  [
+   3,
+   5
+  ],
+  [
+   3,
+   6
+  ],
+  [
+   3,
+   7
+  ],
+  [
+   3,
+   8
+  ],
+  [
+   3,
+   9
+  ],
+  [
+   4,
+   0
+  ],
+  [
+   4,
+   1
+  ],
+  [
+   4,
+   2
+  ],
+  [
+   4,
+   3
+  ],
+  [
+   4,
+   4
+  ],
+  [
+   4,
+   5
+  ],
+  [
+   4,
+   6
+  ],
+  [
+   4,
+   7
+  ],
+  [
+   4,
+   8
+  ],
+  [
+   4,
+   9
+  ],
+  [
+   5,
+   0
+  ],
+  [
+   5,
+   1
+  ],
+  [
+   5,
+   2
+  ],
+  [
+   5,
+   3
+  ],
+  [
+   5,
+   4
+  ],
+  [
+   5,
+   5
+  ],
+  [
+   5,
+   6
+  ],
+  [
+   5,
+   7
+  ],
+  [
+   5,
+   8
+  ],
+  [
+   5,
+   9
+  ],
+  [
+   6,
+   1
+  ],
+  [
+   6,
+   2
+  ],
+  [
+   6,
+   3
+  ],
+  [
+   6,
+   4
+  ],
+  [
+   6,
+   5
+  ],
+  [
+   6,
+   6
+  ],
+  [
+   6,
+   7
+  ],
+  [
+   6,
+   8
+  ],
+  [
+   7,
+   2
+  ],
+  [
+   7,
+   3
+  ],
+  [
+   7,
+   4
+  ],
+  [
+   7,
+   5
+  ],
+  [
+   7,
+   6
+  ],
+  [
+   7,
+   7
+  ],
+  [
+   7,
+   8
+  ],
+  [
+   8,
+   2
+  ],
+  [
+   8,
+   3
+  ],
+  [
+   8,
+   4
+  ],
+  [
+   8,
+   5
+  ],
+  [
+   8,
+   6
+  ],
+  [
+   8,
+   7
+  ],
+  [
+   9,
+   5
+  ],
+  [
+   9,
+   6
+  ],
+  [
+   9,
+   7
+  ],
+  [
+   10,
+   7
+  ],
+  [
+   11,
+   3
+  ]
+ ],
+ "bounds": [
+  -74.0,
+  -33.75,
+  -29.25,
+  5.5
+ ],
+ "sources": "NASA FIRMS: MODIS C6.1 Aqua (SP to Aug 2026, NRT after), VIIRS NOAA-20 375 m (SP to Jul 2026, NRT after)"
+}

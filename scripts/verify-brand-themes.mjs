@@ -17,16 +17,32 @@ async function checkTextContrast(page) {
     const css = getComputedStyle(document.documentElement);
     const luminance = (token) => {
       const raw = css.getPropertyValue(token).trim().replace("#", "");
-      const hex = raw.length === 3 ? raw.split("").map((c) => c + c).join("") : raw;
-      const channels = [0, 2, 4].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((v) => v <= .04045 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4);
-      return channels[0] * .2126 + channels[1] * .7152 + channels[2] * .0722;
+      const hex =
+        raw.length === 3
+          ? raw
+              .split("")
+              .map((c) => c + c)
+              .join("")
+          : raw;
+      const channels = [0, 2, 4]
+        .map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
+        .map((v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+      return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
     };
-    return ["--color-ink", "--color-dim", "--color-faint"].flatMap((text) => ["--color-night", "--color-canopy"].map((background) => {
-      const a = luminance(text), b = luminance(background);
-      return { text, background, ratio: (Math.max(a, b) + .05) / (Math.min(a, b) + .05) };
-    }));
+    return ["--color-ink", "--color-dim", "--color-faint"].flatMap((text) =>
+      ["--color-night", "--color-canopy"].map((background) => {
+        const a = luminance(text),
+          b = luminance(background);
+        return {
+          text,
+          background,
+          ratio: (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05),
+        };
+      }),
+    );
   });
-  for (const r of ratios) assert.ok(r.ratio >= 4.5, `${r.text} on ${r.background}: ${r.ratio}`);
+  for (const r of ratios)
+    assert.ok(r.ratio >= 4.5, `${r.text} on ${r.background}: ${r.ratio}`);
 }
 async function loaded(page) {
   await page.locator(".maplibregl-canvas").waitFor();
@@ -129,19 +145,19 @@ try {
   await page.locator('[data-date="2024-03-15"]').click();
   await page
     .getByRole("button", {
-      name: "Explain Fire radiative power (FRP)",
+      name: "Explain Scaled sensor activity",
       exact: true,
     })
     .click();
   await page
-    .getByRole("dialog", { name: "Fire radiative power (FRP)", exact: true })
+    .getByRole("dialog", { name: "Scaled sensor activity", exact: true })
     .waitFor();
   await page.keyboard.press("Escape");
   const downloadPromise = page.waitForEvent("download");
   await page.getByRole("button", { name: "Heatmap SVG", exact: true }).click();
   const download = await downloadPromise;
   const svg = await readFile(await download.path(), "utf8");
-  assert.match(svg, /Simulated FIRMS-shaped detections/);
+  assert.match(svg, /NASA FIRMS Brazil/);
   assert.match(svg, /Southern Amazon/);
   assert.match(svg, /Exported /);
   await page.reload();

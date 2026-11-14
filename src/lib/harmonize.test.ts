@@ -1,117 +1,133 @@
-import { describe, expect, it } from "vitest";
-import { generateHotspots, mockSource, plantedBursts } from "./data/mock";
-import type { BBox } from "./data/types";
-import { buildRecord, gridYear, harmonize, type FireRecord } from "./harmonize";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { gunzipSync } from "node:zlib";
+import { beforeAll, describe, expect, it, vi } from "vitest";
+import { cellCounts, loadArea, type AreaData } from "./data/area";
+import { meta } from "./data/meta";
+import { decodeTile, tilesFor } from "./data/tiles";
+import { normalizeBBox, type BBox } from "./data/types";
+import { buildRecord, yearView, type FireRecord } from "./harmonize";
 
-/** Two tiles of the Southern Amazon, aligned to the simulation's tile grid. */
-const AREA: BBox = [-60, -12, -52, -8];
+const PUBLIC = join(__dirname, "../../public");
 
-function record(bbox: BBox, first: number, last: number): FireRecord {
-  const years = [];
-  for (let y = first; y <= last; y++) years.push(gridYear(generateHotspots(bbox, `${y}-01-01`, `${y}-12-31`), y));
-  return buildRecord(years);
-}
+/**
+ * A 12° × 12° area aligned to the 0.25° grid, so every cell counts whole. The
+ * expected figures were computed in Python from
+ * harmonization/output/grid_monthly_total.parquet over the same 2304 cells.
+ */
+const AREA: BBox = [-60, -16, -48, -4];
+const EXPECTED = {
+  cells: 2304,
+  modis_2024_09: 44519,
+  viirs_2024_09: 324177,
+  mu_2026_09: 7011.874,
+  var_2026_09: 75728.885,
+  modis_2026_09: 6806,
+  modis_2003_2025: 1656937,
+  median_september: 20551,
+};
 
-const full = record(AREA, 2001, 2025);
+let area: AreaData;
+let record: FireRecord;
+const month = (r: FireRecord, year: number, m: number) => r.months.find((c) => c.year === year && c.month === m - 1)!;
 
-describe("simulated source", () => {
-  it("produces the same records for the same request", async () => {
-    const a = await mockSource.hotspots(AREA, "2020-01-01", "2020-12-31");
-    const b = await mockSource.hotspots(AREA, "2020-01-01", "2020-12-31");
-    expect(a.length).toBeGreaterThan(500);
-    expect(JSON.stringify(a.slice(0, 200))).toBe(JSON.stringify(b.slice(0, 200)));
+beforeAll(async () => {
+  vi.stubGlobal("fetch", async (url: string) => new Response(readFileSync(join(PUBLIC, url))));
+  area = await loadArea(AREA);
+  record = buildRecord(area);
+});
+
+describe("data tiles", () => {
+  it("decode with the header the pipeline wrote", () => {
+    const [tx, ty] = meta.tiles[0];
+    const raw = gunzipSync(readFileSync(join(PUBLIC, `data/brazil/t_${tx}_${ty}.bin.gz`)));
+    const tile = decodeTile(raw.buffer.slice(raw.byteOffset, raw.byteOffset + raw.byteLength));
+    expect([tile.tx, tile.ty]).toEqual([tx, ty]);
+    expect(tile.biome.length).toBe(256);
+    expect(tile.daily.day.length).toBe(tile.daily.cell.length);
+    // Days are sorted, and none falls before MODIS Aqua began.
+    expect(tile.daily.day[0]).toBeGreaterThanOrEqual(182);
   });
 
-  it("keeps every detection inside the area and the dates asked for", () => {
-    const [west, south, east, north] = AREA;
-    for (const h of generateHotspots(AREA, "2019-03-01", "2019-09-30")) {
-      expect(h.longitude).toBeGreaterThanOrEqual(west);
-      expect(h.longitude).toBeLessThanOrEqual(east);
-      expect(h.latitude).toBeGreaterThanOrEqual(south);
-      expect(h.latitude).toBeLessThanOrEqual(north);
-      expect(h.acq_date >= "2019-03-01" && h.acq_date <= "2019-09-30").toBe(true);
-    }
-  });
-
-  it("shows a smaller area as a subset of a larger one", () => {
-    const inner: BBox = [-58, -11, -55, -9];
-    const outer = generateHotspots(AREA, "2021-08-01", "2021-08-31").filter(
-      (h) => h.longitude >= inner[0] && h.longitude <= inner[2] && h.latitude >= inner[1] && h.latitude <= inner[3],
-    );
-    expect(generateHotspots(inner, "2021-08-01", "2021-08-31")).toHaveLength(outer.length);
-  });
-
-  it("has no VIIRS detections before the sensor flew", () => {
-    const early = generateHotspots(AREA, "2005-01-01", "2005-12-31");
-    expect(early.length).toBeGreaterThan(100);
-    expect(early.every((h) => h.instrument === "MODIS")).toBe(true);
-    const late = generateHotspots(AREA, "2020-01-01", "2020-12-31");
-    const viirs = late.filter((h) => h.instrument === "VIIRS").length;
-    expect(viirs).toBeGreaterThan((late.length - viirs) * 2);
+  it("are listed only where Brazil has grid cells", () => {
+    expect(tilesFor([-20, 10, -10, 20])).toEqual([]);
+    // Cells 56–103 by 72–119 fall in tiles 3–6 by 4–7.
+    expect(tilesFor(AREA).length).toBe(16);
   });
 });
 
-describe("harmonized record", () => {
-  it("covers every day from 2001 to 2025 with an index between 0 and 1", () => {
-    expect(full.days).toHaveLength(9131);
-    for (const day of full.days) {
-      expect(day.index).toBeGreaterThanOrEqual(0);
-      expect(day.index).toBeLessThanOrEqual(1);
-    }
+describe("an area's record", () => {
+  it("covers the same cells as the pipeline", () => {
+    expect(area.cells).toBe(EXPECTED.cells);
+    expect(area.biomes[0].name).toBe("Amazônia");
   });
 
-  it("learns that VIIRS lights more cells than MODIS", () => {
-    expect(full.calibration.factor).toBeGreaterThan(1.2);
-    expect(full.calibration.overlapDays).toBeGreaterThan(5000);
+  it("is MODIS Aqua as observed through 2025", () => {
+    const sep = month(record, 2024, 9);
+    expect(sep.source).toBe("observed");
+    expect(sep.value).toBe(EXPECTED.modis_2024_09);
+    expect(sep.detections.VIIRS).toBe(EXPECTED.viirs_2024_09);
+    expect(sep.lo).toBeNull();
+    const total = record.months.filter((c) => c.year >= 2003 && c.year <= 2025).reduce((s, c) => s + c.value, 0);
+    expect(total).toBe(EXPECTED.modis_2003_2025);
   });
 
-  it("removes the step where VIIRS joins the record", () => {
-    // Yearly totals before and after 2012 should be the same order of magnitude:
-    // the sensor of origin must not show as a jump.
-    const mean = (xs: number[]) => xs.reduce((a, b) => a + b, 0) / xs.length;
-    const before = mean(full.yearTotals.filter((t) => t.year >= 2003 && t.year <= 2011).map((t) => t.value));
-    const after = mean(full.yearTotals.filter((t) => t.year >= 2012 && t.year <= 2017).map((t) => t.value));
-    expect(after / before).toBeGreaterThan(0.6);
-    expect(after / before).toBeLessThan(1.6);
+  it("is harmonized VIIRS from 2026, with its interval", () => {
+    const sep = month(record, 2026, 9);
+    expect(sep.source).toBe("modeled");
+    expect(sep.value).toBeCloseTo(EXPECTED.mu_2026_09, 1);
+    expect(sep.detections.MODIS).toBe(EXPECTED.modis_2026_09);
+    const sd = Math.sqrt(EXPECTED.var_2026_09 + (meta.commonErrorC * EXPECTED.mu_2026_09) ** 2);
+    expect(sep.hi! - sep.value).toBeCloseTo(1.96 * sd, 0);
   });
 
-  it("sets each month against the same month in other years", () => {
-    expect(full.months).toHaveLength(25 * 12);
-    for (let m = 0; m < 12; m++) {
-      const same = full.months.filter((c) => c.month === m);
-      expect(same.filter((c) => c.rank === 1).length).toBeGreaterThanOrEqual(1);
-      const above = same.filter((c) => c.value > c.median).length;
-      expect(above).toBeLessThanOrEqual(12);
-    }
+  it("spreads a modeled month over its days without losing any of it", () => {
+    const days = record.days.filter((d) => d.date.startsWith("2026-09"));
+    expect(days.every((d) => d.source === "modeled")).toBe(true);
+    const sum = days.reduce((s, d) => s + d.value, 0);
+    expect(sum).toBeCloseTo(month(record, 2026, 9).value, 3);
   });
 
-  it("finds a fire season late in the year for the southern tropics", () => {
-    expect(full.season).not.toBeNull();
-    expect(full.season!.days).toBeGreaterThan(20);
-    expect(full.season!.days).toBeLessThan(200);
-    expect(full.season!.startDay).toBeGreaterThan(180);
+  it("compares a month with the median of the same month over 2003-2025", () => {
+    expect(month(record, 2024, 9).median).toBe(EXPECTED.median_september);
+    expect(record.monthlyMedian[8]).toBe(EXPECTED.median_september);
   });
 
-  it("flags most planted bursts and little else", () => {
-    let planted = 0;
-    let caught = 0;
-    let flagged = 0;
-    for (let year = 2015; year <= 2025; year++) {
-      const flags = new Set(full.days.filter((d) => d.year === year && d.anomaly).map((d) => d.date));
-      flagged += flags.size;
-      for (const date of plantedBursts(AREA, year)) {
-        planted++;
-        if (flags.has(date)) caught++;
-      }
-    }
-    expect(planted).toBeGreaterThan(3);
-    expect(caught / planted).toBeGreaterThanOrEqual(0.7);
-    expect(flagged).toBeLessThanOrEqual(planted + 12);
+  it("flags the month in progress and keeps it out of the ranks", () => {
+    const nov = month(record, 2026, 11);
+    expect(nov.partial).toBe(true);
+    expect(month(record, 2025, 11).rankOf).toBe(24);
   });
 
-  it("harmonizes a single year on its own", () => {
-    const year = harmonize(generateHotspots(AREA, "2025-01-01", "2025-12-31"), 2025);
-    expect(year.days).toHaveLength(365);
-    expect(year.criticalPeriod).not.toBeNull();
+  it("starts with MODIS Aqua and ends on the last day of data", () => {
+    expect(record.days[0].date).toBe(meta.firstDay);
+    expect(record.days[record.days.length - 1].date).toBe(meta.lastDay);
+    expect(record.days.find((d) => d.date === "2018-03-31")!.bothSensors).toBe(false);
+    expect(record.days.find((d) => d.date === "2018-04-01")!.bothSensors).toBe(true);
+  });
+
+  it("finds a dry-season fire season and scales days from 0 to 1", () => {
+    const y = yearView(record, 2024);
+    expect(y.criticalPeriod).not.toBeNull();
+    expect(y.criticalPeriod!.start.slice(5, 7) >= "06" && y.criticalPeriod!.start.slice(5, 7) <= "08").toBe(true);
+    expect(Math.max(...record.days.map((d) => d.index))).toBe(1);
+    expect(record.days.every((d) => d.index >= 0)).toBe(true);
+  });
+});
+
+describe("map cells", () => {
+  it("add up to the area's detections when every cell is whole", async () => {
+    const cells = await cellCounts(AREA, "2024-09-01", "2024-09-30");
+    expect(cells.reduce((s, c) => s + c.modis, 0)).toBe(EXPECTED.modis_2024_09);
+    expect(cells.every((c) => c.weight === 1)).toBe(true);
+  });
+});
+
+describe("areas", () => {
+  it("stay inside the covered box and within 12 degrees", () => {
+    expect(normalizeBBox([-100, -50, -80, -40])[0]).toBeGreaterThanOrEqual(-74);
+    const big = normalizeBBox([-70, -30, -40, 0]);
+    expect(big[2] - big[0]).toBeLessThanOrEqual(12);
+    expect(big[3] - big[1]).toBeLessThanOrEqual(12);
   });
 });

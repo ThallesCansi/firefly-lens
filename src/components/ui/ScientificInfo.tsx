@@ -5,17 +5,17 @@ import { useId, useRef } from "react";
 const concepts = {
   activity: {
     title: "Harmonized activity",
-    body: "A relative index of calibrated shared-grid activity, displayed from 0 to 100. It is not fire count, burned area, severity or probability.",
+    body: "A relative daily index of observed or modeled activity on the MODIS Aqua scale, displayed from 0 to 100. It is not fire count, burned area, severity or probability.",
     anchor: "formulation",
   },
   hotspot: {
     title: "Hotspot",
-    body: "One thermal pixel detected by a sensor at an acquisition time. One fire may create multiple detections; a pixel may contain more than one fire.",
+    body: "A thermal pixel detected by a sensor, not an independent fire. The map aggregates detections per 0.25° cell rather than displaying individual fire locations.",
     anchor: "hotspot",
   },
   median: {
     title: "Historical median",
-    body: "The median harmonized total for the same calendar month across all available years in this area. The selected year is included. A zero median has no defined ratio.",
+    body: "The median area total for the same calendar month over 2003-2025. A selected year is included only within that reference period. A zero median has no defined ratio.",
     anchor: "monthly-climatology",
   },
   anomaly: {
@@ -25,12 +25,12 @@ const concepts = {
   },
   frp: {
     title: "Fire radiative power (FRP)",
-    body: "Radiative energy release rate in MW. This table sums reported values per sensor; it does not integrate total fire energy or isolate independent events.",
+    body: "Radiative energy release rate in MW, not integrated energy. FRP is not included in the static browser tiles and is not displayed or used in this index.",
     anchor: "frp",
   },
   scaled: {
     title: "Scaled sensor activity",
-    body: "Each sensor’s daily shared-grid activity, calibrated to the common reference and capped at 100. These rows are separate sensor views, not summed fire counts.",
+    body: "MODIS Aqua observations and harmonized VIIRS daily estimates are normalized by the same area reference and capped at 100. Separate sensor views are not summed fire counts.",
     anchor: "formulation",
   },
 };

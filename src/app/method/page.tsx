@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { fireData } from "@/lib/data/source";
 import { SiteFooter } from "@/components/ui/SiteFooter";
 import { SiteHeader } from "@/components/ui/SiteHeader";
 import { MethodTabs } from "@/components/method/MethodTabs";
@@ -28,8 +29,9 @@ export default function MethodPage() {
           <div className="method-notice">
             <span className="status-dot" />
             <span>
-              Current build: simulated data, 2001–2025. Provisional method;
-              real-data validation pending.
+              Current build: real NASA FIRMS data for Brazil,{" "}
+              {fireData.firstDay} to {fireData.lastDay}. Observed MODIS Aqua and
+              modeled VIIRS continuation; validation and limitations documented.
             </span>
           </div>
         </div>
