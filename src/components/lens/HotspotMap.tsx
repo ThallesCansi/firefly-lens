@@ -11,7 +11,18 @@ import type {
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { CellCount } from "@/lib/data/area";
 import { normalizeBBox, type BBox, type Sensor } from "@/lib/data/types";
+import { HOME, boundsContain } from "@/lib/map/camera";
+import { createController, type EngineController } from "@/lib/map/controller";
+import type {
+  MapClickHandler,
+  MapController,
+  MapInteractionMode,
+  MapNavigationRequest,
+  ProjectionMode,
+} from "@/lib/map/map-contract";
+import { DEFAULT_PROJECTION, readProjection, skyFor } from "@/lib/map/projection";
 import type { MapDestination } from "./LocationSearch";
+import { ProjectionToggle } from "./map/ProjectionToggle";
 import { useTheme } from "@/components/ui/ThemeProvider";
 
 const BASEMAPS = {
@@ -28,16 +39,6 @@ function mapColors() {
     modis: read("--color-modis"),
     viirs: read("--color-viirs"),
     stroke: read("--color-night"),
-  };
-}
-
-function fitPadding(map: MapLibreMap) {
-  const { clientHeight: h, clientWidth: w } = map.getContainer();
-  return {
-    top: Math.min(90, h * 0.15),
-    bottom: Math.min(160, h * 0.25),
-    left: Math.min(90, w * 0.2),
-    right: Math.min(60, w * 0.12),
   };
 }
 
@@ -115,20 +116,30 @@ function makeMap(
   lib: typeof import("maplibre-gl"),
   container: HTMLElement,
   theme: "light" | "dark",
+  projection: ProjectionMode,
 ): MapLibreMap {
   return new lib.Map({
     container,
     style: BASEMAPS[theme],
-    center: [-53, -14],
-    zoom: 3,
+    center: HOME.center,
+    zoom: HOME.zoom[projection],
     attributionControl: false,
     cooperativeGestures: false,
     renderWorldCopies: false,
+    // The globe turns by dragging; tilting and spinning the north away add nothing to a fire map.
     dragRotate: false,
     pitchWithRotate: false,
+    touchPitch: false,
   });
 }
 
+/**
+ * The map engine: MapLibre with the basemap, the theme, the projection (globe
+ * by default, flat on request), the camera and the data layers. Tools for
+ * search and area selection plug in through the contract in
+ * src/lib/map/map-contract.ts (`onReady`, `navigation`, `onMapClick`), without
+ * editing this file.
+ */
 export function HotspotMap({
   bbox,
   areaName,
@@ -138,6 +149,13 @@ export function HotspotMap({
   sensors = ["MODIS", "VIIRS"],
   destination = null,
   reset = 0,
+  projection,
+  onProjectionChange,
+  navigation = null,
+  interactionMode,
+  onMapClick,
+  onReady,
+  showProjectionToggle = true,
 }: {
   bbox: BBox | null;
   areaName: string;
@@ -149,11 +167,26 @@ export function HotspotMap({
   sensors?: Sensor[];
   destination?: MapDestination | null;
   reset?: number;
+  /** Controlled projection. Leave undefined to let the map's own switch (and the saved choice) decide. */
+  projection?: ProjectionMode;
+  onProjectionChange?: (mode: ProjectionMode) => void;
+  /** A camera move requested by a tool; a new `id` starts a new move. */
+  navigation?: MapNavigationRequest | null;
+  /** Alternative to `drawing`: "draw-rectangle" draws, "pick-administrative" shows a pointer for clicks. */
+  interactionMode?: MapInteractionMode;
+  /** Clicks on the map, with geography (null when off the Earth). */
+  onMapClick?: MapClickHandler;
+  /** Receives the map controller once the map has loaded. */
+  onReady?: (controller: MapController) => void;
+  /** Shows the 3D globe / 2D map switch inside the map. */
+  showProjectionToggle?: boolean;
 }) {
   const { theme } = useTheme();
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<MapLibreMap | null>(null);
-  const latest = useRef({ cells, bbox, onDraw, sensors, theme });
+  const control = useRef<EngineController | null>(null);
+  const isDrawing = drawing || interactionMode === "draw-rectangle";
+  const latest = useRef({ cells, bbox, onDraw, sensors, theme, onReady, onProjectionChange });
   const appliedTheme = useRef(theme);
   const styled = useRef(false);
   const fellBack = useRef(false);
@@ -161,10 +194,12 @@ export function HotspotMap({
   const [offline, setOffline] = useState(false);
   const [failed, setFailed] = useState(false);
   const [paintedTheme, setPaintedTheme] = useState<string | null>(null);
+  const [mode, setMode] = useState<ProjectionMode>(projection ?? DEFAULT_PROJECTION);
+  const [globeUnavailable, setGlobeUnavailable] = useState(false);
 
   useEffect(() => {
-    latest.current = { cells, bbox, onDraw, sensors, theme };
-  }, [cells, bbox, onDraw, sensors, theme]);
+    latest.current = { cells, bbox, onDraw, sensors, theme, onReady, onProjectionChange };
+  }, [cells, bbox, onDraw, sensors, theme, onReady, onProjectionChange]);
 
   useEffect(() => {
     let dead = false;
@@ -174,9 +209,10 @@ export function HotspotMap({
       if (dead || !el.current) return;
       maplibregl.setWorkerUrl("/maplibre/maplibre-gl-worker.mjs");
       let instance: MapLibreMap;
+      const initial = projection ?? readProjection();
       try {
         appliedTheme.current = latest.current.theme;
-        instance = makeMap(maplibregl, el.current, latest.current.theme);
+        instance = makeMap(maplibregl, el.current, latest.current.theme, initial);
         instance.addControl(
           new maplibregl.NavigationControl({ showCompass: false }),
           "bottom-right",
@@ -192,6 +228,15 @@ export function HotspotMap({
       }
       created = instance;
       map.current = instance;
+      const controller = createController(instance, maplibregl.Point, initial, {
+        onProjection(next, unavailable) {
+          if (dead) return;
+          setMode(next);
+          if (unavailable) setGlobeUnavailable(true);
+          latest.current.onProjectionChange?.(next);
+        },
+      });
+      control.current = controller;
 
       const addLayers = () => {
         const m = instance;
@@ -282,11 +327,24 @@ export function HotspotMap({
         setReady(true);
       };
 
-      // "style.load" fires for the basemap and again for the fallback style.
+      // "style.load" fires for the basemap, again for the fallback style and on
+      // every theme change. A new style starts flat and without our layers, so
+      // projection, sky, data layers and the tools' layers are restored here.
+      let announced = false;
       instance.on("style.load", () => {
         styled.current = true;
         setOffline(fellBack.current);
         addLayers();
+        try {
+          instance.setSky(skyFor(appliedTheme.current) as Parameters<MapLibreMap["setSky"]>[0]);
+        } catch {
+          // A style without sky support still draws; only the atmosphere is missing.
+        }
+        controller.styleLoaded();
+        if (!announced) {
+          announced = true;
+          latest.current.onReady?.(controller);
+        }
       });
       instance.on("idle", () => {
         if (!dead) setPaintedTheme(appliedTheme.current);
@@ -304,8 +362,11 @@ export function HotspotMap({
     return () => {
       dead = true;
       map.current = null;
+      control.current = null;
       created?.remove();
     };
+    // The map is created once; later projection changes go through the controller.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -314,6 +375,7 @@ export function HotspotMap({
     appliedTheme.current = theme;
     styled.current = false;
     fellBack.current = false;
+    control.current?.styleUnloading();
     // Only replace the style. style.load restores data and layer visibility; camera and handlers stay intact.
     m.setStyle(BASEMAPS[theme], { diff: false });
   }, [theme]);
@@ -323,11 +385,8 @@ export function HotspotMap({
     (map.current?.getSource("area") as GeoJSONSource | undefined)?.setData(
       outline(bbox),
     );
-    if (bbox && map.current)
-      map.current.fitBounds(bbox, {
-        padding: fitPadding(map.current),
-        duration: 600,
-      });
+    if (bbox)
+      control.current?.navigate({ id: `area-${bbox.join()}`, bounds: bbox, animation: "ease" });
   }, [bbox, ready]);
 
   useEffect(() => {
@@ -349,27 +408,47 @@ export function HotspotMap({
     }
   }, [sensors, ready]);
 
+  // A search result: fly there, framing its extent when it has one.
   useEffect(() => {
-    if (!ready || !destination || !map.current) return;
-    if (destination.bounds) {
-      map.current.fitBounds(destination.bounds, {
-        padding: fitPadding(map.current),
-        duration: 1000,
-        maxZoom: 12,
-      });
-    } else {
-      map.current.flyTo({
-        center: destination.center,
-        zoom: destination.zoom,
-        duration: 1000,
-      });
-    }
+    if (!ready || !destination) return;
+    control.current?.navigate({
+      id: destination.id,
+      center: destination.center,
+      zoom: destination.zoom,
+      bounds: destination.bounds,
+      maxZoom: 12,
+      animation: "fly",
+    });
   }, [destination, ready]);
 
+  // A camera move asked for by a tool through the contract.
   useEffect(() => {
-    if (ready && reset)
-      map.current?.flyTo({ center: [-53, -14], zoom: 3, duration: 800 });
+    if (ready && navigation) control.current?.navigate(navigation);
+  }, [navigation, ready]);
+
+  useEffect(() => {
+    if (ready && reset) control.current?.resetView();
   }, [reset, ready]);
+
+  // Controlled projection: follow the prop when the parent owns the choice.
+  useEffect(() => {
+    if (ready && projection) control.current?.setProjection(projection);
+  }, [projection, ready]);
+
+  // Clicks for tools such as an administrative picker.
+  useEffect(() => {
+    const c = control.current;
+    if (!ready || !c || !onMapClick) return;
+    return c.onPointer((e) => {
+      if (e.type === "click") onMapClick(e);
+    });
+  }, [onMapClick, ready]);
+
+  useEffect(() => {
+    const m = map.current;
+    if (!ready || !m || isDrawing) return;
+    m.getCanvas().style.cursor = interactionMode === "pick-administrative" ? "pointer" : "";
+  }, [interactionMode, isDrawing, ready]);
 
   useEffect(() => {
     if (!ready || !el.current) return;
@@ -378,9 +457,12 @@ export function HotspotMap({
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
         const m = map.current;
+        const c = control.current;
         m?.resize();
+        // Re-frame the area only if the new size cut it off: resizing must not undo the person's own navigation.
         const box = latest.current.bbox;
-        if (box && m) m.fitBounds(box, { padding: fitPadding(m), duration: 0 });
+        if (box && c && !boundsContain(c.getBounds(), box))
+          c.navigate({ id: `fit-${Date.now()}`, bounds: box, animation: "jump" });
       });
     });
     observer.observe(el.current);
@@ -390,19 +472,17 @@ export function HotspotMap({
     };
   }, [ready]);
 
-  // Drawing a new area: press, drag, release.
+  // Drawing a new area: press, drag, release. The camera is locked meanwhile,
+  // so the globe does not turn under the pointer; a press in space is ignored.
   useEffect(() => {
     const m = map.current;
-    if (!ready || !m || !drawing) return;
+    const c = control.current;
+    if (!ready || !m || !c || !isDrawing) return;
     const draft = () => m.getSource("draft") as GeoJSONSource | undefined;
     let start: [number, number] | null = null;
     let box: BBox | null = null;
-    m.dragPan.disable();
-    m.scrollZoom.disable();
-    m.boxZoom.disable();
-    m.doubleClickZoom.disable();
-    m.touchZoomRotate.disable();
-    m.keyboard.disable();
+    m.stop();
+    c.lockCamera(true);
     const zoomButtons = m
       .getContainer()
       .querySelectorAll<HTMLButtonElement>(
@@ -413,13 +493,16 @@ export function HotspotMap({
     });
     m.getCanvas().style.cursor = "crosshair";
 
+    const onEarth = (e: MapMouseEvent | MapTouchEvent) => c.isOnSurface([e.point.x, e.point.y]);
     const down = (e: MapMouseEvent | MapTouchEvent) => {
       e.preventDefault();
+      if (!onEarth(e)) return;
       start = [e.lngLat.lng, e.lngLat.lat];
       box = null;
     };
     const move = (e: MapMouseEvent | MapTouchEvent) => {
-      if (!start) return;
+      // Past the globe's edge the last corner on the Earth stays.
+      if (!start || !onEarth(e)) return;
       box = [start[0], start[1], e.lngLat.lng, e.lngLat.lat];
       draft()?.setData(outline(normalizeBBox(box)));
     };
@@ -450,12 +533,7 @@ export function HotspotMap({
       m.off("touchstart", down);
       m.off("touchmove", move);
       m.off("touchend", up);
-      m.dragPan.enable();
-      m.scrollZoom.enable();
-      m.boxZoom.enable();
-      m.doubleClickZoom.enable();
-      m.touchZoomRotate.enable();
-      m.keyboard.enable();
+      c.lockCamera(false);
       zoomButtons.forEach((button) => {
         button.disabled = false;
       });
@@ -464,12 +542,13 @@ export function HotspotMap({
       m.getCanvas().style.cursor = "";
       draft()?.setData({ type: "FeatureCollection", features: [] });
     };
-  }, [drawing, ready]);
+  }, [isDrawing, ready]);
 
   return (
     <div
-      className={`hotspot-map relative h-full overflow-hidden bg-canopy ${drawing ? "ring-2 ring-lume" : ""}`}
+      className={`hotspot-map relative h-full overflow-hidden bg-canopy ${isDrawing ? "ring-2 ring-lume" : ""}`}
       data-map-theme={paintedTheme}
+      data-projection={ready ? mode : undefined}
     >
       {/* MapLibre's stylesheet makes its container position: relative, so it fills a positioned parent. */}
       <div className="absolute inset-0">
@@ -492,12 +571,12 @@ export function HotspotMap({
           coordinates.
         </p>
       )}
-      {ready && drawing && (
+      {ready && isDrawing && (
         <p className="drawing-hint pointer-events-none absolute inset-x-0 top-16 mx-auto w-fit rounded-lg bg-lume px-3 py-2 text-[0.875rem] font-medium text-lume-ink">
           Drag to select · max 12° per side · Esc or Navigate to cancel
         </p>
       )}
-      {ready && bbox && !drawing && cells?.length === 0 && (
+      {ready && bbox && !isDrawing && cells?.length === 0 && (
         <p className="pointer-events-none absolute inset-x-0 top-4 mx-auto w-fit rounded-lg bg-night px-3 py-2 text-[0.875rem] text-dim">
           No detections in the selected area and period.
         </p>
@@ -524,7 +603,18 @@ export function HotspotMap({
         {offline && (
           <span className="text-faint">Basemap unavailable offline</span>
         )}
+        {globeUnavailable && (
+          <span className="text-faint">Globe unavailable here: flat map shown</span>
+        )}
       </div>
+      {ready && showProjectionToggle && !projection && (
+        <ProjectionToggle
+          value={mode}
+          disabled={globeUnavailable}
+          onChange={(next) => control.current?.setProjection(next)}
+          className="absolute bottom-[7.25rem] right-[10px]"
+        />
+      )}
     </div>
   );
 }
