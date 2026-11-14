@@ -1,0 +1,369 @@
+@import "tailwindcss";
+
+/*
+  FireFly Lens: a forest at night. Flat darkness, points of light.
+  Neutrals carry a faint green cast so greys never read as plain grey.
+*/
+@theme {
+  --color-night: #0b0e0c;
+  --color-canopy: #121713;
+  --color-bark: #1a201b;
+  --color-line: #2b332c;
+  --color-ink: #eef0e6;
+  --color-dim: #a6ae9f;
+  --color-faint: #7d8677;
+
+  /* The firefly's light: the one brand accent. */
+  --color-lume: #d8f24e;
+  --color-lume-ink: #141a05;
+
+  /* Fire activity, quiet to extreme. Lightness rises with every step. */
+  --color-ember-0: #2b332c;
+  --color-ember-1: #6a2f1d;
+  --color-ember-2: #a63f1c;
+  --color-ember-3: #dc5f1f;
+  --color-ember-4: #f59a35;
+  --color-ember-5: #ffdc78;
+
+  /* Sensor identity. Validated for colour-vision deficiency on the night ground. */
+  --color-modis: #3f8fe6;
+  --color-viirs: #d9569a;
+
+  --font-display: var(--font-funnel-display), system-ui, sans-serif;
+  --font-sans: var(--font-funnel-sans), system-ui, sans-serif;
+  --font-mono: var(--font-dm-mono), ui-monospace, Menlo, Consolas, monospace;
+
+  --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:root {
+  color-scheme: dark;
+
+  /* Motion tokens, from transitions.dev. */
+  --duration-quick: 150ms;
+  --duration-fast: 250ms;
+  --ease-smooth-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --tabs-dur: 250ms;
+  --tabs-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --text-soft-dur: 200ms;
+  --text-soft-blur: 2px;
+  --text-soft-ease: ease-in-out;
+  --text-soft-resize-dur: 240ms;
+  --text-soft-resize-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --tt-in-dur: 150ms;
+  --tt-out-dur: 50ms;
+  --tt-delay: 80ms;
+  --tt-move-dur: 160ms;
+}
+
+html {
+  background: var(--color-night);
+  scrollbar-color: var(--color-line) var(--color-night);
+  scroll-padding-top: 5rem;
+}
+
+body {
+  background: var(--color-night);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--color-lume);
+  color: var(--color-lume-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-lume);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+a {
+  text-underline-offset: 0.22em;
+  text-decoration-thickness: 1px;
+}
+
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.wrap {
+  width: 100%;
+  max-width: 80rem;
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+@media (min-width: 48rem) {
+  .wrap {
+    padding-inline: 2.5rem;
+  }
+}
+
+/* ── Buttons: one pair. They step up on hover and press on click. ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.125rem;
+  border-radius: 0.625rem;
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.2;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    transform var(--duration-quick) var(--ease-smooth-out),
+    background-color var(--duration-quick) ease-out,
+    border-color var(--duration-quick) ease-out;
+}
+.btn:hover {
+  transform: translateY(-1px);
+}
+.btn:active {
+  transform: translateY(0) scale(0.98);
+}
+.btn-primary {
+  background: var(--color-lume);
+  color: var(--color-lume-ink);
+}
+.btn-primary:hover {
+  background: #e5fa72;
+}
+.btn-quiet {
+  border: 1px solid var(--color-line);
+  color: var(--color-ink);
+}
+.btn-quiet:hover {
+  border-color: var(--color-faint);
+  background: var(--color-canopy);
+}
+
+/* A text link whose underline draws in. */
+.link {
+  color: var(--color-ink);
+  text-decoration: none;
+  background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+  transition: background-size var(--duration-fast) var(--ease-smooth-out);
+  padding-bottom: 2px;
+}
+.link:hover,
+.link:focus-visible {
+  background-size: 100% 1px;
+}
+.link-lume {
+  color: var(--color-lume);
+}
+
+/* ── Tabs sliding (transitions.dev 16) ── */
+.t-tabs {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 0.75rem;
+  background: var(--color-bark);
+  max-width: 100%;
+}
+.t-tab {
+  position: relative;
+  z-index: 1;
+  appearance: none;
+  border: 0;
+  background: transparent;
+  min-height: 2.25rem;
+  padding: 0.25rem 0.875rem;
+  border-radius: 0.5625rem;
+  color: var(--color-dim);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--tabs-dur) var(--tabs-ease);
+}
+.t-tab:not([aria-selected="true"]):hover {
+  color: var(--color-ink);
+}
+.t-tab[aria-selected="true"] {
+  color: var(--color-lume-ink);
+}
+.t-tabs-pill {
+  position: absolute;
+  top: 3px;
+  left: 0;
+  z-index: 0;
+  height: calc(100% - 6px);
+  width: 0;
+  border-radius: 0.5625rem;
+  background: var(--color-lume);
+  transform: translateX(0);
+  transition:
+    transform var(--tabs-dur) var(--tabs-ease),
+    width var(--tabs-dur) var(--tabs-ease);
+  will-change: transform, width;
+  pointer-events: none;
+}
+
+/* ── Text swap soft (transitions.dev 34) ── */
+.t-text-soft {
+  display: inline-grid;
+  justify-items: var(--text-soft-align, start);
+  transition: width var(--text-soft-resize-dur) var(--text-soft-resize-ease);
+}
+.t-text-soft > span {
+  grid-area: 1 / 1;
+  white-space: pre;
+  transition:
+    filter var(--text-soft-dur) var(--text-soft-ease),
+    opacity var(--text-soft-dur) var(--text-soft-ease);
+}
+.t-text-soft-new {
+  opacity: 0;
+  filter: blur(var(--text-soft-blur));
+}
+.t-text-soft.is-swapping .t-text-soft-old {
+  opacity: 0;
+  filter: blur(var(--text-soft-blur));
+}
+.t-text-soft.is-swapping .t-text-soft-new {
+  opacity: 1;
+  filter: blur(0);
+}
+
+/* ── Tooltip (transitions.dev 17): delayed in, instant out, travels between triggers ── */
+.t-tt {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 20;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  background: var(--color-ink);
+  color: var(--color-night);
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  scale: 0.98;
+  transform-origin: 50% 100%;
+  translate: var(--tt-x, 0px) var(--tt-y, 0px);
+  box-shadow: 0 6px 24px -6px rgb(0 0 0 / 0.6);
+  transition:
+    opacity var(--tt-out-dur) ease-out,
+    scale var(--tt-out-dur) ease-out;
+}
+.t-tt[data-show="true"] {
+  opacity: 1;
+  scale: 1;
+  transition:
+    opacity var(--tt-in-dur) ease-out var(--tt-delay),
+    scale var(--tt-in-dur) ease-out var(--tt-delay),
+    translate var(--tt-move-dur) var(--ease-smooth-out);
+}
+
+/* ── The firefly ── */
+@keyframes lume-glow {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  45% {
+    opacity: 1;
+  }
+}
+@keyframes lume-wing {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-14deg);
+  }
+}
+@keyframes lume-hover {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+.lume-glow {
+  animation: lume-glow 2.6s ease-in-out infinite;
+}
+.lume-wing {
+  transform-box: fill-box;
+  transform-origin: 100% 100%;
+  animation: lume-wing 0.16s linear infinite;
+}
+.lume-body {
+  animation: lume-hover 3.2s ease-in-out infinite;
+}
+.lume[data-mood="alert"] .lume-glow {
+  animation-duration: 0.9s;
+}
+
+/* The hero's words rise once on load. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+    filter: blur(3px);
+  }
+}
+.rise {
+  animation: rise 700ms var(--ease-smooth-out) both;
+  animation-delay: calc(var(--i, 0) * 90ms + 120ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-tabs-pill,
+  .t-tab,
+  .t-text-soft,
+  .t-text-soft > span,
+  .t-tt,
+  .btn,
+  .link {
+    transition: none !important;
+  }
+  .lume-glow,
+  .lume-wing,
+  .lume-body,
+  .rise {
+    animation: none !important;
+  }
+}
+
+.maplibregl-ctrl-attrib {
+  background: rgb(11 14 12 / 0.8) !important;
+  color: var(--color-faint);
+  font-size: 0.6875rem;
+}
+.maplibregl-ctrl-attrib a {
+  color: var(--color-dim) !important;
+}
