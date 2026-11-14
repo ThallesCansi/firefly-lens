@@ -222,3 +222,94 @@
     font-size: 1.4rem;
   }
 }
+
+/* The site card: mark, links and theme switch in one floating surface.
+   On the map it sits over the top-left corner; on content pages it floats at
+   the top of the page. */
+.site-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 52px;
+  padding: 0 6px 0 14px;
+  border-radius: 14px;
+  backdrop-filter: blur(10px);
+}
+.site-card .brand-signature > span {
+  font-size: 1.35rem;
+}
+.site-card-rule {
+  width: 1px;
+  height: 22px;
+  margin: 0 6px 0 4px;
+  background: var(--color-line);
+}
+.site-card-links {
+  display: flex;
+  align-items: center;
+}
+.site-card-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 10px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-dim);
+  text-decoration: none;
+  transition: color 160ms, background 160ms;
+}
+.site-card-links a:hover {
+  color: var(--color-ink);
+  background: var(--color-bark);
+}
+.site-card-links a[aria-current="page"] {
+  color: var(--color-lume);
+}
+.theme-toggle {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  color: var(--color-dim);
+  cursor: pointer;
+  transition: color 160ms, background 160ms;
+}
+.theme-toggle:hover {
+  color: var(--color-ink);
+  background: var(--color-bark);
+}
+/* Content pages: the same card, floating and staying in view while scrolling. */
+.site-header-float {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  padding-top: 14px;
+  pointer-events: none;
+}
+.site-header-float.is-overlay {
+  position: fixed;
+  inset-inline: 0;
+}
+.site-header-float .site-card {
+  pointer-events: auto;
+}
+@media (max-width: 700px) {
+  .site-card {
+    height: 48px;
+    padding-left: 10px;
+    gap: 2px;
+  }
+  .site-card .brand-signature > span {
+    font-size: 1.15rem;
+  }
+  .site-card-rule {
+    margin: 0 2px;
+  }
+  .site-card-links a {
+    padding: 0 7px;
+    font-size: 0.8125rem;
+  }
+}

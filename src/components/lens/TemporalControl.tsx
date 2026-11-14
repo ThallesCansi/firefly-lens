@@ -16,7 +16,10 @@ export function TemporalControl({
       role="group"
       aria-label="Map period"
     >
-      <span className="text-xs text-dim">MAP / UTC</span>
+      <div className="temporal-head">
+        <span>Map period</span>
+        <span className="text-faint">UTC</span>
+      </div>
       <label>
         <span className="sr-only">Map year</span>
         <select
@@ -56,13 +59,13 @@ export function TemporalControl({
           Whole month
         </button>
       )}
-      <span className="temporal-caption text-xs text-dim">
+      <p className="temporal-caption">
         {disabled
           ? "Select an area to load detections"
           : period.length === 10
-            ? period
+            ? `${period} · one day`
             : `${period} · whole month`}
-      </span>
+      </p>
     </div>
   );
 }

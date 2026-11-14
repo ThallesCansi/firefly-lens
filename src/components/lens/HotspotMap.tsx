@@ -28,11 +28,8 @@ import {
 import type { MapDestination } from "./LocationSearch";
 import { ProjectionToggle } from "./map/ProjectionToggle";
 import { useTheme } from "@/components/ui/ThemeProvider";
+import { BASEMAP_ATTRIBUTION, BASEMAP_URL, styleFor } from "@/lib/map/basemap";
 
-const BASEMAPS = {
-  dark: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
-  light: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
-};
 function mapColors() {
   const css = getComputedStyle(document.documentElement);
   const read = (name: string) => css.getPropertyValue(name).trim();
@@ -124,7 +121,9 @@ function makeMap(
 ): MapLibreMap {
   return new lib.Map({
     container,
-    style: BASEMAPS[theme],
+    style: BASEMAP_URL,
+    // Classic map colours by day, the same map at night in the dark theme.
+    transformStyle: styleFor(theme),
     center: HOME.center,
     zoom: HOME.zoom[projection],
     attributionControl: false,
@@ -248,7 +247,7 @@ export function HotspotMap({
           "bottom-right",
         );
         instance.addControl(
-          new maplibregl.AttributionControl({ compact: true }),
+          new maplibregl.AttributionControl({ compact: true, customAttribution: BASEMAP_ATTRIBUTION }),
           "bottom-right",
         );
       } catch {
@@ -411,7 +410,7 @@ export function HotspotMap({
     fellBack.current = false;
     control.current?.styleUnloading();
     // Only replace the style. style.load restores data and layer visibility; camera and handlers stay intact.
-    m.setStyle(BASEMAPS[theme], { diff: false });
+    m.setStyle(BASEMAP_URL, { diff: false, transformStyle: styleFor(theme) });
   }, [theme]);
 
   useEffect(() => {
@@ -592,7 +591,7 @@ export function HotspotMap({
 
   return (
     <div
-      className={`hotspot-map relative h-full overflow-hidden bg-canopy ${isDrawing ? "ring-2 ring-lume" : ""}`}
+      className={`hotspot-map map-space relative h-full overflow-hidden ${isDrawing ? "ring-2 ring-lume" : ""}`}
       data-map-theme={paintedTheme}
       data-projection={ready ? mode : undefined}
     >
