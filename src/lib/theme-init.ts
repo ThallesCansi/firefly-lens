@@ -1,0 +1,2 @@
+/** Runs before the first paint; no request cookies or client-only render branching. */
+export const themeInit = `(function(){var p='system';try{var s=localStorage.getItem('firefly-lens-theme');if(['light','dark','system'].indexOf(s)!==-1)p=s}catch(e){}var t=p==='system'?(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):p;document.documentElement.dataset.theme=t;document.documentElement.dataset.themePreference=p})()`;

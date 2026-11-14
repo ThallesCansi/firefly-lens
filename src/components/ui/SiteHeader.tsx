@@ -1,19 +1,25 @@
 import Link from "next/link";
-import { Lume } from "@/components/firefly/Lume";
+import { Brand } from "./Brand";
+import { ThemeSelect } from "./ThemeSelect";
 
 const LINKS = [
   { href: "/lens", label: "Lens" },
   { href: "/method", label: "Method" },
 ];
 
-export function SiteHeader({ current, overlay = false }: { current?: string; overlay?: boolean }) {
+export function SiteHeader({
+  current,
+  overlay = false,
+}: {
+  current?: string;
+  overlay?: boolean;
+}) {
   return (
-    <header className={overlay ? "absolute inset-x-0 top-0 z-30" : "border-b border-line bg-night"}>
+    <header
+      className={`site-header ${overlay ? "absolute inset-x-0 top-0 z-30" : "border-b border-line bg-night"}`}
+    >
       <div className="wrap flex h-16 items-center justify-between gap-4">
-        <Link href="/" className="-ml-1 flex items-center gap-2 text-ink no-underline">
-          <Lume size={34} />
-          <span className="font-display text-xl tracking-tight">FireFly Lens</span>
-        </Link>
+        <Brand />
         <nav aria-label="Main" className="flex items-center gap-1">
           {LINKS.map((l) => (
             <Link
@@ -25,6 +31,7 @@ export function SiteHeader({ current, overlay = false }: { current?: string; ove
               {l.label}
             </Link>
           ))}
+          <ThemeSelect />
         </nav>
       </div>
     </header>

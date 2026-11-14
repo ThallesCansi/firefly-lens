@@ -10,7 +10,7 @@
   height: 76px;
   flex-shrink: 0;
   display: grid;
-  grid-template-columns: 220px minmax(180px, 560px) 1fr;
+  grid-template-columns: 150px minmax(180px, 560px) 1fr;
   align-items: center;
   gap: 24px;
   padding: 12px 24px;
@@ -71,10 +71,10 @@
   margin: 0;
 }
 .map-surface {
-  background: rgb(18 23 19 / 96%);
+  background: var(--surface-floating);
   border: 1px solid var(--color-line);
   border-radius: 12px;
-  box-shadow: 0 8px 32px #0004;
+  box-shadow: var(--surface-shadow);
 }
 .map-status {
   position: absolute;
@@ -116,8 +116,8 @@
   color: var(--color-ink);
 }
 .map-toolbar button[aria-pressed="true"] {
-  background: var(--color-lume);
-  color: var(--color-lume-ink);
+  background: var(--color-button);
+  color: var(--color-button-ink);
 }
 .map-toolbar button:disabled {
   opacity: 0.35;

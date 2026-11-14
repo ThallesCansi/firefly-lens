@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "./workspace.css";
+@import "./themes.css";
 
 /*
   FireFly Lens: a forest at night. Flat darkness, points of light.
@@ -147,11 +148,11 @@ a {
   transform: translateY(0) scale(0.98);
 }
 .btn-primary {
-  background: var(--color-lume);
-  color: var(--color-lume-ink);
+  background: var(--color-button);
+  color: var(--color-button-ink);
 }
 .btn-primary:hover {
-  background: #e5fa72;
+  background: var(--color-button-hover);
 }
 .btn-quiet {
   border: 1px solid var(--color-line);
@@ -230,7 +231,7 @@ a {
   color: var(--color-ink);
 }
 .t-tab[aria-selected="true"] {
-  color: var(--color-lume-ink);
+  color: var(--color-button-ink);
 }
 .t-tabs-pill {
   position: absolute;
@@ -240,7 +241,7 @@ a {
   height: calc(100% - 6px);
   width: 0;
   border-radius: 0.5625rem;
-  background: var(--color-lume);
+  background: var(--color-button);
   transform: translateX(0);
   transition:
     transform var(--tabs-dur) var(--tabs-ease),
@@ -382,7 +383,7 @@ a {
 }
 
 .maplibregl-ctrl-attrib {
-  background: rgb(11 14 12 / 0.8) !important;
+  background: var(--surface-floating) !important;
   color: var(--color-faint);
   font-size: 0.6875rem;
 }

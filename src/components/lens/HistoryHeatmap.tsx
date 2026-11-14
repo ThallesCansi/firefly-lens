@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import type { FireRecord, Level, MonthCell } from "@/lib/harmonize";
 import { MONTHS, count } from "@/lib/format";
+import { ScientificInfo } from "@/components/ui/ScientificInfo";
 
 const EMBER: Record<Level, string> = {
   0: "var(--color-ember-0)",
@@ -140,7 +141,7 @@ export function HistoryHeatmap({
                         onBlur={() => setShown(false)}
                         aria-label={`${MONTHS[m]} ${year}: ${againstMedian(cell)}`}
                         aria-pressed={selectedMonth === stamp}
-                        className={`relative block h-6 w-full cursor-pointer rounded-[3px] outline-offset-1 transition-[filter] hover:brightness-125 sm:h-7 ${inRange ? "" : "opacity-30"}`}
+                        className={`history-month relative block h-6 w-full cursor-pointer rounded-[3px] outline-offset-1 transition-[filter] hover:brightness-125 sm:h-7 ${inRange ? "" : "opacity-30"}`}
                         style={{
                           background: EMBER[cell.level],
                           outline:
@@ -207,7 +208,10 @@ export function HistoryHeatmap({
             aria-hidden="true"
             className="block size-4 rounded-[3px] border-[1.5px] border-lume"
           />
-          <span>At least twice the month&rsquo;s median</span>
+          <span>
+            At least twice the month&rsquo;s median{" "}
+            <ScientificInfo concept="median" />
+          </span>
         </div>
         <div className="flex items-center gap-2">
           <span aria-hidden="true" className="block h-4 w-px bg-ink" />

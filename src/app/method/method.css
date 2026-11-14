@@ -1,0 +1,340 @@
+.method-page {
+  max-width: 1080px;
+  padding-block: 64px 88px;
+}
+.method-intro {
+  max-width: 760px;
+  margin-bottom: 36px;
+}
+.method-intro h1 {
+  font-size: clamp(2.4rem, 5vw, 3.8rem);
+  line-height: 1.08;
+}
+.method-intro > p:not(.eyebrow) {
+  color: var(--color-dim);
+  margin-top: 20px;
+  font-size: 1.2rem;
+}
+.method-notice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 24px;
+  padding: 12px 16px;
+  border: 1px solid var(--color-line);
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  color: var(--color-dim);
+  background: var(--color-canopy);
+}
+.method-notice .status-dot {
+  flex-shrink: 0;
+}
+.method-tablist {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  padding: 5px;
+  background: var(--color-bark);
+  border: 1px solid var(--color-line);
+  border-radius: 12px;
+  margin-bottom: 44px;
+}
+.method-tablist button {
+  min-height: 48px;
+  padding: 10px;
+  border-radius: 7px;
+  font-size: 0.9375rem;
+  color: var(--color-dim);
+  cursor: pointer;
+  transition:
+    color 150ms,
+    background 150ms;
+}
+.method-tablist button:hover {
+  color: var(--color-ink);
+}
+.method-tablist button[aria-selected="true"] {
+  background: var(--color-canopy);
+  color: var(--color-ink);
+  box-shadow: 0 1px 4px #0001;
+}
+.method-tabs [role="tabpanel"] {
+  max-width: 800px;
+  margin-inline: auto;
+}
+.method-panel-heading {
+  margin-bottom: 40px;
+}
+.method-panel-heading h2 {
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  line-height: 1.2;
+}
+.method-panel-heading > p:last-child {
+  color: var(--color-dim);
+  margin-top: 14px;
+}
+.method-section {
+  padding-top: 28px;
+  margin-top: 32px;
+  border-top: 1px solid var(--color-line);
+  scroll-margin-top: 24px;
+}
+.method-section > h2,
+.method-references > h2 {
+  font-size: 1.6rem;
+  margin-bottom: 16px;
+}
+.method-status {
+  color: var(--color-accent);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.method-prose {
+  color: var(--color-dim);
+  line-height: 1.75;
+  font-size: 1rem;
+}
+.method-prose p + p {
+  margin-top: 16px;
+}
+.method-prose a {
+  color: var(--color-ink);
+}
+.method-prose strong {
+  color: var(--color-ink);
+  font-weight: 500;
+}
+.method-prose ul {
+  list-style: disc;
+  padding-left: 22px;
+}
+.method-prose li + li {
+  margin-top: 12px;
+}
+.method-pipeline {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin-block: 24px;
+}
+.method-prose .method-pipeline li {
+  padding: 14px 10px;
+  border: 1px solid var(--color-line);
+  border-radius: 8px;
+  background: var(--color-canopy);
+  color: var(--color-ink);
+  font-size: 0.8125rem;
+  margin: 0;
+  line-height: 1.5;
+}
+.method-pipeline span {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-accent);
+  margin-bottom: 8px;
+}
+.equation-card {
+  margin-block: 24px;
+  border: 1px solid var(--color-line);
+  border-radius: 12px;
+  padding: 22px;
+  background: var(--color-canopy);
+  color: var(--color-ink);
+}
+.equation-card h3 {
+  font-size: 1.1rem;
+}
+.equation-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  padding-block: 16px;
+}
+.equation-scroll .katex-display {
+  margin: 0.5em 0;
+  font-size: 1.03em;
+}
+.equation-variables {
+  border-top: 1px solid var(--color-line);
+  padding-top: 14px;
+}
+.equation-variables > div {
+  display: grid;
+  grid-template-columns: 76px 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-size: 0.875rem;
+}
+.equation-variables dt {
+  font-family: var(--font-mono);
+  color: var(--color-ink);
+}
+.equation-variables dd,
+.equation-note {
+  color: var(--color-dim);
+}
+.equation-note {
+  font-size: 0.875rem;
+  margin-top: 14px;
+}
+.method-callout {
+  padding: 20px;
+  border-left: 3px solid var(--color-accent);
+  background: var(--color-canopy);
+  border-radius: 0 8px 8px 0;
+  margin-bottom: 20px;
+}
+.method-definitions > div,
+.method-example dl > div {
+  display: grid;
+  grid-template-columns: minmax(110px, 1fr) 3fr;
+  gap: 20px;
+  padding-block: 12px;
+  border-bottom: 1px solid var(--color-line);
+}
+.method-definitions dt,
+.method-example dt {
+  color: var(--color-ink);
+}
+.method-table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+  margin-block: 24px;
+}
+.method-table-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+.method-table-wrap caption {
+  text-align: left;
+  margin-bottom: 12px;
+  color: var(--color-ink);
+}
+.method-table-wrap th,
+.method-table-wrap td {
+  text-align: left;
+  vertical-align: top;
+  padding: 12px;
+  border-bottom: 1px solid var(--color-line);
+  overflow-wrap: anywhere;
+}
+.method-table-wrap thead {
+  background: var(--color-bark);
+  color: var(--color-ink);
+}
+.method-table-wrap th {
+  font-weight: 500;
+}
+.method-example {
+  padding: 22px;
+  background: var(--color-canopy);
+  border: 1px solid var(--color-line);
+  border-radius: 12px;
+}
+.method-example figcaption > p {
+  margin-top: 12px;
+}
+.example-bars {
+  margin-block: 24px;
+}
+.example-bars > div {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr) 32px;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.75rem;
+}
+.example-bars > div + div {
+  margin-top: 8px;
+}
+.example-bars i {
+  display: block;
+  height: 18px;
+  background: var(--color-faint);
+  border-radius: 2px;
+}
+.example-bars > div:last-child i {
+  background: var(--color-accent);
+}
+.method-example dl {
+  font-size: 0.875rem;
+  margin-bottom: 20px;
+}
+.method-references {
+  margin-top: 48px;
+  padding-top: 28px;
+  border-top: 1px solid var(--color-line);
+}
+.method-references > p {
+  font-size: 0.875rem;
+  color: var(--color-dim);
+}
+.method-references ol {
+  padding-left: 20px;
+  list-style: decimal;
+  margin-top: 20px;
+}
+.method-references li {
+  padding-left: 8px;
+  margin-bottom: 24px;
+}
+.method-references li > p {
+  color: var(--color-dim);
+  font-size: 0.8125rem;
+  margin-top: 5px;
+}
+.method-references li > a {
+  display: inline-block;
+  margin-block: 4px;
+}
+@media (max-width: 600px) {
+  .method-page {
+    padding-block: 36px 56px;
+  }
+  .method-tablist {
+    margin-bottom: 32px;
+  }
+  .method-tablist button {
+    font-size: 0.75rem;
+    padding-inline: 4px;
+  }
+  .method-pipeline {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  .method-prose .method-pipeline li {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    padding: 12px 14px;
+  }
+  .method-pipeline span {
+    margin-bottom: 0;
+  }
+  .equation-card,
+  .method-example {
+    padding: 16px;
+  }
+  .equation-scroll .katex-display {
+    font-size: 0.9em;
+  }
+  .method-definitions > div,
+  .method-example dl > div {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+  .method-table-wrap th,
+  .method-table-wrap td {
+    padding: 8px 6px;
+    font-size: 0.8125rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .method-tablist button {
+    transition: none;
+  }
+}

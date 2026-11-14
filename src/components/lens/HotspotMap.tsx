@@ -16,9 +16,24 @@ import {
   type Sensor,
 } from "@/lib/data/types";
 import type { MapDestination } from "./LocationSearch";
+import { useTheme } from "@/components/ui/ThemeProvider";
 
-const BASEMAP =
-  "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
+const BASEMAPS = {
+  dark: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
+  light: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
+};
+function mapColors() {
+  const css = getComputedStyle(document.documentElement);
+  const read = (name: string) => css.getPropertyValue(name).trim();
+  return {
+    ground: read("--map-ground"),
+    area: read("--color-selected"),
+    ink: read("--color-ink"),
+    modis: read("--color-modis"),
+    viirs: read("--color-viirs"),
+    stroke: read("--color-night"),
+  };
+}
 
 function fitPadding(map: MapLibreMap) {
   const { clientHeight: h, clientWidth: w } = map.getContainer();
@@ -31,17 +46,17 @@ function fitPadding(map: MapLibreMap) {
 }
 
 /** Used when the basemap cannot be reached, so the detections still draw. */
-const BLANK: StyleSpecification = {
+const blankStyle = (): StyleSpecification => ({
   version: 8,
   sources: {},
   layers: [
     {
       id: "ground",
       type: "background",
-      paint: { "background-color": "#121713" },
+      paint: { "background-color": mapColors().ground },
     },
   ],
-};
+});
 
 function points(hotspots: Hotspot[]) {
   return {
@@ -79,10 +94,11 @@ function outline(bbox: BBox | null) {
 function makeMap(
   lib: typeof import("maplibre-gl"),
   container: HTMLElement,
+  theme: "light" | "dark",
 ): MapLibreMap {
   return new lib.Map({
     container,
-    style: BASEMAP,
+    style: BASEMAPS[theme],
     center: [-48, -8],
     zoom: 2,
     attributionControl: false,
@@ -114,28 +130,33 @@ export function HotspotMap({
   destination?: MapDestination | null;
   reset?: number;
 }) {
+  const { theme } = useTheme();
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<MapLibreMap | null>(null);
-  const latest = useRef({ hotspots, bbox, onDraw });
+  const latest = useRef({ hotspots, bbox, onDraw, sensors, theme });
+  const appliedTheme = useRef(theme);
+  const styled = useRef(false);
+  const fellBack = useRef(false);
   const [ready, setReady] = useState(false);
   const [offline, setOffline] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [paintedTheme, setPaintedTheme] = useState<string | null>(null);
 
   useEffect(() => {
-    latest.current = { hotspots, bbox, onDraw };
-  }, [hotspots, bbox, onDraw]);
+    latest.current = { hotspots, bbox, onDraw, sensors, theme };
+  }, [hotspots, bbox, onDraw, sensors, theme]);
 
   useEffect(() => {
     let dead = false;
     let created: MapLibreMap | undefined;
-    let fellBack = false;
 
     import("maplibre-gl").then((maplibregl) => {
       if (dead || !el.current) return;
       maplibregl.setWorkerUrl("/maplibre/maplibre-gl-worker.mjs");
       let instance: MapLibreMap;
       try {
-        instance = makeMap(maplibregl, el.current);
+        appliedTheme.current = latest.current.theme;
+        instance = makeMap(maplibregl, el.current, latest.current.theme);
         instance.addControl(
           new maplibregl.NavigationControl({ showCompass: false }),
           "bottom-right",
@@ -154,6 +175,7 @@ export function HotspotMap({
 
       const addLayers = () => {
         const m = instance;
+        const colors = mapColors();
         if (m.getSource("hotspots")) return;
         m.addSource("area", {
           type: "geojson",
@@ -172,7 +194,7 @@ export function HotspotMap({
           type: "line",
           source: "area",
           paint: {
-            "line-color": "#d8f24e",
+            "line-color": colors.area,
             "line-width": 1.5,
             "line-opacity": 0.8,
           },
@@ -182,7 +204,7 @@ export function HotspotMap({
           type: "line",
           source: "draft",
           paint: {
-            "line-color": "#eef0e6",
+            "line-color": colors.ink,
             "line-width": 1.5,
             "line-dasharray": [2, 2],
           },
@@ -193,10 +215,15 @@ export function HotspotMap({
           type: "circle",
           source: "hotspots",
           filter: ["==", ["get", "sensor"], "MODIS"],
+          layout: {
+            visibility: latest.current.sensors.includes("MODIS")
+              ? "visible"
+              : "none",
+          },
           paint: {
             "circle-radius": ["interpolate", ["linear"], ["zoom"], 4, 4, 9, 9],
             "circle-color": "rgba(0,0,0,0)",
-            "circle-stroke-color": "#3f8fe6",
+            "circle-stroke-color": colors.modis,
             "circle-stroke-width": 1.5,
           },
         });
@@ -205,10 +232,15 @@ export function HotspotMap({
           type: "circle",
           source: "hotspots",
           filter: ["==", ["get", "sensor"], "VIIRS"],
+          layout: {
+            visibility: latest.current.sensors.includes("VIIRS")
+              ? "visible"
+              : "none",
+          },
           paint: {
             "circle-radius": ["interpolate", ["linear"], ["zoom"], 4, 2, 9, 4],
-            "circle-color": "#d9569a",
-            "circle-stroke-color": "#0b0e0c",
+            "circle-color": colors.viirs,
+            "circle-stroke-color": colors.stroke,
             "circle-stroke-width": 1,
           },
         });
@@ -216,18 +248,21 @@ export function HotspotMap({
       };
 
       // "style.load" fires for the basemap and again for the fallback style.
-      let styled = false;
       instance.on("style.load", () => {
-        styled = true;
+        styled.current = true;
+        setOffline(fellBack.current);
         addLayers();
+      });
+      instance.on("idle", () => {
+        if (!dead) setPaintedTheme(appliedTheme.current);
       });
       instance.on("error", (e) => {
         if (!dead) console.warn("FireFly Lens map:", e.error?.message ?? e);
         // The basemap style itself never arrived: fall back to a plain ground.
-        if (styled || dead || fellBack) return;
-        fellBack = true;
+        if (styled.current || dead || fellBack.current) return;
+        fellBack.current = true;
         setOffline(true);
-        instance.setStyle(BLANK);
+        instance.setStyle(blankStyle());
       });
     });
 
@@ -237,6 +272,16 @@ export function HotspotMap({
       created?.remove();
     };
   }, []);
+
+  useEffect(() => {
+    const m = map.current;
+    if (!m || appliedTheme.current === theme) return;
+    appliedTheme.current = theme;
+    styled.current = false;
+    fellBack.current = false;
+    // Only replace the style. style.load restores data and layer visibility; camera and handlers stay intact.
+    m.setStyle(BASEMAPS[theme], { diff: false });
+  }, [theme]);
 
   useEffect(() => {
     if (!ready) return;
@@ -260,6 +305,7 @@ export function HotspotMap({
   useEffect(() => {
     if (!ready) return;
     for (const sensor of ["MODIS", "VIIRS"] as Sensor[]) {
+      if (!map.current?.getLayer(sensor.toLowerCase())) continue;
       map.current?.setLayoutProperty(
         sensor.toLowerCase(),
         "visibility",
@@ -272,7 +318,9 @@ export function HotspotMap({
     if (!ready || !destination || !map.current) return;
     if (destination.bounds) {
       map.current.fitBounds(destination.bounds, {
-        padding: fitPadding(map.current), duration: 1000, maxZoom: 12,
+        padding: fitPadding(map.current),
+        duration: 1000,
+        maxZoom: 12,
       });
     } else {
       map.current.flyTo({
@@ -311,7 +359,7 @@ export function HotspotMap({
   useEffect(() => {
     const m = map.current;
     if (!ready || !m || !drawing) return;
-    const draft = m.getSource("draft") as GeoJSONSource | undefined;
+    const draft = () => m.getSource("draft") as GeoJSONSource | undefined;
     let start: [number, number] | null = null;
     let box: BBox | null = null;
     m.dragPan.disable();
@@ -338,13 +386,13 @@ export function HotspotMap({
     const move = (e: MapMouseEvent | MapTouchEvent) => {
       if (!start) return;
       box = [start[0], start[1], e.lngLat.lng, e.lngLat.lat];
-      draft?.setData(outline(normalizeBBox(box)));
+      draft()?.setData(outline(normalizeBBox(box)));
     };
     const up = () => {
       if (start && box) latest.current.onDraw(normalizeBBox(box));
       start = null;
       box = null;
-      draft?.setData({ type: "FeatureCollection", features: [] });
+      draft()?.setData({ type: "FeatureCollection", features: [] });
     };
 
     m.on("mousedown", down);
@@ -356,7 +404,7 @@ export function HotspotMap({
     const cancel = () => {
       start = null;
       box = null;
-      draft?.setData(outline(null));
+      draft()?.setData(outline(null));
     };
     m.getCanvas().addEventListener("mouseleave", cancel);
     m.getCanvas().addEventListener("touchcancel", cancel);
@@ -379,13 +427,14 @@ export function HotspotMap({
       m.getCanvas().removeEventListener("mouseleave", cancel);
       m.getCanvas().removeEventListener("touchcancel", cancel);
       m.getCanvas().style.cursor = "";
-      draft?.setData({ type: "FeatureCollection", features: [] });
+      draft()?.setData({ type: "FeatureCollection", features: [] });
     };
   }, [drawing, ready]);
 
   return (
     <div
       className={`hotspot-map relative h-full overflow-hidden bg-canopy ${drawing ? "ring-2 ring-lume" : ""}`}
+      data-map-theme={paintedTheme}
     >
       {/* MapLibre's stylesheet makes its container position: relative, so it fills a positioned parent. */}
       <div className="absolute inset-0">

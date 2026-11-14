@@ -375,11 +375,17 @@ export function AnalysisContent({
                 record &&
                 download(
                   `${fileBase}_heatmap.svg`,
-                  heatmapSvg(
-                    record.months,
-                    years,
-                    `${areaName}, ${from} to ${to}`,
-                  ),
+                  heatmapSvg(record.months, years, areaName, {
+                    source: fireData.simulated
+                      ? "Simulated FIRMS-shaped detections — not observations"
+                      : "Configured FireDataSource",
+                    period: `${from} to ${to}`,
+                    processing:
+                      "0.05° shared grid · overlap calibration · provisional harmonization",
+                    exportedAt: new Date().toISOString(),
+                    from,
+                    to,
+                  }),
                   "image/svg+xml",
                 )
               }

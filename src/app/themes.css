@@ -1,0 +1,224 @@
+/* Retain existing token names so all scientific views share the same theme. */
+:root {
+  --surface-floating: #121713f5;
+  --surface-shadow: 0 8px 32px #0004;
+  --color-button: #d8f24e;
+  --color-button-ink: #141a05;
+  --color-button-hover: #e5fa72;
+  --color-accent: #f59a35;
+  --color-selected: #d8f24e;
+  --map-ground: #121713;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --color-night: #f5f7f2;
+  --color-canopy: #ffffff;
+  --color-bark: #e6ece1;
+  --color-line: #cbd5c7;
+  --color-ink: #17291f;
+  --color-dim: #495e4e;
+  --color-faint: #5d705f;
+  --color-lume: #526b12;
+  --color-lume-ink: #f8fbe9;
+  --color-button: #d8f24e;
+  --color-button-ink: #141a05;
+  --color-button-hover: #cce43e;
+  --color-accent: #914911;
+  --color-selected: #526b12;
+  --color-ember-0: #e0e7dc;
+  --color-modis: #2167b8;
+  --color-viirs: #a02f70;
+  --surface-floating: #fffffff5;
+  --surface-shadow: 0 8px 32px #17301e14;
+  --map-ground: #e6ece1;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+.field::placeholder { color: var(--color-faint); opacity: 1; }
+[role="alert"] { color: var(--color-accent); }
+/* Bound pale high-activity marks against light surfaces without changing their colour order or area. */
+:root[data-theme="light"] .calendar-dot,
+:root[data-theme="light"] .history-month {
+  box-shadow: inset 0 0 0 .75px var(--color-faint);
+}
+/* Keep every original Lume colour, shape, proportion and animation in both themes. */
+.lume {
+  --color-ink: #eef0e6;
+  --color-night: #0b0e0c;
+  --color-dim: #a6ae9f;
+  --color-faint: #7d8677;
+  --color-lume: #d8f24e;
+  --color-lume-ink: #141a05;
+  --color-ember-4: #f59a35;
+}
+.brand-signature {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  text-decoration: none;
+  color: var(--color-ink);
+  width: fit-content;
+  flex-shrink: 0;
+}
+@media (max-width: 400px) {
+  .site-header .wrap {
+    gap: 8px;
+    padding-inline: 12px;
+  }
+  .site-header nav > a {
+    padding-inline: 8px;
+  }
+}
+.brand-signature > span {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+.theme-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding-left: 10px;
+  border-left: 1px solid var(--color-line);
+  color: var(--color-dim);
+}
+.theme-select select {
+  min-height: 44px;
+  max-width: 92px;
+  cursor: pointer;
+  background: transparent;
+  color: var(--color-ink);
+  font-size: 0.8125rem;
+}
+.theme-select option {
+  background: var(--color-canopy);
+  color: var(--color-ink);
+}
+.scientific-info {
+  display: inline;
+  font-family: var(--font-sans);
+}
+.scientific-info-trigger {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  vertical-align: middle;
+  color: var(--color-dim);
+  cursor: pointer;
+  border-radius: 50%;
+}
+.scientific-info-trigger:hover {
+  color: var(--color-ink);
+  background: var(--color-bark);
+}
+.scientific-popover {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  width: 320px;
+  max-width: calc(100vw - 24px);
+  padding: 20px 32px 18px 18px;
+  background: var(--color-canopy);
+  color: var(--color-ink);
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+  box-shadow: var(--surface-shadow);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  white-space: normal;
+  text-align: left;
+}
+.scientific-popover > strong,
+.scientific-popover > span,
+.scientific-popover > a {
+  display: block;
+}
+.scientific-popover > span {
+  color: var(--color-dim);
+  margin-block: 8px 12px;
+}
+.scientific-popover > a {
+  font-size: 0.8125rem;
+}
+.scientific-popover > button {
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+}
+@media (pointer: coarse) {
+  .scientific-info-trigger {
+    width: 44px;
+    height: 44px;
+  }
+}
+.maplibregl-ctrl-group {
+  background: var(--color-canopy) !important;
+  border: 1px solid var(--color-line);
+  box-shadow: var(--surface-shadow) !important;
+}
+.maplibregl-ctrl-group button {
+  width: 36px;
+  height: 36px;
+}
+:root[data-theme="dark"] .maplibregl-ctrl-icon {
+  filter: invert(1);
+}
+.maplibregl-ctrl-attrib {
+  background: var(--surface-floating) !important;
+  color: var(--color-dim);
+}
+.maplibregl-ctrl-attrib a {
+  color: var(--color-dim) !important;
+}
+.maplibregl-ctrl-attrib-button {
+  background-color: var(--color-canopy);
+}
+:root[data-theme="dark"] .maplibregl-ctrl-attrib-button {
+  filter: invert(1);
+}
+.map-surface {
+  background: var(--surface-floating);
+  box-shadow: var(--surface-shadow);
+}
+.map-toolbar button[aria-pressed="true"],
+.btn-primary,
+.t-tabs-pill {
+  background: var(--color-button);
+  color: var(--color-button-ink);
+}
+.btn-primary:hover {
+  background: var(--color-button-hover);
+}
+.t-tab[aria-selected="true"] {
+  color: var(--color-button-ink);
+}
+.eyebrow {
+  color: var(--color-lume);
+}
+:focus-visible {
+  outline-color: var(--color-selected);
+}
+@media (max-width: 700px) {
+  .workspace-header {
+    gap: 6px 10px;
+  }
+  .workspace-header nav {
+    gap: 12px;
+  }
+  .theme-select {
+    gap: 3px;
+    padding-left: 8px;
+  }
+  .theme-select > svg {
+    display: none;
+  }
+  .brand-signature > span {
+    font-size: 1.4rem;
+  }
+}

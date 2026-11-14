@@ -9,7 +9,7 @@ const browser = await chromium.launch({
   channel: process.env.PLAYWRIGHT_CHANNEL || "chrome",
 });
 const base = process.env.PREVIEW_URL || "http://localhost:3000";
-const directory = "docs/phase-3/screenshots";
+const directory = process.env.SCREENSHOT_DIRECTORY || "docs/phase-3/screenshots";
 await mkdir(directory, { recursive: true });
 const errors = [];
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });

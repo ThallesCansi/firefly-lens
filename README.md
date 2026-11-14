@@ -4,7 +4,7 @@ One fire calendar from two satellite sensors.
 
 FireFly Lens is a NASA Space Apps Challenge 2026 project for the challenge *Harmonization of MODIS and VIIRS Hot Spots*. It brings the active-fire detections of both instruments onto one shared grid and shows a year of fire activity as a calendar, with the fire season and the unusual days marked.
 
-> **Status: stage 3.** The map-first exploration interface and the method are in place for the whole 2001 to 2025 record, running on **simulated detections** shaped like NASA FIRMS records. The method has not yet been checked against real data. This project is not endorsed by NASA.
+> **Status: stage 4.** The map-first explorer now includes Light/Dark/System themes and a scientific documentation centre for the whole 2001 to 2025 record, running on **simulated detections** shaped like NASA FIRMS records. The method has not yet been checked against real data. This project is not endorsed by NASA.
 
 ## Why the two records need harmonizing
 
@@ -26,7 +26,7 @@ The full description, with what is still provisional, is on the `/method` page a
 |---|---|
 | `/` and `/lens` | Full-viewport map workspace: explore, select an area, then open its historical analysis. |
 | `/about` | The original project introduction, sensor comparison, method overview and calendar preview. |
-| `/method` | The method in order, its limits, and what comes next. |
+| `/method` | Three linked tabs: Harmonization, Historical Anomalies, and Data & Limitations, with equations and references. |
 
 In the map workspace a user can:
 
@@ -58,6 +58,16 @@ pnpm build && pnpm start
 ```
 
 `pnpm dev` and `pnpm build` first copy the MapLibre worker into `public/maplibre/` (see [`scripts/copy-maplibre-worker.mjs`](scripts/copy-maplibre-worker.mjs)); the map needs it.
+
+## Themes and scientific documentation
+
+Headers use the original Lume mascot plus the compact wordmark **Lens**; the institutional name remains **FireFly Lens**. The original mascot component is unchanged. The SVG browser icon is rendered directly from that component, with its original geometry and colours.
+
+The header offers **Light**, **Dark** and **System**. The preference is stored locally, applied before the first paint and synchronized with operating-system changes in System mode. Theme changes update CARTO dark/Positron map styles on the existing MapLibre instance, restoring custom layers and sensor visibility without changing the camera, area or analysis period.
+
+The Method page supports keyboard tabs and shareable hashes, such as `/method#seasonal-z-score`. KaTeX renders the equations on the server with accessible MathML. Monthly medians/ranks and the local daily MAD heuristic are documented as implemented. Seasonal z-scores and seasonal percentile ranks are explained as future methods, not existing outputs. No Python integration is claimed. Contextual explanations cover activity, hot spots, medians, anomalies and FRP.
+
+SVG downloads now include region, period, legend, source/simulation status, processing description and export timestamp. Scientific values and CSV schemas are unchanged. See [Phase 4 changes, evidence and limitations](docs/phase-4/validation.md).
 
 ## Deployment
 

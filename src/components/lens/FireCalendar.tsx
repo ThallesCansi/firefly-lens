@@ -2,13 +2,28 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Sensor } from "@/lib/data/types";
-import { LEVEL_NAMES, inSeason, levelOf, type DaySummary, type Level, type YearSummary } from "@/lib/harmonize";
+import {
+  LEVEL_NAMES,
+  inSeason,
+  levelOf,
+  type DaySummary,
+  type Level,
+  type YearSummary,
+} from "@/lib/harmonize";
 import { MONTHS, indexScore, weekdayDate } from "@/lib/format";
+import { ScientificInfo } from "@/components/ui/ScientificInfo";
 
 export type CalendarMode = "harmonized" | Sensor;
 
 /** Each day is a point of light: it grows and warms as fire activity rises. */
-const DOT_SIZE: Record<Level, string> = { 0: "16%", 1: "30%", 2: "44%", 3: "58%", 4: "74%", 5: "90%" };
+const DOT_SIZE: Record<Level, string> = {
+  0: "16%",
+  1: "30%",
+  2: "44%",
+  3: "58%",
+  4: "74%",
+  5: "90%",
+};
 const DOT_COLOR: Record<Level, string> = {
   0: "var(--color-ember-0)",
   1: "var(--color-ember-1)",
@@ -18,7 +33,10 @@ const DOT_COLOR: Record<Level, string> = {
   5: "var(--color-ember-5)",
 };
 
-export function dayValue(day: DaySummary, mode: CalendarMode): { value: number; level: Level } {
+export function dayValue(
+  day: DaySummary,
+  mode: CalendarMode,
+): { value: number; level: Level } {
   if (mode === "harmonized") return { value: day.index, level: day.level };
   const s = day.sensors[mode];
   return { value: s.scaled, level: levelOf(s.scaled, s.detections > 0) };
@@ -43,12 +61,17 @@ export function FireCalendar({
 }) {
   const root = useRef<HTMLDivElement>(null);
   const moveFocus = useRef(false);
-  const [tip, setTip] = useState<{ x: number; y: number; day: DaySummary } | null>(null);
+  const [tip, setTip] = useState<{
+    x: number;
+    y: number;
+    day: DaySummary;
+  } | null>(null);
   const [tipShown, setTipShown] = useState(false);
 
   const blocks = useMemo(() => {
     const byMonth: DaySummary[][] = Array.from({ length: 12 }, () => []);
-    for (const day of summary.days) byMonth[Number(day.date.slice(5, 7)) - 1].push(day);
+    for (const day of summary.days)
+      byMonth[Number(day.date.slice(5, 7)) - 1].push(day);
     return (months ?? byMonth.map((_, i) => i)).map((m) => {
       const first = new Date(`${byMonth[m][0].date}T00:00:00Z`).getUTCDay();
       return { month: m, days: byMonth[m], offset: (first + 6) % 7 };
@@ -57,16 +80,27 @@ export function FireCalendar({
 
   const visible = useMemo(() => blocks.flatMap((b) => b.days), [blocks]);
   const season = summary.criticalPeriod;
-  const focusDate = visible.some((d) => d.date === selected) ? selected : visible[0]?.date;
+  const focusDate = visible.some((d) => d.date === selected)
+    ? selected
+    : visible[0]?.date;
 
   useEffect(() => {
     if (!moveFocus.current) return;
     moveFocus.current = false;
-    root.current?.querySelector<HTMLElement>(`[data-date="${selected}"]`)?.focus();
+    root.current
+      ?.querySelector<HTMLElement>(`[data-date="${selected}"]`)
+      ?.focus();
   }, [selected]);
 
   const onKeyDown = (e: React.KeyboardEvent) => {
-    const step = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7, PageUp: -28, PageDown: 28 }[e.key];
+    const step = {
+      ArrowLeft: -1,
+      ArrowRight: 1,
+      ArrowUp: -7,
+      ArrowDown: 7,
+      PageUp: -28,
+      PageDown: 28,
+    }[e.key];
     if (!step) return;
     e.preventDefault();
     const at = visible.findIndex((d) => d.date === focusDate);
@@ -81,7 +115,10 @@ export function FireCalendar({
     const box = root.current?.getBoundingClientRect();
     if (!box) return;
     const r = el.getBoundingClientRect();
-    const x = Math.min(box.width - 96, Math.max(96, r.left + r.width / 2 - box.left));
+    const x = Math.min(
+      box.width - 96,
+      Math.max(96, r.left + r.width / 2 - box.left),
+    );
     setTip({ x, y: r.top - box.top - 8, day });
     setTipShown(true);
   };
@@ -89,7 +126,11 @@ export function FireCalendar({
   const tipValue = tip ? dayValue(tip.day, mode) : null;
 
   return (
-    <div ref={root} className="relative" onPointerLeave={() => setTipShown(false)}>
+    <div
+      ref={root}
+      className="relative"
+      onPointerLeave={() => setTipShown(false)}
+    >
       <div
         role="grid"
         aria-label={`Fire activity by day, ${summary.year}`}
@@ -98,7 +139,9 @@ export function FireCalendar({
       >
         {blocks.map(({ month, days, offset }) => (
           <div key={month} role="rowgroup">
-            <h3 className="mb-2 font-sans text-[0.8125rem] font-medium tracking-normal text-dim">{MONTHS[month]}</h3>
+            <h3 className="mb-2 font-sans text-[0.8125rem] font-medium tracking-normal text-dim">
+              {MONTHS[month]}
+            </h3>
             <div className="grid grid-cols-7" role="row">
               {Array.from({ length: offset }, (_, i) => (
                 <span key={`pad-${i}`} aria-hidden="true" />
@@ -124,14 +167,23 @@ export function FireCalendar({
                   >
                     <span
                       aria-hidden="true"
-                      className="block aspect-square rounded-full transition-[width,background-color] duration-300 ease-out-expo group-hover:brightness-125"
-                      style={{ width: DOT_SIZE[level], background: DOT_COLOR[level] }}
+                      className="calendar-dot block aspect-square rounded-full transition-[width,background-color] duration-300 ease-out-expo group-hover:brightness-125"
+                      style={{
+                        width: DOT_SIZE[level],
+                        background: DOT_COLOR[level],
+                      }}
                     />
                     {day.anomaly && (
-                      <span aria-hidden="true" className="absolute inset-[6%] rounded-full border-[1.5px] border-lume" />
+                      <span
+                        aria-hidden="true"
+                        className="absolute inset-[6%] rounded-full border-[1.5px] border-lume"
+                      />
                     )}
                     {isSelected && (
-                      <span aria-hidden="true" className="absolute inset-0 rounded-[3px] border-2 border-ink" />
+                      <span
+                        aria-hidden="true"
+                        className="absolute inset-0 rounded-[3px] border-2 border-ink"
+                      />
                     )}
                   </button>
                 );
@@ -153,9 +205,12 @@ export function FireCalendar({
       >
         {tip && tipValue && (
           <>
-            <span className="block font-medium">{weekdayDate(tip.day.date)}</span>
+            <span className="block font-medium">
+              {weekdayDate(tip.day.date)}
+            </span>
             <span className="block">
-              {LEVEL_NAMES[tipValue.level]} · <span className="num">{indexScore(tipValue.value)}</span>
+              {LEVEL_NAMES[tipValue.level]} ·{" "}
+              <span className="num">{indexScore(tipValue.value)}</span>
               {tip.day.anomaly ? " · unusual" : ""}
             </span>
           </>
@@ -175,18 +230,29 @@ export function CalendarLegend() {
         <span className="flex items-center gap-1" aria-hidden="true">
           {levels.map((l) => (
             <span key={l} className="grid size-5 place-items-center">
-              <span className="block aspect-square rounded-full" style={{ width: DOT_SIZE[l], background: DOT_COLOR[l] }} />
+              <span
+                className="calendar-dot block aspect-square rounded-full"
+                style={{ width: DOT_SIZE[l], background: DOT_COLOR[l] }}
+              />
             </span>
           ))}
         </span>
         <span>Extreme</span>
       </div>
       <div className="flex items-center gap-2">
-        <span aria-hidden="true" className="block size-4 rounded-full border-[1.5px] border-lume" />
-        <span>Unusual burning</span>
+        <span
+          aria-hidden="true"
+          className="block size-4 rounded-full border-[1.5px] border-lume"
+        />
+        <span>
+          Unusual burning <ScientificInfo concept="anomaly" />
+        </span>
       </div>
       <div className="flex items-center gap-2">
-        <span aria-hidden="true" className="block size-4 bg-bark ring-1 ring-line" />
+        <span
+          aria-hidden="true"
+          className="block size-4 bg-bark ring-1 ring-line"
+        />
         <span>Typical fire season</span>
       </div>
     </div>

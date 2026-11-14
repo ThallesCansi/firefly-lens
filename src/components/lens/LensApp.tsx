@@ -12,6 +12,7 @@ import { TopNavigation } from "./TopNavigation";
 import { MapToolbar, MapLayerControl } from "./MapControls";
 import { TemporalControl } from "./TemporalControl";
 import { useMapHotspots } from "@/lib/useMapHotspots";
+import { ScientificInfo } from "@/components/ui/ScientificInfo";
 
 type Area = { name: string; bbox: BBox };
 const presets = fireData.presets();
@@ -229,6 +230,7 @@ export function LensApp() {
           />
           {area && (
             <p className="map-data-status map-surface" role="status">
+              <ScientificInfo concept="hotspot" />
               {mapData.error ||
                 (mapData.hotspots === null
                   ? "Loading detections…"
