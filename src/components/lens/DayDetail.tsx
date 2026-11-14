@@ -16,8 +16,9 @@ export function DayDetail({ day }: { day: DaySummary }) {
     { label: "High confidence", value: (s) => (s.detections ? `${Math.round((s.confidence.high / s.detections) * 100)}%` : "–") },
   ];
 
-  const agreement =
-    day.agreement === null
+  const agreement = !day.bothSensors
+    ? "This day rests on MODIS alone, scaled to match VIIRS."
+    : day.agreement === null
       ? "Neither sensor saw fire."
       : day.agreement > 0.75
         ? "Both sensors tell the same story."
@@ -81,7 +82,7 @@ export function DayDetail({ day }: { day: DaySummary }) {
               </th>
               {SENSORS.map((sensor) => (
                 <td key={sensor} className="num py-2 text-right text-ink">
-                  <SoftText value={row.value(day.sensors[sensor])} align="end" />
+                  <SoftText value={sensor === "VIIRS" && !day.bothSensors ? "–" : row.value(day.sensors[sensor])} align="end" />
                 </td>
               ))}
             </tr>

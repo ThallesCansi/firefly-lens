@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Sensor } from "@/lib/data/types";
-import { LEVEL_NAMES, levelOf, type DaySummary, type Level, type YearSummary } from "@/lib/harmonize";
+import { LEVEL_NAMES, inSeason, levelOf, type DaySummary, type Level, type YearSummary } from "@/lib/harmonize";
 import { MONTHS, indexScore, weekdayDate } from "@/lib/format";
 
 export type CalendarMode = "harmonized" | Sensor;
@@ -105,7 +105,7 @@ export function FireCalendar({
               ))}
               {days.map((day) => {
                 const { level } = dayValue(day, mode);
-                const inSeason = season ? day.date >= season.start && day.date <= season.end : false;
+                const seasonal = inSeason(season, day.date);
                 const isSelected = day.date === selected;
                 return (
                   <button
@@ -120,7 +120,7 @@ export function FireCalendar({
                     onPointerEnter={(e) => showTip(e.currentTarget, day)}
                     onFocus={(e) => showTip(e.currentTarget, day)}
                     onBlur={() => setTipShown(false)}
-                    className={`group relative grid aspect-square cursor-pointer place-items-center outline-offset-0 ${inSeason ? "bg-bark" : ""}`}
+                    className={`group relative grid aspect-square cursor-pointer place-items-center outline-offset-0 ${seasonal ? "bg-bark" : ""}`}
                   >
                     <span
                       aria-hidden="true"
@@ -187,7 +187,7 @@ export function CalendarLegend() {
       </div>
       <div className="flex items-center gap-2">
         <span aria-hidden="true" className="block size-4 bg-bark ring-1 ring-line" />
-        <span>Fire season</span>
+        <span>Typical fire season</span>
       </div>
     </div>
   );
