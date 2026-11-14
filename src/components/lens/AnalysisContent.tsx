@@ -2,14 +2,15 @@
 
 import { useMemo, useState } from "react";
 import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
+import { cellDays } from "@/lib/data/area";
 import { fireData } from "@/lib/data/source";
 import type { BBox } from "@/lib/data/types";
 import {
   areaSlug,
+  cellDaysCsv,
   dailyCsv,
   download,
   heatmapSvg,
-  hotspotsCsv,
   monthlyCsv,
 } from "@/lib/export";
 import { MONTHS, count, shortDate } from "@/lib/format";
@@ -26,12 +27,13 @@ import { SensorCompare } from "./SensorCompare";
 
 const MODES: { value: CalendarMode; label: string }[] = [
   { value: "harmonized", label: "Harmonized" },
-  { value: "MODIS", label: "MODIS only" },
-  { value: "VIIRS", label: "VIIRS only" },
+  { value: "MODIS", label: "MODIS Aqua" },
+  { value: "VIIRS", label: "VIIRS, harmonized" },
 ];
 
-/** Longest span, in months, offered as a raw hot spot download. */
+/** Longest span, in months, offered as a grid-cell download. */
 const HOTSPOT_CSV_MONTHS = 36;
+const VIIRS_YEAR = Number(fireData.viirsStart.slice(0, 4));
 
 const FIRST = fireData.firstYear;
 const LAST = fireData.lastYear;
@@ -70,7 +72,7 @@ export function AnalysisContent({
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
 
-  const { record, recordKey, loading, progress, error } = useFireRecord(bbox);
+  const { record, recordKey, loading, error } = useFireRecord(bbox);
   const shownBBox = useMemo(
     () => (recordKey ? (recordKey.split(",").map(Number) as BBox) : bbox),
     [recordKey, bbox],
@@ -106,12 +108,12 @@ export function AnalysisContent({
     setExporting(true);
     setExportError(null);
     try {
-      const rows = await fireData.hotspots(
+      const rows = await cellDays(
         shownBBox,
         `${from}-01`,
         `${to}-${lastDay(to)}`,
       );
-      download(`${fileBase}_hotspots.csv`, hotspotsCsv(rows), "text/csv");
+      download(`${fileBase}_cell_days.csv`, cellDaysCsv(rows), "text/csv");
     } catch {
       setExportError("The download could not be prepared. Please try again.");
     } finally {
@@ -129,8 +131,20 @@ export function AnalysisContent({
           aria-label="Date range"
           className="flex shrink-0 flex-wrap items-end gap-x-5 gap-y-3"
         >
-          <MonthPicker label="From" value={from} max={to} onChange={setFrom} />
-          <MonthPicker label="To" value={to} min={from} onChange={setTo} />
+          <MonthPicker
+            label="From"
+            value={from}
+            min={fireData.firstMonth}
+            max={to}
+            onChange={setFrom}
+          />
+          <MonthPicker
+            label="To"
+            value={to}
+            min={from}
+            max={fireData.lastMonth}
+            onChange={setTo}
+          />
         </div>
       </div>
 
@@ -151,10 +165,7 @@ export function AnalysisContent({
           className="flex items-center gap-4 text-[0.9375rem] text-dim"
         >
           <span className="h-1 w-48 overflow-hidden rounded-full bg-bark">
-            <span
-              className="block h-full bg-lume transition-[width] duration-150"
-              style={{ width: `${Math.round(progress * 100)}%` }}
-            />
+            <span className="block h-full w-1/3 animate-pulse bg-lume" />
           </span>
           Reading {FIRST} to {LAST} for {areaName}
         </div>
@@ -173,10 +184,17 @@ export function AnalysisContent({
               <h2 id="history-title" className="text-xl md:text-2xl">
                 {latest ? (
                   <>
-                    {MONTHS[latest.month]} {latest.year} was{" "}
+                    {MONTHS[latest.month]} {latest.year}{" "}
+                    {latest.partial ? "so far is" : "was"}{" "}
                     {againstMedian(latest)},{" "}
                     <span className="text-dim">
-                      rank {latest.rank} of {record.years.length} for the month
+                      {latest.partial
+                        ? "the month is still in progress"
+                        : `rank ${latest.rank} of ${latest.rankOf} for the month`}
+                      {latest.source === "modeled" &&
+                        latest.lo !== null &&
+                        latest.hi !== null &&
+                        ` · ${count(latest.value)} hot spots, 95% range ${count(latest.lo)}–${count(latest.hi)}, estimated from VIIRS`}
                     </span>
                   </>
                 ) : (
@@ -184,17 +202,34 @@ export function AnalysisContent({
                 )}
               </h2>
               <p className="mt-2 max-w-[70ch] text-[0.9375rem] text-dim">
-                Each square is one month of harmonized activity. Before 2012 the
-                record rests on MODIS alone, scaled by{" "}
-                <span className="num text-ink">
-                  {record.calibration.factor.toFixed(2)}
-                </span>{" "}
-                VIIRS cells per MODIS cell, a factor learned from the{" "}
-                <span className="num text-ink">
-                  {count(record.calibration.overlapDays)}
-                </span>{" "}
-                days both sensors flew over this area. Select a year to open its
-                calendar.
+                Each square is one month, in hot spots on the MODIS Aqua scale:
+                observed by MODIS Aqua through {fireData.observedUntil}, and from{" "}
+                {fireData.observedUntil + 1} converted from VIIRS NOAA-20 by the
+                harmonization model, with a 95% range.
+                {record.overlap && record.overlap.modis > 0 && (
+                  <>
+                    {" "}
+                    Here, from {record.overlap.from} to {record.overlap.to}, VIIRS
+                    reported{" "}
+                    <span className="num text-ink">
+                      {(record.overlap.viirs / record.overlap.modis).toFixed(1)}×
+                    </span>{" "}
+                    as many hot spots as MODIS Aqua; harmonized, it comes to{" "}
+                    <span className="num text-ink">
+                      {Math.round(
+                        (record.overlap.viirsHarmonized / record.overlap.modis) *
+                          100,
+                      )}
+                      %
+                    </span>{" "}
+                    of the MODIS count.
+                  </>
+                )}{" "}
+                {count(record.cells)} grid cells
+                {record.biomes[0]
+                  ? `, ${Math.round(record.biomes[0].share * 100)}% ${record.biomes[0].name}`
+                  : ""}
+                . Select a year to open its calendar.
               </p>
             </div>
             <HistoryHeatmap
@@ -253,10 +288,10 @@ export function AnalysisContent({
                 onChange={setMode}
               />
             </div>
-            {mode === "VIIRS" && shownYear < 2012 && (
+            {mode === "VIIRS" && shownYear < VIIRS_YEAR && (
               <p className="rounded-lg bg-canopy p-3 text-[0.9375rem] text-dim">
-                VIIRS started on 20 January 2012. This year has no VIIRS
-                detections, so its calendar is empty.
+                The VIIRS NOAA-20 record starts in April {VIIRS_YEAR}. This year
+                has no VIIRS detections, so its calendar is empty.
               </p>
             )}
             <FireCalendar
@@ -287,15 +322,15 @@ export function AnalysisContent({
                 {shownYear}, as each sensor saw it
               </h2>
               <p className="mt-1 max-w-[70ch] text-[0.9375rem] text-dim">
-                MODIS reported{" "}
+                MODIS Aqua reported{" "}
                 <span className="num text-ink">
                   {count(summary.totals.MODIS.detections)}
                 </span>{" "}
                 detections
-                {shownYear >= 2012 ? (
+                {shownYear >= VIIRS_YEAR ? (
                   <>
                     {" "}
-                    and VIIRS{" "}
+                    and VIIRS NOAA-20{" "}
                     <span className="num text-ink">
                       {count(summary.totals.VIIRS.detections)}
                     </span>
@@ -303,7 +338,7 @@ export function AnalysisContent({
                     keeps its own scale.
                   </>
                 ) : (
-                  <>. VIIRS had not launched yet.</>
+                  <>. VIIRS NOAA-20 was not flying yet.</>
                 )}{" "}
                 Select a day to inspect it.
               </p>
@@ -331,7 +366,7 @@ export function AnalysisContent({
               }
               onClick={exportHotspots}
             >
-              {exporting ? "Preparing the file…" : "Hot spots CSV"}
+              {exporting ? "Preparing the file…" : "Grid-cell counts CSV"}
             </button>
             <button
               type="button"
@@ -389,7 +424,7 @@ export function AnalysisContent({
           </div>
           {rangeMonths > HOTSPOT_CSV_MONTHS && (
             <p className="text-[0.8125rem] text-faint">
-              The hot spot file covers up to {HOTSPOT_CSV_MONTHS} months. Narrow
+              The grid-cell file covers up to {HOTSPOT_CSV_MONTHS} months. Narrow
               the range to download it.
             </p>
           )}

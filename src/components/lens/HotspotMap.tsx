@@ -9,12 +9,8 @@ import type {
   StyleSpecification,
 } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import {
-  normalizeBBox,
-  type BBox,
-  type Hotspot,
-  type Sensor,
-} from "@/lib/data/types";
+import type { CellCount } from "@/lib/data/area";
+import { normalizeBBox, type BBox, type Sensor } from "@/lib/data/types";
 import type { MapDestination } from "./LocationSearch";
 
 const BASEMAP =
@@ -43,19 +39,37 @@ const BLANK: StyleSpecification = {
   ],
 };
 
-function points(hotspots: Hotspot[]) {
+/**
+ * One feature per 0.25° grid cell. `km` and `kv` size the MODIS ring and the
+ * VIIRS dot against the busiest cell of the period, per sensor.
+ */
+function points(cells: CellCount[]) {
+  const topM = Math.max(1, ...cells.map((c) => c.modis));
+  const topV = Math.max(1, ...cells.map((c) => c.viirs));
+  const k = (n: number, top: number) => (n > 0 ? Math.max(0.3, Math.sqrt(n / top)) : 0);
   return {
     type: "FeatureCollection" as const,
-    features: hotspots.map((h) => ({
+    features: cells.map((c) => ({
       type: "Feature" as const,
-      geometry: {
-        type: "Point" as const,
-        coordinates: [h.longitude, h.latitude],
-      },
-      properties: { sensor: h.instrument },
+      geometry: { type: "Point" as const, coordinates: [c.lon, c.lat] },
+      properties: { modis: c.modis, viirs: c.viirs, km: k(c.modis, topM), kv: k(c.viirs, topV) },
     })),
   };
 }
+
+/** Half a 0.25° cell in pixels at zoom 3 and 11, times a size factor. */
+const cellRadius = (k: string, scale = 1) => [
+  "interpolate",
+  ["exponential", 2],
+  ["zoom"],
+  3,
+  ["max", 1.2, ["*", 0.71 * scale, ["get", k]]],
+  11,
+  ["*", 182 * scale, ["get", k]],
+];
+
+/** Brazil's outline, drawn under the data so the covered area reads at a glance. */
+const OUTLINE_URL = "/data/brazil/brazil.geojson";
 
 function outline(bbox: BBox | null) {
   if (!bbox) return { type: "FeatureCollection" as const, features: [] };
@@ -83,8 +97,8 @@ function makeMap(
   return new lib.Map({
     container,
     style: BASEMAP,
-    center: [-48, -8],
-    zoom: 2,
+    center: [-53, -14],
+    zoom: 3,
     attributionControl: false,
     cooperativeGestures: false,
     renderWorldCopies: false,
@@ -96,7 +110,7 @@ function makeMap(
 export function HotspotMap({
   bbox,
   areaName,
-  hotspots,
+  cells,
   drawing,
   onDraw,
   sensors = ["MODIS", "VIIRS"],
@@ -105,8 +119,8 @@ export function HotspotMap({
 }: {
   bbox: BBox | null;
   areaName: string;
-  /** Null while the day's detections load. */
-  hotspots: Hotspot[] | null;
+  /** Detections per grid cell; null while they load. */
+  cells: CellCount[] | null;
   /** When true, dragging on the map draws a new area instead of panning. */
   drawing: boolean;
   onDraw: (bbox: BBox) => void;
@@ -116,14 +130,14 @@ export function HotspotMap({
 }) {
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<MapLibreMap | null>(null);
-  const latest = useRef({ hotspots, bbox, onDraw });
+  const latest = useRef({ cells, bbox, onDraw });
   const [ready, setReady] = useState(false);
   const [offline, setOffline] = useState(false);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
-    latest.current = { hotspots, bbox, onDraw };
-  }, [hotspots, bbox, onDraw]);
+    latest.current = { cells, bbox, onDraw };
+  }, [cells, bbox, onDraw]);
 
   useEffect(() => {
     let dead = false;
@@ -165,7 +179,14 @@ export function HotspotMap({
         });
         m.addSource("hotspots", {
           type: "geojson",
-          data: points(latest.current.hotspots ?? []),
+          data: points(latest.current.cells ?? []),
+        });
+        m.addSource("brazil", { type: "geojson", data: OUTLINE_URL });
+        m.addLayer({
+          id: "brazil",
+          type: "line",
+          source: "brazil",
+          paint: { "line-color": "#eef0e6", "line-width": 0.8, "line-opacity": 0.35 },
         });
         m.addLayer({
           id: "area",
@@ -187,14 +208,16 @@ export function HotspotMap({
             "line-dasharray": [2, 2],
           },
         });
-        // MODIS: an open ring, sized like its coarser pixel. VIIRS: a small solid dot.
+        // One mark per grid cell, sized by its detections. MODIS: an open ring.
+        // VIIRS: a solid dot, slightly smaller so it nests inside the ring.
         m.addLayer({
           id: "modis",
           type: "circle",
           source: "hotspots",
-          filter: ["==", ["get", "sensor"], "MODIS"],
+          filter: [">", ["get", "modis"], 0],
           paint: {
-            "circle-radius": ["interpolate", ["linear"], ["zoom"], 4, 4, 9, 9],
+            // @ts-expect-error MapLibre accepts a zoom curve whose stops are data expressions.
+            "circle-radius": cellRadius("km"),
             "circle-color": "rgba(0,0,0,0)",
             "circle-stroke-color": "#3f8fe6",
             "circle-stroke-width": 1.5,
@@ -204,12 +227,14 @@ export function HotspotMap({
           id: "viirs",
           type: "circle",
           source: "hotspots",
-          filter: ["==", ["get", "sensor"], "VIIRS"],
+          filter: [">", ["get", "viirs"], 0],
           paint: {
-            "circle-radius": ["interpolate", ["linear"], ["zoom"], 4, 2, 9, 4],
+            // @ts-expect-error MapLibre accepts a zoom curve whose stops are data expressions.
+            "circle-radius": cellRadius("kv", 0.7),
             "circle-color": "#d9569a",
+            "circle-opacity": 0.85,
             "circle-stroke-color": "#0b0e0c",
-            "circle-stroke-width": 1,
+            "circle-stroke-width": 0.5,
           },
         });
         setReady(true);
@@ -253,9 +278,9 @@ export function HotspotMap({
   useEffect(() => {
     if (!ready) return;
     (map.current?.getSource("hotspots") as GeoJSONSource | undefined)?.setData(
-      points(hotspots ?? []),
+      points(cells ?? []),
     );
-  }, [hotspots, ready]);
+  }, [cells, ready]);
 
   useEffect(() => {
     if (!ready) return;
@@ -285,7 +310,7 @@ export function HotspotMap({
 
   useEffect(() => {
     if (ready && reset)
-      map.current?.flyTo({ center: [-48, -8], zoom: 2, duration: 800 });
+      map.current?.flyTo({ center: [-53, -14], zoom: 3, duration: 800 });
   }, [reset, ready]);
 
   useEffect(() => {
@@ -413,7 +438,7 @@ export function HotspotMap({
           Drag to select · max 12° per side · Esc or Navigate to cancel
         </p>
       )}
-      {ready && bbox && !drawing && hotspots?.length === 0 && (
+      {ready && bbox && !drawing && cells?.length === 0 && (
         <p className="pointer-events-none absolute inset-x-0 top-4 mx-auto w-fit rounded-lg bg-night px-3 py-2 text-[0.875rem] text-dim">
           No detections in the selected area and period.
         </p>
@@ -424,14 +449,14 @@ export function HotspotMap({
             aria-hidden="true"
             className="block size-3 rounded-full border-[1.5px] border-modis"
           />
-          MODIS, 1 km pixel
+          MODIS Aqua, detections per 0.25° cell
         </span>
         <span className="flex items-center gap-2">
           <span
             aria-hidden="true"
             className="mx-[3px] block size-1.5 rounded-full bg-viirs"
           />
-          VIIRS, 375 m pixel
+          VIIRS NOAA-20, detections per cell
         </span>
         <span className="flex items-center gap-2">
           <span aria-hidden="true" className="block h-px w-3 bg-lume" />

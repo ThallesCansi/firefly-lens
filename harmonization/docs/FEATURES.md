@@ -153,6 +153,33 @@ abr/2018 a dez/2023, sem ago/2020 e abr/2022 (quedas do Aqua).
 
 Predição do Nível 1 (calculada nas Etapas 7 e 8, não armazenada aqui): `n_hat_L1 = k × n_viirs_1km`.
 
+### `public/data/brazil/` (Etapa 9) — arquivos lidos pelo aplicativo
+
+Gerados por `pipeline/09_app_data.py`. São um recorte compacto das tabelas acima; nenhuma coluna
+nova é calculada aqui.
+
+| arquivo | conteúdo | origem |
+|---|---|---|
+| `t_{tx}_{ty}.bin.gz` | Bloco de 4° × 4° (16 × 16 células de 0,25°). `tx = ix // 16`, `ty = iy // 16`, com `ix`, `iy` de `grid_cells` | ver abaixo |
+| `meta.json` | Período, regras da série (`observedUntil`, `seriesEnd`, `partialMonth`), `commonErrorC`, base da climatologia, biomas, regiões prontas e lista de blocos | `harmonization_params.json`, `config.yaml` |
+| `brazil.geojson` | Contorno do Brasil simplificado a 0,02° | `geobr.read_country` (2020) |
+
+Colunas de cada bloco (formato binário descrito em `src/lib/data/tiles.ts`):
+
+| nome | tipo | definição exata | origem |
+|---|---|---|---|
+| `biome` | uint8[256] | Código do bioma de cada célula local (`(iy % 16) * 16 + ix % 16`), na ordem de `meta.biomes`; 255 = fora da grade | `grid_cells.bioma` |
+| `day` | uint16 | Dias desde 2002-01-01 (UTC) | `date` dos focos filtrados |
+| `aquaD`, `aquaN` | uint16 | Focos do MODIS Aqua na célula e no dia, de dia e de noite | Etapa 2, `satellite = 'Aqua'` |
+| `n20D`, `n20N` | uint16 | Focos do VIIRS NOAA-20, de dia e de noite | Etapa 2, `satellite = 'N20'` |
+| `n20Km` | uint16 | Subcélulas de 0,01° distintas com foco do NOAA-20 no dia, contadas por período (dia/noite) e somadas. A soma no mês é igual a `n_viirs_1km` da Etapa 4 | Etapa 2 |
+| `mu` | float32 | `n_viirs_harmonized` de `grid_monthly_total` (dia + noite), de abr/2018 em diante | Etapa 8 |
+| `var` | float32 | `var_harmonized` de `grid_monthly_total`, só nos meses modelados | Etapa 8 |
+
+Só entram as combinações célula × dia com algum foco (3.952.350 linhas no total) e todas as
+células × meses com `mu` (1.223.352). No aplicativo, um retângulo soma as células que cobre,
+cada uma ponderada pela fração da sua área dentro do retângulo; a variância soma `w² · var`.
+
 ## Features do modelo (Nível 2)
 
 Resposta: `n_modis`. Família: binomial negativa NB2, link log. Ajustado nas linhas de calibração

@@ -63,7 +63,6 @@ export function HistoryHeatmap({
   const totals = new Map(record.yearTotals.map((t) => [t.year, t]));
   const top = Math.max(...record.yearTotals.map((t) => t.value), 1);
   const typical = record.yearTotals[0]?.median ?? 0;
-  const spanYears = record.years.length;
 
   const show = (el: HTMLElement, cell: MonthCell) => {
     const box = root.current?.getBoundingClientRect();
@@ -125,7 +124,7 @@ export function HistoryHeatmap({
                   if (!cell) return <td key={m} />;
                   const stamp = `${year}-${String(m + 1).padStart(2, "0")}`;
                   const inRange = stamp >= from && stamp <= to;
-                  const high = cell.ratio !== null && cell.ratio >= 2;
+                  const high = cell.ratio !== null && cell.ratio >= 2 && !cell.partial;
                   return (
                     <td key={m} className="p-0">
                       <button
@@ -155,6 +154,12 @@ export function HistoryHeatmap({
                             className="absolute inset-[2px] rounded-[2px] border-[1.5px] border-lume"
                           />
                         )}
+                        {cell.source === "modeled" && (
+                          <span
+                            aria-hidden="true"
+                            className="absolute bottom-[3px] right-[3px] block size-[5px] rounded-full bg-ink/80"
+                          />
+                        )}
                       </button>
                     </td>
                   );
@@ -163,7 +168,7 @@ export function HistoryHeatmap({
                   {total && (
                     <span
                       className="relative block h-6 sm:h-7"
-                      title={`${year}: ${count(total.value)} cell-days`}
+                      title={`${year}: ${count(total.value)} hot spots${total.complete ? "" : " (part of the year)"}`}
                     >
                       <span
                         className="absolute inset-y-[5px] left-0 rounded-r-[3px]"
@@ -213,6 +218,12 @@ export function HistoryHeatmap({
           <span aria-hidden="true" className="block h-4 w-px bg-ink" />
           <span>Median year</span>
         </div>
+        <div className="flex items-center gap-2">
+          <span aria-hidden="true" className="relative block size-4 rounded-[3px] bg-ember-2">
+            <span className="absolute bottom-[3px] right-[3px] block size-[5px] rounded-full bg-ink/80" />
+          </span>
+          <span>Estimated from VIIRS</span>
+        </div>
       </div>
 
       <div
@@ -235,10 +246,22 @@ export function HistoryHeatmap({
                 againstMedian(tip.cell).slice(1)}
             </span>
             <span className="block">
-              Rank <span className="num">{tip.cell.rank}</span> of{" "}
-              <span className="num">{spanYears}</span> ·{" "}
-              <span className="num">{count(tip.cell.value)}</span> cell-days
+              {tip.cell.partial ? (
+                "Month in progress"
+              ) : (
+                <>
+                  Rank <span className="num">{tip.cell.rank}</span> of{" "}
+                  <span className="num">{tip.cell.rankOf}</span>
+                </>
+              )}{" "}
+              · <span className="num">{count(tip.cell.value)}</span> hot spots
             </span>
+            {tip.cell.source === "modeled" && tip.cell.lo !== null && tip.cell.hi !== null && (
+              <span className="block">
+                From VIIRS, 95%: <span className="num">{count(tip.cell.lo)}</span>–
+                <span className="num">{count(tip.cell.hi)}</span>
+              </span>
+            )}
           </>
         )}
       </div>

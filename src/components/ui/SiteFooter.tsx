@@ -8,8 +8,8 @@ export function SiteFooter() {
         <div className="flex items-center gap-3">
           <Lume size={40} className="shrink-0" />
           <p className="max-w-[46ch] text-[0.9375rem] text-dim">
-            FireFly Lens is a NASA Space Apps Challenge 2026 project. It is not endorsed by NASA. This build runs on
-            simulated detections.
+            FireFly Lens is a NASA Space Apps Challenge 2026 project. It is not endorsed by NASA. Data: NASA FIRMS,
+            MODIS Aqua and VIIRS NOAA-20 over Brazil.
           </p>
         </div>
         <nav aria-label="Footer" className="flex gap-6 text-[0.9375rem]">

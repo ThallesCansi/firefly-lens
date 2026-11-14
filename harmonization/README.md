@@ -4,9 +4,15 @@ Pipeline de dados do desafio "Harmonization of MODIS and VIIRS Hot Spots" (NASA 
 Produz uma série mensal única de focos de calor em escala **MODIS-Aqua-equivalente** e o arquivo de
 focos que o aplicativo oferece para download.
 
-Esta pasta cuida só da harmonização e é independente do aplicativo Next.js da raiz do repositório:
-o app ainda não lê estes arquivos. Os arquivos de `output/` são estáticos; nenhum modelo precisa rodar
-no servidor.
+Esta pasta cuida da harmonização. O aplicativo Next.js da raiz do repositório lê os arquivos que a
+etapa 9 gera em `public/data/brazil/` (contagens diárias por célula, série harmonizada mensal e sua
+variância, em blocos de 4°). Nenhum modelo roda no servidor nem no navegador.
+
+A etapa 9 precisa das pastas `data/` e `output/` de uma execução completa do pipeline:
+
+```bash
+uv run python -I pipeline/09_app_data.py            # escreve em ../public/data/brazil/
+```
 
 **O que está versionado:** o código, a documentação e as saídas compactas de `output/` (cerca de 25 MB).
 **O que não está:** `data/` (downloads e intermediários, ~1 GB) e `output/points/` (focos para download,
@@ -42,6 +48,7 @@ importado como código.
 | 6 | `pipeline/06_level2.py` | GLM binomial negativo e incerteza | feito |
 | 7 | `pipeline/07_validate.py` | Leave-one-year-out, teste em 2024–2026 e figuras | feito |
 | 8 | `pipeline/08_export.py` | Série final, climatologia e `calendar_for_polygon` | feito |
+| 9 | `pipeline/09_app_data.py` | Blocos binários do app em `../public/data/brazil/` | feito |
 
 Todos os parâmetros (anos, limiares, grade, caminhos, semente) estão em `config.yaml`.
 

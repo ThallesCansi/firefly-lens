@@ -1,4 +1,5 @@
-import type { BBox, Hotspot } from "./data/types";
+import type { CellDay } from "./data/area";
+import type { BBox } from "./data/types";
 import { LEVEL_NAMES, type DaySummary, type MonthCell } from "./harmonize";
 import { MONTHS } from "./format";
 
@@ -12,26 +13,61 @@ function toCsv(header: string[], rows: Cell[][]): string {
   return [header, ...rows].map((r) => r.map(cell).join(",")).join("\n") + "\n";
 }
 
-/** Hot spots in the column order of a FIRMS download. */
-export function hotspotsCsv(hotspots: Hotspot[]): string {
+const r1 = (x: number) => Math.round(x * 10) / 10;
+const r3 = (x: number) => Math.round(x * 1000) / 1000;
+
+/** Detections per 0.25° grid cell and day: the finest level the app holds. */
+export function cellDaysCsv(rows: CellDay[]): string {
   return toCsv(
-    ["latitude", "longitude", "brightness", "acq_date", "acq_time", "satellite", "instrument", "confidence", "frp", "daynight"],
-    hotspots.map((h) => [h.latitude, h.longitude, h.brightness, h.acq_date, h.acq_time, h.satellite, h.instrument, h.confidence, h.frp, h.daynight]),
+    [
+      "date",
+      "cell_id",
+      "cell_lat",
+      "cell_lon",
+      "biome",
+      "share_of_cell_in_area",
+      "modis_aqua_day",
+      "modis_aqua_night",
+      "viirs_noaa20_day",
+      "viirs_noaa20_night",
+      "viirs_noaa20_1km_cells",
+    ],
+    rows.map((r) => [
+      r.date,
+      r.cell.id,
+      r.cell.lat,
+      r.cell.lon,
+      r.cell.biome,
+      r3(r.cell.weight),
+      r.aquaD,
+      r.aquaN,
+      r.viirsD,
+      r.viirsN,
+      r.viirsKm,
+    ]),
   );
 }
 
 export function dailyCsv(days: DaySummary[]): string {
-  const r = (x: number) => Math.round(x * 1000) / 1000;
   return toCsv(
-    ["date", "modis_detections", "modis_cells", "viirs_detections", "viirs_cells", "sensors", "harmonized_cells", "index_0_100", "level", "unusual_burning"],
+    [
+      "date",
+      "modis_aqua_detections",
+      "viirs_noaa20_detections",
+      "viirs_harmonized",
+      "harmonized_hotspots",
+      "source",
+      "index_0_100",
+      "level",
+      "unusual_burning",
+    ],
     days.map((d) => [
       d.date,
-      d.sensors.MODIS.detections,
-      d.sensors.MODIS.cells,
-      d.bothSensors ? d.sensors.VIIRS.detections : null,
-      d.bothSensors ? d.sensors.VIIRS.cells : null,
-      d.bothSensors ? "MODIS+VIIRS" : "MODIS",
-      r(d.value),
+      r3(d.sensors.MODIS.detections),
+      d.bothSensors ? r3(d.sensors.VIIRS.detections) : null,
+      d.sensors.VIIRS.estimate === null ? null : r3(d.sensors.VIIRS.estimate),
+      r3(d.value),
+      d.source === "observed" ? "observed_modis" : "modeled_viirs",
       Math.round(d.index * 100),
       LEVEL_NAMES[d.level],
       d.anomaly,
@@ -40,18 +76,38 @@ export function dailyCsv(days: DaySummary[]): string {
 }
 
 export function monthlyCsv(months: MonthCell[]): string {
-  const r = (x: number) => Math.round(x * 10) / 10;
   return toCsv(
-    ["year", "month", "harmonized_cell_days", "median_for_month", "ratio_to_median", "rank_for_month", "modis_detections", "viirs_detections"],
+    [
+      "year",
+      "month",
+      "harmonized_hotspots",
+      "source",
+      "lo95",
+      "hi95",
+      "partial_month",
+      "median_for_month_2003_2025",
+      "ratio_to_median",
+      "rank_for_month",
+      "months_ranked",
+      "modis_aqua_detections",
+      "viirs_noaa20_detections",
+      "viirs_harmonized",
+    ],
     months.map((m) => [
       m.year,
       MONTHS[m.month],
-      r(m.value),
-      r(m.median),
+      r1(m.value),
+      m.source === "observed" ? "observed_modis" : "modeled_viirs",
+      m.lo === null ? null : r1(m.lo),
+      m.hi === null ? null : r1(m.hi),
+      m.partial,
+      r1(m.median),
       m.ratio === null ? null : Math.round(m.ratio * 100) / 100,
       m.rank,
-      m.detections.MODIS,
-      m.detections.VIIRS,
+      m.rankOf,
+      r1(m.detections.MODIS),
+      r1(m.detections.VIIRS),
+      m.viirsHarmonized === null ? null : r1(m.viirsHarmonized),
     ]),
   );
 }
@@ -70,7 +126,7 @@ export function heatmapSvg(months: MonthCell[], years: number[], title: string):
     `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" font-family="system-ui, sans-serif" font-size="11">`,
     `<rect width="100%" height="100%" fill="#0b0e0c"/>`,
     `<text x="${left}" y="24" fill="#eef0e6" font-size="14">${title.replace(/[<&>]/g, "")}</text>`,
-    `<text x="${left}" y="42" fill="#a6ae9f">Harmonized MODIS and VIIRS burning activity by month. A ring marks a month at least twice its median.</text>`,
+    `<text x="${left}" y="42" fill="#a6ae9f">Hot spots by month, MODIS-Aqua-equivalent: observed to 2025, VIIRS harmonized after. A ring marks a month at least twice its median.</text>`,
   ];
   MONTHS.forEach((name, m) => parts.push(`<text x="${left + m * cell + cell / 2}" y="${top - 6}" fill="#a6ae9f" text-anchor="middle">${name[0]}</text>`));
   years.forEach((year, row) => {
@@ -86,7 +142,7 @@ export function heatmapSvg(months: MonthCell[], years: number[], title: string):
       }
     }
   });
-  parts.push(`<text x="${left}" y="${height - 8}" fill="#7d8677">FireFly Lens</text>`, `</svg>`);
+  parts.push(`<text x="${left}" y="${height - 8}" fill="#7d8677">FireFly Lens · NASA FIRMS, Brazil</text>`, `</svg>`);
   return parts.join("\n");
 }
 

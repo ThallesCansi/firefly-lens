@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { scaleLinear } from "d3-scale";
 import { max } from "d3-array";
-import { SENSORS, type Sensor } from "@/lib/data/types";
+import { SENSORS, SENSOR_NAME, type Sensor } from "@/lib/data/types";
 import type { YearSummary } from "@/lib/harmonize";
-import { MONTHS, weekdayDate } from "@/lib/format";
+import { MONTHS, count, weekdayDate } from "@/lib/format";
 
 const ROW = 76;
 const GAP = 34;
@@ -58,7 +58,7 @@ export function SensorCompare({
             width={width}
             height={height}
             role="img"
-            aria-label={`Shared-grid cells lit per day by MODIS and by VIIRS, ${summary.year}. Each sensor has its own scale.`}
+            aria-label={`Detections per day by MODIS Aqua and by VIIRS NOAA-20, ${summary.year}. Each sensor has its own scale.`}
             className="block touch-pan-y text-ink"
             onPointerMove={(e) => setHover(pick(e.clientX))}
             onPointerLeave={() => setHover(null)}
@@ -66,19 +66,19 @@ export function SensorCompare({
           >
             {SENSORS.map((sensor, row) => {
               const top = row * (ROW + GAP) + 18;
-              const peak = max(days, (d) => d.sensors[sensor].cells) ?? 1;
+              const peak = Math.max(1, max(days, (d) => d.sensors[sensor].detections) ?? 1);
               const y = scaleLinear().domain([0, peak]).range([0, ROW - 18]);
               return (
                 <g key={sensor} transform={`translate(0 ${top})`}>
                   <text x={0} y={-6} className="fill-ink text-[0.8125rem] font-medium">
-                    {sensor}
+                    {SENSOR_NAME[sensor]}
                   </text>
-                  <text x={52} y={-6} className="fill-faint text-[0.75rem]">
-                    cells lit per day · busiest day {peak}
+                  <text x={sensor === "MODIS" ? 92 : 104} y={-6} className="fill-faint text-[0.75rem]">
+                    detections per day · busiest day {count(peak)}
                   </text>
                   <line x1={0} x2={width} y1={ROW - 0.5} y2={ROW - 0.5} stroke="var(--color-line)" />
                   {days.map((d, i) => {
-                    const h = y(d.sensors[sensor].cells);
+                    const h = y(d.sensors[sensor].detections);
                     if (h <= 0) return null;
                     return (
                       <rect
@@ -120,8 +120,8 @@ export function SensorCompare({
           SENSORS.map((sensor) => (
             <span key={sensor} className="inline-flex items-center gap-2">
               <span aria-hidden="true" className="block size-2.5 rounded-[2px]" style={{ background: COLOR[sensor] }} />
-              {sensor} <span className="num text-ink">{shown.sensors[sensor].cells}</span> cells from{" "}
-              <span className="num text-ink">{shown.sensors[sensor].detections}</span> detections
+              {SENSOR_NAME[sensor]} <span className="num text-ink">{count(shown.sensors[sensor].detections)}</span> detections in{" "}
+              <span className="num text-ink">{shown.sensors[sensor].cells}</span> cells
             </span>
           ))}
       </p>

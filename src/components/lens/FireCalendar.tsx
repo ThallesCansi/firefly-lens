@@ -49,10 +49,13 @@ export function FireCalendar({
   const blocks = useMemo(() => {
     const byMonth: DaySummary[][] = Array.from({ length: 12 }, () => []);
     for (const day of summary.days) byMonth[Number(day.date.slice(5, 7)) - 1].push(day);
-    return (months ?? byMonth.map((_, i) => i)).map((m) => {
-      const first = new Date(`${byMonth[m][0].date}T00:00:00Z`).getUTCDay();
-      return { month: m, days: byMonth[m], offset: (first + 6) % 7 };
-    });
+    // A year cut by the start or end of the record leaves some months empty.
+    return (months ?? byMonth.map((_, i) => i))
+      .filter((m) => byMonth[m].length > 0)
+      .map((m) => {
+        const first = new Date(`${byMonth[m][0].date}T00:00:00Z`).getUTCDay();
+        return { month: m, days: byMonth[m], offset: (first + 6) % 7 };
+      });
   }, [summary, months]);
 
   const visible = useMemo(() => blocks.flatMap((b) => b.days), [blocks]);
