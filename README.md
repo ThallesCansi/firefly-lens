@@ -4,7 +4,7 @@ One fire calendar from two satellite sensors.
 
 FireFly Lens is a NASA Space Apps Challenge 2026 project for the challenge *Harmonization of MODIS and VIIRS Hot Spots*. It brings the active-fire detections of both instruments onto one shared grid and shows a year of fire activity as a calendar, with the fire season and the unusual days marked.
 
-> **Status: stage 2.** The interface and the method are in place for the whole 2001 to 2025 record, running on **simulated detections** shaped like NASA FIRMS records. The method has not yet been checked against real data. This project is not endorsed by NASA.
+> **Status: stage 3.** The map-first exploration interface and the method are in place for the whole 2001 to 2025 record, running on **simulated detections** shaped like NASA FIRMS records. The method has not yet been checked against real data. This project is not endorsed by NASA.
 
 ## Why the two records need harmonizing
 
@@ -24,11 +24,15 @@ The full description, with what is still provisional, is on the `/method` page a
 
 | Route | What it shows |
 |---|---|
-| `/` | The project: an interactive lens over one day of detections, the two sensors side by side, the method in four steps, and a calendar preview. |
-| `/lens` | The tool, described below. |
+| `/` and `/lens` | Full-viewport map workspace: explore, select an area, then open its historical analysis. |
+| `/about` | The original project introduction, sensor comparison, method overview and calendar preview. |
 | `/method` | The method in order, its limits, and what comes next. |
 
-In `/lens` a user can:
+In the map workspace a user can:
+
+- **Explore first**: pan and zoom globally, search places or `latitude, longitude`, and toggle MODIS and VIIRS independently. Search only navigates the camera; it never selects administrative boundaries.
+- **Select, then analyze**: draw a rectangle, type bounds, or choose a study region under Coordinates. Press **Analyze Area** to compute the history. A scrollable right panel opens on desktop, and a bottom sheet opens on mobile. Closing preserves context; editing an area requires pressing Analyze again. Camera movement never recalculates the history.
+- **Coordinate views**: choosing a history-grid month updates the map month; selecting a daily calendar cell or sensor-chart day shows that day's detections. The compact map control switches month and year. Detections load only inside the selected area, not globally.
 
 - **Choose an area of interest**: four ready-made regions, coordinates typed in decimal degrees, or a rectangle drawn on the map (up to 12° per side).
 - **Choose a date range**, by month, anywhere from 2001 to 2025.
@@ -92,6 +96,8 @@ Sources the project is built for:
 - VIIRS active fire, 375 m (Suomi NPP, NOAA-20, NOAA-21)
 
 The map uses [MapLibre GL JS](https://maplibre.org/) with a CARTO basemap built on © OpenStreetMap contributors.
+
+Place search uses [Photon](https://photon.komoot.io/) through `/api/geocode`, with explicit submission, cached results, an eight-second timeout, and a per-process request guard. The public service permits moderate use, may throttle requests, and has no availability guarantee. Set the server-only `PHOTON_URL` to a compatible private Photon `/api/` endpoint for larger deployments. No private key is exposed. See [Phase 3 validation and screenshots](docs/phase-3/validation.md).
 
 ## Roadmap
 

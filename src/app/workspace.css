@@ -1,0 +1,407 @@
+/* The map remains mounted while a separately scrolling analysis pane opens. */
+.lens-workspace {
+  height: 100dvh;
+  min-height: 420px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.workspace-header {
+  height: 76px;
+  flex-shrink: 0;
+  display: grid;
+  grid-template-columns: 220px minmax(180px, 560px) 1fr;
+  align-items: center;
+  gap: 24px;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--color-line);
+  background: var(--color-night);
+  z-index: 30;
+}
+.workspace-header nav {
+  justify-self: end;
+}
+.location-search {
+  position: relative;
+  min-width: 0;
+}
+.search-results {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  right: 0;
+  padding: 16px;
+  max-height: 55dvh;
+  overflow-y: auto;
+}
+.search-result {
+  width: 100%;
+  text-align: left;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-line);
+  cursor: pointer;
+  font-size: 14px;
+}
+.search-result:hover {
+  color: var(--color-lume);
+}
+.workspace-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  position: relative;
+}
+.workspace-map {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+.workspace-map .maplibregl-ctrl-bottom-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.workspace-map .maplibregl-ctrl-bottom-right .maplibregl-ctrl {
+  float: none;
+  margin: 0 10px 10px 0;
+}
+.workspace-map .maplibregl-ctrl-bottom-right .maplibregl-ctrl-attrib {
+  order: 2;
+  margin: 0;
+}
+.map-surface {
+  background: rgb(18 23 19 / 96%);
+  border: 1px solid var(--color-line);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px #0004;
+}
+.map-status {
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  font-size: 10px;
+  letter-spacing: 0.09em;
+}
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-ember-4);
+}
+.map-toolbar {
+  position: absolute;
+  top: 82px;
+  left: 20px;
+  display: flex;
+  flex-direction: column;
+  padding: 5px;
+  gap: 3px;
+}
+.map-toolbar button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 7px;
+  cursor: pointer;
+  color: var(--color-dim);
+}
+.map-toolbar button:hover {
+  background: var(--color-bark);
+  color: var(--color-ink);
+}
+.map-toolbar button[aria-pressed="true"] {
+  background: var(--color-lume);
+  color: var(--color-lume-ink);
+}
+.map-toolbar button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.map-layers {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  padding: 10px 14px;
+}
+.map-layers input {
+  accent-color: var(--color-lume);
+  width: 16px;
+  height: 16px;
+}
+.sensor-ring {
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid var(--color-modis);
+  border-radius: 50%;
+}
+.sensor-dot {
+  width: 7px;
+  height: 7px;
+  background: var(--color-viirs);
+  border-radius: 50%;
+}
+.eyebrow {
+  color: var(--color-lume);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  margin-bottom: 8px;
+}
+.explore-hint,
+.selection-card {
+  position: absolute;
+  left: 92px;
+  top: 150px;
+  width: min(350px, calc(100% - 112px));
+  padding: 22px;
+}
+.coordinates-panel {
+  position: absolute;
+  top: 82px;
+  left: 86px;
+  width: min(490px, calc(100% - 105px));
+  padding: 16px;
+  max-height: calc(100% - 180px);
+  overflow-y: auto;
+}
+.temporal-control {
+  position: absolute;
+  bottom: 34px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  max-width: calc(100% - 40px);
+}
+.temporal-control .field {
+  height: 40px;
+}
+.temporal-caption {
+  white-space: nowrap;
+}
+.map-data-status {
+  position: absolute;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 7px 12px;
+  font-size: 11px;
+  width: max-content;
+  max-width: calc(100% - 40px);
+  text-align: center;
+}
+.analysis-drawer {
+  flex: 0 0 min(600px, 48%);
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--color-line);
+  background: var(--color-night);
+}
+.analysis-drawer[hidden] {
+  display: none;
+}
+.analysis-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--color-line);
+}
+.analysis-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 24px;
+}
+.analysis-content .btn {
+  font-size: 13px;
+  white-space: normal;
+}
+.analysis-content h2 {
+  font-size: 20px;
+}
+.analysis-content section {
+  min-width: 0;
+}
+.workspace-body[data-expanded="true"] .analysis-drawer {
+  flex-basis: 65%;
+}
+.workspace-body[data-analysis="true"] .temporal-control {
+  flex-wrap: wrap;
+  justify-content: center;
+  width: max-content;
+}
+.workspace-body[data-analysis="true"] .temporal-caption {
+  width: 100%;
+  text-align: center;
+}
+.workspace-body[data-analysis="true"] .map-legend {
+  bottom: 170px;
+}
+.workspace-body[data-analysis="true"] .map-data-status {
+  bottom: 133px;
+}
+@media (max-width: 1100px) {
+  .temporal-caption {
+    display: none;
+  }
+  .analysis-heading {
+    padding: 16px;
+  }
+  .analysis-scroll {
+    padding: 16px;
+  }
+  .analysis-heading .expand-analysis {
+    display: none;
+  }
+  .map-legend {
+    bottom: 115px;
+  }
+}
+@media (max-width: 700px) {
+  .workspace-header {
+    height: 122px;
+    grid-template-columns: 1fr auto;
+    gap: 8px 12px;
+    padding: 10px 14px;
+  }
+  .location-search {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .workspace-header nav {
+    font-size: 12px;
+  }
+  .map-status {
+    top: 12px;
+    left: 12px;
+    gap: 6px;
+    padding: 8px;
+  }
+  .map-status .text-dim {
+    display: none;
+  }
+  .map-toolbar {
+    top: 60px;
+    left: 12px;
+  }
+  .map-layers {
+    top: 12px;
+    right: 12px;
+    padding: 7px 10px;
+  }
+  .explore-hint,
+  .selection-card {
+    left: 77px;
+    top: 144px;
+    width: calc(100% - 90px);
+    padding: 16px;
+  }
+  .explore-hint h1 {
+    font-size: 22px;
+  }
+  .coordinates-panel {
+    left: 74px;
+    top: 60px;
+    width: calc(100% - 86px);
+  }
+  .temporal-control {
+    bottom: 34px;
+    gap: 7px;
+    padding: 8px;
+    max-width: calc(100% - 20px);
+  }
+  .temporal-control > span:first-child {
+    display: none;
+  }
+  .temporal-control .btn {
+    padding: 6px;
+    font-size: 11px;
+  }
+  .map-legend {
+    bottom: 150px;
+    font-size: 10px;
+    padding: 7px;
+  }
+  .map-data-status {
+    bottom: 100px;
+  }
+  .analysis-drawer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 58%;
+    border: 1px solid var(--color-line);
+    border-radius: 18px 18px 0 0;
+    z-index: 20;
+    box-shadow: 0 -8px 32px #0005;
+  }
+  .analysis-heading {
+    padding: 12px 16px;
+  }
+  .analysis-heading h2 {
+    font-size: 20px;
+  }
+  .workspace-body[data-analysis="true"] .workspace-map {
+    margin-bottom: calc((100dvh - 122px) * 0.58);
+  }
+  .workspace-body[data-analysis="true"] .map-status,
+  .workspace-body[data-analysis="true"] .map-legend,
+  .workspace-body[data-analysis="true"] .map-data-status {
+    display: none;
+  }
+  .workspace-body[data-analysis="true"] .map-toolbar {
+    top: 12px;
+    flex-direction: row;
+  }
+  .workspace-body[data-analysis="true"] .map-layers {
+    top: 74px;
+    left: 12px;
+    right: auto;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: 4px 10px;
+  }
+  .workspace-body[data-analysis="true"] .temporal-control {
+    bottom: 30px;
+  }
+  .drawing-hint {
+    margin-left: 76px;
+    margin-right: 12px;
+    font-size: 12px;
+  }
+}
+@media (max-width: 700px) and (max-height: 740px) {
+  .explore-hint,
+  .selection-card {
+    top: 125px;
+    padding: 12px;
+  }
+  .explore-hint h1 {
+    font-size: 19px;
+  }
+  .map-legend {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lens-workspace *,
+  .lens-workspace *::before,
+  .lens-workspace *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

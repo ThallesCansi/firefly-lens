@@ -49,3 +49,5 @@ next-env.d.ts
 # agent skills and their agents: third-party, installed locally (see README)
 /.claude/skills/
 /.claude/agents/
+# Local pnpm download cache
+.pnpm-store/
