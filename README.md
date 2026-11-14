@@ -55,6 +55,10 @@ pnpm build && pnpm start
 
 `pnpm dev` and `pnpm build` first copy the MapLibre worker into `public/maplibre/` (see [`scripts/copy-maplibre-worker.mjs`](scripts/copy-maplibre-worker.mjs)); the map needs it.
 
+## Deployment
+
+The site deploys on [Vercel](https://vercel.com) from this repository: every push to `main` goes to production and every pull request gets its own preview URL. No environment variables are needed for the simulated build.
+
 ## Project layout
 
 ```
