@@ -10,7 +10,7 @@ import type {
 } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { CellCount } from "@/lib/data/area";
-import { normalizeBBox, type BBox, type Sensor } from "@/lib/data/types";
+import { normalizeBBox, type AnalysisArea, type BBox, type Sensor } from "@/lib/data/types";
 import { HOME } from "@/lib/map/camera";
 import { createController, type EngineController } from "@/lib/map/controller";
 import type {
@@ -97,6 +97,11 @@ const cellRadius = (k: string, scale = 1) => [
 /** Brazil's outline, drawn under the data so the covered area reads at a glance. */
 const OUTLINE_URL = "/data/brazil/brazil.geojson";
 
+function areaFeature(area: AnalysisArea | null) {
+  if (!area) return { type: "FeatureCollection" as const, features: [] };
+  return { type: "Feature" as const, properties: {}, geometry: area.geometry };
+}
+
 function outline(bbox: BBox | null) {
   if (!bbox) return { type: "FeatureCollection" as const, features: [] };
   const [w, s, e, n] = bbox;
@@ -145,7 +150,8 @@ function makeMap(
  * editing this file.
  */
 export function HotspotMap({
-  bbox,
+  area,
+  frame,
   areaName,
   cells,
   drawing,
@@ -162,7 +168,10 @@ export function HotspotMap({
   onViewChange,
   showProjectionToggle = true,
 }: {
-  bbox: BBox | null;
+  /** The area of interest, outlined on the map. */
+  area: AnalysisArea | null;
+  /** The camera frames the area when this changes (a new selection, not an edit). */
+  frame?: string | number | null;
   areaName: string;
   /** Detections per grid cell; null while they load. */
   cells: CellCount[] | null;
@@ -193,9 +202,10 @@ export function HotspotMap({
   const map = useRef<MapLibreMap | null>(null);
   const control = useRef<EngineController | null>(null);
   const isDrawing = drawing || interactionMode === "draw-rectangle";
+  const bbox = area?.bbox ?? null;
   const latest = useRef({
     cells,
-    bbox,
+    area,
     onDraw,
     sensors,
     theme,
@@ -217,14 +227,14 @@ export function HotspotMap({
   useEffect(() => {
     latest.current = {
       cells,
-      bbox,
+      area,
       onDraw,
       sensors,
       theme,
       onReady,
       onProjectionChange,
     };
-  }, [cells, bbox, onDraw, sensors, theme, onReady, onProjectionChange]);
+  }, [cells, area, onDraw, sensors, theme, onReady, onProjectionChange]);
 
   useEffect(() => {
     let dead = false;
@@ -274,7 +284,7 @@ export function HotspotMap({
         if (m.getSource("hotspots")) return;
         m.addSource("area", {
           type: "geojson",
-          data: outline(latest.current.bbox),
+          data: areaFeature(latest.current.area),
         });
         m.addSource("draft", {
           type: "geojson",
@@ -417,15 +427,24 @@ export function HotspotMap({
   useEffect(() => {
     if (!ready) return;
     (map.current?.getSource("area") as GeoJSONSource | undefined)?.setData(
-      outline(bbox),
+      areaFeature(area),
     );
-    if (bbox)
+  }, [area, ready]);
+
+  // Frame a new selection; reshaping the current one leaves the camera alone.
+  const framed = useRef(bbox);
+  useEffect(() => {
+    framed.current = bbox;
+  }, [bbox]);
+  useEffect(() => {
+    const box = framed.current;
+    if (ready && frame != null && box)
       control.current?.navigate({
-        id: `area-${bbox.join()}`,
-        bounds: bbox,
+        id: `area-${frame}`,
+        bounds: box,
         animation: "ease",
       });
-  }, [bbox, ready]);
+  }, [frame, ready]);
 
   useEffect(() => {
     if (!ready) return;

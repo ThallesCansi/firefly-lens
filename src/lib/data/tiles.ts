@@ -1,4 +1,5 @@
 import { meta } from "./meta";
+import { cellShare, type PreparedPolygon } from "../geo/clip";
 import type { BBox } from "./types";
 
 /**
@@ -116,14 +117,12 @@ export function tilesFor([w, s, e, n]: BBox): [number, number][] {
 }
 
 /** Centre and share of a cell that lies inside an area (0 to 1, by area in degrees). */
-export function cellGeometry(tile: Pick<Tile, "tx" | "ty">, local: number, [w, s, e, n]: BBox) {
+export function cellGeometry(tile: Pick<Tile, "tx" | "ty">, local: number, shape: PreparedPolygon) {
   const [x0, y0] = meta.origin;
   const d = meta.cellDeg;
   const ix = tile.tx * UNITS + (local % UNITS);
   const iy = tile.ty * UNITS + Math.floor(local / UNITS);
   const west = x0 + ix * d;
   const south = y0 + iy * d;
-  const dx = Math.max(0, Math.min(e, west + d) - Math.max(w, west));
-  const dy = Math.max(0, Math.min(n, south + d) - Math.max(s, south));
-  return { id: iy * 1000 + ix, lon: west + d / 2, lat: south + d / 2, weight: (dx * dy) / (d * d) };
+  return { id: iy * 1000 + ix, lon: west + d / 2, lat: south + d / 2, weight: cellShare(shape, west, south, d) };
 }

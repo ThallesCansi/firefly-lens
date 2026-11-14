@@ -1,9 +1,6 @@
 "use client";
 import { AdministrativeSelectionCard } from "./AdministrativeSelectionCard";
-import {
-  RectangleEditActions,
-  RectangleEditOverlay,
-} from "./RectangleEditOverlay";
+import { PolygonEditOverlay } from "./PolygonEditOverlay";
 import type { useWorkspaceTools } from "./useWorkspaceTools";
 export function WorkspaceSelectionTools({
   tools,
@@ -18,8 +15,7 @@ export function WorkspaceSelectionTools({
     <>
       {(tools.administrativeActive || tools.boundary) &&
         !coordinates &&
-        !drawing &&
-        !tools.editor && (
+        !drawing && (
           <section
             className="ff-workspace-tools-card"
             aria-label="Country or state selection"
@@ -60,11 +56,7 @@ export function WorkspaceSelectionTools({
                     <p className="ff-interaction-notice">
                       {tools.boundary.dataCoverage === "none"
                         ? "No data coverage: observations currently cover Brazil only."
-                        : "Exact territorial analysis is unavailable until polygon clipping is supported. This selection is for viewing."}
-                    </p>
-                    <p className="ff-interaction-muted">
-                      The boundary is not converted to a rectangular analysis
-                      area.
+                        : "The whole country is too large for one analysis. Pick a Brazilian state instead."}
                     </p>
                   </div>
                   <div className="ff-boundary-actions">
@@ -87,17 +79,12 @@ export function WorkspaceSelectionTools({
           </section>
         )}
       {tools.editor && (
-        <>
-          <RectangleEditOverlay
-            editor={tools.editor}
-            adapter={tools.adapter}
-            viewRevision={tools.revision}
-            onInteractionLock={tools.lock}
-          />
-          <div className="ff-workspace-tools-card">
-            <RectangleEditActions editor={tools.editor} />
-          </div>
-        </>
+        <PolygonEditOverlay
+          editor={tools.editor}
+          adapter={tools.adapter}
+          viewRevision={tools.revision}
+          onInteractionLock={tools.lock}
+        />
       )}
     </>
   );

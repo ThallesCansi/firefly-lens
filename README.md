@@ -16,7 +16,7 @@ FireFly Lens therefore writes the whole record on the MODIS Aqua scale. In short
 2. Over April 2018 to December 2023, when both flew and Aqua kept its orbit, a negative binomial model learns how many MODIS Aqua hot spots each VIIRS count stands for, by biome, month and day or night.
 3. Through 2025 the series is MODIS Aqua as observed; from 2026 it is VIIRS converted, with a 95% range.
 4. Checked on years left out of the fit: raw VIIRS reads 506% above MODIS Aqua over Brazil; harmonized, the bias is below 1% and the ranking of the worst months matches (Spearman 0.99).
-5. In the app, any rectangle sums its cells; each month is compared with the median of the same month over 2003–2025, and days are scaled into an index from 0 to 100 for the calendar, with the fire season and unusual days marked.
+5. In the app, any area (a drawn polygon or a Brazilian state) sums its cells, each weighted by the share of it inside the area; each month is compared with the median of the same month over 2003–2025, and days are scaled into an index from 0 to 100 for the calendar, with the fire season and unusual days marked.
 
 The method, its validation and its limits are on the `/method` page and, in full (in Portuguese), in [`harmonization/docs/METHODOLOGY.md`](harmonization/docs/METHODOLOGY.md).
 
@@ -31,10 +31,10 @@ The method, its validation and its limits are on the `/method` page and, in full
 In the map workspace a user can:
 
 - **Explore first**: pan and zoom, search places or `latitude, longitude`, and toggle MODIS and VIIRS independently. The map shows detections per 0.25° grid cell (MODIS Aqua as rings, VIIRS NOAA-20 as dots), inside Brazil's outline. Search only navigates the camera; it never selects administrative boundaries.
-- **Select, then analyze**: draw a rectangle, type bounds, or choose a study region under Coordinates. Press **Analyze Area** to compute the history. A scrollable right panel opens on desktop, and a bottom sheet opens on mobile. Closing preserves context; editing an area requires pressing Analyze again. Camera movement never recalculates the history.
+- **Select, then analyze**: draw an area, pick a Brazilian state, type bounds, or choose a study region under Coordinates. Press **Analyze Area** to compute the history. A scrollable right panel opens on desktop, and a bottom sheet opens on mobile. Closing preserves context; editing an area requires pressing Analyze again. Camera movement never recalculates the history.
 - **Coordinate views**: choosing a history-grid month updates the map month; selecting a daily calendar cell or sensor-chart day shows that day's detections. The compact map control switches month and year. Detections load only inside the selected area, not globally.
 
-- **Choose an area of interest** in Brazil: five ready-made regions (Southern Amazon, Matopiba, Pantanal, Sertão, Pampa), coordinates typed in decimal degrees, or a rectangle drawn on the map (up to 12° per side).
+- **Choose an area of interest** in Brazil: five ready-made regions (Southern Amazon, Matopiba, Pantanal, Sertão, Pampa), coordinates typed in decimal degrees, a Brazilian state picked on the map (cut by its IBGE outline), or an area drawn on the map (up to 12° in each direction). A drawn area shows its corners right away: drag a corner on its own, drag the + on an edge to add one, double-click a corner to remove it, or drag the centre to move the whole shape. Edges may not cross.
 - **Choose a date range**, by month, from July 2002 to November 2026.
 - **Read the history grid**: every month of every year in MODIS-Aqua-equivalent hot spots, with months at least twice their 2003–2025 median ringed, months estimated from VIIRS dotted, and each year's total set against the median year. The headline compares the selected month with its median and rank, with a 95% range when it is estimated.
 - **Open any year** as a daily calendar with the typical fire season and unusual days marked, switch between the harmonized series, MODIS Aqua and harmonized VIIRS, and inspect any day in figures per sensor and on the map.

@@ -3,7 +3,16 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { fireData } from "@/lib/data/source";
-import { normalizeBBox, type BBox, type Sensor } from "@/lib/data/types";
+import {
+  drawnArea,
+  normalizeBBox,
+  rectangleArea,
+  type AnalysisArea,
+  type BBox,
+  type Sensor,
+} from "@/lib/data/types";
+import type { AdministrativeCandidate } from "@/lib/interactions/administrative";
+import type { Vertex } from "@/lib/interactions/polygon-editor";
 import { AreaForm } from "./AreaForm";
 import { AnalysisContent } from "./AnalysisContent";
 import { HotspotMap } from "./HotspotMap";
@@ -14,13 +23,23 @@ import { TemporalControl } from "./TemporalControl";
 import { useMapCells } from "@/lib/useMapHotspots";
 import { useWorkspaceTools } from "@/components/interactions/useWorkspaceTools";
 import { WorkspaceSelectionTools } from "@/components/interactions/WorkspaceSelectionTools";
+import { PolygonEditStatus } from "@/components/interactions/PolygonEditOverlay";
 import { ResizableAnalysisPanel } from "@/components/interactions/ResizableAnalysisPanel";
 import type { MapController } from "@/lib/map/map-contract";
 import "@/components/interactions/WorkspaceTools.css";
 import { ScientificInfo } from "@/components/ui/ScientificInfo";
 
-type Area = { name: string; bbox: BBox };
+type Area = AnalysisArea;
 const presets = fireData.presets();
+
+const deg = (n: number) => Math.round(n * 100) / 100;
+/** One line that says what the area is. */
+function describe(area: Area): string {
+  if (area.kind === "state") return "Brazilian state · IBGE outline";
+  const corners = area.geometry.type === "Polygon" ? area.geometry.coordinates[0].length - 1 : 0;
+  const [w, s, e, n] = area.bbox;
+  return `${corners} corners · W ${deg(w)} · S ${deg(s)} · E ${deg(e)} · N ${deg(n)}`;
+}
 
 export function LensApp() {
   const [area, setArea] = useState<Area | null>(null);
@@ -36,24 +55,50 @@ export function LensApp() {
   const [destination, setDestination] = useState<MapDestination | null>(null);
   const [reset, setReset] = useState(0);
   const [controller, setController] = useState<MapController | null>(null);
+  /** Changes on each new selection, so the camera frames it; edits leave it alone. */
+  const [frame, setFrame] = useState(0);
   const analyzeButton = useRef<HTMLButtonElement>(null);
   const closeButton = useRef<HTMLButtonElement>(null);
-  const mapData = useMapCells(area?.bbox ?? null, period);
+  const mapData = useMapCells(area, period);
   const commitRectangle = useCallback((bbox: BBox) => {
-    setArea({ name: "Custom area", bbox: normalizeBBox(bbox) });
+    setArea(rectangleArea(normalizeBBox(bbox)));
+    setFrame((n) => n + 1);
     setDrawing(false);
     setCoordinates(false);
     setAnalysis(false);
   }, []);
-  const commitAdministrative = useCallback(() => {
-    setArea(null);
-    setAnalysis(false);
-    setDrawing(false);
-    setCoordinates(false);
+  // A finished corner edit: the shape changes, the camera stays.
+  const commitShape = useCallback((vertices: Vertex[]) => {
+    setArea((current) => drawnArea(vertices, current?.name));
   }, []);
+  const commitAdministrative = useCallback(
+    (candidate: AdministrativeCandidate) => {
+      setAnalysis(false);
+      setDrawing(false);
+      setCoordinates(false);
+      if (candidate.analysis !== "available") {
+        setArea(null);
+        return false;
+      }
+      const { id, name } = candidate.feature.properties;
+      setArea({
+        id: `state:${id}`,
+        name,
+        kind: "state",
+        geometry: candidate.feature.geometry,
+        bbox: candidate.bounds,
+      });
+      setFrame((n) => n + 1);
+      return true;
+    },
+    [],
+  );
+  // Corner handles show as soon as a drawn area exists, unless another tool is in use.
+  const editable = area && !analysis && !drawing && !coordinates ? area : null;
   const tools = useWorkspaceTools(
     controller,
-    commitRectangle,
+    editable,
+    commitShape,
     commitAdministrative,
   );
   const { stop: stopTools, clearAdministrative } = tools;
@@ -118,7 +163,8 @@ export function LensApp() {
       >
         <section className="workspace-map" aria-label="Earth exploration">
           <HotspotMap
-            bbox={area?.bbox ?? null}
+            area={area}
+            frame={area ? frame : null}
             areaName={area?.name ?? "Earth"}
             cells={mapData.cells}
             drawing={drawing}
@@ -130,11 +176,9 @@ export function LensApp() {
             interactionMode={
               tools.administrativeActive
                 ? "pick-administrative"
-                : tools.editor
-                  ? "edit-rectangle"
-                  : drawing
-                    ? "draw-rectangle"
-                    : "navigate"
+                : drawing
+                  ? "draw-rectangle"
+                  : "navigate"
             }
             onMapClick={tools.onMapClick}
             onViewChange={tools.editor ? tools.updateView : undefined}
@@ -149,7 +193,6 @@ export function LensApp() {
           <MapToolbar
             tool={drawing ? "draw" : coordinates ? "coordinates" : "navigate"}
             hasArea={!!area || !!tools.boundary || !!tools.preview}
-            canEditRectangle={!!area}
             onSelectAdministrative={() => {
               setDrawing(false);
               setCoordinates(false);
@@ -157,15 +200,6 @@ export function LensApp() {
               tools.beginAdministrative();
             }}
             administrativeActive={tools.administrativeActive}
-            onEditRectangle={() => {
-              if (area) {
-                setAnalysis(false);
-                setDrawing(false);
-                setCoordinates(false);
-                tools.beginEdit(area.bbox);
-              }
-            }}
-            rectangleEditing={!!tools.editor}
             onTool={(tool) => {
               tools.stop();
               setDrawing(tool === "draw");
@@ -213,7 +247,8 @@ export function LensApp() {
                     const p = presets.find((p) => p.id === e.target.value);
                     if (p) {
                       tools.clear();
-                      setArea({ name: p.name, bbox: p.bbox });
+                      setArea(rectangleArea(p.bbox, p.name));
+                      setFrame((n) => n + 1);
                       setAnalysis(false);
                       setCoordinates(false);
                     }
@@ -255,8 +290,9 @@ export function LensApp() {
                   One shared history.
                 </h1>
                 <p className="mt-2 text-sm text-dim">
-                  Real MODIS and VIIRS records for Brazil, 2002 to today. Draw a
-                  rectangle anywhere in Brazil to investigate its fire activity.
+                  Real MODIS and VIIRS records for Brazil, 2002 to today. Draw an
+                  area anywhere in Brazil, or pick a state, to investigate its
+                  fire activity.
                 </p>
                 <button
                   className="btn btn-primary mt-4"
@@ -270,23 +306,22 @@ export function LensApp() {
             !analysis &&
             !coordinates &&
             !drawing &&
-            !tools.administrativeActive &&
-            !tools.editor && (
+            !tools.administrativeActive && (
               <section
                 className="selection-card map-surface"
                 aria-label="Selected area"
               >
                 <p className="eyebrow">AREA OF INTEREST</p>
                 <h2 className="text-xl">{area.name}</h2>
-                <p className="num my-2 text-xs text-dim">
-                  W {area.bbox[0]} · S {area.bbox[1]} · E {area.bbox[2]} · N{" "}
-                  {area.bbox[3]}
-                </p>
-                <p className="mb-3 text-xs text-dim">
-                  {analyzed && analyzed.bbox.join() !== area.bbox.join()
-                    ? "Area changed. Analyze to recalculate the history."
-                    : "Selection is independent of map navigation."}
-                </p>
+                <p className="num my-2 text-xs text-dim">{describe(area)}</p>
+                <div className="mb-3 flex flex-col gap-1">
+                  {analyzed && analyzed.id !== area.id && (
+                    <p className="text-xs text-dim">
+                      Area changed. Analyze to recalculate the history.
+                    </p>
+                  )}
+                  {tools.editor && <PolygonEditStatus editor={tools.editor} />}
+                </div>
                 <div className="flex flex-wrap gap-2">
                   <button
                     ref={analyzeButton}
@@ -302,7 +337,7 @@ export function LensApp() {
                       setDrawing(true);
                     }}
                   >
-                    Change
+                    Redraw
                   </button>
                   <button
                     className="btn btn-quiet"
@@ -357,9 +392,7 @@ export function LensApp() {
               <div>
                 <p className="eyebrow">INVESTIGATE / NASA FIRMS, BRAZIL</p>
                 <h2 className="text-2xl">{analyzed.name}</h2>
-                <p className="num text-xs text-dim">
-                  {analyzed.bbox.join(" / ")}
-                </p>
+                <p className="num text-xs text-dim">{describe(analyzed)}</p>
               </div>
               <div className="flex gap-2">
                 <button
@@ -388,9 +421,8 @@ export function LensApp() {
                 </Link>
               </p>
               <AnalysisContent
-                key={analyzed.bbox.join()}
-                bbox={analyzed.bbox}
-                areaName={analyzed.name}
+                key={analyzed.id}
+                area={analyzed}
                 period={period}
                 onPeriod={changePeriod}
                 from={from}

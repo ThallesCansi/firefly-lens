@@ -1,6 +1,6 @@
 import { renderHistorySvg, type SvgProvenance } from "./export-svg";
 import type { CellDay } from "./data/area";
-import type { BBox } from "./data/types";
+import type { AnalysisArea } from "./data/types";
 import { LEVEL_NAMES, type DaySummary, type MonthCell } from "./harmonize";
 import { MONTHS } from "./format";
 
@@ -134,8 +134,31 @@ export function download(filename: string, text: string, mime: string): void {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-export function areaSlug(bbox: BBox): string {
-  return bbox
-    .map((n) => String(n).replace("-", "m").replace(".", "p"))
+/** A short file-name part for an area: the state's name, or the drawn shape's envelope. */
+export function areaSlug(area: AnalysisArea): string {
+  if (area.kind === "state")
+    return area.name
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^A-Za-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+      .toLowerCase();
+  return area.bbox
+    .map((n) => String(Math.round(n * 100) / 100).replace("-", "m").replace(".", "p"))
     .join("_");
+}
+
+/** The area's outline as a GeoJSON feature, to reuse the same area in a GIS. */
+export function areaGeoJson(area: AnalysisArea): string {
+  return (
+    JSON.stringify(
+      {
+        type: "Feature",
+        properties: { name: area.name, kind: area.kind, id: area.id },
+        geometry: area.geometry,
+      },
+      null,
+      1,
+    ) + "\n"
+  );
 }

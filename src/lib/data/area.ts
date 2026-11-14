@@ -1,13 +1,16 @@
 import { addDays, daysBetween, monthIndex } from "../dates";
 import { meta } from "./meta";
 import { cellGeometry, loadTile, tilesFor, type Tile } from "./tiles";
-import type { BBox } from "./types";
+import { prepare, type PreparedPolygon } from "../geo/clip";
+import type { AnalysisArea, BBox } from "./types";
 
 /**
  * Everything the record of an area needs, summed over the 0.25° cells it covers.
  * A cell cut by the area's edge counts by the share of it inside the area.
  */
 export interface AreaData {
+  area: AnalysisArea;
+  /** Envelope of the area. */
   bbox: BBox;
   /** Grid cells inside the area, whole or in part. */
   cells: number;
@@ -42,22 +45,24 @@ const DAY0 = daysBetween(meta.epochDay, meta.firstDay);
 const DAYS = daysBetween(meta.firstDay, meta.lastDay) + 1;
 
 /** Share of each local cell of a tile inside the area (0 when outside or off the grid). */
-function weights(tile: Tile, bbox: BBox) {
+function weights(tile: Tile, shape: PreparedPolygon) {
   const w = new Float64Array(tile.biome.length);
   const at: { id: number; lon: number; lat: number }[] = [];
   for (let c = 0; c < w.length; c++) {
-    const g = cellGeometry(tile, c, bbox);
+    const g = cellGeometry(tile, c, shape);
     at.push(g);
     if (tile.biome[c] !== 255) w[c] = g.weight;
   }
   return { w, at };
 }
 
-export async function loadArea(bbox: BBox): Promise<AreaData> {
-  const tiles = await Promise.all(tilesFor(bbox).map(([tx, ty]) => loadTile(tx, ty)));
+export async function loadArea(shape: AnalysisArea): Promise<AreaData> {
+  const tiles = await Promise.all(tilesFor(shape.bbox).map(([tx, ty]) => loadTile(tx, ty)));
+  const polygon = prepare(shape.geometry);
   const months = LAST_MONTH - FIRST_MONTH + 1;
   const area: AreaData = {
-    bbox,
+    area: shape,
+    bbox: shape.bbox,
     cells: 0,
     biomes: [],
     firstDay: meta.firstDay,
@@ -76,7 +81,7 @@ export async function loadArea(bbox: BBox): Promise<AreaData> {
   };
   const biomeWeight = new Map<string, number>();
   for (const tile of tiles) {
-    const { w } = weights(tile, bbox);
+    const { w } = weights(tile, polygon);
     w.forEach((x, c) => {
       if (x <= 0) return;
       area.cells++;
@@ -141,13 +146,14 @@ export interface CellDay {
 }
 
 /** Every cell-day with a detection in the area and span (inclusive, YYYY-MM-DD). */
-export async function cellDays(bbox: BBox, from: string, to: string): Promise<CellDay[]> {
-  const tiles = await Promise.all(tilesFor(bbox).map(([tx, ty]) => loadTile(tx, ty)));
+export async function cellDays(shape: AnalysisArea, from: string, to: string): Promise<CellDay[]> {
+  const tiles = await Promise.all(tilesFor(shape.bbox).map(([tx, ty]) => loadTile(tx, ty)));
+  const polygon = prepare(shape.geometry);
   const lo = daysBetween(meta.epochDay, from);
   const hi = daysBetween(meta.epochDay, to);
   const rows: CellDay[] = [];
   for (const tile of tiles) {
-    const { w, at } = weights(tile, bbox);
+    const { w, at } = weights(tile, polygon);
     const cells = new Map<number, CellCount>();
     const d = tile.daily;
     for (let i = 0; i < d.day.length; i++) {
@@ -175,8 +181,8 @@ export async function cellDays(bbox: BBox, from: string, to: string): Promise<Ce
 }
 
 /** Detections per cell over a span of days, cells without any left out. */
-export async function cellCounts(bbox: BBox, from: string, to: string): Promise<CellCount[]> {
+export async function cellCounts(shape: AnalysisArea, from: string, to: string): Promise<CellCount[]> {
   const cells = new Set<CellCount>();
-  for (const row of await cellDays(bbox, from, to)) cells.add(row.cell);
+  for (const row of await cellDays(shape, from, to)) cells.add(row.cell);
   return [...cells];
 }

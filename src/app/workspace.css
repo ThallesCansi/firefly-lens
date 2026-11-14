@@ -161,6 +161,10 @@
   width: min(350px, calc(100% - 112px));
   padding: 22px;
 }
+/* Above the corner handles of the area, which sit at z-index 12. */
+.selection-card {
+  z-index: 15;
+}
 .coordinates-panel {
   position: absolute;
   top: 82px;
@@ -311,6 +315,29 @@
   .explore-hint h1 {
     font-size: 22px;
   }
+  /* On a phone the area card is a strip above the period control, so the map
+     and the area's corners stay in view. */
+  .selection-card {
+    left: 10px;
+    right: 10px;
+    top: auto;
+    bottom: 96px;
+    width: auto;
+    padding: 12px 14px;
+  }
+  .selection-card h2 {
+    font-size: 17px;
+  }
+  .selection-card .eyebrow {
+    display: none;
+  }
+  .selection-card .btn {
+    padding-block: 8px;
+  }
+  .workspace-map:has(.selection-card) .map-legend,
+  .workspace-map:has(.selection-card) .map-data-status {
+    display: none;
+  }
   .coordinates-panel {
     left: 74px;
     top: 60px;
@@ -385,8 +412,7 @@
   }
 }
 @media (max-width: 700px) and (max-height: 740px) {
-  .explore-hint,
-  .selection-card {
+  .explore-hint {
     top: 125px;
     padding: 12px;
   }

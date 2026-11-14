@@ -53,14 +53,15 @@ export function AdministrativeSelectionCard({
             {candidate.feature.geometry.type}
           </p>
           <p className={"ff-interaction-notice"}>
-            {candidate.dataCoverage === "brazil"
-              ? "Brazil observations are available. Exact territorial analysis requires polygon clipping, which is not wired to this selection."
-              : "No data coverage: this application currently serves Brazil only."}
+            {candidate.analysis === "available"
+              ? "The analysis counts each 0.25° grid cell by the share of it inside this outline."
+              : candidate.analysis === "too-large"
+                ? "The whole country is too large for one analysis. Switch the level to Brazilian state."
+                : "No data coverage: this application currently serves Brazil only."}
           </p>
           <p className={"ff-interaction-muted"}>
-            Bounding box:{" "}
-            {candidate.bounds.map((n) => n.toFixed(3)).join(" / ")}. This
-            envelope is not the region&apos;s territory.
+            Envelope:{" "}
+            {candidate.bounds.map((n) => n.toFixed(2)).join(" / ")}
           </p>
           <a
             className={"ff-interaction-source"}
@@ -79,7 +80,9 @@ export function AdministrativeSelectionCard({
             className="btn btn-primary"
             onClick={() => controller.confirm()}
           >
-            Confirm boundary for display
+            {candidate.analysis === "available"
+              ? "Use this state"
+              : "Confirm boundary for display"}
           </button>
         </>
       )}

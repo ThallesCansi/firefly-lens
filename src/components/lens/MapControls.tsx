@@ -6,25 +6,19 @@ export type SpatialTool = "navigate" | "draw" | "coordinates";
 export function MapToolbar({
   tool,
   hasArea,
-  canEditRectangle = hasArea,
   onTool,
   onClear,
   onReset,
   onSelectAdministrative,
   administrativeActive = false,
-  onEditRectangle,
-  rectangleEditing = false,
 }: {
   tool: SpatialTool;
   hasArea: boolean;
-  canEditRectangle?: boolean;
   onTool: (tool: SpatialTool) => void;
   onClear: () => void;
   onReset: () => void;
   onSelectAdministrative?: () => void;
   administrativeActive?: boolean;
-  onEditRectangle?: () => void;
-  rectangleEditing?: boolean;
 }) {
   return (
     <div
@@ -35,13 +29,11 @@ export function MapToolbar({
       <Tool
         label="Navigate"
         icon="navigate"
-        active={
-          tool === "navigate" && !administrativeActive && !rectangleEditing
-        }
+        active={tool === "navigate" && !administrativeActive}
         onClick={() => onTool("navigate")}
       />
       <Tool
-        label={tool === "draw" ? "Cancel drawing" : "Draw rectangle"}
+        label={tool === "draw" ? "Cancel drawing" : "Draw an area"}
         icon="rectangle"
         active={tool === "draw"}
         onClick={() => onTool(tool === "draw" ? "navigate" : "draw")}
@@ -62,19 +54,10 @@ export function MapToolbar({
       />
       {onSelectAdministrative && (
         <Tool
-          label="Select Country / State"
+          label="Select a state"
           icon="administrative"
           active={administrativeActive}
           onClick={onSelectAdministrative}
-        />
-      )}
-      {onEditRectangle && (
-        <Tool
-          label="Edit rectangle"
-          icon="edit"
-          active={rectangleEditing}
-          disabled={!canEditRectangle}
-          onClick={onEditRectangle}
         />
       )}
       <Tool label="Reset view" icon="reset" onClick={onReset} />
@@ -131,12 +114,6 @@ function Tool({
     administrative: (
       <>
         <path d="M3 4h7l4 3h7v12h-7l-4-3H3zM10 4v12M14 7v12" />
-      </>
-    ),
-    edit: (
-      <>
-        <rect x="3" y="5" width="16" height="14" rx="1" />
-        <path d="m12 13 7-7 2 2-7 7-3 1z" />
       </>
     ),
     navigate: <path d="m5 3 14 8-8 2-2 8z" />,

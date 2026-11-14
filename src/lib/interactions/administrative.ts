@@ -3,9 +3,8 @@ import {
   type GeographicBounds,
   type GeographicPoint,
 } from "./navigation";
-export type PolygonGeometry =
-  | { type: "Polygon"; coordinates: number[][][] }
-  | { type: "MultiPolygon"; coordinates: number[][][][] };
+import type { PolygonGeometry } from "../data/types";
+export type { PolygonGeometry };
 export type BoundaryFeature = {
   type: "Feature";
   properties: {
@@ -26,7 +25,8 @@ export type AdministrativeCandidate = {
   center: [number, number];
   centerKind: "bounding-box-center";
   dataCoverage: "brazil" | "none";
-  analysis: "requires-polygon-clipping" | "outside-data-coverage";
+  /** A Brazilian state can be analysed; the whole country is too large for one area. */
+  analysis: "available" | "too-large" | "outside-data-coverage";
 };
 
 function onSegment(x: number, y: number, a: number[], b: number[]) {
@@ -118,7 +118,11 @@ export function administrativeCandidate(
     center: [(bounds[0] + bounds[2]) / 2, (bounds[1] + bounds[3]) / 2],
     centerKind: "bounding-box-center",
     dataCoverage: brazil ? "brazil" : "none",
-    analysis: brazil ? "requires-polygon-clipping" : "outside-data-coverage",
+    analysis: !brazil
+      ? "outside-data-coverage"
+      : feature.properties.level === "state"
+        ? "available"
+        : "too-large",
   };
 }
 export function identifyRegions(
@@ -241,7 +245,9 @@ export class AdministrativeSelectionController {
         candidates,
         selected,
         message: selected
-          ? "Confirm this boundary for display; exact analysis remains unavailable."
+          ? selected.analysis === "available"
+            ? "Use this state as the area of interest, or click elsewhere to change it."
+            : "Confirm this boundary for display. Choose a Brazilian state to analyse it."
           : level === "state"
             ? "No Brazilian state at this location."
             : "No country in the simplified boundary dataset at this location.",
@@ -273,7 +279,9 @@ export class AdministrativeSelectionController {
       this.emit({
         ...this.state,
         message:
-          "Boundary confirmed for display. No historical analysis was requested.",
+          this.state.selected.analysis === "available"
+            ? "State set as the area of interest."
+            : "Boundary confirmed for display. No historical analysis was requested.",
       });
     }
   }

@@ -5,7 +5,7 @@ import { beforeAll, describe, expect, it, vi } from "vitest";
 import { cellCounts, loadArea, type AreaData } from "./data/area";
 import { meta } from "./data/meta";
 import { decodeTile, tilesFor } from "./data/tiles";
-import { normalizeBBox, type BBox } from "./data/types";
+import { drawnArea, normalizeBBox, rectangleArea, type BBox } from "./data/types";
 import { buildRecord, yearView, type FireRecord } from "./harmonize";
 
 const PUBLIC = join(__dirname, "../../public");
@@ -33,7 +33,7 @@ const month = (r: FireRecord, year: number, m: number) => r.months.find((c) => c
 
 beforeAll(async () => {
   vi.stubGlobal("fetch", async (url: string) => new Response(readFileSync(join(PUBLIC, url))));
-  area = await loadArea(AREA);
+  area = await loadArea(rectangleArea(AREA));
   record = buildRecord(area);
 });
 
@@ -117,9 +117,28 @@ describe("an area's record", () => {
 
 describe("map cells", () => {
   it("add up to the area's detections when every cell is whole", async () => {
-    const cells = await cellCounts(AREA, "2024-09-01", "2024-09-30");
+    const cells = await cellCounts(rectangleArea(AREA), "2024-09-01", "2024-09-30");
     expect(cells.reduce((s, c) => s + c.modis, 0)).toBe(EXPECTED.modis_2024_09);
     expect(cells.every((c) => c.weight === 1)).toBe(true);
+  });
+});
+
+describe("polygon areas", () => {
+  it("count half of the cells a diagonal cuts in two", async () => {
+    // The triangle under the diagonal of the test area: whole cells below it, halves on it.
+    const [w, s, e, n] = AREA;
+    const triangle = drawnArea([
+      [w, s],
+      [e, s],
+      [e, n],
+    ]);
+    const half = await loadArea(triangle);
+    expect(half.cells).toBe((48 * 49) / 2);
+    const cells = await cellCounts(triangle, "2024-09-01", "2024-09-30");
+    expect(cells.filter((c) => c.weight > 0 && c.weight < 1).every((c) => Math.abs(c.weight - 0.5) < 1e-9)).toBe(true);
+    const total = cells.reduce((sum, c) => sum + c.weight * c.modis, 0);
+    expect(total).toBeGreaterThan(0);
+    expect(total).toBeLessThan(EXPECTED.modis_2024_09);
   });
 });
 

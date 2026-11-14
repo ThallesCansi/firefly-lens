@@ -98,7 +98,7 @@ describe("administrative identification", () => {
       identifyRegions([-43.2, -22.9], states)[0].feature.properties.sourceId,
     ).toBe("33");
     expect(identifyRegions([-46.63, -23.55], countries)[0].analysis).toBe(
-      "requires-polygon-clipping",
+      "too-large",
     );
     expect(identifyRegions([-120, 38], countries)[0].dataCoverage).toBe("none");
     expect(identifyRegions([-30, 0], countries)).toHaveLength(0);

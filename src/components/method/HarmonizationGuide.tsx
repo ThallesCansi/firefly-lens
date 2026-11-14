@@ -99,7 +99,7 @@ export function HarmonizationGuide() {
             {
               symbol: "w_c",
               meaning:
-                "Fraction of each 0.25° cell within the selected rectangle.",
+                "Fraction of each 0.25° cell inside the selected area (a drawn shape or a state outline), by area in degrees.",
             },
             {
               symbol: "M, μ̂",
@@ -175,7 +175,7 @@ export function HarmonizationGuide() {
         <p>
           These are the pipeline’s reported held-out validation results, not new
           measurements from this UI change or guarantees for every selected
-          rectangle. Reproducible metrics and rankings are committed under{" "}
+          area. Reproducible metrics and rankings are committed under{" "}
           <code>harmonization/output/</code>. Day allocation and the heuristic
           anomaly flags are not validated as independent fire-event predictions.
         </p>

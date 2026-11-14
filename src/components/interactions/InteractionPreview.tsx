@@ -104,7 +104,6 @@ export function InteractionPreview() {
                 "Choose country/state and submit a geographic click below.",
               )
             }
-            onEditRectangle={startEdit}
           />
         </div>
         <h2>Location autocomplete</h2>

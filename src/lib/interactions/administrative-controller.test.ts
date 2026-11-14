@@ -45,7 +45,7 @@ describe("administrative selection lifecycle", () => {
     );
     await c.selectAt([-45, -23], "state");
     expect(c.snapshot().selected?.feature.geometry).toEqual(feature.geometry);
-    expect(c.snapshot().selected?.analysis).toBe("requires-polygon-clipping");
+    expect(c.snapshot().selected?.analysis).toBe("available");
     expect(confirm).not.toHaveBeenCalled();
     c.confirm();
     expect(confirm).toHaveBeenCalledTimes(1);

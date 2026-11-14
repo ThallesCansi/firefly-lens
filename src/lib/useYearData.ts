@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { cellCounts, loadArea, type CellCount } from "./data/area";
 import { DATA_YEAR, fireData } from "./data/source";
+import { rectangleArea } from "./data/types";
 import { buildRecord, yearView, type YearSummary } from "./harmonize";
 
 export interface YearData {
@@ -21,11 +22,12 @@ export function useYearData(regionId: string): { data: YearData | null; loading:
   useEffect(() => {
     let live = true;
     const region = fireData.presets().find((r) => r.id === regionId) ?? fireData.presets()[0];
-    loadArea(region.bbox)
-      .then(async (area) => {
-        const summary = yearView(buildRecord(area), DATA_YEAR);
+    const area = rectangleArea(region.bbox, region.name);
+    loadArea(area)
+      .then(async (data) => {
+        const summary = yearView(buildRecord(data), DATA_YEAR);
         const peak = summary.days.reduce((best, d) => (d.index > best.index ? d : best)).date;
-        const peakCells = await cellCounts(region.bbox, peak, peak);
+        const peakCells = await cellCounts(area, peak, peak);
         if (!live) return;
         setError(null);
         setData({ regionId, summary, peak, peakCells });

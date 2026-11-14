@@ -95,25 +95,32 @@ actual GeoJSON Polygon/MultiPolygon, not its bounding envelope. Multiple matches
 
 AdministrativeCandidate separates feature geometry, administrative ID, bounds
 and center. centerKind is explicitly bounding-box-center, not a centroid.
-dataCoverage is brazil or none; analysis is requires-polygon-clipping or
-outside-data-coverage. These are capability flags, not observation/quality claims
+dataCoverage is brazil or none; analysis is available (a Brazilian state),
+too-large (the whole of Brazil) or outside-data-coverage. These are capability flags, not observation/quality claims
 for every location or time.
 
-The browser's existing scientific API accepts BBox. Do not route a country's or
-state's envelope into analysis and label it territorial. Exact territorial
-analysis is intentionally unavailable until a real polygon clipping path is
-integrated. Countries outside Brazil are identified with no data coverage.
-Confirm currently commits geometry for display only. Cancel clears the preview.
-The host should separately retain any previously committed geometry.
+The analysis takes an `AnalysisArea` (src/lib/data/types.ts): a polygon and its
+envelope. Each 0.25° cell counts by the share of it inside the polygon
+(src/lib/geo/clip.ts). Confirming a Brazilian state makes its outline the area
+of interest; a country is only shown. Countries outside Brazil are identified
+with no data coverage. Cancel clears the preview.
 
-### Rectangle editing
+### Area editing
 
-Construct RectangleEditor from a valid existing BBox and render
-RectangleEditOverlay + RectangleEditActions. onPreview updates a lightweight
-GeoJSON preview; onConfirm commits the new BBox; onCancel restores the original.
-No API/historical query is fired by this module or during dragging.
-Recreate the editor when beginning a new edit of a newly committed selection.
-Cancel the current editor if the host replaces/clears the selection.
+A drawn area is edited with PolygonEditor (src/lib/interactions/polygon-editor.ts)
+and PolygonEditOverlay. The Lens creates the editor as soon as a drawn area
+exists; there is no separate edit mode or confirm step. Each corner moves on its
+own; the + on an edge adds a corner; double-click or Delete removes one (at
+least three remain); the centre handle moves the shape. onPreview draws the
+shape while dragging; onCommit hands over the shape when a drag ends, and the
+host replaces the area with it. No historical query runs until Analyze.
+
+An edit is refused, keeping the last valid shape, when edges would cross, the
+shape would leave Brazil's coverage box, its envelope would pass 12° in either
+direction, or it would shrink below one 0.25° cell. State outlines are not
+edited by hand.
+
+RectangleEditor and RectangleEditOverlay remain for the /interaction-preview page.
 
 Supply a RectangleProjectionAdapter with project(geographicPoint) and
 unproject(containerPixel). Both must use the actual active map projection.

@@ -129,6 +129,72 @@
 .ff-interaction-corner:active {
   cursor: grabbing;
 }
+/* Polygon editing: a small dot on each corner inside a larger hit area. */
+.ff-polygon-vertex {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.ff-polygon-vertex > span {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--color-selected);
+  border-radius: 999px;
+  background: var(--color-canopy);
+  box-shadow: var(--surface-shadow);
+  transition: transform 120ms ease-out;
+}
+.ff-polygon-vertex:hover > span,
+.ff-polygon-vertex:focus-visible > span,
+.ff-polygon-vertex[data-active] > span {
+  transform: scale(1.3);
+  background: var(--color-selected);
+}
+.ff-polygon-vertex:focus-visible {
+  outline: none;
+}
+.ff-polygon-move {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  cursor: move;
+}
+.ff-polygon-mid {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 24px;
+  height: 24px;
+  pointer-events: auto;
+  touch-action: none;
+  cursor: copy;
+  background: transparent;
+  display: grid;
+  place-items: center;
+  opacity: 0.75;
+  transition: opacity 120ms ease-out;
+}
+.ff-polygon-mid::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--color-selected);
+}
+.ff-polygon-mid:hover {
+  opacity: 1;
+}
+.ff-interaction-edit-overlay[data-dragging] .ff-polygon-mid,
+.ff-interaction-edit-overlay[data-dragging] .ff-polygon-move {
+  opacity: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ff-polygon-vertex > span,
+  .ff-polygon-mid {
+    transition: none;
+  }
+}
 .ff-interaction-corner > span {
   width: 8px;
   height: 8px;
@@ -138,6 +204,10 @@
   .ff-interaction-corner {
     width: 44px;
     height: 44px;
+  }
+  .ff-polygon-mid {
+    width: 36px;
+    height: 36px;
   }
   .ff-interaction-resize-handle {
     width: 24px;

@@ -4,8 +4,9 @@ import { useMemo, useState } from "react";
 import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
 import { cellDays } from "@/lib/data/area";
 import { fireData } from "@/lib/data/source";
-import type { BBox } from "@/lib/data/types";
+import type { AnalysisArea } from "@/lib/data/types";
 import {
+  areaGeoJson,
   areaSlug,
   cellDaysCsv,
   dailyCsv,
@@ -46,8 +47,7 @@ const lastDay = (ym: string) =>
   ).getUTCDate();
 
 export function AnalysisContent({
-  bbox,
-  areaName,
+  area,
   period,
   onPeriod,
   from,
@@ -55,8 +55,7 @@ export function AnalysisContent({
   onFrom,
   onTo,
 }: {
-  bbox: BBox;
-  areaName: string;
+  area: AnalysisArea;
   period: string;
   onPeriod: (period: string) => void;
   from: string;
@@ -72,11 +71,9 @@ export function AnalysisContent({
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
 
-  const { record, recordKey, loading, error } = useFireRecord(bbox);
-  const shownBBox = useMemo(
-    () => (recordKey ? (recordKey.split(",").map(Number) as BBox) : bbox),
-    [recordKey, bbox],
-  );
+  const { record, recordArea, loading, error } = useFireRecord(area);
+  const shownArea = recordArea ?? area;
+  const areaName = area.name;
 
   const fromYear = Number(from.slice(0, 4));
   const toYear = Number(to.slice(0, 4));
@@ -102,14 +99,14 @@ export function AnalysisContent({
     Number(to.slice(5, 7)) -
     Number(from.slice(5, 7)) +
     1;
-  const fileBase = `firefly-lens_${areaSlug(bbox)}_${from}_${to}`;
+  const fileBase = `firefly-lens_${areaSlug(area)}_${from}_${to}`;
 
   const exportHotspots = async () => {
     setExporting(true);
     setExportError(null);
     try {
       const rows = await cellDays(
-        shownBBox,
+        shownArea,
         `${from}-01`,
         `${to}-${lastDay(to)}`,
       );
@@ -426,6 +423,19 @@ export function AnalysisContent({
               }
             >
               Heatmap SVG
+            </button>
+            <button
+              type="button"
+              className="btn btn-quiet"
+              onClick={() =>
+                download(
+                  `${fileBase}_area.geojson`,
+                  areaGeoJson(area),
+                  "application/geo+json",
+                )
+              }
+            >
+              Area GeoJSON
             </button>
           </div>
           {rangeMonths > HOTSPOT_CSV_MONTHS && (

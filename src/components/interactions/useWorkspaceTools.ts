@@ -1,32 +1,41 @@
 "use client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { BBox } from "@/lib/data/types";
+import {
+  closeRing,
+  editableVertices,
+  type AnalysisArea,
+} from "@/lib/data/types";
 import type { MapController, MapPointerEvent } from "@/lib/map/map-contract";
 import {
   AdministrativeSelectionController,
   type AdministrativeCandidate,
 } from "@/lib/interactions/administrative";
-import { RectangleEditor } from "@/lib/interactions/rectangle-editor";
-import {
-  bindSelectionLayer,
-  rectangleGeometry,
-} from "@/lib/interactions/map-tool-layer";
+import { PolygonEditor, type Vertex } from "@/lib/interactions/polygon-editor";
+import { bindSelectionLayer } from "@/lib/interactions/map-tool-layer";
 import { distanceKm } from "@/lib/interactions/navigation";
 import type { RectangleProjectionAdapter } from "./RectangleEditOverlay";
 
+/**
+ * Selection tools around the map: the state picker and the corner handles of
+ * a drawn area. The handles exist whenever `editable` is a drawn area; every
+ * finished edit goes to `commitShape`. Both callbacks should be stable
+ * (useCallback): the state picker keeps the first `commitAdministrative`.
+ */
 export function useWorkspaceTools(
   controller: MapController | null,
-  commitRectangle: (box: BBox) => void,
-  commitAdministrative: () => void,
+  editable: AnalysisArea | null,
+  commitShape: (vertices: Vertex[]) => void,
+  commitAdministrative: (candidate: AdministrativeCandidate) => boolean,
 ) {
   const [administrativeActive, setAdministrativeActive] = useState(false);
-  const [level, setLevel] = useState<"country" | "state">("country");
+  const [level, setLevel] = useState<"country" | "state">("state");
   const [boundary, setBoundary] = useState<AdministrativeCandidate | null>(
     null,
   );
   const [preview, setPreview] = useState<AdministrativeCandidate | null>(null);
-  const [editor, setEditor] = useState<RectangleEditor | null>(null);
-  const [draft, setDraft] = useState<BBox | null>(null);
+  const [draft, setDraft] = useState<{ id: string; vertices: Vertex[] } | null>(
+    null,
+  );
   const [revision, setRevision] = useState(0);
   const [administrative] = useState(
     () =>
@@ -34,10 +43,12 @@ export function useWorkspaceTools(
         undefined,
         setPreview,
         (candidate) => {
-          setBoundary(candidate);
           setPreview(null);
           setAdministrativeActive(false);
-          commitAdministrative();
+          // A Brazilian state becomes the area; anything else is only shown.
+          if (!commitAdministrative(candidate))
+            setBoundary(candidate);
+          else setBoundary(null);
         },
       ),
   );
@@ -50,6 +61,24 @@ export function useWorkspaceTools(
         animation: "ease",
       });
   }, [boundary, controller]);
+
+  // No handles while a state is being picked.
+  const shown = administrativeActive ? null : editable;
+  const editor = useMemo(() => {
+    const vertices = editableVertices(shown);
+    if (!shown || !vertices) return null;
+    const id = shown.id;
+    try {
+      return new PolygonEditor(vertices, {
+        onPreview: (next) => setDraft({ id, vertices: next }),
+        onEnd: () => setDraft(null),
+        onCommit: commitShape,
+      });
+    } catch {
+      return null;
+    }
+  }, [shown, commitShape]);
+
   const layer = useRef<ReturnType<typeof bindSelectionLayer> | null>(null);
   useEffect(() => {
     if (!controller) return;
@@ -60,12 +89,16 @@ export function useWorkspaceTools(
       layer.current = null;
     };
   }, [controller]);
+  const liveDraft = draft && shown && draft.id === shown.id ? draft : null;
   const geometry = useMemo(
     () =>
-      draft
-        ? rectangleGeometry(draft)
+      liveDraft
+        ? {
+            type: "Polygon" as const,
+            coordinates: [closeRing(liveDraft.vertices)],
+          }
         : ((preview ?? boundary)?.feature.geometry ?? null),
-    [draft, preview, boundary],
+    [liveDraft, preview, boundary],
   );
   useEffect(() => {
     layer.current?.setGeometry(geometry);
@@ -78,9 +111,7 @@ export function useWorkspaceTools(
     [administrative, controller],
   );
   const stop = useCallback(() => {
-    editor?.cancel();
-    setEditor(null);
-    setDraft(null);
+    editor?.revert();
     administrative.cancel();
     setAdministrativeActive(false);
     controller?.lockCamera(false);
@@ -97,27 +128,8 @@ export function useWorkspaceTools(
   };
   const beginAdministrative = () => {
     stop();
+    setBoundary(null);
     setAdministrativeActive(true);
-  };
-  const beginEdit = (box: BBox) => {
-    stop();
-    setDraft([...box]);
-    setEditor(
-      new RectangleEditor(box, {
-        onPreview: setDraft,
-        onConfirm: (next) => {
-          setEditor(null);
-          setDraft(null);
-          clearAdministrative();
-          commitRectangle(next);
-        },
-        onCancel: () => {
-          setEditor(null);
-          setDraft(null);
-          controller?.lockCamera(false);
-        },
-      }),
-    );
   };
   const onMapClick = useCallback(
     (event: MapPointerEvent) => {
@@ -172,7 +184,6 @@ export function useWorkspaceTools(
     clear,
     clearAdministrative,
     beginAdministrative,
-    beginEdit,
     cancelAdministrative: () => {
       administrative.cancel();
       setAdministrativeActive(false);
