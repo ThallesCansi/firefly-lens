@@ -1,0 +1,14 @@
+{
+ "common_error_c": 0.213,
+ "common_error_target_coverage": 0.95,
+ "interval_formula": "total ± 1.96 * sqrt(sum(w^2 * var_harmonized) + (c * total)^2)",
+ "observed_until": 2025,
+ "series_end": "2026-10",
+ "partial_month": "2026-11",
+ "climatology_base": [
+  2003,
+  2025
+ ],
+ "unit": "focos MODIS-Aqua-equivalentes",
+ "cell_deg": 0.25
+}
