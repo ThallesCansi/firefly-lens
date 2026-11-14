@@ -3,6 +3,7 @@ import { meta } from "@/lib/data/meta";
 import { MethodSection } from "./MethodSection";
 import { References } from "./References";
 import { LIMITS } from "./RealDataNotes";
+import { QualityEvidence } from "./MethodEvidence";
 
 export function DataGuide() {
   return (
@@ -54,6 +55,9 @@ export function DataGuide() {
           displayed daily value. Near-real-time and standard-processing records
           have different limitations.
         </p>
+      </MethodSection>
+      <MethodSection id="data-quality" title="Quality of this data snapshot" status="INDEPENDENT FILE AUDIT · SCIENTIFIC LIMITS REMAIN">
+        <QualityEvidence />
       </MethodSection>
       <MethodSection id="hotspot" title="What is a hotspot?">
         <p>

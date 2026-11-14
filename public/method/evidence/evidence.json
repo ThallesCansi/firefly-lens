@@ -1,0 +1,382 @@
+{
+  "hashConvention": "SHA-256; text sources normalized to LF, binary files unchanged",
+  "dataCommit": "6ea44c7a8962e2e462cba0cb48cd8883a1f8757c",
+  "referenceDate": "2026-11-14",
+  "summary": {
+    "pass": 86,
+    "error": 0,
+    "warning": 3,
+    "not_run": 3,
+    "not_applicable": 1
+  },
+  "period": {
+    "firstDay": "2002-07-04",
+    "lastDay": "2026-11-14",
+    "seriesEnd": "2026-10",
+    "partialMonth": "2026-11"
+  },
+  "metrics": [
+    {
+      "period": "LOYO 2018–2023",
+      "months": 67,
+      "bias": -0.08297131554640957,
+      "maeLog1p": 0.09578592570974631
+    },
+    {
+      "period": "2024",
+      "months": 12,
+      "bias": -16.330369980525372,
+      "maeLog1p": 0.1930344242583669
+    },
+    {
+      "period": "2025",
+      "months": 12,
+      "bias": -15.71870106390576,
+      "maeLog1p": 0.1843449787129813
+    },
+    {
+      "period": "2026",
+      "months": 10,
+      "bias": -7.848397831220932,
+      "maeLog1p": 0.12958265479144648
+    }
+  ],
+  "seasonalSpearman": 0.9930069930069931,
+  "gaps": [
+    {
+      "sensor": "MODIS Aqua",
+      "dates": [
+        "2002-07-30",
+        "2002-07-31",
+        "2002-08-01",
+        "2002-08-02",
+        "2002-08-03",
+        "2002-08-04",
+        "2002-08-05",
+        "2002-08-06",
+        "2002-08-07",
+        "2002-09-13",
+        "2002-11-15",
+        "2016-02-19",
+        "2016-02-28",
+        "2020-08-28",
+        "2021-09-24",
+        "2022-04-01",
+        "2022-04-02",
+        "2022-04-03",
+        "2022-04-04",
+        "2022-04-05",
+        "2022-04-06",
+        "2022-04-07",
+        "2022-04-08",
+        "2022-04-09",
+        "2022-04-10",
+        "2022-04-11",
+        "2022-04-12",
+        "2022-04-13",
+        "2022-04-14",
+        "2022-04-15",
+        "2022-04-16",
+        "2025-12-24"
+      ]
+    },
+    {
+      "sensor": "VIIRS NOAA-20",
+      "dates": [
+        "2023-07-19",
+        "2023-07-20",
+        "2023-07-21",
+        "2023-07-22",
+        "2023-09-30",
+        "2024-02-04"
+      ]
+    }
+  ],
+  "region": {
+    "name": "Southern Amazon study box",
+    "bbox": [
+      -60,
+      -16,
+      -48,
+      -4
+    ],
+    "cells": 2304
+  },
+  "monthly": {
+    "month": "September",
+    "selectedYear": 2024,
+    "value": 44519,
+    "median": 20551,
+    "ratio": 2.1662692813001803,
+    "reference": [
+      {
+        "year": 2003,
+        "value": 37380
+      },
+      {
+        "year": 2004,
+        "value": 52141
+      },
+      {
+        "year": 2005,
+        "value": 45663
+      },
+      {
+        "year": 2006,
+        "value": 32602
+      },
+      {
+        "year": 2007,
+        "value": 69873
+      },
+      {
+        "year": 2008,
+        "value": 19613
+      },
+      {
+        "year": 2009,
+        "value": 12107
+      },
+      {
+        "year": 2010,
+        "value": 50044
+      },
+      {
+        "year": 2011,
+        "value": 15451
+      },
+      {
+        "year": 2012,
+        "value": 23148
+      },
+      {
+        "year": 2013,
+        "value": 10647
+      },
+      {
+        "year": 2014,
+        "value": 14749
+      },
+      {
+        "year": 2015,
+        "value": 20551
+      },
+      {
+        "year": 2016,
+        "value": 13759
+      },
+      {
+        "year": 2017,
+        "value": 36045
+      },
+      {
+        "year": 2018,
+        "value": 11081
+      },
+      {
+        "year": 2019,
+        "value": 19050
+      },
+      {
+        "year": 2020,
+        "value": 27565
+      },
+      {
+        "year": 2021,
+        "value": 9227
+      },
+      {
+        "year": 2022,
+        "value": 20849
+      },
+      {
+        "year": 2023,
+        "value": 11383
+      },
+      {
+        "year": 2024,
+        "value": 44519
+      },
+      {
+        "year": 2025,
+        "value": 6461
+      }
+    ]
+  },
+  "daily": {
+    "selectedDate": "2024-10-23",
+    "value": 366,
+    "index": 0.3553398058252427,
+    "reference": 1030,
+    "median": 0.06310679611650485,
+    "scaledMad": 0.06981174757281554,
+    "flagged": true,
+    "threshold": 0.34235378640776704,
+    "days": [
+      {
+        "date": "2024-10-13",
+        "index": 0.2941747572815534,
+        "value": 303,
+        "flagged": false
+      },
+      {
+        "date": "2024-10-14",
+        "index": 0.020388349514563107,
+        "value": 21,
+        "flagged": false
+      },
+      {
+        "date": "2024-10-15",
+        "index": 0.141747572815534,
+        "value": 146,
+        "flagged": false
+      },
+      {
+        "date": "2024-10-16",
+        "index": 0.05048543689320388,
+        "value": 52,
+        "flagged": false
+      },
+      {
+        "date": "2024-10-17",
+        "index": 0.024271844660194174,
+        "value": 25,
+        "flagged": false
+      },
+      {
+        "date": "2024-10-18",
+        "index": 0.14466019417475728,
+        "value": 149,
+        "flagged": false
+      },
+      {
+        "date": "2024-10-19",
+        "index": 0.01262135922330097,
+        "value": 13,
+        "flagged": false
+      },
+      {
+        "date": "2024-10-20",
+        "index": 0.23009708737864076,
+        "value": 237,
+        "flagged": false
+      },
+      {
+        "date": "2024-10-21",
+        "index": 0.03203883495145631,
+        "value": 33,
+        "flagged": false
+      },
+      {
+        "date": "2024-10-22",
+        "index": 0.05533980582524272,
+        "value": 57,
+        "flagged": false
+      },
+      {
+        "date": "2024-10-23",
+        "index": 0.3553398058252427,
+        "value": 366,
+        "flagged": true
+      },
+      {
+        "date": "2024-10-24",
+        "index": 0.05339805825242718,
+        "value": 55,
+        "flagged": false
+      },
+      {
+        "date": "2024-10-25",
+        "index": 0.34757281553398056,
+        "value": 358,
+        "flagged": true
+      },
+      {
+        "date": "2024-10-26",
+        "index": 0.09514563106796116,
+        "value": 98,
+        "flagged": false
+      },
+      {
+        "date": "2024-10-27",
+        "index": 0.01650485436893204,
+        "value": 17,
+        "flagged": false
+      },
+      {
+        "date": "2024-10-28",
+        "index": 0.20388349514563106,
+        "value": 210,
+        "flagged": false
+      },
+      {
+        "date": "2024-10-29",
+        "index": 0.0048543689320388345,
+        "value": 5,
+        "flagged": false
+      },
+      {
+        "date": "2024-10-30",
+        "index": 0.12330097087378641,
+        "value": 127,
+        "flagged": false
+      },
+      {
+        "date": "2024-10-31",
+        "index": 0.015533980582524271,
+        "value": 16,
+        "flagged": false
+      },
+      {
+        "date": "2024-11-01",
+        "index": 0.070873786407767,
+        "value": 73,
+        "flagged": false
+      },
+      {
+        "date": "2024-11-02",
+        "index": 0.09320388349514563,
+        "value": 96,
+        "flagged": false
+      }
+    ]
+  },
+  "sources": [
+    {
+      "path": "harmonization/output/validation_metrics.csv",
+      "sha256": "a399f8a70930a3fe57740f4d1900e71623019590f9baedf1f639436eb278a994"
+    },
+    {
+      "path": "harmonization/output/validation_rankings.csv",
+      "sha256": "f77d7041dd9d9040e4d72098fe8f0f63cd93499a44a986f08af0a7f1bb15bab9"
+    },
+    {
+      "path": "qa/data-audit/reports/report.json",
+      "sha256": "491852a854b57bfc5f9554363ce9239bd98155aa564f5ea90da9257eaddb06a4"
+    },
+    {
+      "path": "src/lib/harmonize.ts",
+      "sha256": "0ea4c0b0761b90628704281c5b7d3a262afb8833b3b3e8c7da232d896fceb5f7"
+    },
+    {
+      "path": "src/lib/data/area.ts",
+      "sha256": "33aec603e84cc3414507d1782323eb3a48e1efdb24a583a3827d18c418d5743a"
+    },
+    {
+      "path": "harmonization/output/figures/before_after_brazil.png",
+      "sha256": "731c1e6540a2cbfaa6bcf9ca9d4b807a9f31af35929bb53d577f841eb74a9075"
+    },
+    {
+      "path": "harmonization/output/figures/before_after_brazil_zoom.png",
+      "sha256": "8c3781fdae24e2efe8626f79b649261abdbcec9dc96868f68e3c05acc65409db"
+    },
+    {
+      "path": "harmonization/output/figures/scatter_by_biome.png",
+      "sha256": "367ecb8ce571ac8df14a15a4f2f52726e8683a4114a18f7d22aa7c7771aeebff"
+    },
+    {
+      "path": "harmonization/output/figures/residuals_time.png",
+      "sha256": "bd0c8c069c0447f786f23b4d8be097192dd57bff2c94631ea576be1394e87a5e"
+    }
+  ]
+}

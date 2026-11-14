@@ -1,6 +1,7 @@
 import { Equation } from "./Equation";
 import { MethodSection } from "./MethodSection";
 import { References } from "./References";
+import { MonthlyEvidence, DailyEvidence } from "./MethodEvidence";
 
 export function AnomaliesGuide() {
   return (
@@ -63,6 +64,7 @@ export function AnomaliesGuide() {
             Partial months are identified separately.
           </p>
         </Equation>
+        <MonthlyEvidence />
         <p>
           Colours represent monthly totals on a common scale derived from the
           98th percentile of positive monthly totals across the record; colour
@@ -221,6 +223,7 @@ export function AnomaliesGuide() {
             test or monthly robust z-score.
           </p>
         </Equation>
+        <DailyEvidence />
       </MethodSection>
       <MethodSection
         id="percentiles"
