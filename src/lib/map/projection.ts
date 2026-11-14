@@ -25,25 +25,18 @@ export function saveProjection(mode: ProjectionMode): void {
 /** MapLibre's projection type for a mode. "globe" turns flat on its own past zoom ~11. */
 export const projectionSpec = (mode: ProjectionMode) => ({ type: mode });
 
-/** Sky and atmosphere for the globe, per theme. The flat map ignores them. */
+/**
+ * Sky and atmosphere for the globe. The globe hangs in space in both themes,
+ * so both get a blue atmosphere; the dark theme's is a little stronger.
+ */
 export function skyFor(theme: "light" | "dark") {
-  return theme === "dark"
-    ? {
-        "sky-color": "#0b1020",
-        "horizon-color": "#1b2a44",
-        "fog-color": "#0b1020",
-        "sky-horizon-blend": 0.5,
-        "horizon-fog-blend": 0.6,
-        "fog-ground-blend": 0,
-        "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 0, 0.8, 5, 0.6, 7, 0],
-      }
-    : {
-        "sky-color": "#dfe9f5",
-        "horizon-color": "#ffffff",
-        "fog-color": "#dfe9f5",
-        "sky-horizon-blend": 0.5,
-        "horizon-fog-blend": 0.6,
-        "fog-ground-blend": 0,
-        "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 0, 0.6, 5, 0.4, 7, 0],
-      };
+  return {
+    "sky-color": "#050a14",
+    "horizon-color": "#7fb2ff",
+    "fog-color": "#050a14",
+    "sky-horizon-blend": 0.5,
+    "horizon-fog-blend": 0.6,
+    "fog-ground-blend": 0,
+    "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 0, theme === "dark" ? 1 : 0.9, 5, 0.7, 7, 0],
+  };
 }

@@ -85,7 +85,8 @@ describe("projection settings", () => {
     expect(projectionSpec("globe")).toEqual({ type: "globe" });
   });
 
-  it("gives each theme its own sky", () => {
-    expect(skyFor("dark")["sky-color"]).not.toBe(skyFor("light")["sky-color"]);
+  it("keeps a blue atmosphere in both themes, a little stronger at night", () => {
+    expect(skyFor("dark")["horizon-color"]).toBe(skyFor("light")["horizon-color"]);
+    expect(JSON.stringify(skyFor("dark")["atmosphere-blend"])).not.toBe(JSON.stringify(skyFor("light")["atmosphere-blend"]));
   });
 });

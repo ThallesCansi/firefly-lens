@@ -16,8 +16,9 @@ import type { Vertex } from "@/lib/interactions/polygon-editor";
 import { AreaForm } from "./AreaForm";
 import { AnalysisContent } from "./AnalysisContent";
 import { HotspotMap } from "./HotspotMap";
-import type { MapDestination } from "./LocationSearch";
-import { TopNavigation } from "./TopNavigation";
+import { LocationSearch, type MapDestination } from "./LocationSearch";
+import { AssistantDock } from "./AssistantDock";
+import { SiteNav } from "@/components/ui/SiteNav";
 import { MapToolbar, MapLayerControl } from "./MapControls";
 import { TemporalControl } from "./TemporalControl";
 import { useMapCells } from "@/lib/useMapHotspots";
@@ -48,6 +49,8 @@ export function LensApp() {
   const [expanded, setExpanded] = useState(false);
   const [drawing, setDrawing] = useState(false);
   const [coordinates, setCoordinates] = useState(false);
+  const [searching, setSearching] = useState(false);
+  const searchPanel = useRef<HTMLElement>(null);
   const [period, setPeriod] = useState(`${fireData.lastYear}-09`);
   const [from, setFrom] = useState(fireData.firstMonth);
   const [to, setTo] = useState(fireData.lastMonth);
@@ -126,12 +129,25 @@ export function LensApp() {
       if (e.key === "Escape") {
         setDrawing(false);
         setCoordinates(false);
+        setSearching(false);
         stopTools();
+      }
+      // "/" opens place search, as in most map and search apps, unless the person is typing.
+      const typing = (e.target as HTMLElement | null)?.closest("input, textarea, select, [contenteditable=true]");
+      if (e.key === "/" && !typing && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        e.preventDefault();
+        setCoordinates(false);
+        setDrawing(false);
+        setSearching(true);
       }
     };
     window.addEventListener("keydown", cancel);
     return () => window.removeEventListener("keydown", cancel);
   }, [stopTools]);
+  // Focus the search field as soon as the panel opens.
+  useEffect(() => {
+    if (searching) searchPanel.current?.querySelector("input")?.focus();
+  }, [searching]);
   function analyze() {
     if (!area) return;
     setAnalyzed(area);
@@ -149,13 +165,6 @@ export function LensApp() {
   }
   return (
     <main id="main" className="lens-workspace">
-      <TopNavigation
-        onNavigate={(place) => {
-          tools.stop();
-          setDrawing(false);
-          setDestination(place);
-        }}
-      />
       <div
         className="workspace-body"
         data-analysis={analysis}
@@ -183,14 +192,15 @@ export function LensApp() {
             onMapClick={tools.onMapClick}
             onViewChange={tools.editor ? tools.updateView : undefined}
           />
-          <div className="map-status map-surface">
-            <span className="status-dot" />
-            NASA FIRMS · BRAZIL
-            <span className="text-dim">
-              {fireData.firstYear}–{fireData.lastYear}
-            </span>
-          </div>
+          <SiteNav current="/lens" className="map-site-card" />
           <MapToolbar
+            onSearch={() => {
+              tools.stop();
+              setDrawing(false);
+              setCoordinates(false);
+              setSearching((s) => !s);
+            }}
+            searchActive={searching}
             tool={drawing ? "draw" : coordinates ? "coordinates" : "navigate"}
             hasArea={!!area || !!tools.boundary || !!tools.preview}
             onSelectAdministrative={() => {
@@ -202,6 +212,7 @@ export function LensApp() {
             administrativeActive={tools.administrativeActive}
             onTool={(tool) => {
               tools.stop();
+              setSearching(false);
               setDrawing(tool === "draw");
               setCoordinates(tool === "coordinates");
             }}
@@ -217,7 +228,44 @@ export function LensApp() {
               setReset((n) => n + 1);
             }}
           />
-          <MapLayerControl sensors={sensors} onChange={setSensors} />
+          <div className="map-top-right">
+            <TemporalControl
+              period={period}
+              onChange={changePeriod}
+              disabled={!area}
+            />
+            <MapLayerControl sensors={sensors} onChange={setSensors} />
+          </div>
+          {searching && (
+            <section
+              ref={searchPanel}
+              className="map-search-panel map-surface"
+              aria-label="Search places"
+            >
+              <div className="map-search-head">
+                <h2>Search places</h2>
+                <button
+                  className="btn btn-quiet"
+                  onClick={() => setSearching(false)}
+                  aria-label="Close search"
+                >
+                  ×
+                </button>
+              </div>
+              <LocationSearch
+                onNavigate={(place) => {
+                  tools.stop();
+                  setDrawing(false);
+                  setDestination(place);
+                  setSearching(false);
+                }}
+              />
+              <p className="map-search-hint">
+                Cities, states or <span className="num">lat, lon</span>. The
+                records cover Brazil; draw an area there to analyze it.
+              </p>
+            </section>
+          )}
           <WorkspaceSelectionTools
             tools={tools}
             coordinates={coordinates}
@@ -279,6 +327,7 @@ export function LensApp() {
           {!area &&
             !drawing &&
             !coordinates &&
+            !searching &&
             !tools.administrativeActive &&
             !tools.boundary &&
             !tools.editor && (
@@ -351,11 +400,7 @@ export function LensApp() {
                 </div>
               </section>
             )}
-          <TemporalControl
-            period={period}
-            onChange={changePeriod}
-            disabled={!area}
-          />
+          <AssistantDock />
           {area && (
             <p className="map-data-status map-surface" role="status">
               <ScientificInfo concept="hotspot" />

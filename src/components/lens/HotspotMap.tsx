@@ -28,11 +28,8 @@ import {
 import type { MapDestination } from "./LocationSearch";
 import { ProjectionToggle } from "./map/ProjectionToggle";
 import { useTheme } from "@/components/ui/ThemeProvider";
+import { BASEMAP_ATTRIBUTION, basemapFor, loadBasemap } from "@/lib/map/basemap";
 
-const BASEMAPS = {
-  dark: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
-  light: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
-};
 function mapColors() {
   const css = getComputedStyle(document.documentElement);
   const read = (name: string) => css.getPropertyValue(name).trim();
@@ -124,12 +121,13 @@ function outline(bbox: BBox | null) {
 function makeMap(
   lib: typeof import("maplibre-gl"),
   container: HTMLElement,
-  theme: "light" | "dark",
+  style: StyleSpecification,
   projection: ProjectionMode,
 ): MapLibreMap {
   return new lib.Map({
     container,
-    style: BASEMAPS[theme],
+    // Already fetched and coloured for the theme (see loadBasemap), or the plain ground.
+    style,
     center: HOME.center,
     zoom: HOME.zoom[projection],
     attributionControl: false,
@@ -240,17 +238,20 @@ export function HotspotMap({
     let dead = false;
     let created: MapLibreMap | undefined;
 
-    import("maplibre-gl").then((maplibregl) => {
+    // The style is fetched here rather than by MapLibre: a failed style request
+    // inside MapLibre left the map stuck, unable to load the fallback.
+    Promise.all([import("maplibre-gl"), loadBasemap()]).then(([maplibregl, base]) => {
       if (dead || !el.current) return;
       maplibregl.setWorkerUrl("/maplibre/maplibre-gl-worker.mjs");
       let instance: MapLibreMap;
       const initial = projection ?? readProjection();
       try {
         appliedTheme.current = latest.current.theme;
+        fellBack.current = !base;
         instance = makeMap(
           maplibregl,
           el.current,
-          latest.current.theme,
+          base ? basemapFor(base, latest.current.theme) : blankStyle(),
           initial,
         );
         instance.addControl(
@@ -258,7 +259,7 @@ export function HotspotMap({
           "bottom-right",
         );
         instance.addControl(
-          new maplibregl.AttributionControl({ compact: true }),
+          new maplibregl.AttributionControl({ compact: true, customAttribution: BASEMAP_ATTRIBUTION }),
           "bottom-right",
         );
       } catch {
@@ -421,7 +422,11 @@ export function HotspotMap({
     fellBack.current = false;
     control.current?.styleUnloading();
     // Only replace the style. style.load restores data and layer visibility; camera and handlers stay intact.
-    m.setStyle(BASEMAPS[theme], { diff: false });
+    loadBasemap().then((base) => {
+      if (map.current !== m || appliedTheme.current !== theme) return;
+      fellBack.current = !base;
+      m.setStyle(base ? basemapFor(base, theme) : blankStyle(), { diff: false });
+    });
   }, [theme]);
 
   useEffect(() => {
@@ -611,7 +616,7 @@ export function HotspotMap({
 
   return (
     <div
-      className={`hotspot-map relative h-full overflow-hidden bg-canopy ${isDrawing ? "ring-2 ring-lume" : ""}`}
+      className={`hotspot-map map-space relative h-full overflow-hidden ${isDrawing ? "ring-2 ring-lume" : ""}`}
       data-map-theme={paintedTheme}
       data-projection={ready ? mode : undefined}
     >

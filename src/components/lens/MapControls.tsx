@@ -11,6 +11,8 @@ export function MapToolbar({
   onReset,
   onSelectAdministrative,
   administrativeActive = false,
+  onSearch,
+  searchActive = false,
 }: {
   tool: SpatialTool;
   hasArea: boolean;
@@ -19,6 +21,9 @@ export function MapToolbar({
   onReset: () => void;
   onSelectAdministrative?: () => void;
   administrativeActive?: boolean;
+  /** Opens place search; shown first, since finding a place comes before selecting it. */
+  onSearch?: () => void;
+  searchActive?: boolean;
 }) {
   return (
     <div
@@ -26,10 +31,20 @@ export function MapToolbar({
       role="toolbar"
       aria-label="Spatial tools"
     >
+      {onSearch && (
+        <Tool
+          label="Search places (/)"
+          icon="search"
+          active={searchActive}
+          onClick={onSearch}
+        />
+      )}
       <Tool
         label="Navigate"
         icon="navigate"
-        active={tool === "navigate" && !administrativeActive}
+        active={
+          tool === "navigate" && !administrativeActive && !searchActive
+        }
         onClick={() => onTool("navigate")}
       />
       <Tool
@@ -111,6 +126,12 @@ function Tool({
   onClick: () => void;
 }) {
   const paths: Record<string, ReactNode> = {
+    search: (
+      <>
+        <circle cx="11" cy="11" r="6.5" />
+        <path d="m20 20-4.4-4.4" />
+      </>
+    ),
     administrative: (
       <>
         <path d="M3 4h7l4 3h7v12h-7l-4-3H3zM10 4v12M14 7v12" />

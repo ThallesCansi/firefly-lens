@@ -9,7 +9,7 @@ import { SiteHeader } from "@/components/ui/SiteHeader";
 export default function Home() {
   return (
     <>
-      <SiteHeader overlay />
+      <SiteHeader current="/about" overlay />
       <main id="main">
         <LensHero />
         <TwoSensors />
