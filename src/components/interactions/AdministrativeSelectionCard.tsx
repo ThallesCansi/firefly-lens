@@ -6,8 +6,10 @@ import "./Interactions.css";
 
 export function AdministrativeSelectionCard({
   controller,
+  onCancel,
 }: {
   controller: AdministrativeSelectionController;
+  onCancel?: () => void;
 }) {
   const state = useSyncExternalStore(
       controller.subscribe,
@@ -84,7 +86,7 @@ export function AdministrativeSelectionCard({
       <button
         type="button"
         className="btn btn-quiet"
-        onClick={() => controller.cancel()}
+        onClick={onCancel ?? (() => controller.cancel())}
       >
         Cancel selection
       </button>

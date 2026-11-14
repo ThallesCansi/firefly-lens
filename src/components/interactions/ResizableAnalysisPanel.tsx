@@ -20,6 +20,9 @@ export function ResizableAnalysisPanel({
   minMapWidth = 320,
   storageKey = "firefly-lens-analysis-width",
   onResize,
+  hidden = false,
+  expanded = false,
+  onKeyDown,
 }: {
   children: ReactNode;
   defaultWidth?: number;
@@ -28,6 +31,9 @@ export function ResizableAnalysisPanel({
   minMapWidth?: number;
   storageKey?: string;
   onResize?: (width: number) => void;
+  hidden?: boolean;
+  expanded?: boolean;
+  onKeyDown?: React.KeyboardEventHandler<HTMLElement>;
 }) {
   const [controller] = useState(
     () =>
@@ -74,6 +80,14 @@ export function ResizableAnalysisPanel({
       cancelAnimationFrame(frame);
     };
   }, [onResize]);
+  const previousExpanded = useRef(expanded);
+  useEffect(() => {
+    if (previousExpanded.current === expanded) return;
+    previousExpanded.current = expanded;
+    controller.setWidth(
+      expanded ? controller.snapshot().limits.max : defaultWidth,
+    );
+  }, [expanded, controller, defaultWidth]);
   const persist = () => {
     try {
       localStorage.setItem(storageKey, String(controller.snapshot().width));
@@ -82,6 +96,8 @@ export function ResizableAnalysisPanel({
   return (
     <aside
       ref={element}
+      hidden={hidden}
+      onKeyDown={onKeyDown}
       className={"ff-interaction-panel"}
       data-mobile={state.limits.mobile}
       data-resizing={state.resizing}
@@ -120,6 +136,8 @@ export function ResizableAnalysisPanel({
           onLostPointerCapture={() => controller.cancel()}
           onKeyDown={(e) => {
             if (e.key === "Escape") {
+              e.preventDefault();
+              e.stopPropagation();
               controller.cancel();
               return;
             }

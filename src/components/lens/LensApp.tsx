@@ -12,6 +12,11 @@ import { TopNavigation } from "./TopNavigation";
 import { MapToolbar, MapLayerControl } from "./MapControls";
 import { TemporalControl } from "./TemporalControl";
 import { useMapCells } from "@/lib/useMapHotspots";
+import { useWorkspaceTools } from "@/components/interactions/useWorkspaceTools";
+import { WorkspaceSelectionTools } from "@/components/interactions/WorkspaceSelectionTools";
+import { ResizableAnalysisPanel } from "@/components/interactions/ResizableAnalysisPanel";
+import type { MapController } from "@/lib/map/map-contract";
+import "@/components/interactions/WorkspaceTools.css";
 import { ScientificInfo } from "@/components/ui/ScientificInfo";
 
 type Area = { name: string; bbox: BBox };
@@ -30,15 +35,36 @@ export function LensApp() {
   const [sensors, setSensors] = useState<Sensor[]>(["MODIS", "VIIRS"]);
   const [destination, setDestination] = useState<MapDestination | null>(null);
   const [reset, setReset] = useState(0);
+  const [controller, setController] = useState<MapController | null>(null);
   const analyzeButton = useRef<HTMLButtonElement>(null);
   const closeButton = useRef<HTMLButtonElement>(null);
   const mapData = useMapCells(area?.bbox ?? null, period);
-  const selectArea = useCallback((bbox: BBox) => {
+  const commitRectangle = useCallback((bbox: BBox) => {
     setArea({ name: "Custom area", bbox: normalizeBBox(bbox) });
     setDrawing(false);
     setCoordinates(false);
     setAnalysis(false);
   }, []);
+  const commitAdministrative = useCallback(() => {
+    setArea(null);
+    setAnalysis(false);
+    setDrawing(false);
+    setCoordinates(false);
+  }, []);
+  const tools = useWorkspaceTools(
+    controller,
+    commitRectangle,
+    commitAdministrative,
+  );
+  const { stop: stopTools, clearAdministrative } = tools;
+  const selectArea = useCallback(
+    (bbox: BBox) => {
+      stopTools();
+      clearAdministrative();
+      commitRectangle(bbox);
+    },
+    [stopTools, clearAdministrative, commitRectangle],
+  );
   const changePeriod = (next: string) => {
     setPeriod(next);
     const month = next.slice(0, 7);
@@ -55,22 +81,32 @@ export function LensApp() {
       if (e.key === "Escape") {
         setDrawing(false);
         setCoordinates(false);
+        stopTools();
       }
     };
     window.addEventListener("keydown", cancel);
     return () => window.removeEventListener("keydown", cancel);
-  }, []);
+  }, [stopTools]);
   function analyze() {
     if (!area) return;
     setAnalyzed(area);
     setAnalysis(true);
     setCoordinates(false);
-    requestAnimationFrame(() => closeButton.current?.focus());
+    tools.stop();
+    requestAnimationFrame(() => {
+      closeButton.current?.focus();
+      controller?.navigate({
+        id: Date.now(),
+        bounds: area.bbox,
+        animation: "ease",
+      });
+    });
   }
   return (
     <main id="main" className="lens-workspace">
       <TopNavigation
         onNavigate={(place) => {
+          tools.stop();
           setDrawing(false);
           setDestination(place);
         }}
@@ -90,6 +126,18 @@ export function LensApp() {
             sensors={sensors}
             destination={destination}
             reset={reset}
+            onReady={setController}
+            interactionMode={
+              tools.administrativeActive
+                ? "pick-administrative"
+                : tools.editor
+                  ? "edit-rectangle"
+                  : drawing
+                    ? "draw-rectangle"
+                    : "navigate"
+            }
+            onMapClick={tools.onMapClick}
+            onViewChange={tools.editor ? tools.updateView : undefined}
           />
           <div className="map-status map-surface">
             <span className="status-dot" />
@@ -100,22 +148,47 @@ export function LensApp() {
           </div>
           <MapToolbar
             tool={drawing ? "draw" : coordinates ? "coordinates" : "navigate"}
-            hasArea={!!area}
+            hasArea={!!area || !!tools.boundary || !!tools.preview}
+            canEditRectangle={!!area}
+            onSelectAdministrative={() => {
+              setDrawing(false);
+              setCoordinates(false);
+              setAnalysis(false);
+              tools.beginAdministrative();
+            }}
+            administrativeActive={tools.administrativeActive}
+            onEditRectangle={() => {
+              if (area) {
+                setAnalysis(false);
+                setDrawing(false);
+                setCoordinates(false);
+                tools.beginEdit(area.bbox);
+              }
+            }}
+            rectangleEditing={!!tools.editor}
             onTool={(tool) => {
+              tools.stop();
               setDrawing(tool === "draw");
               setCoordinates(tool === "coordinates");
             }}
             onClear={() => {
+              tools.clear();
               setArea(null);
               setAnalysis(false);
               setDrawing(false);
             }}
             onReset={() => {
+              tools.stop();
               setDrawing(false);
               setReset((n) => n + 1);
             }}
           />
           <MapLayerControl sensors={sensors} onChange={setSensors} />
+          <WorkspaceSelectionTools
+            tools={tools}
+            coordinates={coordinates}
+            drawing={drawing}
+          />
           {coordinates && (
             <section
               className="coordinates-panel map-surface"
@@ -139,6 +212,7 @@ export function LensApp() {
                   onChange={(e) => {
                     const p = presets.find((p) => p.id === e.target.value);
                     if (p) {
+                      tools.clear();
                       setArea({ name: p.name, bbox: p.bbox });
                       setAnalysis(false);
                       setCoordinates(false);
@@ -167,62 +241,81 @@ export function LensApp() {
               />
             </section>
           )}
-          {!area && !drawing && !coordinates && (
-            <div className="explore-hint map-surface">
-              <p className="eyebrow">EXPLORE THE RECORD</p>
-              <h1 className="text-2xl">
-                A place. Two sensors.
-                <br />
-                One shared history.
-              </h1>
-              <p className="mt-2 text-sm text-dim">
-                Real MODIS and VIIRS records for Brazil, 2002 to today. Draw a
-                rectangle anywhere in Brazil to investigate its fire activity.
-              </p>
-              <button
-                className="btn btn-primary mt-4"
-                onClick={() => setDrawing(true)}
-              >
-                Select an area
-              </button>
-            </div>
-          )}
-          {area && !analysis && !coordinates && !drawing && (
-            <section
-              className="selection-card map-surface"
-              aria-label="Selected area"
-            >
-              <p className="eyebrow">AREA OF INTEREST</p>
-              <h2 className="text-xl">{area.name}</h2>
-              <p className="num my-2 text-xs text-dim">
-                W {area.bbox[0]} · S {area.bbox[1]} · E {area.bbox[2]} · N{" "}
-                {area.bbox[3]}
-              </p>
-              <p className="mb-3 text-xs text-dim">
-                {analyzed && analyzed.bbox.join() !== area.bbox.join()
-                  ? "Area changed. Analyze to recalculate the history."
-                  : "Selection is independent of map navigation."}
-              </p>
-              <div className="flex flex-wrap gap-2">
+          {!area &&
+            !drawing &&
+            !coordinates &&
+            !tools.administrativeActive &&
+            !tools.boundary &&
+            !tools.editor && (
+              <div className="explore-hint map-surface">
+                <p className="eyebrow">EXPLORE THE RECORD</p>
+                <h1 className="text-2xl">
+                  A place. Two sensors.
+                  <br />
+                  One shared history.
+                </h1>
+                <p className="mt-2 text-sm text-dim">
+                  Real MODIS and VIIRS records for Brazil, 2002 to today. Draw a
+                  rectangle anywhere in Brazil to investigate its fire activity.
+                </p>
                 <button
-                  ref={analyzeButton}
-                  className="btn btn-primary"
-                  onClick={analyze}
-                >
-                  Analyze Area
-                </button>
-                <button
-                  className="btn btn-quiet"
+                  className="btn btn-primary mt-4"
                   onClick={() => setDrawing(true)}
                 >
-                  Change
-                </button>
-                <button className="btn btn-quiet" onClick={() => setArea(null)}>
-                  Clear
+                  Select an area
                 </button>
               </div>
-            </section>
-          )}
+            )}
+          {area &&
+            !analysis &&
+            !coordinates &&
+            !drawing &&
+            !tools.administrativeActive &&
+            !tools.editor && (
+              <section
+                className="selection-card map-surface"
+                aria-label="Selected area"
+              >
+                <p className="eyebrow">AREA OF INTEREST</p>
+                <h2 className="text-xl">{area.name}</h2>
+                <p className="num my-2 text-xs text-dim">
+                  W {area.bbox[0]} · S {area.bbox[1]} · E {area.bbox[2]} · N{" "}
+                  {area.bbox[3]}
+                </p>
+                <p className="mb-3 text-xs text-dim">
+                  {analyzed && analyzed.bbox.join() !== area.bbox.join()
+                    ? "Area changed. Analyze to recalculate the history."
+                    : "Selection is independent of map navigation."}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    ref={analyzeButton}
+                    className="btn btn-primary"
+                    onClick={analyze}
+                  >
+                    Analyze Area
+                  </button>
+                  <button
+                    className="btn btn-quiet"
+                    onClick={() => {
+                      tools.stop();
+                      setDrawing(true);
+                    }}
+                  >
+                    Change
+                  </button>
+                  <button
+                    className="btn btn-quiet"
+                    onClick={() => {
+                      tools.clear();
+                      setArea(null);
+                    }}
+                  >
+                    Clear
+                  </button>
+                </div>
+              </section>
+            )}
           <TemporalControl
             period={period}
             onChange={changePeriod}
@@ -253,10 +346,9 @@ export function LensApp() {
           )}
         </section>
         {analyzed && (
-          <aside
-            className="analysis-drawer"
+          <ResizableAnalysisPanel
             hidden={!analysis}
-            aria-label={`Analysis of ${analyzed.name}`}
+            expanded={expanded}
             onKeyDown={(e) => {
               if (e.key === "Escape") close();
             }}
@@ -313,7 +405,7 @@ export function LensApp() {
                 }}
               />
             </div>
-          </aside>
+          </ResizableAnalysisPanel>
         )}
       </div>
     </main>

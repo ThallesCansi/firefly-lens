@@ -177,6 +177,7 @@ export function RectangleEditOverlay({
               }[e.key];
               if (!delta) return;
               e.preventDefault();
+              e.stopPropagation();
               const step = e.shiftKey ? 0.5 : 0.1;
               editor.begin(name, point);
               editor.update([

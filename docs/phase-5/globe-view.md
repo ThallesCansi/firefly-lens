@@ -59,7 +59,7 @@ Tool layers should use ids starting with `tool-` and be inserted before `FIRST_D
 - **Search** (`LocationSearch.tsx`): nothing to change. `MapDestination` is consumed as before and now flies along an arc. To request other moves, pass `navigation` from `LensApp`.
 - **Editable rectangle**: a separate component that receives the controller, draws handles in `onStyleReady` (layers `tool-…`), listens with `onPointer`, calls `lockCamera(true)` while a handle is dragged, and reports the new box through the same `onDraw(normalizeBBox(bbox))`. Use `interactionMode="edit-rectangle"`.
 - **Administrative picker**: boundaries as a `tool-` fill layer added in `onStyleReady`; `interactionMode="pick-administrative"` and `onMapClick` (or `onPointer` with `layers`) return the clicked feature; report it as a `SelectedArea` of kind `"administrative"`.
-- **Integration point**: `LensApp.tsx` passes `onReady`, `navigation`, `interactionMode` and `onMapClick` to `HotspotMap`. That file is reserved for the final integration.
+- **Integration point**: `LensApp.tsx` now connects `onReady`, `interactionMode` and `onMapClick` to the spatial tools. Country/state selection, rectangle editing and the resizable analysis panel run in the main workspace; see [the integrated workflows](../map-interactions/INTEGRATED.md).
 
 ## Verified
 

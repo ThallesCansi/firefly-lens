@@ -44,6 +44,9 @@
   background: var(--color-night);
   border-left: 1px solid var(--color-line);
 }
+.ff-interaction-panel[hidden] {
+  display: none;
+}
 .ff-interaction-panel[data-resizing="true"] {
   user-select: none;
   cursor: col-resize;

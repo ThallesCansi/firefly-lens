@@ -6,6 +6,7 @@ export type SpatialTool = "navigate" | "draw" | "coordinates";
 export function MapToolbar({
   tool,
   hasArea,
+  canEditRectangle = hasArea,
   onTool,
   onClear,
   onReset,
@@ -16,6 +17,7 @@ export function MapToolbar({
 }: {
   tool: SpatialTool;
   hasArea: boolean;
+  canEditRectangle?: boolean;
   onTool: (tool: SpatialTool) => void;
   onClear: () => void;
   onReset: () => void;
@@ -71,7 +73,7 @@ export function MapToolbar({
           label="Edit rectangle"
           icon="edit"
           active={rectangleEditing}
-          disabled={!hasArea}
+          disabled={!canEditRectangle}
           onClick={onEditRectangle}
         />
       )}

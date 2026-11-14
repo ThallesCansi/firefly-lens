@@ -1,5 +1,9 @@
 # Advanced map interactions (Agent B)
 
+**Integration is now implemented in the main Lens workspace.** Read
+[the current workflows and verification](INTEGRATED.md). The document below
+records the original isolated delivery and its integration checklist.
+
 ## Isolation and scope
 
 Worktree: `C:\Users\caioc\Documents\GitHub\firefly-interactions`
