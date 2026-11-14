@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { Lume } from "@/components/firefly/Lume";
+import { fireData } from "@/lib/data/source";
 import { shortDate } from "@/lib/format";
 import { useYearData } from "@/lib/useYearData";
 
@@ -116,7 +117,7 @@ export function LensHero() {
       host.style.setProperty("--lens-r", `${radius}px`);
 
       if (data && peak) {
-        const [west, south, east, north] = [-62, -13, -50, -5];
+        const [west, south, east, north] = fireData.presets()[0].bbox;
         const day = data.hotspots
           .filter((p) => p.acq_date === peak)
           .map((p) => ({

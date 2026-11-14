@@ -2,7 +2,7 @@ const SOURCES = [
   {
     name: "NASA FIRMS",
     detail: "Fire Information for Resource Management System: the service that distributes both active-fire records.",
-    href: "https://firms.modaps.eosdis.nasa.gov/",
+    href: "https://www.earthdata.nasa.gov/data/tools/firms",
   },
   {
     name: "MODIS active fire, Collection 6.1",
@@ -25,9 +25,9 @@ export function DataCredits() {
             Built on NASA&rsquo;s open fire records
           </h2>
           <p className="mt-5 max-w-[34rem] text-lg text-dim">
-            FireFly Lens answers the 2026 NASA Space Apps challenge on harmonizing MODIS and VIIRS hot spots. This first
-            build runs on simulated detections with the same fields as a FIRMS download, so the live feed can replace
-            them without changing the interface.
+            FireFly Lens answers the 2026 NASA Space Apps challenge on harmonizing MODIS and VIIRS hot spots. This build
+            runs on simulated detections from 2001 to 2025, with the same fields as a FIRMS download, so real records
+            can replace them without changing the interface.
           </p>
         </div>
         <ul className="self-end">

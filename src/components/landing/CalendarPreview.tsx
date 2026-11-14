@@ -14,7 +14,7 @@ export function CalendarPreview() {
   const { data } = useYearData("amazon");
   const [picked, setPicked] = useState<string | null>(null);
   const summary = data?.summary;
-  const selected = picked ?? summary?.anomalies.find((d) => d >= "2025-07-01") ?? "2025-09-05";
+  const selected = picked ?? summary?.anomalies.find((d) => d.slice(5) >= "07-01" && d.slice(5) <= "10-31") ?? summary?.days[247].date ?? "";
   const day = summary?.days.find((d) => d.date === selected);
 
   return (
