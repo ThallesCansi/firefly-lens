@@ -6,12 +6,12 @@ const SOURCES = [
   },
   {
     name: "MODIS active fire, Collection 6.1",
-    detail: "1 km detections from the Terra and Aqua satellites.",
+    detail: "1 km detections from the Aqua satellite, 2002 onward: the reference scale of the record.",
     href: "https://www.earthdata.nasa.gov/data/instruments/modis",
   },
   {
     name: "VIIRS active fire, 375 m",
-    detail: "Detections from the I-bands of Suomi NPP, NOAA-20 and NOAA-21.",
+    detail: "375 m detections from NOAA-20, April 2018 onward, converted to the MODIS Aqua scale.",
     href: "https://www.earthdata.nasa.gov/data/instruments/viirs",
   },
 ];
@@ -25,9 +25,9 @@ export function DataCredits() {
             Built on NASA&rsquo;s open fire records
           </h2>
           <p className="mt-5 max-w-[34rem] text-lg text-dim">
-            FireFly Lens answers the 2026 NASA Space Apps challenge on harmonizing MODIS and VIIRS hot spots. This build
-            runs on simulated detections from 2001 to 2025, with the same fields as a FIRMS download, so real records
-            can replace them without changing the interface.
+            FireFly Lens answers the 2026 NASA Space Apps challenge on harmonizing MODIS and VIIRS hot spots. It reads
+            the real FIRMS records for Brazil, from July 2002 to November 2026: 6 million MODIS Aqua and 10 million
+            VIIRS NOAA-20 detections, filtered, counted on a 0.25° grid and joined into one series.
           </p>
         </div>
         <ul className="self-end">

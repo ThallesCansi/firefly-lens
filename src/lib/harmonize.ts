@@ -1,38 +1,38 @@
-import { VIIRS_START, confidenceClass, type ConfidenceClass, type Hotspot, type Sensor } from "./data/types";
-import { dateOfDay, daysInYear } from "./data/mock";
+import type { AreaData } from "./data/area";
+import { meta } from "./data/meta";
+import type { Sensor } from "./data/types";
+import { addDays, dateOfDay, daysInYear, monthStamp } from "./dates";
 
 /**
- * Provisional harmonization.
+ * One record per area, in MODIS-Aqua-equivalent hot spots.
  *
- * A hot spot is one observation, not one fire: VIIRS reports several 375 m
- * pixels where MODIS reports a single 1 km pixel, so raw counts from the two
- * sensors are never added together. The steps:
+ * The harmonization itself happens offline (harmonization/, negative binomial
+ * model on a 0.25° grid, validated year by year). This module turns the area's
+ * sums into what the interface shows:
  *
- *  1. Snap every detection to a shared grid and count the lit cells per sensor
- *     and day. Pixel size no longer matters: a cell is lit or it is not.
- *  2. Learn from the years both sensors flew how many cells VIIRS lights for
- *     each cell MODIS lights in this area (the calibration factor).
- *  3. Express every day in VIIRS-equivalent cells: MODIS alone before 2012,
- *     scaled by the factor; the mean of both afterwards.
- *  4. Scale that one series against the area's own busy day (the 95th
- *     percentile of burning days), giving an index from 0 to 1 that means the
- *     same thing in 2003 and in 2023.
+ *  1. Through `meta.observedUntil` (2025) the series is MODIS Aqua as observed.
+ *     From then on it is VIIRS NOAA-20 converted to the MODIS Aqua scale.
+ *  2. The model works by month. A month's harmonized VIIRS total is spread over
+ *     its days in proportion to the VIIRS detections of each day (degraded to
+ *     ~1 km), so the days always add up to the month.
+ *  3. Each day is scaled against the area's own busy day (95th percentile of
+ *     burning days) into an index from 0 to 1, for the calendar.
+ *  4. Each month is set against the median of the same month over 2003–2025,
+ *     computed on the area's own monthly totals.
  */
 
-/** Shared grid cell size in degrees (about 5.5 km at the equator). */
-export const CELL_DEGREES = 0.05;
+export type Source = "observed" | "modeled";
 
 export interface SensorDay {
-  /** Raw detections, as reported. */
+  /** Detections as reported, summed over the area. */
   detections: number;
-  /** Shared-grid cells with at least one detection. */
+  /** 0.25° cells with at least one detection. */
   cells: number;
-  /** Summed fire radiative power, MW. */
-  frp: number;
   day: number;
   night: number;
-  confidence: Record<ConfidenceClass, number>;
-  /** This sensor's own view of the day on the 0-1 index, after calibration. */
+  /** This sensor's view of the day in MODIS-Aqua-equivalent hot spots; null when the sensor did not fly. */
+  estimate: number | null;
+  /** That estimate on the 0-1 index. */
   scaled: number;
 }
 
@@ -53,9 +53,11 @@ export interface DaySummary {
   year: number;
   dayOfYear: number;
   sensors: Record<Sensor, SensorDay>;
-  /** False before VIIRS existed: the day rests on MODIS alone. */
+  /** False before VIIRS NOAA-20: the day rests on MODIS Aqua alone. */
   bothSensors: boolean;
-  /** Harmonized activity in VIIRS-equivalent lit cells. */
+  /** Observed MODIS Aqua, or VIIRS converted by the model. */
+  source: Source;
+  /** Harmonized activity in MODIS-Aqua-equivalent hot spots. */
   value: number;
   /** Harmonized activity, 0 to 1. */
   index: number;
@@ -64,7 +66,7 @@ export interface DaySummary {
   expected: number;
   /** True when the day burns far above its surrounding three weeks. */
   anomaly: boolean;
-  /** 1 when both sensors agree after calibration, 0 when one sees nothing. */
+  /** 1 when MODIS Aqua and harmonized VIIRS agree, 0 when one sees nothing. */
   agreement: number | null;
 }
 
@@ -73,16 +75,25 @@ export interface MonthCell {
   year: number;
   /** 0 to 11. */
   month: number;
-  /** Sum of the daily harmonized values: VIIRS-equivalent cell-days. */
+  /** Harmonized hot spots in the month (MODIS-Aqua-equivalent). */
   value: number;
+  source: Source;
+  /** 95% interval of a modeled month; null when observed. */
+  lo: number | null;
+  hi: number | null;
+  /** The month is still in progress. */
+  partial: boolean;
   /** Raw detections in the month, per sensor, as reported. */
   detections: Record<Sensor, number>;
-  /** Median of this calendar month across every year on record. */
+  /** VIIRS converted to the MODIS Aqua scale, from April 2018; null before. */
+  viirsHarmonized: number | null;
+  /** Median of this calendar month over the base years. */
   median: number;
   /** value / median, or null when the median is zero. */
   ratio: number | null;
-  /** 1 is the highest this calendar month has been. */
+  /** 1 is the highest this calendar month has been, out of `rankOf` complete months. */
   rank: number;
+  rankOf: number;
   /** 0 to 5, by the value's share of the busiest months on record. */
   level: Level;
 }
@@ -97,36 +108,32 @@ export interface Season {
 export interface FireRecord {
   years: number[];
   days: DaySummary[];
-  /** VIIRS cells lit per MODIS cell lit, learned from the overlap years. */
-  calibration: { factor: number; overlapDays: number };
-  /** VIIRS-equivalent cells that scale to an index of 1. */
+  /** Hot spots that scale to an index of 1. */
   reference: number;
   months: MonthCell[];
-  /** Median harmonized value for each calendar month. */
+  /** Median for each calendar month, over the base years. */
   monthlyMedian: number[];
-  yearTotals: { year: number; value: number; median: number }[];
+  /** `complete` is false for years that started or ended mid-way. */
+  yearTotals: { year: number; value: number; median: number; complete: boolean }[];
   season: Season | null;
+  /** Grid cells in the area, and its biomes. */
+  cells: number;
+  biomes: { name: string; share: number }[];
+  /** Both sensors over the years MODIS Aqua is still the reference. */
+  overlap: { from: string; to: string; modis: number; viirs: number; viirsHarmonized: number } | null;
 }
 
 /** One year of a record, in the shape the calendar and charts read. */
 export interface YearSummary {
   year: number;
   days: DaySummary[];
-  totals: Record<Sensor, { detections: number; frp: number }>;
+  totals: Record<Sensor, { detections: number }>;
   /** The typical fire season, as dates in this year. */
   criticalPeriod: { start: string; end: string; days: number; wraps: boolean } | null;
   anomalies: string[];
 }
 
-function emptySensorDay(): SensorDay {
-  return { detections: 0, cells: 0, frp: 0, day: 0, night: 0, confidence: { low: 0, nominal: 0, high: 0 }, scaled: 0 };
-}
-
-export function cellKey(latitude: number, longitude: number): string {
-  return `${Math.floor(latitude / CELL_DEGREES)}:${Math.floor(longitude / CELL_DEGREES)}`;
-}
-
-function percentile(sorted: number[], p: number): number {
+export function percentile(sorted: number[], p: number): number {
   if (sorted.length === 0) return 0;
   const at = (sorted.length - 1) * p;
   const lo = Math.floor(at);
@@ -134,7 +141,7 @@ function percentile(sorted: number[], p: number): number {
   return sorted[lo] + (sorted[hi] - sorted[lo]) * (at - lo);
 }
 
-function median(values: number[]): number {
+export function median(values: number[]): number {
   return percentile([...values].sort((a, b) => a - b), 0.5);
 }
 
@@ -147,52 +154,6 @@ export function levelOf(index: number, anyDetection: boolean): Level {
   return 5;
 }
 
-/** Step 1: one year of detections snapped to the shared grid, day by day. */
-export function gridYear(hotspots: Hotspot[], year: number): DaySummary[] {
-  const total = daysInYear(year);
-  const byDate = new Map<string, number>();
-  const days: DaySummary[] = [];
-  for (let d = 1; d <= total; d++) {
-    const date = dateOfDay(year, d);
-    byDate.set(date, d - 1);
-    days.push({
-      date,
-      year,
-      dayOfYear: d,
-      sensors: { MODIS: emptySensorDay(), VIIRS: emptySensorDay() },
-      bothSensors: date >= VIIRS_START,
-      value: 0,
-      index: 0,
-      level: 0,
-      expected: 0,
-      anomaly: false,
-      agreement: null,
-    });
-  }
-  const cells: Record<Sensor, Set<string>[]> = {
-    MODIS: days.map(() => new Set<string>()),
-    VIIRS: days.map(() => new Set<string>()),
-  };
-  for (const h of hotspots) {
-    const at = byDate.get(h.acq_date);
-    if (at === undefined) continue;
-    const s = days[at].sensors[h.instrument];
-    s.detections++;
-    s.frp += h.frp;
-    if (h.daynight === "D") s.day++;
-    else s.night++;
-    s.confidence[confidenceClass(h.confidence)]++;
-    cells[h.instrument][at].add(cellKey(h.latitude, h.longitude));
-  }
-  days.forEach((day, i) => {
-    for (const sensor of ["MODIS", "VIIRS"] as const) {
-      day.sensors[sensor].cells = cells[sensor][i].size;
-      day.sensors[sensor].frp = Math.round(day.sensors[sensor].frp * 10) / 10;
-    }
-  });
-  return days;
-}
-
 /** Days on each side used to judge what is normal for a date. */
 const ANOMALY_WINDOW = 10;
 /** Below this index a day is too faint to call unusual. */
@@ -200,41 +161,82 @@ const ANOMALY_FLOOR = 0.22;
 /** Smallest gap over the neighbours' median that counts as unusual. */
 const ANOMALY_MARGIN = 0.15;
 
-/** Steps 2 to 4: gridded years, in order, become one harmonized record. */
-export function buildRecord(years: DaySummary[][]): FireRecord {
-  const days = years.flat();
+export function buildRecord(area: AreaData): FireRecord {
+  const { observedUntil, climatologyBase, commonErrorC, viirsStart, partialMonth, epochYear } = meta;
+  const monthOf = (date: string) =>
+    (Number(date.slice(0, 4)) - epochYear) * 12 + Number(date.slice(5, 7)) - 1 - area.firstMonth;
 
-  // Step 2: calibrate MODIS against VIIRS where both flew.
-  let modisCells = 0;
-  let viirsCells = 0;
-  let overlapDays = 0;
-  for (const day of days) {
-    if (!day.bothSensors) continue;
-    overlapDays++;
-    modisCells += day.sensors.MODIS.cells;
-    viirsCells += day.sensors.VIIRS.cells;
+  // Monthly sums of the daily columns.
+  const n = area.months;
+  const mAqua = new Float64Array(n);
+  const mViirs = new Float64Array(n);
+  const mKm = new Float64Array(n);
+  const mDays = new Float64Array(n);
+  const dates: string[] = [];
+  const dayMonth = new Int32Array(area.days);
+  for (let k = 0; k < area.days; k++) {
+    const date = addDays(area.firstDay, k);
+    const m = monthOf(date);
+    dates.push(date);
+    dayMonth[k] = m;
+    mAqua[m] += area.aquaD[k] + area.aquaN[k];
+    mViirs[m] += area.viirsD[k] + area.viirsN[k];
+    mKm[m] += area.viirsKm[k];
+    mDays[m]++;
   }
-  const factor = modisCells > 0 && viirsCells > 0 ? viirsCells / modisCells : 1;
 
-  // Step 3: one series in VIIRS-equivalent cells.
-  for (const day of days) {
-    const fromModis = day.sensors.MODIS.cells * factor;
-    day.value = day.bothSensors ? (fromModis + day.sensors.VIIRS.cells) / 2 : fromModis;
-  }
+  // Steps 1 and 2: one value per day.
+  const days: DaySummary[] = dates.map((date, k) => {
+    const m = dayMonth[k];
+    const year = Number(date.slice(0, 4));
+    const both = date >= viirsStart;
+    const mu = area.mu[m];
+    const viirsEstimate =
+      both && !Number.isNaN(mu) ? (mKm[m] > 0 ? (mu * area.viirsKm[k]) / mKm[m] : mu / mDays[m]) : null;
+    const aqua = area.aquaD[k] + area.aquaN[k];
+    const viirs = area.viirsD[k] + area.viirsN[k];
+    const modeled = year > observedUntil && viirsEstimate !== null;
+    const dayOfYear = Math.round((Date.parse(`${date}T00:00:00Z`) - Date.UTC(year, 0, 1)) / 86_400_000) + 1;
+    return {
+      date,
+      year,
+      dayOfYear,
+      sensors: {
+        MODIS: { detections: aqua, cells: area.aquaCells[k], day: area.aquaD[k], night: area.aquaN[k], estimate: aqua, scaled: 0 },
+        VIIRS: {
+          detections: both ? viirs : 0,
+          cells: area.viirsCells[k],
+          day: area.viirsD[k],
+          night: area.viirsN[k],
+          estimate: viirsEstimate,
+          scaled: 0,
+        },
+      },
+      bothSensors: both,
+      source: modeled ? "modeled" : "observed",
+      value: modeled ? (viirsEstimate as number) : aqua,
+      index: 0,
+      level: 0,
+      expected: 0,
+      anomaly: false,
+      agreement: null,
+    };
+  });
 
-  // Step 4: scale against the area's own busy day.
+  // Step 3: scale against the area's own busy day.
   const burning = days.map((d) => d.value).filter((v) => v > 0).sort((a, b) => a - b);
   const reference = Math.max(1, percentile(burning, 0.95));
   for (const day of days) {
-    const m = day.sensors.MODIS;
+    const a = day.sensors.MODIS;
     const v = day.sensors.VIIRS;
-    m.scaled = Math.min(1, (m.cells * factor) / reference);
-    v.scaled = Math.min(1, v.cells / reference);
+    a.scaled = Math.min(1, (a.estimate ?? 0) / reference);
+    v.scaled = Math.min(1, (v.estimate ?? 0) / reference);
     day.index = Math.min(1, day.value / reference);
-    const any = m.detections + v.detections > 0;
-    day.level = levelOf(day.index, any);
-    const top = Math.max(m.cells * factor, v.cells);
-    day.agreement = day.bothSensors && any && top > 0 ? 1 - Math.abs(m.cells * factor - v.cells) / top : null;
+    day.level = levelOf(day.index, a.detections + v.detections > 0);
+    if (v.estimate !== null) {
+      const top = Math.max(a.estimate ?? 0, v.estimate);
+      day.agreement = top > 0 ? 1 - Math.abs((a.estimate ?? 0) - v.estimate) / top : null;
+    }
   }
 
   // Unusual burning: a day far above the median of its neighbours, by a margin
@@ -251,54 +253,80 @@ export function buildRecord(years: DaySummary[][]): FireRecord {
     day.anomaly = day.index >= ANOMALY_FLOOR && day.index >= mid * 2 && day.index > mid + Math.max(ANOMALY_MARGIN, 4 * spread);
   });
 
-  const months = monthTable(days);
-  const monthlyMedian = Array.from({ length: 12 }, (_, m) => months.find((c) => c.month === m)?.median ?? 0);
-  const totals = years.map((y) => ({ year: y[0].year, value: y.reduce((sum, d) => sum + d.value, 0) }));
-  const typical = median(totals.map((t) => t.value));
+  // Step 4: months against their own history.
+  const months: MonthCell[] = [];
+  for (let m = 0; m < n; m++) {
+    const abs = area.firstMonth + m;
+    const year = epochYear + Math.floor(abs / 12);
+    const month = abs % 12;
+    const mu = area.mu[m];
+    const modeled = year > observedUntil && !Number.isNaN(mu);
+    const value = modeled ? mu : mAqua[m];
+    const sd = modeled ? Math.sqrt((Number.isNaN(area.variance[m]) ? 0 : area.variance[m]) + (commonErrorC * value) ** 2) : 0;
+    months.push({
+      year,
+      month,
+      value,
+      source: modeled ? "modeled" : "observed",
+      lo: modeled ? Math.max(0, value - 1.96 * sd) : null,
+      hi: modeled ? value + 1.96 * sd : null,
+      partial: monthStamp(year, month) === partialMonth,
+      detections: { MODIS: mAqua[m], VIIRS: mViirs[m] },
+      viirsHarmonized: Number.isNaN(mu) ? null : mu,
+      median: 0,
+      ratio: null,
+      rank: 1,
+      rankOf: 1,
+      level: 0,
+    });
+  }
+  const inBase = (year: number) => year >= climatologyBase[0] && year <= climatologyBase[1];
+  const top = Math.max(percentile(months.map((c) => c.value).filter((v) => v > 0).sort((a, b) => a - b), 0.98), 1e-9);
+  const steps = [0.03, 0.1, 0.3, 0.6].map((f) => f * top);
+  const monthlyMedian = Array.from({ length: 12 }, (_, m) => {
+    const same = months.filter((c) => c.month === m);
+    const mid = median(same.filter((c) => inBase(c.year)).map((c) => c.value));
+    const ranked = same.filter((c) => !c.partial);
+    for (const cell of same) {
+      cell.median = mid;
+      cell.ratio = mid > 0 ? cell.value / mid : null;
+      cell.rank = 1 + ranked.filter((o) => o.value > cell.value).length;
+      cell.rankOf = ranked.length;
+      cell.level = cell.value <= 0 ? 0 : ((1 + steps.filter((s) => cell.value > s).length) as Level);
+    }
+    return mid;
+  });
+
+  const years = [...new Set(months.map((c) => c.year))];
+  const totals = years.map((year) => {
+    const of = months.filter((c) => c.year === year);
+    return { year, value: of.reduce((s, c) => s + c.value, 0), complete: of.length === 12 && !of.some((c) => c.partial) };
+  });
+  const typical = median(totals.filter((t) => inBase(t.year)).map((t) => t.value));
+
+  const both = months.filter((c) => c.viirsHarmonized !== null && c.year <= observedUntil);
+  const overlap = both.length
+    ? {
+        from: monthStamp(both[0].year, both[0].month),
+        to: monthStamp(both[both.length - 1].year, both[both.length - 1].month),
+        modis: both.reduce((s, c) => s + c.detections.MODIS, 0),
+        viirs: both.reduce((s, c) => s + c.detections.VIIRS, 0),
+        viirsHarmonized: both.reduce((s, c) => s + (c.viirsHarmonized ?? 0), 0),
+      }
+    : null;
 
   return {
-    years: years.map((y) => y[0].year),
+    years,
     days,
-    calibration: { factor, overlapDays },
     reference,
     months,
     monthlyMedian,
     yearTotals: totals.map((t) => ({ ...t, median: typical })),
     season: findSeason(days),
+    cells: area.cells,
+    biomes: area.biomes,
+    overlap,
   };
-}
-
-function monthTable(days: DaySummary[]): MonthCell[] {
-  const cells = new Map<string, MonthCell>();
-  for (const day of days) {
-    const month = Number(day.date.slice(5, 7)) - 1;
-    const key = `${day.year}:${month}`;
-    let cell = cells.get(key);
-    if (!cell) {
-      cell = { year: day.year, month, value: 0, detections: { MODIS: 0, VIIRS: 0 }, median: 0, ratio: null, rank: 1, level: 0 };
-      cells.set(key, cell);
-    }
-    cell.value += day.value;
-    cell.detections.MODIS += day.sensors.MODIS.detections;
-    cell.detections.VIIRS += day.sensors.VIIRS.detections;
-  }
-  const all = [...cells.values()];
-  const sorted = all.map((c) => c.value).filter((v) => v > 0).sort((a, b) => a - b);
-  // Colour steps are fractions of the busiest months on record, so a strong
-  // season and a weak one land on different steps.
-  const top = Math.max(percentile(sorted, 0.98), 1e-9);
-  const steps = [0.03, 0.1, 0.3, 0.6].map((f) => f * top);
-  for (let m = 0; m < 12; m++) {
-    const same = all.filter((c) => c.month === m);
-    const mid = median(same.map((c) => c.value));
-    for (const cell of same) {
-      cell.median = mid;
-      cell.ratio = mid > 0 ? cell.value / mid : null;
-      cell.rank = 1 + same.filter((o) => o.value > cell.value).length;
-      cell.level = cell.value <= 0 ? 0 : ((1 + steps.filter((s) => cell.value > s).length) as Level);
-    }
-  }
-  return all;
 }
 
 /** The unbroken stretch of the year where the average day stays above 35% of the yearly peak. */
@@ -341,12 +369,10 @@ export function inSeason(period: YearSummary["criticalPeriod"], date: string): b
 /** One year of a record, with the typical season expressed in that year's dates. */
 export function yearView(record: FireRecord, year: number): YearSummary {
   const days = record.days.filter((d) => d.year === year);
-  const totals = { MODIS: { detections: 0, frp: 0 }, VIIRS: { detections: 0, frp: 0 } };
+  const totals = { MODIS: { detections: 0 }, VIIRS: { detections: 0 } };
   for (const day of days) {
-    for (const sensor of ["MODIS", "VIIRS"] as const) {
-      totals[sensor].detections += day.sensors[sensor].detections;
-      totals[sensor].frp += day.sensors[sensor].frp;
-    }
+    totals.MODIS.detections += day.sensors.MODIS.detections;
+    totals.VIIRS.detections += day.sensors.VIIRS.detections;
   }
   const s = record.season;
   return {
@@ -358,9 +384,4 @@ export function yearView(record: FireRecord, year: number): YearSummary {
       : null,
     anomalies: days.filter((d) => d.anomaly).map((d) => d.date),
   };
-}
-
-/** A single year harmonized on its own: what the landing page shows. */
-export function harmonize(hotspots: Hotspot[], year: number): YearSummary {
-  return yearView(buildRecord([gridYear(hotspots, year)]), year);
 }

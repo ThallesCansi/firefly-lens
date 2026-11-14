@@ -54,12 +54,12 @@ const STEPS = [
     body: `On this day MODIS reported ${MODIS.length} detections and VIIRS ${VIIRS.length} over the same ground. Neither number is wrong, and neither is a count of fires.`,
   },
   {
-    title: "Snap both to one shared grid",
-    body: `Every detection lands in a grid cell about 5.5 km wide. A cell is lit or it is not, however many pixels fell inside. MODIS lights ${MODIS_CELLS.length} cells, VIIRS ${VIIRS_CELLS.length}.`,
+    title: "Bring VIIRS to a 1 km view",
+    body: `Several 375 m VIIRS pixels over one fire would count several times, so VIIRS is counted in cells: a cell is lit or it is not, however many pixels fell inside. In this sketch MODIS lights ${MODIS_CELLS.length} cells, VIIRS ${VIIRS_CELLS.length}. VIIRS still sees more: it catches smaller fires.`,
   },
   {
-    title: "Scale each sensor against its own busy day",
-    body: `Each count is divided by that sensor's own reference, the 95th percentile of its burning days. MODIS reaches ${MODIS_SCALED.toFixed(2)}, VIIRS ${VIIRS_SCALED.toFixed(2)}. Their mean, ${DAY_INDEX.toFixed(2)}, is the day's activity.`,
+    title: "Put VIIRS on the MODIS scale",
+    body: `A model learned from 2018 to 2023, when both flew over Brazil, turns each VIIRS count into the MODIS Aqua hot spots it stands for, by biome, month and day or night. On one scale the two agree, and the day gets one value: here ${DAY_INDEX.toFixed(2)} of the area's busy day.`,
   },
   {
     title: "Give the day its place in the year",

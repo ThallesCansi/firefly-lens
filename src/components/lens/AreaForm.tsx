@@ -78,7 +78,9 @@ export function AreaForm({
           {error}
         </p>
       ) : (
-        <p className="text-[0.8125rem] text-faint">Decimal degrees, west and south negative. Each side up to {MAX_AREA_SIDE} degrees.</p>
+        <p className="text-[0.8125rem] text-faint">
+          Decimal degrees, west and south negative. Each side up to {MAX_AREA_SIDE} degrees. The records cover Brazil only.
+        </p>
       )}
     </form>
   );

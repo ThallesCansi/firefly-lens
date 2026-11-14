@@ -11,7 +11,7 @@ import type { MapDestination } from "./LocationSearch";
 import { TopNavigation } from "./TopNavigation";
 import { MapToolbar, MapLayerControl } from "./MapControls";
 import { TemporalControl } from "./TemporalControl";
-import { useMapHotspots } from "@/lib/useMapHotspots";
+import { useMapCells } from "@/lib/useMapHotspots";
 
 type Area = { name: string; bbox: BBox };
 const presets = fireData.presets();
@@ -24,14 +24,14 @@ export function LensApp() {
   const [drawing, setDrawing] = useState(false);
   const [coordinates, setCoordinates] = useState(false);
   const [period, setPeriod] = useState(`${fireData.lastYear}-09`);
-  const [from, setFrom] = useState(`${fireData.firstYear}-01`);
-  const [to, setTo] = useState(`${fireData.lastYear}-12`);
+  const [from, setFrom] = useState(fireData.firstMonth);
+  const [to, setTo] = useState(fireData.lastMonth);
   const [sensors, setSensors] = useState<Sensor[]>(["MODIS", "VIIRS"]);
   const [destination, setDestination] = useState<MapDestination | null>(null);
   const [reset, setReset] = useState(0);
   const analyzeButton = useRef<HTMLButtonElement>(null);
   const closeButton = useRef<HTMLButtonElement>(null);
-  const mapData = useMapHotspots(area?.bbox ?? null, period);
+  const mapData = useMapCells(area?.bbox ?? null, period);
   const selectArea = useCallback((bbox: BBox) => {
     setArea({ name: "Custom area", bbox: normalizeBBox(bbox) });
     setDrawing(false);
@@ -83,7 +83,7 @@ export function LensApp() {
           <HotspotMap
             bbox={area?.bbox ?? null}
             areaName={area?.name ?? "Earth"}
-            hotspots={mapData.hotspots}
+            cells={mapData.cells}
             drawing={drawing}
             onDraw={selectArea}
             sensors={sensors}
@@ -92,7 +92,7 @@ export function LensApp() {
           />
           <div className="map-status map-surface">
             <span className="status-dot" />
-            {fireData.simulated ? "SIMULATED DATA" : "OBSERVATIONS"}
+            NASA FIRMS · BRAZIL
             <span className="text-dim">
               {fireData.firstYear}–{fireData.lastYear}
             </span>
@@ -175,8 +175,8 @@ export function LensApp() {
                 One shared history.
               </h1>
               <p className="mt-2 text-sm text-dim">
-                Search Earth, then draw a rectangle to investigate its fire
-                activity.
+                Real MODIS and VIIRS records for Brazil, 2002 to today. Draw a
+                rectangle anywhere in Brazil to investigate its fire activity.
               </p>
               <button
                 className="btn btn-primary mt-4"
@@ -230,11 +230,20 @@ export function LensApp() {
           {area && (
             <p className="map-data-status map-surface" role="status">
               {mapData.error ||
-                (mapData.hotspots === null
+                (mapData.cells === null
                   ? "Loading detections…"
-                  : `${mapData.hotspots.filter((p) => sensors.includes(p.instrument)).length.toLocaleString()} visible detections · selected area only`)}
-              {period < "2012-01-20" && sensors.includes("VIIRS")
-                ? " · VIIRS unavailable before 20 Jan 2012"
+                  : `${Math.round(
+                      mapData.cells.reduce(
+                        (s, c) =>
+                          s +
+                          (sensors.includes("MODIS") ? c.modis : 0) +
+                          (sensors.includes("VIIRS") ? c.viirs : 0),
+                        0,
+                      ),
+                    ).toLocaleString("en-GB")} visible detections in ${mapData.cells.length.toLocaleString("en-GB")} grid cells · selected area only`)}
+              {period < fireData.viirsStart.slice(0, period.length) &&
+              sensors.includes("VIIRS")
+                ? " · VIIRS NOAA-20 starts in April 2018"
                 : ""}
             </p>
           )}
@@ -251,8 +260,7 @@ export function LensApp() {
             <div className="analysis-heading">
               <div>
                 <p className="eyebrow">
-                  INVESTIGATE /{" "}
-                  {fireData.simulated ? "SIMULATION" : "OBSERVATIONS"}
+                  INVESTIGATE / NASA FIRMS, BRAZIL
                 </p>
                 <h2 className="text-2xl">{analyzed.name}</h2>
                 <p className="num text-xs text-dim">
@@ -279,10 +287,8 @@ export function LensApp() {
             </div>
             <div className="analysis-scroll">
               <p className="mb-5 text-xs text-dim">
-                {fireData.simulated
-                  ? "Simulated detections, not satellite observations. "
-                  : ""}
-                Hot spots are detected pixels, not independent fires.{" "}
+                Real detections, harmonized to the MODIS Aqua scale. Hot spots
+                are detected pixels, not independent fires.{" "}
                 <Link href="/method">
                   Read the methodology and limitations.
                 </Link>
