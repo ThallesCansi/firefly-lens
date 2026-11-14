@@ -1,0 +1,97 @@
+# Parâmetros do pipeline de harmonização MODIS Aqua × VIIRS NOAA-20 (Brasil).
+# Tudo que é limiar, ano, tamanho de grade ou caminho fica aqui (regra R4).
+
+project:
+  seed: 42
+  bbox: [-74.0, -34.0, -34.0, 6.0]      # W, S, E, N (caixa envolvente do Brasil)
+
+paths:                                   # relativos à raiz do projeto
+  zips: data/zips                        # ZIPs temporários (apagados após extrair)
+  raw: data/raw                          # Parquet bruto por sensor e ano
+  interim: data/interim                  # tabelas intermediárias (filtrado, grade)
+  geo: data/geo                          # cache de biomas e contorno do Brasil
+  output: output
+  points: output/points                  # focos particionados por ano
+  figures: output/figures
+
+periods:
+  modis_archive: [2002, 2025]            # anos dos ZIPs anuais MODIS (Aqua a partir de jul/2002)
+  viirs_archive: [2018, 2025]            # anos dos ZIPs anuais NOAA-20 (SP começa em 2018-04-01)
+  calibration: [2018, 2023]              # sobreposição usada para ajustar os modelos (a partir de abr/2018);
+                                         # 2024+ fica de fora por causa da deriva orbital do Aqua
+  calibration_exclude: ["2020-08", "2022-04"]   # meses com queda do Aqua, fora do ajuste
+  climatology: [2003, 2025]              # base da mediana histórica
+  observed_until: 2025                   # até este ano a série é o MODIS observado; depois, o VIIRS harmonizado
+  api_year: 2026                         # ano baixado pela API
+  series_end: "2026-10"                  # último mês completo da série
+  partial_month: "2026-11"               # mês corrente, marcado com is_partial = true
+
+archive:                                 # arquivos anuais por país, processamento SP
+  modis_url: "https://firms.modaps.eosdis.nasa.gov/data/country/zips/modis_{year}_all_countries.zip"
+  viirs_n20_url: "https://firms.modaps.eosdis.nasa.gov/data/country/zips/viirs-jpss1_{year}_all_countries.zip"
+  country: Brazil                        # o nome real do CSV é confirmado listando o ZIP
+  delete_zip_after_extract: true
+
+api:                                     # FIRMS area API, só para 2026
+  area_url: "https://firms.modaps.eosdis.nasa.gov/api/area/csv/{key}/{source}/{bbox}/{day_range}/{date}"
+  availability_url: "https://firms.modaps.eosdis.nasa.gov/api/data_availability/csv/{key}/all"
+  day_range: 5
+  sleep_s: 1.0
+  timeout_s: 120
+  max_retries: 5
+  backoff_s: 2.0
+  prefer_sp: true                        # usa SP onde existir e NRT só na cauda;
+                                         # as datas de corte vêm de availability_url em tempo de execução
+  products:
+    modis:     {sp: MODIS_SP,        nrt: MODIS_NRT}
+    viirs_n20: {sp: VIIRS_NOAA20_SP, nrt: VIIRS_NOAA20_NRT}
+    viirs_n21: {sp: VIIRS_NOAA21_SP, nrt: VIIRS_NOAA21_NRT}
+
+filters:
+  modis:
+    satellite: Aqua                      # a codificação real (A/Aqua) é conferida na Etapa 1
+    confidence_min: 30
+    confidence_min_sensitivity: 50       # teste de sensibilidade, não entra na série principal
+  viirs:
+    confidence_keep: [nominal, high]
+  type_keep: [0]                         # fogo presumido em vegetação; só existe em SP
+  dedup_keys: [latitude, longitude, acq_date, acq_time, satellite]
+
+confidence_class:                        # classe harmonizada entre sensores
+  modis_low_below: 30                    # confidence < 30         -> low
+  modis_high_from: 80                    # confidence >= 80        -> high; o resto é nominal
+  viirs_codes: {l: low, n: nominal, h: high}
+
+sensors:
+  model_viirs: N20                       # único VIIRS que alimenta n_viirs_* e o modelo
+  points_only: [N21]                     # entra só no arquivo de focos (2026)
+
+biomes:
+  source: geobr.read_biomes
+  keep: ["Amazônia", "Cerrado", "Caatinga", "Mata Atlântica", "Pantanal", "Pampa"]
+  drop: ["Sistema Costeiro"]
+  orphans: nearest                       # ponto dentro do Brasil sem bioma -> bioma mais próximo
+
+grid:
+  cell_deg: 0.25                         # célula de modelagem
+  subcell_deg: 0.01                      # subcélula (~1 km) do VIIRS degradado
+  origin: [-74.0, -34.0]                 # canto sudoeste da grade (lon, lat)
+
+level1:
+  strata: [bioma, month, daynight]
+  shrink_prior_n: 200                    # peso do fator do bioma no encolhimento;
+                                         # a fórmula exata é declarada na Etapa 5
+
+level2:
+  # x = log1p(n_viirs_1km); viirs_zero = (n_viirs_1km == 0). As quatro últimas parcelas foram
+  # aprovadas em 14/11/2026, depois que a especificação original superestimou o total em 44%.
+  formula: "n_modis ~ x * C(bioma) + C(month) + C(daynight) + viirs_zero + I(x**2) + C(daynight):x + C(daynight):I(x**2)"
+  n_sim: 500                             # réplicas da simulação de incerteza
+  sim_chunk_rows: 200000                 # linhas por bloco (máquina com 7 GB de RAM)
+  quantiles: [2.5, 97.5]
+  common_error_target_coverage: 0.95     # cobertura-alvo em bioma × mês (LOYO) ao calibrar o erro comum c;
+                                         # o valor estimado de c fica em output/harmonization_params.json
+
+validation:
+  loyo_years: [2018, 2023]               # leave-one-year-out dentro da calibração
+  oos_years: [2024, 2026]                # fora da amostra contra o MODIS Aqua (com deriva)

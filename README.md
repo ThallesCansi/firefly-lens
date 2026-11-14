@@ -99,6 +99,15 @@ The map uses [MapLibre GL JS](https://maplibre.org/) with a CARTO basemap built 
 
 Place search uses [Photon](https://photon.komoot.io/) through `/api/geocode`, with explicit submission, cached results, an eight-second timeout, and a per-process request guard. The public service permits moderate use, may throttle requests, and has no availability guarantee. Set the server-only `PHOTON_URL` to a compatible private Photon `/api/` endpoint for larger deployments. No private key is exposed. See [Phase 3 validation and screenshots](docs/phase-3/validation.md).
 
+## Real-data harmonization for Brazil
+
+[`harmonization/`](harmonization/) holds a separate Python pipeline that harmonizes the **real** FIRMS records for Brazil: MODIS Aqua 2002–2025 (standard processing) and VIIRS NOAA-20 2018–2026, converted to one monthly series in MODIS-Aqua-equivalent hot spots on a 0.25° grid, with uncertainty for 2026 onward. It is not wired into the app yet.
+
+- Outputs ready to read: `harmonization/output/grid_monthly_total.parquet` (cell × month), `climatology.parquet` and `harmonization_params.json`.
+- Method, validation and limits (in Portuguese): [`harmonization/docs/METHODOLOGY.md`](harmonization/docs/METHODOLOGY.md); every column: [`harmonization/docs/FEATURES.md`](harmonization/docs/FEATURES.md).
+- Reference functions for a backend: [`fire_calendar.py`](harmonization/pipeline/fire_calendar.py) (calendar, median and anomaly for a polygon) and [`export_points.py`](harmonization/pipeline/export_points.py) (hot-spot CSV).
+- To rerun: `cd harmonization && uv sync`, then the numbered scripts; see [`harmonization/README.md`](harmonization/README.md).
+
 ## Roadmap
 
 - Load real FIRMS records: archive for the history, area API for the latest days.

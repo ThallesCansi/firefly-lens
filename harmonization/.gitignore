@@ -1,0 +1,14 @@
+# segredos (a chave do FIRMS fica só no .env local)
+.env
+!.env.example
+
+# ambiente Python
+.venv/
+__pycache__/
+*.pyc
+
+# dados baixados e intermediários (regenerados pelo pipeline, ~1 GB)
+data/
+
+# focos para download: 187 MB, regenerados por pipeline/03_points.py
+output/points/

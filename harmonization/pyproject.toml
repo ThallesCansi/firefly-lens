@@ -1,0 +1,23 @@
+[project]
+name = "harmonizacao-modis-viirs"
+version = "0.1.0"
+description = "Harmonização de focos de calor MODIS Aqua × VIIRS NOAA-20 para o Brasil (NASA Space Apps 2026)"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "duckdb>=1.3,<2",   # geobr 2.1 usa Relation.fetchone(), removido no duckdb 2.0
+    "pandas",
+    "pyarrow",
+    "numpy",
+    "scipy",
+    "statsmodels",
+    "geopandas",
+    "shapely",
+    "geobr",
+    "matplotlib",
+    "pyyaml",
+    "python-dotenv",
+    "requests",
+]
+
+[tool.uv]
+package = false
