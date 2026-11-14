@@ -1,0 +1,14 @@
+{
+  "retrievedAt": "2026-11-14T20:16:08.580Z",
+  "sources": {
+    "countries": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson",
+    "states": "https://servicodados.ibge.gov.br/api/v3/malhas/paises/BR?intrarregiao=UF&formato=application%2Fvnd.geo%2Bjson&qualidade=minima",
+    "names": "https://servicodados.ibge.gov.br/api/v1/localidades/estados"
+  },
+  "rawSha256": {
+    "countries": "6866c877d39cba9c357620878839b336d569f8c662d3cfab4cb1dbe2d39c977f",
+    "states": "07c671aa87aa1ab296c446de6294df9827112782537b996c0a160284907e7c0f",
+    "names": "7ca1368dea3af83cba1af84ae8a7e88f1173c97586831d086cc8b3c1ba9c6596"
+  },
+  "note": "Simplified boundaries for display/identification, not scientific clipping masks. IBGE API default vintage, not an asserted boundary year."
+}

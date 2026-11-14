@@ -1,0 +1,72 @@
+.ff-location-root {
+  position: relative;
+  min-width: 0;
+}
+.ff-location-root .ff-location-dropdown {
+  background: var(--color-canopy);
+  position: absolute;
+  top: calc(100% + 8px);
+  inset-inline: 0;
+  z-index: 40;
+  padding: 10px;
+  max-height: min(65dvh, 420px);
+  overflow: auto;
+}
+.ff-location-status {
+  padding: 4px 7px 8px;
+  font-size: 0.75rem;
+  color: var(--color-dim);
+}
+.ff-location-options {
+  max-height: min(40dvh, 300px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.ff-location-option {
+  border-radius: 7px;
+  list-style: none;
+}
+.ff-location-option button {
+  width: 100%;
+  min-height: 52px;
+  padding: 10px 9px;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 7px;
+  color: var(--color-ink);
+}
+.ff-location-option[aria-selected="true"],
+.ff-location-option:hover {
+  background: var(--color-bark);
+}
+.ff-location-option span {
+  display: block;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+.ff-location-option small {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.6875rem;
+  color: var(--color-dim);
+  text-transform: capitalize;
+}
+.ff-location-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--color-line);
+  padding: 6px 7px 0;
+  font-size: 0.6875rem;
+  color: var(--color-dim);
+}
+.ff-location-footer button {
+  min-height: 36px;
+  padding-inline: 8px;
+  cursor: pointer;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ff-location-option {
+    transition: background 120ms;
+  }
+}

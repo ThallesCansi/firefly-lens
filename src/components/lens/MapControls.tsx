@@ -9,12 +9,20 @@ export function MapToolbar({
   onTool,
   onClear,
   onReset,
+  onSelectAdministrative,
+  administrativeActive = false,
+  onEditRectangle,
+  rectangleEditing = false,
 }: {
   tool: SpatialTool;
   hasArea: boolean;
   onTool: (tool: SpatialTool) => void;
   onClear: () => void;
   onReset: () => void;
+  onSelectAdministrative?: () => void;
+  administrativeActive?: boolean;
+  onEditRectangle?: () => void;
+  rectangleEditing?: boolean;
 }) {
   return (
     <div
@@ -25,7 +33,9 @@ export function MapToolbar({
       <Tool
         label="Navigate"
         icon="navigate"
-        active={tool === "navigate"}
+        active={
+          tool === "navigate" && !administrativeActive && !rectangleEditing
+        }
         onClick={() => onTool("navigate")}
       />
       <Tool
@@ -48,6 +58,23 @@ export function MapToolbar({
         disabled={!hasArea}
         onClick={onClear}
       />
+      {onSelectAdministrative && (
+        <Tool
+          label="Select Country / State"
+          icon="administrative"
+          active={administrativeActive}
+          onClick={onSelectAdministrative}
+        />
+      )}
+      {onEditRectangle && (
+        <Tool
+          label="Edit rectangle"
+          icon="edit"
+          active={rectangleEditing}
+          disabled={!hasArea}
+          onClick={onEditRectangle}
+        />
+      )}
       <Tool label="Reset view" icon="reset" onClick={onReset} />
     </div>
   );
@@ -99,6 +126,17 @@ function Tool({
   onClick: () => void;
 }) {
   const paths: Record<string, ReactNode> = {
+    administrative: (
+      <>
+        <path d="M3 4h7l4 3h7v12h-7l-4-3H3zM10 4v12M14 7v12" />
+      </>
+    ),
+    edit: (
+      <>
+        <rect x="3" y="5" width="16" height="14" rx="1" />
+        <path d="m12 13 7-7 2 2-7 7-3 1z" />
+      </>
+    ),
     navigate: <path d="m5 3 14 8-8 2-2 8z" />,
     rectangle: (
       <>

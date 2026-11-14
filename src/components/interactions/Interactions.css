@@ -1,0 +1,159 @@
+.ff-interaction-card {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 0.875rem;
+}
+.ff-interaction-card h2 {
+  font-size: 1.35rem;
+}
+.ff-interaction-card label {
+  display: grid;
+  gap: 6px;
+}
+.ff-interaction-muted {
+  color: var(--color-dim);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+.ff-interaction-notice {
+  border-left: 3px solid var(--color-accent);
+  background: var(--color-bark);
+  padding: 10px 12px;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+.ff-interaction-source {
+  font-size: 0.75rem;
+  color: var(--color-dim);
+  text-decoration: underline;
+}
+.ff-interaction-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.ff-interaction-panel {
+  position: relative;
+  flex: 0 0 auto;
+  width: var(--analysis-panel-width);
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-night);
+  border-left: 1px solid var(--color-line);
+}
+.ff-interaction-panel[data-resizing="true"] {
+  user-select: none;
+  cursor: col-resize;
+}
+.ff-interaction-resize-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -7px;
+  width: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 15;
+  cursor: col-resize;
+  touch-action: none;
+}
+.ff-interaction-resize-handle span {
+  height: 56px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--color-faint);
+}
+.ff-interaction-resize-handle:hover span,
+.ff-interaction-resize-handle:focus-visible span {
+  width: 4px;
+  background: var(--color-selected);
+}
+.ff-interaction-panel-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--color-line);
+  font-size: 0.8125rem;
+}
+.ff-interaction-panel-tools button {
+  font-size: 0.75rem;
+}
+.ff-interaction-panel-content {
+  min-height: 0;
+  flex: 1;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 18px;
+}
+.ff-interaction-panel[data-mobile="true"] {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  width: 100%;
+  height: 58%;
+  border: 1px solid var(--color-line);
+  border-radius: 16px 16px 0 0;
+  z-index: 20;
+}
+.ff-interaction-edit-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 12;
+}
+.ff-interaction-corner {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  pointer-events: auto;
+  touch-action: none;
+  cursor: grab;
+  border-radius: 6px;
+  background: var(--color-canopy);
+  color: var(--color-ink);
+  border: 2px solid var(--color-selected);
+  box-shadow: var(--surface-shadow);
+}
+.ff-interaction-corner:active {
+  cursor: grabbing;
+}
+.ff-interaction-corner > span {
+  width: 8px;
+  height: 8px;
+  border: 1px solid currentColor;
+}
+@media (pointer: coarse) {
+  .ff-interaction-corner {
+    width: 44px;
+    height: 44px;
+  }
+  .ff-interaction-resize-handle {
+    width: 24px;
+    left: -12px;
+  }
+}
+
+@media (max-width: 700px) {
+  .ff-interaction-panel {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    width: 100%;
+    height: 58%;
+    border: 1px solid var(--color-line);
+    border-radius: 16px 16px 0 0;
+    z-index: 20;
+  }
+  .ff-interaction-resize-handle {
+    display: none;
+  }
+}

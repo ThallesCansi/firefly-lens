@@ -1,0 +1,87 @@
+.ff-preview-workspace {
+  position: relative;
+  display: flex;
+  height: calc(100dvh - 195px);
+  min-height: 520px;
+  border: 1px solid var(--color-line);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--color-canopy);
+}
+.ff-preview-controls {
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.ff-preview-controls h2 {
+  font-size: 1.2rem;
+}
+.ff-preview-toolbar > div {
+  position: static;
+  flex-direction: row;
+  flex-wrap: wrap;
+  width: max-content;
+  max-width: 100%;
+}
+.ff-preview-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  border-top: 1px solid var(--color-line);
+  padding-top: 18px;
+}
+.ff-preview-form h2,
+.ff-preview-form > p {
+  grid-column: 1/-1;
+}
+.ff-preview-form label {
+  display: grid;
+  gap: 5px;
+  font-size: 0.8125rem;
+}
+.ff-preview-form input,
+.ff-preview-form select {
+  width: 100%;
+  min-width: 0;
+}
+.ff-preview-form button {
+  font-size: 0.8125rem;
+  white-space: normal;
+}
+.ff-preview-help {
+  font-size: 0.8125rem;
+  color: var(--color-dim);
+  line-height: 1.65;
+}
+.ff-preview-notice {
+  padding: 12px;
+  background: var(--color-bark);
+  font-size: 0.8125rem;
+  border-radius: 8px;
+}
+@media (max-width: 700px) {
+  .ff-preview-controls {
+    flex: none;
+    width: 100%;
+    height: 42%;
+    padding: 14px;
+  }
+  .ff-preview-form {
+    grid-template-columns: 1fr;
+  }
+  .ff-preview-form h2,
+  .ff-preview-form > p {
+    grid-column: 1;
+  }
+  .ff-preview-workspace {
+    min-height: 600px;
+  }
+  .ff-preview-toolbar button {
+    width: 38px;
+    height: 40px;
+  }
+}
