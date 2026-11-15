@@ -82,21 +82,11 @@ export function InteractionPreview() {
         <div className={"ff-preview-toolbar"}>
           <MapToolbar
             tool="navigate"
-            hasArea={true}
             onTool={(tool) =>
               setNotice(
                 "Tool requested: " +
                   tool +
                   ". Map event integration is pending.",
-              )
-            }
-            onClear={() => {
-              administrative.cancel();
-              editor.cancel();
-            }}
-            onReset={() =>
-              setNotice(
-                "Reset-view request. Camera is reserved for the map engine.",
               )
             }
             onSelectAdministrative={() =>

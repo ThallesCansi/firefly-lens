@@ -34,7 +34,7 @@ describe("scientific SVG presentation", () => {
       "320 Aqua-equivalent hot spots (observed); median 100; rank 1; outside selected range",
     );
     expect(svg).toContain('opacity="0.25"');
-    expect(svg).toContain('stroke="#d8f24e"');
+    expect(svg).toContain('stroke="#f3eee9"');
     expect(svg).toContain("Area &lt;script&gt; &amp; &quot;name&quot;");
     expect(svg).not.toContain("<script>");
     expect(svg).toContain("Simulated detections (not observations)");

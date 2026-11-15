@@ -152,7 +152,7 @@ export function HistoryHeatmap({
                         {high && (
                           <span
                             aria-hidden="true"
-                            className="absolute inset-[2px] rounded-[2px] border-[1.5px] border-lume"
+                            className="absolute inset-[2px] rounded-[2px] border-[1.5px] border-marker shadow-[inset_0_0_0_1px_var(--color-night)]"
                           />
                         )}
                         {cell.source === "modeled" && (
@@ -211,7 +211,7 @@ export function HistoryHeatmap({
         <div className="flex items-center gap-2">
           <span
             aria-hidden="true"
-            className="block size-4 rounded-[3px] border-[1.5px] border-lume"
+            className="block size-4 rounded-[3px] border-[1.5px] border-marker shadow-[inset_0_0_0_1px_var(--color-night)]"
           />
           <span>
             At least twice the month&rsquo;s median{" "}

@@ -41,9 +41,9 @@ export function Lume({
         <ellipse cx="22" cy="42" rx="11" ry="8.5" transform="rotate(-24 22 42)" fill={light} />
         <path d="M17.5 36.5l6 12M23 34.5l5.5 11" stroke="var(--color-lume-ink)" strokeOpacity="0.28" strokeWidth="1.5" strokeLinecap="round" />
         {/* thorax */}
-        <ellipse cx="37" cy="33" rx="8.5" ry="7.5" transform="rotate(-24 37 33)" fill="#39432f" />
+        <ellipse cx="37" cy="33" rx="8.5" ry="7.5" transform="rotate(-24 37 33)" fill="#43362c" />
         {/* head */}
-        <circle cx="47" cy="26" r="7.5" fill="#252c22" />
+        <circle cx="47" cy="26" r="7.5" fill="#2a221c" />
         <circle cx="49.5" cy="25" r="3" fill="var(--color-ink)" />
         <circle cx="50.3" cy="25.2" r="1.4" fill="var(--color-night)" />
         {/* antennae */}

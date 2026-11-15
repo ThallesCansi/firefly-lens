@@ -27,8 +27,10 @@
   cursor: pointer;
   font-size: 14px;
 }
-.search-result:hover {
-  color: var(--color-lume);
+@media (hover: hover) {
+  .search-result:hover {
+    color: var(--color-lume);
+  }
 }
 .workspace-body {
   flex: 1;
@@ -37,6 +39,7 @@
   position: relative;
 }
 .workspace-map {
+  container: map / inline-size;
   position: relative;
   flex: 1;
   min-width: 0;
@@ -55,11 +58,14 @@
   order: 2;
   margin: 0;
 }
+/* Floating surfaces: depth from a shadow ring, not a border. The transparent
+   border keeps an edge in forced-colors mode, where shadows are removed. */
 .map-surface {
   background: var(--surface-floating);
-  border: 1px solid var(--color-line);
-  border-radius: 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-card);
   box-shadow: var(--surface-shadow);
+  backdrop-filter: blur(10px);
 }
 /* Space behind the globe: deep blue-black with three layers of stars at
    unrelated spacings, so no repeat is visible. The same in both themes. */
@@ -93,23 +99,52 @@
   position: absolute;
   top: 84px;
   left: 20px;
+  /* Above the cards beside it, so its tooltips are never covered. */
+  z-index: 27;
   display: flex;
   flex-direction: column;
   padding: 5px;
   gap: 3px;
 }
+/* Inner radius = card radius (14) − padding (5) − border (1). */
 .map-toolbar button {
+  position: relative;
   display: grid;
   place-items: center;
   width: 44px;
   height: 44px;
-  border-radius: 7px;
+  border-radius: 8px;
   cursor: pointer;
   color: var(--color-dim);
+  transition-property: background-color, color, scale;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
 }
-.map-toolbar button:hover {
-  background: var(--color-bark);
-  color: var(--color-ink);
+.map-toolbar-rule {
+  height: 1px;
+  margin: 3px 6px;
+  background: var(--color-line);
+}
+/* The tool's name, next to it, on hover or keyboard focus. */
+.map-toolbar button::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: calc(100% + 12px);
+  top: 50%;
+  translate: 0 -50%;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: var(--color-ink);
+  color: var(--color-night);
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: pre;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 120ms ease-out;
+}
+.map-toolbar button:focus-visible::after {
+  opacity: 1;
 }
 .map-toolbar button[aria-pressed="true"] {
   background: var(--color-button);
@@ -119,24 +154,116 @@
   opacity: 0.35;
   cursor: default;
 }
-/* Top-right: the map period, then the layers. */
-.map-top-right {
+@media (hover: hover) {
+  .map-toolbar button:hover {
+    background: var(--color-bark);
+    color: var(--color-ink);
+  }
+  .map-toolbar button:hover::after {
+    opacity: 1;
+    transition-delay: 300ms;
+  }
+  .map-toolbar button[aria-pressed="true"]:hover {
+    background: var(--color-button-hover);
+    color: var(--color-button-ink);
+  }
+  .layer-chip:hover,
+  .map-projection button:not([aria-pressed="true"]):hover,
+  .map-zoom button:not(:disabled):hover {
+    background: var(--color-bark);
+    color: var(--color-ink);
+  }
+}
+/* Press feedback, the same for every map control. */
+.map-toolbar button:not(:disabled):active,
+.layer-chip:active,
+.map-projection button:not(:disabled):active,
+.map-zoom button:not(:disabled):active,
+.assistant-send:not(:disabled):active,
+.assistant-examples button:active {
+  scale: 0.96;
+}
+/* Cards enter with a short rise; under reduced motion only the opacity changes. */
+@media (prefers-reduced-motion: no-preference) {
+  .explore-hint,
+  .selection-card,
+  .map-search-panel,
+  .coordinates-panel,
+  .assistant-panel,
+  .map-card[data-open="true"] .map-card-body {
+    animation: card-in 300ms ease-out both;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .explore-hint,
+  .selection-card,
+  .map-search-panel,
+  .coordinates-panel,
+  .assistant-panel {
+    animation: card-fade 150ms ease-out both;
+  }
+}
+@keyframes card-in {
+  from {
+    opacity: 0;
+    filter: blur(4px);
+    translate: 0 12px;
+  }
+}
+@keyframes card-fade {
+  from {
+    opacity: 0;
+  }
+}
+/* Top-right: one map card, period and sensors together. */
+.map-card {
   position: absolute;
   top: 16px;
   right: 20px;
+  z-index: 15;
+  width: 268px;
+  padding: 12px;
+}
+.map-card-chip {
+  display: none;
+}
+.map-card-body {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
   gap: 10px;
-  z-index: 15;
+}
+.map-card-hint {
+  font-size: 12px;
+  color: var(--color-dim);
 }
 .map-layers {
-  padding: 10px 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
 }
-.map-layers input {
-  accent-color: var(--color-lume);
-  width: 16px;
-  height: 16px;
+.layer-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 36px;
+  border: 1px solid var(--color-line);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-dim);
+  cursor: pointer;
+  transition-property: background-color, border-color, color, scale;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+}
+.layer-chip[aria-pressed="true"] {
+  border-color: var(--color-faint);
+  background: var(--color-bark);
+  color: var(--color-ink);
+}
+.layer-chip[aria-pressed="false"] > span {
+  opacity: 0.35;
 }
 .sensor-ring {
   width: 10px;
@@ -165,9 +292,13 @@
   width: min(350px, calc(100% - 112px));
   padding: 22px;
 }
-/* Above the corner handles of the area, which sit at z-index 12. */
+/* Above the shape's edit handles; actions stay on one row. */
 .selection-card {
-  z-index: 15;
+  z-index: 26;
+  width: min(372px, calc(100% - 112px));
+}
+.selection-card .btn {
+  padding-inline: 0.875rem;
 }
 .coordinates-panel {
   position: absolute;
@@ -177,13 +308,13 @@
   padding: 16px;
   max-height: calc(100% - 180px);
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 .temporal-control {
   display: grid;
-  grid-template-columns: auto auto;
+  grid-template-columns: 1fr 1.4fr;
   align-items: center;
-  gap: 8px;
-  padding: 10px 12px 10px;
+  gap: 6px;
 }
 .temporal-head {
   grid-column: 1 / -1;
@@ -196,18 +327,13 @@
   color: var(--color-dim);
 }
 .temporal-control .field {
+  width: 100%;
   height: 38px;
 }
 .temporal-control .btn {
   grid-column: 1 / -1;
   min-height: 34px;
   font-size: 12px;
-}
-.temporal-caption {
-  grid-column: 1 / -1;
-  font-size: 11px;
-  color: var(--color-dim);
-  white-space: nowrap;
 }
 /* Place search, opened from the magnifier, next to the tools. */
 .map-search-panel {
@@ -307,7 +433,7 @@
 }
 .assistant-panel {
   padding: 14px 16px 16px;
-  border-radius: 16px;
+  border-radius: var(--radius-panel);
 }
 .assistant-panel-head {
   display: flex;
@@ -346,9 +472,11 @@
   cursor: pointer;
   transition: background 160ms, border-color 160ms;
 }
-.assistant-examples button:hover {
-  background: var(--color-bark);
-  border-color: var(--color-dim);
+@media (hover: hover) {
+  .assistant-examples button:hover {
+    background: var(--color-bark);
+    border-color: var(--color-dim);
+  }
 }
 .assistant-thread {
   display: flex;
@@ -371,16 +499,92 @@
   background: var(--color-button);
   color: var(--color-button-ink);
 }
-.map-data-status {
+/* Bottom-left: the map key, with the live detection count at its foot. */
+.map-key {
   position: absolute;
-  bottom: 98px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 7px 12px;
-  font-size: 11px;
-  width: max-content;
-  max-width: calc(100% - 40px);
-  text-align: center;
+  left: 20px;
+  bottom: 28px;
+  z-index: 12;
+  width: 244px;
+  padding: 10px 12px;
+  font-size: 12.5px;
+  color: var(--color-dim);
+}
+.map-key-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.map-key-rows li {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.map-key-rows .sensor-dot {
+  margin-inline: 1.5px;
+}
+.map-key-area {
+  width: 12px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--color-selected);
+}
+.map-key-status {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-line);
+  color: var(--color-ink);
+}
+.map-key-status p {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.map-key-note {
+  margin-top: 6px;
+  color: var(--color-faint);
+}
+/* Bottom-right: projection, zoom and reset in one column. */
+.map-view-controls {
+  position: absolute;
+  right: 20px;
+  bottom: 40px;
+  z-index: 12;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+.map-projection,
+.map-zoom {
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+  gap: 2px;
+}
+.map-projection button,
+.map-zoom button {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-dim);
+  cursor: pointer;
+  transition-property: background-color, color, scale;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+}
+.map-projection button[aria-pressed="true"] {
+  background: var(--color-button);
+  color: var(--color-button-ink);
+}
+.map-projection button:disabled,
+.map-zoom button:disabled {
+  opacity: 0.35;
+  cursor: default;
 }
 .analysis-drawer {
   flex: 0 0 min(600px, 48%);
@@ -421,13 +625,8 @@
 .workspace-body[data-expanded="true"] .analysis-drawer {
   flex-basis: 65%;
 }
-.workspace-body[data-analysis="true"] .map-legend {
-  bottom: 100px;
-}
+
 @media (max-width: 1100px) {
-  .temporal-caption {
-    display: none;
-  }
   .assistant-badge-inline {
     display: none;
   }
@@ -440,8 +639,20 @@
   .analysis-heading .expand-analysis {
     display: none;
   }
-  .map-legend {
+}
+/* The bottom row shares the map's width: the assistant narrows between the key
+   and the view controls, and on a narrow map the key moves above it. */
+@container map (max-width: 1150px) {
+  .assistant-dock {
+    width: max(280px, calc(100% - 600px));
+  }
+}
+@container map (max-width: 900px) {
+  .map-key {
     bottom: 100px;
+  }
+  .assistant-dock {
+    width: calc(100% - 150px);
   }
 }
 @media (max-width: 700px) {
@@ -450,39 +661,57 @@
     left: 12px;
   }
   .map-toolbar {
-    top: 74px;
+    top: 70px;
     left: 12px;
   }
-  /* The period and the layers sit under the site card, on the right. */
-  .map-top-right {
-    top: 74px;
+  /* The map card folds into a chip under the site card, opening on tap. */
+  .map-card {
+    top: 70px;
     right: 12px;
-    gap: 8px;
+    width: auto;
+    padding: 0;
   }
-  .map-layers {
-    padding: 7px 10px;
+  .map-card-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 0 12px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-ink);
+    cursor: pointer;
+  }
+  .map-card-body {
+    display: none;
+    width: 240px;
+    padding: 0 12px 12px;
+  }
+  .map-card[data-open="true"] .map-card-body {
+    display: flex;
   }
   .temporal-head {
     display: none;
   }
-  .temporal-control {
-    padding: 8px;
-  }
   .map-search-panel {
-    top: 74px;
-    left: 74px;
-    width: calc(100% - 86px);
+    top: 70px;
+    left: 70px;
+    width: calc(100% - 82px);
   }
-  /* The assistant takes the bottom edge; zoom, projection and attribution move above it. */
+  .explore-hint {
+    left: 70px;
+    top: 122px;
+    width: calc(100% - 82px);
+    padding: 16px;
+  }
+  .explore-hint h1 {
+    font-size: 22px;
+  }
+  /* The assistant takes the bottom edge; the key and view controls sit above it. */
   .assistant-dock {
-    bottom: 30px;
+    bottom: 28px;
     width: calc(100% - 24px);
-  }
-  .workspace-map .maplibregl-ctrl-bottom-right {
-    bottom: 88px;
-  }
-  .hotspot-map > [role="group"][aria-label="Map projection"] {
-    bottom: 214px;
+    min-width: 0;
   }
   .assistant-bar {
     height: 50px;
@@ -490,24 +719,37 @@
   .assistant-bar input {
     font-size: 14px;
   }
-  /* Below the period and layers cards on the right. */
-  .explore-hint,
-  .selection-card {
-    left: 77px;
-    top: 262px;
-    width: calc(100% - 90px);
-    padding: 16px;
+  .workspace-map .maplibregl-ctrl-bottom-right {
+    bottom: 86px;
   }
-  .explore-hint h1 {
-    font-size: 22px;
+  /* Clear of the attribution line, which sits at bottom 86. */
+  .map-key {
+    left: 12px;
+    bottom: 120px;
+    width: auto;
+    max-width: calc(100% - 84px);
+    padding: 8px 10px;
+    font-size: 11.5px;
   }
-  /* On a phone the area card is a strip above the period control, so the map
+  .map-key-rows {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+  }
+  .map-key-rows .text-faint {
+    display: none;
+  }
+  .map-view-controls {
+    right: 12px;
+    bottom: 120px;
+  }
+  /* On a phone the area card is a strip above the assistant, so the map
      and the area's corners stay in view. */
   .selection-card {
-    left: 10px;
-    right: 10px;
+    left: 12px;
+    right: 12px;
     top: auto;
-    bottom: 96px;
+    bottom: 90px;
     width: auto;
     padding: 12px 14px;
   }
@@ -520,26 +762,16 @@
   .selection-card .btn {
     padding-block: 8px;
   }
-  .workspace-map:has(.selection-card) .map-legend,
-  .workspace-map:has(.selection-card) .map-data-status {
+  .workspace-map:has(.selection-card) .map-key {
     display: none;
   }
+  .workspace-map:has(.selection-card) .map-view-controls {
+    bottom: 250px;
+  }
   .coordinates-panel {
-    left: 74px;
-    top: 60px;
-    width: calc(100% - 86px);
-  }
-  .temporal-control .btn {
-    padding: 6px;
-    font-size: 11px;
-  }
-  .map-legend {
-    bottom: 150px;
-    font-size: 10px;
-    padding: 7px;
-  }
-  .map-data-status {
-    bottom: 100px;
+    left: 70px;
+    top: 70px;
+    width: calc(100% - 82px);
   }
   .analysis-drawer {
     position: absolute;
@@ -547,8 +779,7 @@
     left: 0;
     right: 0;
     height: 58%;
-    border: 1px solid var(--color-line);
-    border-radius: 18px 18px 0 0;
+    border-radius: var(--radius-panel) var(--radius-panel) 0 0;
     z-index: 20;
     box-shadow: 0 -8px 32px #0005;
   }
@@ -561,33 +792,32 @@
   .workspace-body[data-analysis="true"] .workspace-map {
     margin-bottom: calc(100dvh * 0.58);
   }
-  .workspace-body[data-analysis="true"] .map-legend,
-  .workspace-body[data-analysis="true"] .map-data-status,
+  .workspace-body[data-analysis="true"] .map-key,
   .workspace-body[data-analysis="true"] .assistant-dock,
-  .workspace-body[data-analysis="true"] .map-top-right {
+  .workspace-body[data-analysis="true"] .map-card {
     display: none;
   }
   .workspace-body[data-analysis="true"] .map-toolbar {
     top: 12px;
     flex-direction: row;
   }
-
+  .workspace-body[data-analysis="true"] .map-toolbar-rule {
+    width: 1px;
+    height: auto;
+    margin: 6px 3px;
+  }
   .drawing-hint {
-    margin-left: 76px;
+    margin-left: 70px;
     margin-right: 12px;
     font-size: 12px;
   }
 }
 @media (max-width: 700px) and (max-height: 740px) {
   .explore-hint {
-    top: 252px;
     padding: 12px;
   }
   .explore-hint h1 {
     font-size: 19px;
-  }
-  .map-legend {
-    display: none;
   }
 }
 @media (prefers-reduced-motion: reduce) {

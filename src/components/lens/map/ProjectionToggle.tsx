@@ -23,27 +23,21 @@ export function ProjectionToggle({
     <div
       role="group"
       aria-label="Map projection"
-      className={`map-surface pointer-events-auto flex gap-1 rounded-lg p-1 text-[0.8125rem] ${className}`}
+      className={`map-projection map-surface ${className}`}
     >
-      {OPTIONS.map((o) => {
-        const active = value === o.mode;
-        return (
-          <button
-            key={o.mode}
-            type="button"
-            aria-pressed={active}
-            disabled={disabled}
-            title={o.mode === "globe" ? "Show the Earth as a globe" : "Show a flat map"}
-            onClick={() => onChange(o.mode)}
-            className={`min-h-8 min-w-11 cursor-pointer rounded-md px-2.5 font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-              active ? "bg-lume text-lume-ink" : "text-dim hover:text-ink"
-            }`}
-          >
-            <span className="sm:hidden">{o.short}</span>
-            <span className="hidden sm:inline">{o.label}</span>
-          </button>
-        );
-      })}
+      {OPTIONS.map((o) => (
+        <button
+          key={o.mode}
+          type="button"
+          aria-pressed={value === o.mode}
+          aria-label={o.label}
+          title={o.mode === "globe" ? "3D globe" : "2D map"}
+          disabled={disabled}
+          onClick={() => onChange(o.mode)}
+        >
+          {o.short}
+        </button>
+      ))}
     </div>
   );
 }
