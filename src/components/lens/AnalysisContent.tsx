@@ -1,5 +1,6 @@
 "use client";
 
+import { Picker } from "@/components/ui/Picker";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
 import { cellDays } from "@/lib/data/area";
@@ -669,34 +670,23 @@ function MonthPicker({
         role="group"
         aria-labelledby={`range-${label}`}
       >
-        <select
-          aria-label={`${label} month`}
-          value={month}
-          onChange={(e) => set(year, Number(e.target.value))}
-          className="field"
-        >
-          {MONTHS.map((name, m) => (
-            <option key={name} value={m} disabled={!allowed(year, m)}>
-              {name}
-            </option>
-          ))}
-        </select>
-        <select
-          aria-label={`${label} year`}
-          value={year}
-          onChange={(e) => set(Number(e.target.value), month)}
+        <Picker
+          label={`${label} month`}
+          value={String(month)}
+          options={MONTHS.map((name, m) => ({ value: String(m), label: name, disabled: !allowed(year, m) }))}
+          onChange={(v) => set(year, Number(v))}
+        />
+        <Picker
+          label={`${label} year`}
           className="field num"
-        >
-          {ALL_YEARS.filter(
+          value={String(year)}
+          options={ALL_YEARS.filter(
             (y) =>
               (!min || y >= Number(min.slice(0, 4))) &&
               (!max || y <= Number(max.slice(0, 4))),
-          ).map((y) => (
-            <option key={y} value={y}>
-              {y}
-            </option>
-          ))}
-        </select>
+          ).map((y) => ({ value: String(y), label: String(y) }))}
+          onChange={(v) => set(Number(v), month)}
+        />
       </div>
     </div>
   );

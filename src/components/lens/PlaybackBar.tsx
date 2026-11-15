@@ -1,9 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { fireData } from "@/lib/data/source";
 import { MONTHS } from "@/lib/format";
 import { monthsBetween } from "@/lib/usePlayback";
+import { Picker } from "@/components/ui/Picker";
+
+const YEARS = Array.from({ length: fireData.lastYear - fireData.firstYear + 1 }, (_, i) => {
+  const y = String(fireData.lastYear - i);
+  return { value: y, label: y };
+});
 
 /** Time a month stays on screen at 1×. */
 const FRAME_MS = 900;
@@ -41,30 +47,21 @@ function MonthYear({
   const clamp = (v: string) => (v < min ? min : v > max ? max : v);
   return (
     <span className="playback-when">
-      <select
-        aria-label={`${name} month`}
-        className="field"
+      <Picker
+        label={`${name} month`}
+        placement="up"
         value={value.slice(5, 7)}
-        onChange={(e) => onChange(clamp(`${value.slice(0, 4)}-${e.target.value}`))}
-      >
-        {MONTHS.map((m, i) => (
-          <option key={m} value={String(i + 1).padStart(2, "0")}>
-            {m.slice(0, 3)}
-          </option>
-        ))}
-      </select>
-      <select
-        aria-label={`${name} year`}
+        options={MONTHS.map((m, i) => ({ value: String(i + 1).padStart(2, "0"), label: m.slice(0, 3) }))}
+        onChange={(v) => onChange(clamp(`${value.slice(0, 4)}-${v}`))}
+      />
+      <Picker
+        label={`${name} year`}
+        placement="up"
         className="field num"
         value={value.slice(0, 4)}
-        onChange={(e) => onChange(clamp(`${e.target.value}-${value.slice(5, 7)}`))}
-      >
-        {Array.from({ length: fireData.lastYear - fireData.firstYear + 1 }, (_, i) => fireData.lastYear - i).map(
-          (y) => (
-            <option key={y}>{y}</option>
-          ),
-        )}
-      </select>
+        options={YEARS}
+        onChange={(v) => onChange(clamp(`${v}-${value.slice(5, 7)}`))}
+      />
     </span>
   );
 }
@@ -111,30 +108,60 @@ export function PlaybackBar({
   const canPlay = hasArea && ready && months.length > 1;
   const frameMs = FRAME_MS / speed;
   const running = playing && canPlay;
+  const fill = useRef<HTMLDivElement>(null);
+  /** Where the fill stood when paused, so it stays there instead of snapping back. */
+  const [frozen, setFrozen] = useState<{ at: number; range: string; value: number } | null>(null);
+  /** Length of the step in progress when it resumes part-way through a month. */
+  const [stepMs, setStepMs] = useState<number | null>(null);
+  const range = `${from}|${to}`;
+  const hold = frozen && frozen.at === at && frozen.range === range ? frozen.value : null;
+
+  /** The fill's position on screen now, 0 to 1, read from its transition. */
+  const shownProgress = () => {
+    const m = fill.current && /matrix\(([^,]+)/.exec(getComputedStyle(fill.current).transform);
+    return m ? Number(m[1]) : index / span;
+  };
+  /** How far through the current month the fill has got, 0 to 1. */
+  const through = (value: number) => Math.min(1, Math.max(0, value * span - at));
 
   // One step per tick; the last month stops the playback.
   useEffect(() => {
     if (!running) return;
     const id = window.setTimeout(() => {
+      setStepMs(null);
       if (at < 0 || at >= months.length - 1) setPlaying(false);
       else onPeriod(months[at + 1]);
-    }, frameMs);
+    }, stepMs ?? frameMs);
     return () => window.clearTimeout(id);
-  }, [running, at, months, frameMs, onPeriod]);
+  }, [running, at, months, frameMs, stepMs, onPeriod]);
 
   const toggle = () => {
-    if (playing) return setPlaying(false);
-    // Start from the beginning when the map is outside the range or at its end.
+    if (playing) {
+      setFrozen({ at, range, value: shownProgress() });
+      setStepMs(null);
+      setPlaying(false);
+      return;
+    }
+    // Start from the beginning when the map is outside the range or at its end;
+    // after a pause, finish the month from where the fill stopped.
     if (at < 0 || at === months.length - 1) onPeriod(months[0]);
+    else if (hold !== null) setStepMs((1 - through(hold)) * frameMs);
+    setFrozen(null);
     setPlaying(true);
   };
 
+  const changeSpeed = (next: number) => {
+    // Mid-month, the rest of the step runs at the new speed.
+    if (running) setStepMs((1 - through(shownProgress())) * (FRAME_MS / next));
+    setSpeed(next);
+  };
+
   // Playing, the fill heads for the next month over exactly one frame, linearly;
-  // each step retargets it, so it moves without stopping. Otherwise it settles.
+  // each step retargets it, so it moves without stopping. Paused, it stays put.
   const target = running && at >= 0 && at < months.length - 1 ? at + 1 : index;
-  const progress = target / span;
+  const progress = !running && hold !== null ? hold : target / span;
   const motion = {
-    transitionDuration: running ? `${frameMs}ms` : "200ms",
+    transitionDuration: running ? `${stepMs ?? frameMs}ms` : hold !== null ? "0ms" : "200ms",
     transitionTimingFunction: running ? "linear" : "cubic-bezier(0.23, 1, 0.32, 1)",
   };
 
@@ -177,7 +204,7 @@ export function PlaybackBar({
         </div>
         <div className="playback-speeds" role="group" aria-label="Speed">
           {SPEEDS.map((s) => (
-            <button key={s} type="button" className="num" aria-pressed={speed === s} onClick={() => setSpeed(s)}>
+            <button key={s} type="button" className="num" aria-pressed={speed === s} onClick={() => changeSpeed(s)}>
               {s}×
             </button>
           ))}
@@ -192,7 +219,7 @@ export function PlaybackBar({
       {hasArea ? (
         <div className="playback-timeline" data-disabled={!canPlay}>
           <div className="playback-track">
-            <div className="playback-fill" style={{ transform: `scaleX(${progress})`, ...motion }} />
+            <div ref={fill} className="playback-fill" style={{ transform: `scaleX(${progress})`, ...motion }} />
             {years.map(({ i }) => (
               <span key={i} className="playback-tick" style={{ left: `${(i / span) * 100}%` }} />
             ))}
