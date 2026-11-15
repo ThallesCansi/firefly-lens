@@ -41,11 +41,16 @@ export async function proxyAnalytics(request: Request, section: "history" | "for
       signal: AbortSignal.any([request.signal, AbortSignal.timeout(55_000)]),
       cache: "no-store",
     });
+    if ([502, 503, 504].includes(upstream.status) && !upstream.headers.get("Content-Type")?.includes("application/json")) {
+      await upstream.body?.cancel();
+      return Response.json({ detail: "analytics_service_starting" }, { status: 503, headers: { "Retry-After": "2" } });
+    }
     return new Response(await upstream.text(), {
       status: upstream.status,
       headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
     });
-  } catch {
-    return Response.json({ detail: "analytics_service_unavailable" }, { status: 503 });
+  } catch (error) {
+    const starting = error instanceof Error && error.name === "TimeoutError";
+    return Response.json({ detail: starting ? "analytics_service_starting" : "analytics_service_unavailable" }, { status: 503 });
   }
 }

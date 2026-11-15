@@ -34,3 +34,15 @@ it("isolates upstream failures", async () => {
   vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("connection refused")));
   expect((await proxyAnalytics(request(), "forecast")).status).toBe(503);
 });
+it("normalizes Render's HTML startup page without exposing upstream markup", async () => {
+  vi.stubEnv("ANALYTICS_API_URL", "https://test.onrender.com");
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("<html>Starting</html>", { status: 503 })));
+  const response = await proxyAnalytics(request(), "history");
+  expect(response.status).toBe(503);
+  expect(await response.json()).toEqual({ detail: "analytics_service_starting" });
+});
+it("preserves application dataset failures rather than treating them as startup", async () => {
+  vi.stubEnv("ANALYTICS_API_URL", "https://test.onrender.com");
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({ detail: "analytics_dataset_unavailable" }, { status: 503 })));
+  expect(await (await proxyAnalytics(request(), "history")).json()).toEqual({ detail: "analytics_dataset_unavailable" });
+});

@@ -10,6 +10,21 @@ const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
 afterEach(() => vi.unstubAllGlobals());
 
 describe("dynamic regional analytics", () => {
+  it("retries a sleeping service, but does not retry unconfigured infrastructure", async () => {
+    vi.useFakeTimers();
+    try {
+      const fetcher = vi.fn().mockResolvedValueOnce(Response.json({ detail: "analytics_service_starting" }, { status: 503 }))
+        .mockResolvedValueOnce(Response.json(bundle));
+      vi.stubGlobal("fetch", fetcher);
+      const pending = loadDynamicAnalytics(area.geometry, "history", new AbortController().signal);
+      await vi.advanceTimersByTimeAsync(2000);
+      expect((await pending).region_id).toBe(bundle.region_id);
+      expect(fetcher).toHaveBeenCalledTimes(2);
+      fetcher.mockReset().mockResolvedValue(Response.json({ detail: "analytics_service_unconfigured" }, { status: 503 }));
+      await expect(loadDynamicAnalytics(area.geometry, "history", new AbortController().signal)).rejects.toThrow("analytics_service_unconfigured");
+      expect(fetcher).toHaveBeenCalledTimes(1);
+    } finally { vi.useRealTimers(); }
+  });
   it("posts only geometry and data version and validates Python contracts", async () => {
     const fetcher = vi.fn().mockResolvedValue(Response.json(bundle));
     vi.stubGlobal("fetch", fetcher);
