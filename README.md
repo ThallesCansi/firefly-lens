@@ -45,13 +45,13 @@ In the map workspace a user can:
 
 ### Tour with Lume
 
-The workspace offers an optional first-visit invitation and a discreet **Tour with Lume** replay button. Nothing starts automatically. The guided tour uses the original animated mascot and Driver.js 1.14.0 to spotlight real controls across the map, monthly side panel and full report below the map.
+The workspace automatically opens Lume’s welcome on each new visit or reload. **Don't show again** is an explicit browser preference: only checking it disables future automatic welcomes. Completing, skipping or closing the tour does not opt out. A single welcome is presented per browser document, including across Strict Mode effect replay and client-side navigation. The **Tour with Lume** launcher, beside the original animated mascot, remains available after opt-out.
 
-The demonstration selects the exact Pantanal preset and September 2023, using the existing historical record and geometry-matched Python analytics. History, historical anomalies and experimental Forecast remain distinct; unavailable forecasts are shown as unavailable, including for arbitrary geometries. No forecast is borrowed from another region. Search, map gestures and downloads are optional; the tour never downloads a file automatically or sends a request to the map assistant.
+The read-only demonstration selects the exact Pantanal preset and September 2023, using the existing historical record and geometry-matched Python analytics. History, historical anomalies and experimental Forecast remain distinct; unavailable forecasts remain unavailable. Only the guide’s controls and opt-out checkbox are interactive. Search, map gestures, pickers, calendars, tabs, exports and the assistant remain visible but locked. Next/Back prepare them through existing React handlers; no file is downloaded and no model request is sent by the tour.
 
-At completion, choose **Keep example**, **Restore previous workspace**, or **Replay tour**. Skip and Escape restore the prior region, period, range, sensors, panel/calendar view and analytics tab. Camera restoration uses the existing bounds/projection contract, rather than promising an identical camera pose. Tour outcomes use `firefly-lens-tour-v1`, independently of the original introductory hint.
+At completion, choose **Keep example**, **Restore previous workspace**, or **Replay tour**. Skip and Escape restore the prior region, period, range, sensors, panel/calendar view and analytics tab. Camera restoration uses the existing bounds/projection contract. Outcomes use `firefly-lens-tour-v1`; opt-out uses the independent `firefly-lens-tour-auto-disabled-v1` preference. Unchecking it during manual replay enables automatic presentation on the next visit. Neither preference depends on the original introductory hint.
 
-Tour transitions prepare application state before highlighting semantic `data-tour` anchors. Driver performs target waiting, spotlight positioning and focus handling; failed sections offer Retry, Skip section and Exit. React/layout commits and cancellation signals handle transitions, without guessed loading delays. Existing scientific functions, data and export schemas remain unchanged. While a tour is active, assistant workspace mutations are paused; its conversation is retained.
+Tour transitions prepare application state before highlighting semantic `data-tour` anchors. Driver performs target waiting, spotlight positioning and focus handling; failed sections offer Retry, Skip section and Exit. The workspace is `inert`, with scoped event blocking for background gestures and shortcuts. Driver’s popover is portaled outside that subtree. Time-lapse playback is suspended during the guide. On exit, workspace interactions are immediately restored. Scientific functions, data and export schemas remain unchanged; the assistant conversation is retained.
 
 Browser QA can reuse an existing Playwright installation without adding it to project dependencies:
 
@@ -63,7 +63,7 @@ $env:PLAYWRIGHT_MODULE = 'C:/path/to/playwright/index.mjs'
 node scripts/qa-lume-tour.mjs
 ```
 
-`QA_BASE_URL` overrides the server URL and `QA_OUTPUT` overrides the evidence directory (the default is the system temporary directory, `firefly-lume-qa`). The script uses installed Chrome. See [implementation and verification notes](docs/lume-tour-validation.md).
+`QA_BASE_URL` overrides the server URL and `QA_OUTPUT` overrides the evidence directory (the default is the system temporary directory, `firefly-lume-readonly-qa`). The script uses installed Chrome. See [implementation and verification notes](docs/lume-tour-validation.md).
 
 Requires Node 20.9 or newer and [pnpm](https://pnpm.io).
 

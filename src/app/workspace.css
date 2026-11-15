@@ -1,11 +1,8 @@
-.lume-replay { position: fixed; left: 12px; bottom: max(2px, env(safe-area-inset-bottom)); z-index: 32; min-height: 24px; padding: 3px 10px; font-size: 12px; color: var(--color-ink); cursor: pointer; }
+.lume-replay { position: fixed; left: 12px; bottom: max(2px, env(safe-area-inset-bottom)); z-index: 32; display: flex; align-items: center; gap: 6px; min-height: 36px; padding: 2px 10px 2px 4px; font-size: 12px; color: var(--color-ink); cursor: pointer; }
 .lume-replay:disabled { opacity: .4; cursor: default; }
-.lume-invitation { display: flex; align-items: center; gap: 8px; margin-top: 16px; border-top: 1px solid var(--color-line); padding-top: 12px; font-size: 13px; }
-.lume-invitation .lume { flex-shrink: 0; }
-.lume-invitation-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-top: 6px; }
-.lume-invitation .btn { padding: 6px 10px; font-size: 12px; }
-[data-tour-active="true"] .assistant-dock { pointer-events: none; }
-@media (max-width: 700px) { .explore-hint:has(.lume-invitation) { max-height: calc(100% - 220px); overflow-y: auto; } }
+/* Driver's popover is portaled outside this inert subtree. Keep all highlighted
+   descendants out of Driver's focusable-target list as well as mouse hit testing. */
+.lens-workspace[inert], .lens-workspace[inert] * { pointer-events: none !important; }
 
 /* The map remains mounted while a separately scrolling analysis pane opens. */
 /* The map and its side panel fill the first screen; the area report, when
@@ -254,9 +251,54 @@
 }
 .map-card-body {
   display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+}
+.map-settings-row {
+  display: flex;
   align-items: center;
   gap: 6px;
 }
+.map-highlights {
+  border-top: 1px solid var(--color-line);
+  padding: 8px 6px 4px;
+}
+.map-highlights-heading, .signal-switch {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.map-highlights-heading { justify-content: space-between; gap: 16px; }
+.map-highlights h2 { font-size: 11px; color: var(--color-dim); }
+.signal-switch { font-size: 13px; cursor: pointer; }
+.signal-switch input { width: 28px; height: 16px; accent-color: var(--color-lume); cursor: pointer; }
+.map-highlights p { font-size: 11px; color: var(--color-dim); margin-top: 4px; }
+.firefly-signal-marker {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--color-lume);
+  border-radius: 50%;
+  background: var(--surface-floating);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--color-lume) 40%, transparent);
+  cursor: pointer;
+}
+.firefly-signal-marker:focus-visible { outline: 2px solid var(--color-ink); outline-offset: 3px; }
+.firefly-signal-marker:disabled { pointer-events: none; opacity: 0.5; }
+.firefly-signal-popup .maplibregl-popup-content {
+  background: var(--surface-floating);
+  color: var(--color-ink);
+  border-radius: 12px;
+  box-shadow: var(--surface-shadow);
+  padding: 14px 22px 14px 14px;
+}
+.firefly-signal-popup .maplibregl-popup-tip { border-top-color: var(--surface-floating); border-bottom-color: var(--surface-floating); }
+.firefly-signal-popup .maplibregl-popup-close-button { color: var(--color-ink); font-size: 18px; min-width: 24px; }
+.firefly-signal-tooltip { display: grid; gap: 6px; font: 12px/1.45 var(--font-body, sans-serif); }
+.firefly-signal-tooltip strong { font-size: 14px; }
+.firefly-signal-tooltip small { color: var(--color-dim); }
 .map-layers {
   display: flex;
   gap: 4px;
@@ -1274,6 +1316,8 @@
 /* Where the row would reach the site card, it folds into a chip that opens
    on click. */
 @container map (max-width: 760px) {
+  .map-settings-row { flex-direction: column; align-items: stretch; }
+  .map-highlights-heading { flex-wrap: wrap; gap: 4px; }
   /* Under the site card, right of the slim tool column. */
   .map-card {
     top: 84px;

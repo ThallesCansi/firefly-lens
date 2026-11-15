@@ -134,9 +134,9 @@ export function download(filename: string, text: string, mime: string): void {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-/** A short file-name part for an area: the state's name, or the drawn shape's envelope. */
+/** A short file-name part for an area: a named region, or the drawn shape's envelope. */
 export function areaSlug(area: AnalysisArea): string {
-  if (area.kind === "state")
+  if (area.kind === "state" || area.kind === "preset")
     return area.name
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")

@@ -54,6 +54,10 @@ import {
   saveBasemap,
   type BasemapKind,
 } from "@/lib/map/basemap";
+import type { FireflySignal } from "@/lib/analytics/signals";
+import { useSignalMarkers } from "./map/useSignalMarkers";
+
+const NO_SIGNALS: FireflySignal[] = [];
 
 function mapColors() {
   const css = getComputedStyle(document.documentElement);
@@ -228,6 +232,8 @@ export function HotspotMap({
   unusualMonth,
   harmonized,
   forceColumns = false,
+  signals = NO_SIGNALS,
+  onSignalSelect,
 }: {
   /** The area of interest, outlined on the map. */
   area: AnalysisArea | null;
@@ -254,7 +260,7 @@ export function HotspotMap({
   /** Clicks on the map, with geography (null when off the Earth). */
   onMapClick?: MapClickHandler;
   /** Receives the map controller once the map has loaded. */
-  onReady?: (controller: MapController) => void;
+  onReady?: (controller: MapController | null) => void;
   /** Reproject external editing handles after map frames change. */
   onViewChange?: () => void;
   /** Shows the 3D globe / 2D map switch inside the map. */
@@ -271,6 +277,8 @@ export function HotspotMap({
   harmonized?: (cellId: number) => number | null;
   /** Holds the 3D columns on, for a guided flight; the switch is then disabled. */
   forceColumns?: boolean;
+  signals?: FireflySignal[];
+  onSignalSelect?: (area: AnalysisArea) => void;
 }) {
   const { theme } = useTheme();
   const el = useRef<HTMLDivElement>(null);
@@ -336,6 +344,8 @@ export function HotspotMap({
   );
   const readout = useRef<HTMLDivElement>(null);
   const pointer = useRef<[number, number]>([0, 0]);
+  const signalMarkers = useSignalMarkers(map, ready, signals,
+    isDrawing || interactionMode === "pick-administrative", onSignalSelect);
 
   useEffect(() => {
     latest.current = {
@@ -611,6 +621,9 @@ export function HotspotMap({
       dead = true;
       motion.current?.stop();
       motion.current = null;
+      // Next may preserve the workspace state across client navigation while
+      // destroying its effects. Never rebind tools to that removed engine.
+      latest.current.onReady?.(null);
       map.current = null;
       control.current = null;
       created?.remove();
@@ -1119,6 +1132,7 @@ export function HotspotMap({
           <p className="map-key-note">Globe unavailable here: flat map shown</p>
         )}
       </section>
+      {signalMarkers}
       {/* One column of view controls: projection, zoom, reset. */}
       {ready && (
         <div data-tour="map-controls" className="map-view-controls">

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { afterPaint, TourSession, type TourWorkspace, type WorkspaceSnapshot } from "./session";
 import { stepIndex } from "./steps";
-import { readTourOutcome, saveTourOutcome, TOUR_KEY } from "./persistence";
+import { claimAutomaticTour, readTourOptOut, readTourOutcome, saveTourOptOut, saveTourOutcome, TOUR_KEY, TOUR_OPT_OUT_KEY } from "./persistence";
 
 const saved: WorkspaceSnapshot = {
   area: null, analyzed: null, analysis: false, expanded: false, drawing: false,
@@ -97,6 +97,38 @@ describe("Lume session coordination", () => {
   });
 });
 describe("independent tour persistence", () => {
+  it("automatically presents on every new page regardless of previous outcome", () => {
+    for (const outcome of ["completed", "dismissed", "partial"] as const) {
+      const storage = { getItem: (key: string) => key === TOUR_KEY ? outcome : null };
+      expect(claimAutomaticTour({}, storage)).toBe(true);
+      expect(readTourOutcome(storage)).toBe(outcome);
+    }
+  });
+  it("claims only once per document across effect replay, rerenders and client navigation", () => {
+    const document = {};
+    const storage = { getItem: () => null };
+    expect(claimAutomaticTour(document, storage)).toBe(true);
+    expect(claimAutomaticTour(document, storage)).toBe(false);
+    expect(claimAutomaticTour(document, storage)).toBe(false);
+    expect(claimAutomaticTour({}, storage)).toBe(true); // real reload/new document
+  });
+  it("requires an explicit checked preference to opt out; unchecking re-enables visits", () => {
+    const values = new Map<string, string>();
+    const storage = { getItem: (key: string) => values.get(key) ?? null, setItem: (key: string, value: string) => { values.set(key, value); }, removeItem: (key: string) => { values.delete(key); } };
+    saveTourOutcome("completed", storage);
+    expect(readTourOptOut(storage)).toBe(false);
+    saveTourOptOut(true, storage);
+    expect(values.get(TOUR_OPT_OUT_KEY)).toBe("true");
+    expect(claimAutomaticTour({}, storage)).toBe(false);
+    expect(values.get(TOUR_KEY)).toBe("completed");
+    saveTourOptOut(false, storage);
+    expect(claimAutomaticTour({}, storage)).toBe(true);
+  });
+  it("does not mistake other stored values or blocked storage for an opt-out", () => {
+    expect(readTourOptOut({ getItem: () => "completed" })).toBe(false);
+    expect(claimAutomaticTour({}, { getItem: () => { throw new Error("blocked"); } })).toBe(true);
+    expect(() => saveTourOptOut(true, { setItem: () => { throw new Error("blocked"); }, removeItem: () => {} })).not.toThrow();
+  });
   it("distinguishes completed, dismissed and partial tours with a versioned key", () => {
     for (const value of ["completed", "dismissed", "partial"] as const) {
       const setItem = vi.fn(); saveTourOutcome(value, { setItem });

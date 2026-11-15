@@ -2,6 +2,31 @@
 
 import { useState, type ReactNode } from "react";
 import type { Sensor } from "@/lib/data/types";
+import { Lume } from "@/components/firefly/Lume";
+
+/** A grouped home for seasonal signals and future anomaly layers. */
+export function MapHighlightsControl({ enabled, onChange, status }: {
+  enabled: boolean;
+  onChange: (enabled: boolean) => void;
+  status: string;
+}) {
+  return (
+    <section className="map-highlights" aria-label="Anomaly highlights">
+      <div className="map-highlights-heading">
+        <h2>Highlights</h2>
+        <label className="signal-switch">
+          <Lume size={24} />
+          <span>Firefly Signals</span>
+          <input type="checkbox" role="switch" checked={enabled}
+            aria-describedby="signal-method signal-status"
+            onChange={(event) => onChange(event.target.checked)} />
+        </label>
+      </div>
+      <p id="signal-status" role="status">{status}</p>
+      <p id="signal-method">Same-month percentile ≥ 90 or z-score ≥ 2.<br />Complete months · Prepared study regions only.</p>
+    </section>
+  );
+}
 
 export type SpatialTool = "navigate" | "draw" | "coordinates";
 

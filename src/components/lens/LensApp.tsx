@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { fireData } from "@/lib/data/source";
 import {
   drawnArea,
@@ -21,7 +21,8 @@ import { LocationSearch, type MapDestination } from "./LocationSearch";
 import { AssistantDock } from "./AssistantDock";
 import type { AssistantHost } from "@/lib/assistant/execute";
 import { SiteNav } from "@/components/ui/SiteNav";
-import { MapCard, MapToolbar, MapLayerControl } from "./MapControls";
+import { MapCard, MapToolbar, MapLayerControl, MapHighlightsControl } from "./MapControls";
+import { useFireflySignals } from "@/lib/analytics/useFireflySignals";
 import { MONTHS } from "@/lib/format";
 import { TemporalControl } from "./TemporalControl";
 import { useMapCells } from "@/lib/useMapHotspots";
@@ -40,7 +41,9 @@ import { ResizableAnalysisPanel } from "@/components/interactions/ResizableAnaly
 import type { MapController } from "@/lib/map/map-contract";
 import "@/components/interactions/WorkspaceTools.css";
 import { ScientificInfo } from "@/components/ui/ScientificInfo";
-import { TourInvitation } from "@/components/onboarding/TourInvitation";
+import { AutoStartTour } from "@/components/onboarding/AutoStartTour";
+import { Lume } from "@/components/firefly/Lume";
+import { lockTourInteractions } from "@/lib/onboarding/interaction-lock";
 import { afterPaint, type TourWorkspace, type WorkspaceSnapshot } from "@/lib/onboarding/session";
 import { TOUR_PERIOD, stepIndex, type TourStepId } from "@/lib/onboarding/steps";
 
@@ -54,6 +57,7 @@ const FLIGHT_PERIOD = "2024-09" >= fireData.firstMonth && "2024-09" <= fireData.
 const deg = (n: number) => Math.round(n * 100) / 100;
 /** One line that says what the area is. */
 function describe(area: Area): string {
+  if (area.kind === "preset") return "Study region · Prepared seasonal analytics";
   if (area.kind === "state") return "Brazilian state · IBGE outline";
   const corners = area.geometry.type === "Polygon" ? area.geometry.coordinates[0].length - 1 : 0;
   const [w, s, e, n] = area.bbox;
@@ -97,6 +101,7 @@ export function LensApp() {
   const [searching, setSearching] = useState(false);
   const [tourRunning, setTourRunning] = useState(false);
   const tourGuard = useRef(false);
+  useLayoutEffect(() => { if (tourRunning) return lockTourInteractions(); }, [tourRunning]);
   const tourSnapshot = useRef<WorkspaceSnapshot | null>(null);
   const analysisFrame = useRef(0);
   const restoredView = useRef<AbortController | null>(null);
@@ -141,6 +146,8 @@ export function LensApp() {
   }, []);
   const searchPanel = useRef<HTMLElement>(null);
   const [period, setPeriod] = useState(`${fireData.lastYear}-09`);
+  const [signalsEnabled, setSignalsEnabled] = useState(true);
+  const signals = useFireflySignals(signalsEnabled, period);
   const [from, setFrom] = useState(fireData.firstMonth);
   const [to, setTo] = useState(fireData.lastMonth);
   const [sensors, setSensors] = useState<Sensor[]>(["MODIS", "VIIRS"]);
@@ -161,8 +168,8 @@ export function LensApp() {
     const to = `${year}-12` > fireData.lastMonth ? fireData.lastMonth : `${year}-12`;
     return { from: `${year}-01`, to };
   });
-  const play = usePlaybackFrames(area, playRange.from, playRange.to, playback);
-  const playing = playback && play.frames !== null;
+  const play = usePlaybackFrames(area, playRange.from, playRange.to, playback && !tourRunning);
+  const playing = playback && !tourRunning && play.frames !== null;
   // While a time-lapse is loaded its frames feed the map, so nothing else loads.
   const mapData = useMapCells(playing ? null : area, period);
   const shown = playing
@@ -469,7 +476,10 @@ export function LensApp() {
     setFrame((n) => n + 1);
     changePeriod(FLIGHT_PERIOD);
   }
-  const startTour = () => { restoredView.current?.abort(); tourSnapshot.current = tourWorkspace.capture(); tourGuard.current = true; setTourRunning(true); };
+  const startTour = () => {
+    if (tourGuard.current) return;
+    restoredView.current?.abort(); tourSnapshot.current = tourWorkspace.capture(); tourGuard.current = true; setTourRunning(true);
+  };
   const tourWorkspace: TourWorkspace = {
     capture: () => tourSnapshot.current ?? ({ area, analyzed, analysis, expanded, drawing, coordinates, searching,
       period, from, to, sensors: [...sensors], monthOpen, cardOpen, analyticsTab,
@@ -526,13 +536,15 @@ export function LensApp() {
       void afterPaint(view.signal).then(() => {
         if (saved.projection) controller?.setProjection(saved.projection);
         if (saved.bounds) controller?.navigate({ id: `tour-restore-${Date.now()}`, bounds: saved.bounds, animation: "jump" });
+        else controller?.resetView();
       }).catch(() => { /* A newer tour/navigation superseded restoration. */ });
     },
-    keep() { restoreUi.current = null; cancelAnimationFrame(analysisFrame.current); setSearching(false); setCoordinates(false); setDrawing(false); setCardOpen(false); setAnalyticsTab("history"); },
+    keep() { restoreUi.current = null; cancelAnimationFrame(analysisFrame.current); setPlayback(false); setSearching(false); setCoordinates(false); setDrawing(false); setCardOpen(false); setAnalyticsTab("history"); },
   };
   return (
-    <main id="main" className="lens-workspace" data-tour-active={tourRunning}>
-      <button ref={tourLauncher} data-tour="replay" type="button" className="lume-replay map-surface" onClick={startTour} disabled={tourRunning}>Tour with Lume</button>
+    <main id="main" inert={tourRunning} className="lens-workspace" data-tour-active={tourRunning}>
+      <AutoStartTour onStart={startTour} />
+      <button ref={tourLauncher} data-tour="replay" type="button" className="lume-replay map-surface" onClick={startTour} disabled={tourRunning}><Lume size={32} />Tour with Lume</button>
       {tourRunning && <LumeTour workspace={tourWorkspace} onExit={() => { tourGuard.current = false; tourSnapshot.current = null; setTourRunning(false); }} />}
       <div
         className="workspace-body"
@@ -546,6 +558,15 @@ export function LensApp() {
             areaName={area?.name ?? "Earth"}
             cells={shown.cells}
             scale={playing ? play.frames!.top : undefined}
+            signals={signals.signals}
+            onSignalSelect={(target) => {
+              tools.clear();
+              setDrawing(false);
+              setCoordinates(false);
+              setSearching(false);
+              setArea(target);
+              analyze(target);
+            }}
             drawing={drawing}
             onDraw={selectArea}
             sensors={sensors}
@@ -597,38 +618,41 @@ export function LensApp() {
           <MapCard
             open={cardOpen}
             onOpenChange={setCardOpen}
-            summary={periodSummary(period, sensors.length)}
+            summary={`${periodSummary(period, sensors.length)} · Signals ${signalsEnabled ? "on" : "off"}`}
           >
-            <TemporalControl period={period} onChange={changePeriod} />
-            <button
-              type="button"
-              className="layer-chip play-chip"
-              aria-pressed={playback}
-              onClick={() => {
-                // Opening starts the map at the first month of the range.
-                if (!playback) changePeriod(playRange.from);
-                setPlayback(!playback);
-              }}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M8.5 5.2v13.6a1 1 0 0 0 1.5.86l11-6.8a1 1 0 0 0 0-1.72l-11-6.8a1 1 0 0 0-1.5.86Z" />
-              </svg>
-              Time-lapse
-            </button>
-            <button
-              type="button"
-              className="layer-chip play-chip"
-              aria-pressed={flight !== null}
-              disabled={tourRunning}
-              title="Fly over the study regions, one after another, in 3D"
-              onClick={() => flyTo(flight === null ? 0 : null)}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M3 11 21 3l-8 18-2-8-8-2Z" />
-              </svg>
-              Regions
-            </button>
-            <MapLayerControl sensors={sensors} onChange={setSensors} />
+            <div className="map-settings-row">
+              <TemporalControl period={period} onChange={changePeriod} />
+              <button
+                type="button"
+                className="layer-chip play-chip"
+                aria-pressed={playback}
+                onClick={() => {
+                  // Opening starts the map at the first month of the range.
+                  if (!playback) changePeriod(playRange.from);
+                  setPlayback(!playback);
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M8.5 5.2v13.6a1 1 0 0 0 1.5.86l11-6.8a1 1 0 0 0 0-1.72l-11-6.8a1 1 0 0 0-1.5.86Z" />
+                </svg>
+                Time-lapse
+              </button>
+              <button
+                type="button"
+                className="layer-chip play-chip"
+                aria-pressed={flight !== null}
+                disabled={tourRunning}
+                title="Fly over the study regions, one after another, in 3D"
+                onClick={() => flyTo(flight === null ? 0 : null)}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M3 11 21 3l-8 18-2-8-8-2Z" />
+                </svg>
+                Regions
+              </button>
+              <MapLayerControl sensors={sensors} onChange={setSensors} />
+            </div>
+            <MapHighlightsControl enabled={signalsEnabled} onChange={setSignalsEnabled} status={signals.status} />
           </MapCard>
           {searching && (
             <section
@@ -725,7 +749,6 @@ export function LensApp() {
                   area anywhere in Brazil, or pick a state, to investigate its
                   fire activity.
                 </p>
-                <TourInvitation onStart={startTour} />
                 <button
                   className="btn btn-primary mt-4"
                   onClick={() => setDrawing(true)}
@@ -815,7 +838,7 @@ export function LensApp() {
               </section>
             )}
           <div className="map-bottom">
-            {playback && (
+            {playback && !tourRunning && (
               <PlaybackBar
                 from={playRange.from}
                 to={playRange.to}
