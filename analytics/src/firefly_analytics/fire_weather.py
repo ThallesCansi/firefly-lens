@@ -1,9 +1,18 @@
 """Normalized provider-index adapter; no FWI approximation or unverified live API."""
-from datetime import datetime
+from datetime import datetime, timezone
+from functools import lru_cache
+import json
 import math
 from collections import defaultdict
+import os
+from pathlib import Path
 
 SOURCES = {
+    "nasa_gfwed_geos5": {
+        "url": "https://data.giss.nasa.gov/impacts/gfwed/",
+        "doi": "10.5194/nhess-15-1407-2015", "licence": "Public NASA GFWED research data; preserve attribution and product notices",
+        "native_formats": ["NetCDF"], "access": "public NASA NCCS HTTPS; experimental GEOS-5 forecasts",
+    },
     "copernicus_ewds_cems_fire_seasonal": {
         "url": "https://ewds.climate.copernicus.eu/datasets/cems-fire-seasonal?tab=overview",
         "doi": "10.24381/cds.b9c753f1", "licence": "CC-BY (see dataset terms)",
@@ -27,8 +36,30 @@ def unavailable(reason="no_authenticated_numeric_provider_configured"):
                             "No live data, issuance times or horizons are fabricated; this module does not compute FWI."]}
 
 
+@lru_cache(maxsize=48)
+def _numeric_grid(path, metadata_path, file_version, geometry_json, minute):
+    from .fwi_grid import read_netcdf
+    return read_netcdf(path, metadata_path, json.loads(geometry_json))
+
+
 def query_fire_weather(region_id, geometry=None):
-    return {**unavailable(), "region_id": region_id}
+    default = Path(os.environ.get("FIREFLY_DATA_ROOT", Path(__file__).resolve().parents[3])) / "harmonization/output/fire_weather/geos5.nc"
+    path = os.environ.get("FIREFLY_FWI_NETCDF") or (str(default) if default.exists() else None)
+    if not path or geometry is None:
+        return {**unavailable(), "region_id": region_id}
+    try:
+        metadata_path = os.environ.get("FIREFLY_FWI_METADATA", str(Path(path).with_suffix(".json")))
+        version = tuple((p.stat().st_size, p.stat().st_mtime_ns) for p in (Path(path), Path(metadata_path)))
+        now = datetime.now(timezone.utc)
+        result = _numeric_grid(path, metadata_path, version, json.dumps(geometry,sort_keys=True), int(now.timestamp()//60))
+        # Minute cache may never turn an expired validity into a current forecast.
+        rows = [r for r in result['forecasts'] if
+                (r['valid_date'] >= now.date().isoformat() if r.get('valid_date') else utc(r['valid_at']) >= now)]
+        available = any(r['value'] is not None for r in rows)
+        return {**result, "forecasts": rows, "status": "available" if available else "unavailable",
+                "reason": None if available else result.get('reason') or "no_current_valid_numeric_values", "region_id": region_id}
+    except (OSError, ValueError, KeyError, ImportError, TypeError):
+        return {**unavailable("numeric_fwi_product_invalid_or_unreadable"), "region_id": region_id}
 
 
 def from_records(records, geometry, *, source_id, synthetic=False, provenance=None):

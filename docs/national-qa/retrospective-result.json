@@ -1,0 +1,687 @@
+{
+  "scope": "Real irregular Brazilian polygon, final-vintage retrospective experiment",
+  "generated_at": "2026-11-15T16:16:01.045Z",
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [
+          -57.47,
+          -18.47
+        ],
+        [
+          -56.57,
+          -18.43
+        ],
+        [
+          -56.83,
+          -17.67
+        ],
+        [
+          -57.47,
+          -18.47
+        ]
+      ]
+    ]
+  },
+  "seconds": 2.799,
+  "source": {
+    "synthetic": false,
+    "provenance": {
+      "kind": "real_harmonized_parquet",
+      "repository_commit": "f3ad1b382d13b754f8314b634f252957e6a82fb3",
+      "files": [
+        {
+          "path": "grid_monthly_total.parquet",
+          "sha256": "9c0d842197ba6355e094709ed19a5ad25faa843342c8df99c349f14cb4b836e1"
+        },
+        {
+          "path": "harmonization_params.json",
+          "sha256": "c75390256ea42bca3d80a742b634c8b6f158a980d192f1d153adb145b4e91479"
+        },
+        {
+          "path": "meta.json",
+          "sha256": "d369dc57783df59423d9ea34863a683502110db7ac9c7b49373abeb35fcbd99d"
+        }
+      ],
+      "grid_cells": 12,
+      "aggregation": "cell-intersection fraction in square degrees; sum(w*x); uncertainty sum(w^2*variance)+(c*total)^2",
+      "geometry_repaired": false,
+      "simplification_deg_if_over_2000_vertices": 0.005,
+      "data_reference_date": "2026-11-14",
+      "series_end": "2026-10",
+      "processing_version": "ae0dbe0d22553194ad12b6ec5a25b681199493e74bfab4953f8fae73620e444a",
+      "last_complete_month": "2026-10"
+    }
+  },
+  "forecast": {
+    "forecast_status": "experimental",
+    "reason": null,
+    "model": "seasonal_median",
+    "forecast_origin": "2023-09",
+    "last_complete_observation_used": "2023-09",
+    "training_period": {
+      "start": "2002-08",
+      "end": "2023-09",
+      "valid_months": 250
+    },
+    "config": {
+      "horizon": 3,
+      "min_train_months": 96,
+      "min_season_years": 5,
+      "max_origins": 32,
+      "stride": 1,
+      "min_validation_origins": 12,
+      "include_drift": false,
+      "enable_sarima": false,
+      "maxiter": 60,
+      "candidates": [
+        [
+          [
+            1,
+            0,
+            0
+          ],
+          [
+            1,
+            0,
+            0,
+            12
+          ]
+        ],
+        [
+          [
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            1,
+            1,
+            12
+          ]
+        ]
+      ]
+    },
+    "model_details": {},
+    "predictions": [
+      {
+        "date": "2023-10",
+        "horizon": 1,
+        "value": 6.673753684210446,
+        "lower": null,
+        "upper": null,
+        "reason": null,
+        "interval_kind": null,
+        "interval_method": null
+      },
+      {
+        "date": "2023-11",
+        "horizon": 2,
+        "value": 3.7287485380117005,
+        "lower": null,
+        "upper": null,
+        "reason": null,
+        "interval_kind": null,
+        "interval_method": null
+      },
+      {
+        "date": "2023-12",
+        "horizon": 3,
+        "value": 1.5928888888888864,
+        "lower": null,
+        "upper": null,
+        "reason": null,
+        "interval_kind": null,
+        "interval_method": null
+      }
+    ],
+    "backtesting": {
+      "status": "experimental_backtested",
+      "reason": "baseline_selected_on_tuning",
+      "selection_cutoff": "2022-01",
+      "selection_candidate": "seasonal_median",
+      "recommended_model": "seasonal_median",
+      "selection": {
+        "expected_cases": 43,
+        "paired_cases": 43,
+        "eligible_models": [
+          "seasonal_median"
+        ],
+        "success_fraction": {
+          "seasonal_median": 1,
+          "seasonal_naive": 0.8604651162790697,
+          "sarima": 0
+        },
+        "metrics": {
+          "seasonal_median": {
+            "n": 43,
+            "origins": 16,
+            "mae": 9.053120155457192,
+            "rmse": 22.672719215645188,
+            "mean_bias": -6.7856236133864645,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": null
+          }
+        }
+      },
+      "validation": {
+        "expected_cases": 44,
+        "paired_cases": 44,
+        "eligible_models": [
+          "seasonal_median"
+        ],
+        "success_fraction": {
+          "seasonal_median": 1,
+          "seasonal_naive": 0.8636363636363636,
+          "sarima": 0
+        },
+        "metrics": {
+          "seasonal_median": {
+            "n": 44,
+            "origins": 16,
+            "mae": 4.53801866274076,
+            "rmse": 6.9879094384077325,
+            "mean_bias": 1.0518139896944976,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": null
+          }
+        }
+      },
+      "by_horizon": {
+        "seasonal_median": {
+          "1": {
+            "n": 15,
+            "origins": 15,
+            "mae": 3.984482679262254,
+            "rmse": 6.544789422775886,
+            "mean_bias": 0.5757492211725747,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": null
+          },
+          "2": {
+            "n": 14,
+            "origins": 14,
+            "mae": 4.596764522845569,
+            "rmse": 6.959360871273381,
+            "mean_bias": 0.9445501034637701,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": null
+          },
+          "3": {
+            "n": 15,
+            "origins": 15,
+            "mae": 5.036725176788112,
+            "rmse": 7.429610868739249,
+            "mean_bias": 1.627991718698433,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": null
+          }
+        },
+        "seasonal_naive": {
+          "1": {
+            "n": 13,
+            "origins": 13,
+            "mae": 7.800024901899719,
+            "rmse": 21.16552884132955,
+            "mean_bias": 5.321327291601775,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": null
+          },
+          "2": {
+            "n": 12,
+            "origins": 12,
+            "mae": 8.365328205128204,
+            "rmse": 22.027214034799727,
+            "mean_bias": 5.5918047413405185,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": null
+          },
+          "3": {
+            "n": 13,
+            "origins": 13,
+            "mae": 7.7844320993806,
+            "rmse": 21.16441880794789,
+            "mean_bias": 5.343367705456925,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": null
+          }
+        },
+        "sarima": {
+          "1": {
+            "n": 0,
+            "origins": 0,
+            "mae": null,
+            "rmse": null,
+            "mean_bias": null,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": "no_scored_forecasts"
+          },
+          "2": {
+            "n": 0,
+            "origins": 0,
+            "mae": null,
+            "rmse": null,
+            "mean_bias": null,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": "no_scored_forecasts"
+          },
+          "3": {
+            "n": 0,
+            "origins": 0,
+            "mae": null,
+            "rmse": null,
+            "mean_bias": null,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": "no_scored_forecasts"
+          }
+        }
+      },
+      "paired_by_horizon": {
+        "1": {
+          "expected_cases": 15,
+          "paired_cases": 15,
+          "eligible_models": [
+            "seasonal_median"
+          ],
+          "success_fraction": {
+            "seasonal_median": 1,
+            "seasonal_naive": 0.8666666666666667,
+            "sarima": 0
+          },
+          "metrics": {
+            "seasonal_median": {
+              "n": 15,
+              "origins": 15,
+              "mae": 3.984482679262254,
+              "rmse": 6.544789422775886,
+              "mean_bias": 0.5757492211725747,
+              "interval_n": 0,
+              "coverage95": null,
+              "null_reason": null
+            }
+          }
+        },
+        "2": {
+          "expected_cases": 14,
+          "paired_cases": 14,
+          "eligible_models": [
+            "seasonal_median"
+          ],
+          "success_fraction": {
+            "seasonal_median": 1,
+            "seasonal_naive": 0.8571428571428571,
+            "sarima": 0
+          },
+          "metrics": {
+            "seasonal_median": {
+              "n": 14,
+              "origins": 14,
+              "mae": 4.596764522845569,
+              "rmse": 6.959360871273381,
+              "mean_bias": 0.9445501034637701,
+              "interval_n": 0,
+              "coverage95": null,
+              "null_reason": null
+            }
+          }
+        },
+        "3": {
+          "expected_cases": 15,
+          "paired_cases": 15,
+          "eligible_models": [
+            "seasonal_median"
+          ],
+          "success_fraction": {
+            "seasonal_median": 1,
+            "seasonal_naive": 0.8666666666666667,
+            "sarima": 0
+          },
+          "metrics": {
+            "seasonal_median": {
+              "n": 15,
+              "origins": 15,
+              "mae": 5.036725176788112,
+              "rmse": 7.429610868739249,
+              "mean_bias": 1.627991718698433,
+              "interval_n": 0,
+              "coverage95": null,
+              "null_reason": null
+            }
+          }
+        }
+      },
+      "by_evaluation_year": {
+        "2020": {
+          "seasonal_median": {
+            "n": 4,
+            "origins": 3,
+            "mae": 26.602981212325364,
+            "rmse": 48.01396835183269,
+            "mean_bias": -26.602981212325364,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": null
+          },
+          "seasonal_naive": {
+            "n": 4,
+            "origins": 3,
+            "mae": 24.065129181286224,
+            "rmse": 39.97323044424589,
+            "mean_bias": -20.339093625730772,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": null
+          },
+          "sarima": {
+            "n": 0,
+            "origins": 0,
+            "mae": null,
+            "rmse": null,
+            "mean_bias": null,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": "no_scored_forecasts"
+          }
+        },
+        "2021": {
+          "seasonal_median": {
+            "n": 36,
+            "origins": 14,
+            "mae": 7.77773213675214,
+            "rmse": 18.915107686196247,
+            "mean_bias": -5.069333489278772,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": null
+          },
+          "seasonal_naive": {
+            "n": 30,
+            "origins": 14,
+            "mae": 21.53359632748515,
+            "rmse": 35.202052329515936,
+            "mean_bias": 19.936937041835126,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": null
+          },
+          "sarima": {
+            "n": 0,
+            "origins": 0,
+            "mae": null,
+            "rmse": null,
+            "mean_bias": null,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": "no_scored_forecasts"
+          }
+        },
+        "2022": {
+          "seasonal_median": {
+            "n": 25,
+            "origins": 12,
+            "mae": 5.956139503013943,
+            "rmse": 8.490965461992815,
+            "mean_bias": 1.3884867591542698,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": null
+          },
+          "seasonal_naive": {
+            "n": 25,
+            "origins": 12,
+            "mae": 10.904293878182639,
+            "rmse": 26.28641752691855,
+            "mean_bias": 8.978436792802498,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": null
+          },
+          "sarima": {
+            "n": 0,
+            "origins": 0,
+            "mae": null,
+            "rmse": null,
+            "mean_bias": null,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": "no_scored_forecasts"
+          }
+        },
+        "2023": {
+          "seasonal_median": {
+            "n": 24,
+            "origins": 9,
+            "mae": 2.2572241040635674,
+            "rmse": 3.8135716550856213,
+            "mean_bias": 0.38433006897585054,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": null
+          },
+          "seasonal_naive": {
+            "n": 18,
+            "origins": 9,
+            "mae": 2.0127768750937096,
+            "rmse": 3.3682720395351193,
+            "mean_bias": -1.297952937471879,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": null
+          },
+          "sarima": {
+            "n": 0,
+            "origins": 0,
+            "mae": null,
+            "rmse": null,
+            "mean_bias": null,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": "no_scored_forecasts"
+          }
+        }
+      },
+      "by_stratum": {
+        "stable_observed": {
+          "seasonal_median": {
+            "n": 89,
+            "origins": 32,
+            "mae": 6.623451099384861,
+            "rmse": 16.507724999962278,
+            "mean_bias": -2.7524925823489896,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": null
+          },
+          "seasonal_naive": {
+            "n": 77,
+            "origins": 32,
+            "mae": 13.650723860466911,
+            "rmse": 28.15669963237589,
+            "mean_bias": 9.322720827242849,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": null
+          },
+          "sarima": {
+            "n": 0,
+            "origins": 0,
+            "mae": null,
+            "rmse": null,
+            "mean_bias": null,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": "no_scored_forecasts"
+          }
+        },
+        "drift_observed": {
+          "seasonal_median": {
+            "n": 0,
+            "origins": 0,
+            "mae": null,
+            "rmse": null,
+            "mean_bias": null,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": "no_scored_forecasts"
+          },
+          "seasonal_naive": {
+            "n": 0,
+            "origins": 0,
+            "mae": null,
+            "rmse": null,
+            "mean_bias": null,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": "no_scored_forecasts"
+          },
+          "sarima": {
+            "n": 0,
+            "origins": 0,
+            "mae": null,
+            "rmse": null,
+            "mean_bias": null,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": "no_scored_forecasts"
+          }
+        },
+        "modeled_not_scored": {
+          "seasonal_median": {
+            "n": 0,
+            "origins": 0,
+            "mae": null,
+            "rmse": null,
+            "mean_bias": null,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": "no_scored_forecasts"
+          },
+          "seasonal_naive": {
+            "n": 0,
+            "origins": 0,
+            "mae": null,
+            "rmse": null,
+            "mean_bias": null,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": "no_scored_forecasts"
+          },
+          "sarima": {
+            "n": 0,
+            "origins": 0,
+            "mae": null,
+            "rmse": null,
+            "mean_bias": null,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": "no_scored_forecasts"
+          }
+        },
+        "excluded_truth": {
+          "seasonal_median": {
+            "n": 0,
+            "origins": 0,
+            "mae": null,
+            "rmse": null,
+            "mean_bias": null,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": "no_scored_forecasts"
+          },
+          "seasonal_naive": {
+            "n": 0,
+            "origins": 0,
+            "mae": null,
+            "rmse": null,
+            "mean_bias": null,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": "no_scored_forecasts"
+          },
+          "sarima": {
+            "n": 0,
+            "origins": 0,
+            "mae": null,
+            "rmse": null,
+            "mean_bias": null,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": "no_scored_forecasts"
+          }
+        }
+      },
+      "limitations": [
+        "Family selection uses earlier origins; SARIMA has a later holdout gate. A failed gate falls back to a baseline ranked on tuning, not a new validated winner.",
+        "Overlapping horizons are correlated; no significance or causal claim is made.",
+        "At least 90% successful predictions required before matched-case model comparison.",
+        "Historical availability uses final-vintage observations, not a publication-vintage archive."
+      ]
+    },
+    "limitations": [
+      "Experimental forecasts of regional activity, not independent fires or meteorological danger.",
+      "Modeled harmonized values are never used as training observations or evaluation truth.",
+      "Forecast intervals are distinct from harmonization uncertainty and do not propagate that uncertainty.",
+      "Forecasts are withheld when observations do not reach the requested origin; longer leads are not silently extrapolated."
+    ]
+  },
+  "verification": [
+    {
+      "date": "2023-10",
+      "value": 0.26548550607285964,
+      "source": "observed_modis",
+      "complete": true,
+      "flags": [],
+      "lower": null,
+      "upper": null,
+      "uncertainty_method": null,
+      "available_at": null,
+      "year": 2023,
+      "month": 10,
+      "valid_for_reference": true,
+      "uncertainty_kind": null
+    },
+    {
+      "date": "2023-11",
+      "value": 64.93121732793459,
+      "source": "observed_modis",
+      "complete": true,
+      "flags": [],
+      "lower": null,
+      "upper": null,
+      "uncertainty_method": null,
+      "available_at": null,
+      "year": 2023,
+      "month": 11,
+      "valid_for_reference": true,
+      "uncertainty_kind": null
+    },
+    {
+      "date": "2023-12",
+      "value": 44.19473286549701,
+      "source": "observed_modis",
+      "complete": true,
+      "flags": [],
+      "lower": null,
+      "upper": null,
+      "uncertainty_method": null,
+      "available_at": null,
+      "year": 2023,
+      "month": 12,
+      "valid_for_reference": true,
+      "uncertainty_kind": null
+    }
+  ]
+}

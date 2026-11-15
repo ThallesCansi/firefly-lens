@@ -44,6 +44,12 @@ Um SARIMA selecionado no primeiro trecho precisa superar ambos os baselines no h
 
 Uma origem histórica limita também a seleção da família e os alvos do backtest, não apenas o ajuste final. Se dados elegíveis não chegam à origem solicitada, o motor não converte uma extrapolação longa em um horizonte de 1–3 meses: devolve indisponibilidade. Em 2026 essa limitação é material.
 
+## Fire Danger & Risk Assessment
+
+O leitor, classes GWIS, proveniência, agregação elipsoidal e limitações estão em [FIRE_WEATHER_SOURCES.md](FIRE_WEATHER_SOURCES.md) e `/method#fire-danger-risk`. As fórmulas e critérios de elegibilidade dos modelos de atividade foram preservados.
+
+A expansão mantém a calibração brasileira no domínio validado. O piloto PRY contém apenas observações brutas; razões anuais não validam transferência de calibração. Estratos ecológicos locais, holdouts espaciais/temporais e cobertura da incerteza são necessários antes de habilitar harmonização e sinais. Ver [política continental e entrega](../docs/scientific-expansion/README.md).
+
 ## Referências verificadas
 
 - Hyndman & Athanasopoulos, *Forecasting: Principles and Practice*, [métodos simples e validação temporal](https://otexts.com/fpp3/toolbox.html). Fundamenta baselines e origens móveis sem observações futuras; não valida este modelo de fogo.

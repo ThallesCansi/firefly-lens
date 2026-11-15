@@ -61,7 +61,7 @@ async function exit(p, name = "Skip tour") {
 async function shot(p, name) { await p.screenshot({ path: join(output, name), animations: "disabled" }); }
 async function pick(p, label, value) {
   await p.getByRole("button", { name: new RegExp(`^${label}:`) }).click();
-  await p.getByRole("option", { name: value, exact: true }).click();
+  await p.getByRole("listbox", { name: label, exact: true }).getByRole("option", { name: value, exact: true }).click();
 }
 async function state(p) {
   return p.evaluate(() => ({
@@ -205,7 +205,8 @@ try {
   await page.locator('[data-tour="presets"]').selectOption("pampa");
   await pick(page, "Map month", "Jun"); await pick(page, "Map year", "2021");
   await page.locator('[data-tour="sensors"] button').first().click();
-  await page.getByRole("button", { name: "Analyze area", exact: true }).click();
+  const analyze = page.getByRole("button", { name: "Analyze area", exact: true });
+  if (await analyze.isVisible()) await analyze.click();
   await page.locator('[data-tour="history"][data-tour-ready="true"]').waitFor();
   await page.getByRole("button", { name: "Full report below", exact: true }).click();
   await page.locator('[data-tour="tab-forecast"]').click();
@@ -254,15 +255,25 @@ try {
     await ctx.close();
   }
   const { context: recovery, page: rp } = await setup(1440, "dark", "no-preference");
-  let attempts = 0;
-  await recovery.route("**/analytics/pantanal.json", (route) => ++attempts === 1 ? route.fulfill({ status: 503, body: "offline" }) : route.continue());
+  let attempts = 0, recoveredRequests = 0, allowRecovery = false;
+  // Signals may request the same snapshot before the report does. Keep the
+  // outage active until Retry so background prefetch cannot consume the fault.
+  const recoveryRoute = (route) => {
+    attempts++;
+    if (allowRecovery) { recoveredRequests++; return route.continue(); }
+    return route.fulfill({ status: 503, body: "offline" });
+  };
+  await recovery.route("**/analytics/pantanal.json", recoveryRoute);
+  // A configured Python service takes priority over the prepared snapshot.
+  await recovery.route("**/api/analytics/history", recoveryRoute);
   await rp.goto(base); await at(rp, "welcome");
   for (const [id] of chapters.slice(1, 11)) await next(rp, id);
   await card(rp).locator(".driver-popover-next-btn").click();
   await card(rp).getByRole("button", { name: "Retry section", exact: true }).waitFor();
   await shot(rp, "recovery-dark.png");
+  allowRecovery = true;
   await card(rp).getByRole("button", { name: "Retry section", exact: true }).click(); await at(rp, "science");
-  assert.equal(attempts, 2); await exit(rp); await recovery.close();
+  assert.ok(attempts >= 2 && recoveredRequests >= 1); await exit(rp); await recovery.close();
   const { context: failed, page: fp } = await setup(390, "dark");
   await failed.route("**/data/brazil/t_*.bin.gz", (route) => route.fulfill({ status: 503, body: "offline" }));
   await fp.goto(base); await at(fp, "welcome");

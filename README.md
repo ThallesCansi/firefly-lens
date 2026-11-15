@@ -4,7 +4,7 @@ One fire calendar from two satellite sensors.
 
 FireFly Lens is a NASA Space Apps Challenge 2026 project for the challenge *Harmonization of MODIS and VIIRS Hot Spots*. It brings the active-fire detections of both instruments onto one shared grid and shows a year of fire activity as a calendar, with the fire season and the unusual days marked.
 
-> **Status: real data for Brazil.** The map-first interface runs on the real NASA FIRMS records for Brazil, July 2002 to November 2026: MODIS Aqua and VIIRS NOAA-20, harmonized into one series on the MODIS Aqua scale and validated year by year. This project is not endorsed by NASA.
+> **Coverage: spatial harmonization for Brazil; national harmonization for the other 11 South American countries.** The map-first interface runs on the real NASA FIRMS records for Brazil, July 2002 to November 2026: MODIS Aqua and VIIRS NOAA-20, harmonized into one series on the MODIS Aqua scale and validated year by year. This project is not endorsed by NASA.
 
 ## Why the two records need harmonizing
 
@@ -109,6 +109,12 @@ SVG downloads now include region, period, legend, data source and observed/model
 
 ## Deployment
 
+Scientific expansion is documented in [national calibration, real weather, retrospective forecasting and validation](docs/continental-harmonization.md). History opens with the full monthly line chart. Brazil retains its spatial/biome method; **Paraguay, Argentina, Bolivia, Chile, Colombia, Ecuador, Guyana, Peru, Suriname, Uruguay and Venezuela** have separate whole-country reports for April 2018?December 2025. Each country passed predefined aggregate 2022?2023 holdout gates with its own coefficients. Local ecosystems and subnational regions are not validated by these fits.
+
+**Fire Danger Assessment** now reads real NASA GFWED/GEOS-5 experimental NetCDF forecasts. The shipped source was initialized on 12 November 2026 with daily local-noon valid dates 15?17 November. Cached assessments expire automatically and need offline refresh; dates are never relabeled as a fresh forecast. Copernicus seasonal imports remain optional and distinct from operational GWIS products. See [numeric weather provenance and refresh](analytics/FIRE_WEATHER_SOURCES.md) and `/method#fire-danger-risk`.
+
+**Retrospective activity forecasts** can be requested for an eligible past origin, using the existing Python models and strictly past evidence. Unsupported current numeric activity forecasts remain withheld. Check Python hosting with `node scripts/check-analytics-deployment.mjs https://YOUR-PREVIEW-URL`.
+
 Dynamic History and experimental Forecast for arbitrary selected polygons now use an optional separate Python API. See [diagnosis, contracts, local setup and deployment](docs/dynamic-polygon-analytics.md). Without that service, exact prepared regions and the existing browser calendars remain available. Current numeric forecasts may be scientifically unavailable when eligible observations do not reach the requested origin.
 
 The site deploys on [Vercel](https://vercel.com) from this repository: every push to `main` goes to production and every pull request gets its own preview URL. For the map assistant, configure `GROQ_API_KEY` (or `GEMINI_API_KEY`) in the Vercel project settings. The data are static files in `public/data/brazil/` (about 10 MB), fetched by the browser per 4° tile.
@@ -166,7 +172,7 @@ Place search uses [Photon](https://photon.komoot.io/) through `/api/geocode`, wi
 - Replace the near-real-time tail of 2026 with standard processing when FIRMS releases it.
 - Extend the record back to 2000 with MODIS Terra, and the calibration with Suomi NPP from 2012.
 - Correct the observed 2024–2025 MODIS Aqua for its orbital drift, and fill its outages.
-- Extend coverage beyond Brazil.
+- Extend national records before 2018 and validate subnational/ecosystem calibration beyond Brazil.
 
 ## Built with
 

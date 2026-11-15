@@ -1,0 +1,26 @@
+[
+  {
+    "section": "history",
+    "seconds": 1.297,
+    "status": 200,
+    "rows": 293
+  },
+  {
+    "section": "history",
+    "seconds": 0.024,
+    "status": 200,
+    "rows": 293
+  },
+  {
+    "section": "forecast",
+    "seconds": 0.069,
+    "status": 200,
+    "rows": 293
+  },
+  {
+    "section": "fire-weather",
+    "seconds": 0.003,
+    "status": 200,
+    "rows": 0
+  }
+]

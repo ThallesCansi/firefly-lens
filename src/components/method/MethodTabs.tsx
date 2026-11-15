@@ -5,9 +5,15 @@ const tabs = [
   { id: "harmonization", label: "Harmonization" },
   { id: "historical-anomalies", label: "Historical Anomalies" },
   { id: "data-limitations", label: "Data & Limitations" },
+  { id: "fire-danger", label: "Fire Danger & Risk" },
 ] as const;
 type Tab = (typeof tabs)[number]["id"];
 const sectionTabs: Record<string, Tab> = {
+  "fire-danger-risk": "fire-danger",
+  "fwi-source": "fire-danger",
+  "fwi-aggregation": "fire-danger",
+  "fwi-classes": "fire-danger",
+  "geographic-expansion": "fire-danger",
   challenge: "harmonization",
   approach: "harmonization",
   formulation: "harmonization",

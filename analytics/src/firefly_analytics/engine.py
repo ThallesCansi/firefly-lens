@@ -4,12 +4,12 @@ from .history import history
 from .climatology import climatology
 from .anomalies import anomalies
 from .forecasting import ForecastConfig, backtest, forecast
-from .fire_weather import query_fire_weather
+from .fire_weather import query_fire_weather, unavailable as weather_unavailable
 from .export import envelope
 
 
 def analyze(series, *, reference=Reference(), policy=QualityPolicy(), forecast_config=ForecastConfig(),
-            forecast_origin=None, generated_at=None, run_forecast=True, evaluation=None):
+            forecast_origin=None, generated_at=None, run_forecast=True, evaluation=None, run_fire_weather=True):
     """Pure orchestration: each section can fail independently; no file writes/API."""
     results = {}
     operations = {
@@ -18,12 +18,14 @@ def analyze(series, *, reference=Reference(), policy=QualityPolicy(), forecast_c
         "anomalies": (lambda: anomalies(series, reference, policy), {"name": "past_years_only_leave_target_out_seasonal_anomalies", "reference": asdict(reference)}),
         "forecast": (lambda: forecast(series, forecast_config, as_of=forecast_origin,
                                       evaluation=evaluation), {"name": "experimental_expanding_origin_comparison", "config": asdict(forecast_config)}),
-        "fire_weather": (lambda: query_fire_weather(series.region_id, series.geometry), {"name": "provider_fwi_adapter_no_live_provider"}),
+        "fire_weather": (lambda: query_fire_weather(series.region_id, series.geometry), {"name": "provider_numeric_fwi_or_explicit_unavailability"}),
     }
     for section, (operation, method) in operations.items():
         try:
             if section == "forecast" and not run_forecast:
                 data = {"status": "unavailable", "reason": "forecast_explicitly_disabled"}
+            elif section == "fire_weather" and (not run_fire_weather or series.synthetic):
+                data = weather_unavailable("synthetic_activity_does_not_query_real_weather" if series.synthetic else "weather_requested_independently")
             else:
                 data = operation()
             status = data.get("forecast_status", data.get("status")) if section in ("forecast", "fire_weather") else None

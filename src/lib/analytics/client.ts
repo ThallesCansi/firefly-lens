@@ -15,6 +15,7 @@ export interface RegionEntry {
   url: string;
   sha256: string;
   forecast_status: string;
+  representative_point?: [number, number];
 }
 export interface Manifest {
   schema_version: "1.0.0";
@@ -122,7 +123,9 @@ export function validateManifest(value: unknown): Manifest {
   return value as unknown as Manifest;
 }
 
-export function validateBundle(value: unknown, entry: RegionEntry): Bundle {
+export function validateBundle(value: unknown, entry: RegionEntry, expected = {
+  start: meta.firstDay.slice(0, 7), end: meta.lastDay.slice(0, 7), forecastOrigin: meta.seriesEnd,
+}): Bundle {
   assertFiniteTree(value);
   if (
     !object(value) ||
@@ -147,8 +150,8 @@ export function validateBundle(value: unknown, entry: RegionEntry): Bundle {
       throw new Error("Synthetic or mismatched analytics cannot be displayed");
     if (
       !object(payload.period) ||
-      payload.period.start !== meta.firstDay.slice(0, 7) ||
-      payload.period.end !== meta.lastDay.slice(0, 7)
+      payload.period.start !== expected.start ||
+      payload.period.end !== expected.end
     )
       throw new Error("Analytics coverage mismatch");
     if (
@@ -163,7 +166,7 @@ export function validateBundle(value: unknown, entry: RegionEntry): Bundle {
   const bundle = value as unknown as Bundle;
   const forecast = bundle.sections.forecast.data;
   if ("forecast_origin" in forecast) {
-    if (forecast.forecast_origin !== meta.seriesEnd)
+    if (forecast.forecast_origin !== expected.forecastOrigin)
       throw new Error(
         "Retrospective forecasts cannot be shown as a current outlook",
       );

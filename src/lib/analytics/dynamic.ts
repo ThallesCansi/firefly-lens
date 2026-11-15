@@ -12,7 +12,7 @@ export class AnalyticsError extends Error {
   constructor(public status: number, message: string) { super(message); }
 }
 
-function retryDelay(signal: AbortSignal) {
+export function retryDelay(signal: AbortSignal) {
   return new Promise<void>((resolve, reject) => {
     if (signal.aborted) { reject(signal.reason); return; }
     const timer = setTimeout(() => { signal.removeEventListener("abort", abort); resolve(); }, 2000);

@@ -51,10 +51,17 @@ def build():
     weather = obj({"status": {"enum": ["available", "unavailable", "synthetic"]}, "reason": {"type": ["string", "null"]},
                    "index": {"const": "FWI"}, "units": {"const": "dimensionless"},
                    "forecasts": arr(obj({"issued_at": {"type": "string", "format": "date-time"},
-                                         "valid_at": {"type": "string", "format": "date-time"}, "lead_hours": {"type": "number", "minimum": 0},
+                                         "valid_at": {"type": ["string","null"], "format": "date-time"}, "lead_hours": {"type": ["number","null"], "minimum": 0},
                                          "member": {"type": "string"}, "value": NONNEG,
                                          "sample_count": {"type": "integer", "minimum": 1}, "valid_samples": {"type": "integer", "minimum": 0},
-                                         "null_reason": {"type": ["string", "null"]}}))}, extra=True)
+                                         "null_reason": {"type": ["string", "null"]},
+                                         "coverage_fraction": {"type":"number","minimum":0,"maximum":1},
+                                         "danger_class": {"enum":["Low","Moderate","High","Very high","Extreme","Very extreme",None]},
+                                         "maximum": NONNEG, "percentile": NUMBER, "anomaly": NUMBER,
+                                         "valid_date": {"type":"string","format":"date"}, "lead_days":{"type":"integer","minimum":0},
+                                         "validity_basis":{"type":"string"},
+                                         "distribution": arr(obj({"class":{"type":"string"},"area_fraction":{"type":"number","minimum":0,"maximum":1}}))},
+                                         required=["issued_at","valid_at","lead_hours","member","value","sample_count","valid_samples","null_reason"], extra=False))}, extra=True)
     sections = dict(history=history, climatology=climatology, anomalies=anomalies, forecast=forecast, fire_weather=weather)
     result = obj({"schema_version": {"const": "1.0.0"}, "section": {"enum": list(sections)},
                   "region_id": {"type": "string", "minLength": 1}, "period": obj({"start": MONTH, "end": MONTH}),

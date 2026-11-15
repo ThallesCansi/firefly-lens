@@ -1,7 +1,7 @@
 import { geometryKey } from "./client";
 
 /** Keep Python/data outside the Next serverless bundle; credentials stay server-side. */
-export async function proxyAnalytics(request: Request, section: "history" | "forecast") {
+export async function proxyAnalytics(request: Request, section: "history" | "forecast" | "fire-weather" | "retrospective") {
   const endpoint = process.env.ANALYTICS_API_URL;
   if (!endpoint) return Response.json({ detail: "analytics_service_unconfigured" }, { status: 503 });
   if (Number(request.headers.get("content-length")) > 500_000)

@@ -6,6 +6,7 @@ import { MethodTabs } from "@/components/method/MethodTabs";
 import { HarmonizationGuide } from "@/components/method/HarmonizationGuide";
 import { AnomaliesGuide } from "@/components/method/AnomaliesGuide";
 import { DataGuide } from "@/components/method/DataGuide";
+import { FireDangerGuide } from "@/components/method/FireDangerGuide";
 import "./method.css";
 
 export const metadata: Metadata = {
@@ -32,6 +33,7 @@ export default function MethodPage() {
               Current build: real NASA FIRMS data for Brazil,{" "}
               {fireData.firstDay} to {fireData.lastDay}. Observed MODIS Aqua and
               modeled VIIRS continuation; validation and limitations documented.
+              Additional South American reports use separate country-wide calibration for 2018–2025.
             </span>
           </div>
         </div>
@@ -40,6 +42,7 @@ export default function MethodPage() {
             harmonization: <HarmonizationGuide />,
             "historical-anomalies": <AnomaliesGuide />,
             "data-limitations": <DataGuide />,
+            "fire-danger": <FireDangerGuide />,
           }}
         />
       </main>

@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import { cellCounts, type CellCount } from "./data/area";
 import type { AnalysisArea } from "./data/types";
+import { rawPilotFor } from "./data/coverage";
+import { rawPilotCells } from "./data/raw-pilot";
 
 /** Detections per 0.25° cell for the map. Camera movement never enters the query key. */
 export function useMapCells(area: AnalysisArea | null, period: string) {
@@ -20,16 +22,16 @@ export function useMapCells(area: AnalysisArea | null, period: string) {
       Date.UTC(Number(period.slice(0, 4)), Number(period.slice(5, 7)), 0),
     ).getUTCDate();
     const to = period.length === 10 ? period : `${period}-${last}`;
-    cellCounts(area, from, to)
+    (rawPilotFor(area) ? rawPilotCells(area, period) : cellCounts(area, from, to))
       .then((cells) => {
         if (live) setState({ key, cells, error: null });
       })
-      .catch(() => {
+      .catch((error) => {
         if (live)
           setState({
             key,
             cells: [],
-            error: "Detections could not be loaded. Change the period to retry.",
+            error: rawPilotFor(area) && error instanceof Error ? error.message : "Detections could not be loaded. Change the period to retry.",
           });
       });
     return () => {

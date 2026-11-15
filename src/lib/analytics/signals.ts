@@ -19,10 +19,17 @@ export interface FireflySignal {
  * Do not substitute counts, daily flags, or a neighbouring month's scores.
  */
 export function seasonalAnomaly(bundle: Bundle, period: string): AnomalyRow | undefined {
+  const payload = bundle.sections.anomalies;
+  const provenance = payload.source.provenance;
+  const eligibleSource = provenance.kind === "real_harmonized_parquet" ||
+    (provenance.kind === "real_country_harmonized" && provenance.scope === "entire_country_only" && provenance.calibration_status === "evaluated_country_aggregate");
+  if (payload.source.synthetic !== false || payload.data_status !== "available" || !eligibleSource) return;
   const data = bundle.sections.anomalies.data;
   if (isFailure(data)) return;
   return data.months.find((row) => row.date === period.slice(0, 7) &&
-    row.complete && row.value !== null &&
+    row.complete && row.value !== null && row.reference.n_years >= 5 &&
+    row.reference.operational_past_years_only &&
+    row.reference.years_used.every((year) => year < Number(row.date.slice(0,4))) &&
     (row.status === "available" || row.status === "partially_available"));
 }
 
@@ -42,7 +49,7 @@ export function fireflySignals(regions: SignalRegion[], period: string): Firefly
     return [{
       area: { id: `signal:${region.id}`, name: region.name, kind: "preset" as const,
         geometry: region.geometry, bbox },
-      position: [(bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2] as [number, number],
+      position: region.representative_point ?? [(bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2] as [number, number],
       anomaly,
     }];
   });

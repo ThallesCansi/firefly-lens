@@ -105,7 +105,7 @@ export const ASSISTANT_TOOLS: ToolSpec[] = [
   {
     name: "get_fire_history",
     description:
-      "Read the fire record of the current area of interest: yearly totals for the whole record, and monthly values between from_year and to_year (at most 5 years). Values are harmonized hot spots on the MODIS Aqua scale. Use it before stating any number.",
+      "Read the current area's fire record before stating numbers. Brazilian covered cells return yearly totals and up to five years of monthly Aqua-equivalent activity. A selected raw country pilot returns separate observed MODIS/VIIRS counts and explicit unavailability of harmonization, anomalies and forecasts. Missing coverage must never be interpreted as zero fire activity.",
     parameters: object({ from_year: { type: "integer" }, to_year: { type: "integer" } }),
   },
 ];
