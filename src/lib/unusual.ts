@@ -47,6 +47,11 @@ export interface CellHistory {
   aqua: Map<number, Float32Array>;
   /** Harmonized VIIRS per cell for the modeled months, keyed like the `aqua` index: [value, variance]. */
   modeled: Map<number, Map<number, [number, number]>>;
+  /**
+   * Harmonized VIIRS per cell for every month it exists (from April 2018),
+   * indexed like `aqua`; NaN where there is none. Only cells with a value appear.
+   */
+  harmonized: Map<number, Float32Array>;
 }
 
 /** A modeled cell glows when its count is at least this likely to pass the test. */

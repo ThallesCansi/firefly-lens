@@ -24,6 +24,7 @@ const history = (cells: Float32Array[], modeled: CellHistory["modeled"] = new Ma
   firstYear: FIRST,
   aqua: new Map(cells.map((c, i) => [i, c])),
   modeled,
+  harmonized: new Map(),
 });
 
 describe("isUnusual", () => {

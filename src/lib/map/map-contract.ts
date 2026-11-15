@@ -123,7 +123,17 @@ export interface MapLike {
 }
 
 /** Layer ids owned by the map engine. Tools may place layers before them but must not change them. */
-export const ENGINE_LAYERS = ["brazil", "area", "draft", "unusual", "modis", "viirs", "modis-columns", "viirs-columns"] as const;
+export const ENGINE_LAYERS = [
+  "brazil",
+  "area",
+  "draft",
+  "unusual",
+  "modis",
+  "viirs",
+  "cell-hover",
+  "modis-columns",
+  "viirs-columns",
+] as const;
 
 /** First data layer: tools insert their layers before it. */
 export const FIRST_DATA_LAYER = "modis";

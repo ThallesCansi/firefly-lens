@@ -13,6 +13,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import type { CellCount } from "@/lib/data/area";
 import { normalizeBBox, type AnalysisArea, type BBox, type Sensor } from "@/lib/data/types";
 import type { UnusualMonth } from "@/lib/unusual";
+import { cellIdAt, cellRing, placeReadout } from "@/lib/map/readout";
 import { HOME } from "@/lib/map/camera";
 import { GLOW, glowAt } from "@/lib/map/glow";
 import {
@@ -39,6 +40,7 @@ import {
   skyFor,
 } from "@/lib/map/projection";
 import type { MapDestination } from "./LocationSearch";
+import { CellReadout } from "./map/CellReadout";
 import { ProjectionToggle } from "./map/ProjectionToggle";
 import { Starfield } from "./Starfield";
 import { useTheme } from "@/components/ui/ThemeProvider";
@@ -224,6 +226,7 @@ export function HotspotMap({
   onResetView,
   unusual = null,
   unusualMonth,
+  harmonized,
 }: {
   /** The area of interest, outlined on the map. */
   area: AnalysisArea | null;
@@ -263,6 +266,8 @@ export function HotspotMap({
   unusual?: UnusualMonth | null;
   /** Name of that calendar month, for the key. */
   unusualMonth?: string;
+  /** VIIRS on the MODIS Aqua scale for a cell in the month shown; absent when no month is shown. */
+  harmonized?: (cellId: number) => number | null;
 }) {
   const { theme } = useTheme();
   const el = useRef<HTMLDivElement>(null);
@@ -302,6 +307,10 @@ export function HotspotMap({
   const [basemap, setBasemap] = useState<BasemapKind>(DEFAULT_BASEMAP);
   /** The glow under unusually high cells; the key switches it off. */
   const [showUnusual, setShowUnusual] = useState(true);
+  /** The cell under the pointer, whose numbers the readout shows. */
+  const [hovered, setHovered] = useState<CellCount | null>(null);
+  const readout = useRef<HTMLDivElement>(null);
+  const pointer = useRef<[number, number]>([0, 0]);
 
   useEffect(() => {
     latest.current = {
@@ -407,6 +416,10 @@ export function HotspotMap({
             latest.current.showUnusual ? latest.current.unusual : null,
           ),
         });
+        m.addSource("cell-hover", {
+          type: "geojson",
+          data: { type: "FeatureCollection", features: [] },
+        });
         m.addSource("brazil", { type: "geojson", data: OUTLINE_URL });
         m.addLayer({
           id: "brazil",
@@ -493,6 +506,13 @@ export function HotspotMap({
             "circle-stroke-color": colors.stroke,
             "circle-stroke-width": 0.5,
           },
+        });
+        // The cell the readout describes, outlined on the ground.
+        m.addLayer({
+          id: "cell-hover",
+          type: "line",
+          source: "cell-hover",
+          paint: { "line-color": colors.ink, "line-width": 1.5 },
         });
         // The 3D view of the same counts: one column per cell and sensor.
         for (const sensor of ["MODIS", "VIIRS"] as Sensor[]) {
@@ -667,6 +687,101 @@ export function HotspotMap({
     };
   }, [glowing, ready]);
 
+  // The readout: the cell under the pointer, found on the columns in the 3D
+  // view (a tall column covers the ground behind it) and on the ground
+  // otherwise. The card follows the pointer without a React render; only a
+  // change of cell renders. A tap does the same on a touch screen.
+  useEffect(() => {
+    const m = map.current;
+    const c = control.current;
+    if (!ready || !m || !c || isDrawing) return;
+    const byId = new Map((cells ?? []).map((cell) => [cell.id, cell]));
+    let current: number | null = null;
+    let frame = 0;
+    const place = () => {
+      const el = readout.current;
+      if (!el) return;
+      const { clientWidth: width, clientHeight: height } = m.getContainer();
+      const [left, top] = placeReadout(
+        pointer.current,
+        { width: el.offsetWidth, height: el.offsetHeight },
+        { width, height },
+      );
+      el.style.transform = `translate(${Math.round(left)}px, ${Math.round(top)}px)`;
+    };
+    const clear = () => {
+      cancelAnimationFrame(frame);
+      if (current === null) return;
+      current = null;
+      setHovered(null);
+    };
+    const find = (e: MapMouseEvent): CellCount | undefined => {
+      if (!c.isOnSurface([e.point.x, e.point.y])) return undefined;
+      const layers = ["modis-columns", "viirs-columns"].filter(
+        (id) => m.getLayer(id) && m.getLayoutProperty(id, "visibility") !== "none",
+      );
+      const column = layers.length
+        ? m.queryRenderedFeatures(e.point, { layers })[0]
+        : undefined;
+      return typeof column?.id === "number"
+        ? byId.get(Math.floor(column.id / 2))
+        : byId.get(cellIdAt(e.lngLat.lng, e.lngLat.lat));
+    };
+    const show = (e: MapMouseEvent) => {
+      // While a button is down the map is being dragged, not read.
+      if (e.type === "mousemove" && e.originalEvent.buttons !== 0) return clear();
+      pointer.current = [e.point.x, e.point.y];
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const cell = find(e);
+        if (!cell) return clear();
+        if (cell.id !== current) {
+          current = cell.id;
+          setHovered(cell);
+        }
+        place();
+      });
+    };
+    m.on("mousemove", show);
+    m.on("click", show);
+    m.on("mouseout", clear);
+    m.on("movestart", clear);
+    return () => {
+      m.off("mousemove", show);
+      m.off("click", show);
+      m.off("mouseout", clear);
+      m.off("movestart", clear);
+      cancelAnimationFrame(frame);
+      setHovered(null);
+    };
+  }, [cells, isDrawing, ready]);
+
+  // Outline the cell being read, and put the card in place when it first appears.
+  useEffect(() => {
+    if (!ready) return;
+    (map.current?.getSource("cell-hover") as GeoJSONSource | undefined)?.setData(
+      hovered
+        ? {
+            type: "Feature",
+            properties: {},
+            geometry: {
+              type: "LineString",
+              coordinates: cellRing(hovered.lon, hovered.lat),
+            },
+          }
+        : { type: "FeatureCollection", features: [] },
+    );
+    const el = readout.current;
+    const container = map.current?.getContainer();
+    if (!hovered || !el || !container) return;
+    const [left, top] = placeReadout(
+      pointer.current,
+      { width: el.offsetWidth, height: el.offsetHeight },
+      { width: container.clientWidth, height: container.clientHeight },
+    );
+    el.style.transform = `translate(${Math.round(left)}px, ${Math.round(top)}px)`;
+  }, [hovered, ready]);
+
   // The satellite picture is a layer of the basemap: shown or hidden in place.
   useEffect(() => {
     const m = map.current;
@@ -839,6 +954,23 @@ export function HotspotMap({
           data-tour="map-canvas"
         />
       </div>
+      {/* Follows the pointer, so it is moved by the map's own events, not by React. */}
+      {hovered && (
+        <div ref={readout} className="cell-readout map-surface" aria-hidden="true">
+          <CellReadout
+            cell={hovered}
+            harmonized={harmonized?.(hovered.id)}
+            unusual={
+              unusual?.ids.has(hovered.id)
+                ? unusual.modeled
+                  ? "likely"
+                  : "observed"
+                : null
+            }
+            month={unusualMonth}
+          />
+        </div>
+      )}
       {!ready && !failed && (
         <p className="pointer-events-none absolute inset-0 grid place-items-center text-[0.9375rem] text-dim">
           Loading the map…

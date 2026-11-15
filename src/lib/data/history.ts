@@ -21,8 +21,9 @@ function monthOfDay(): Uint16Array {
 
 /**
  * The monthly record of each cell of an area: MODIS Aqua detections for every
- * month, and the harmonized VIIRS value with its variance for the modeled
- * months. One pass over the area's tiles, which the map has already fetched.
+ * month, the harmonized VIIRS value wherever it exists, and its variance for
+ * the modeled months. One pass over the area's tiles, which the map has
+ * already fetched.
  */
 export async function cellHistory(shape: AnalysisArea): Promise<CellHistory> {
   const tiles = await Promise.all(tilesFor(shape.bbox).map(([tx, ty]) => loadTile(tx, ty)));
@@ -30,7 +31,7 @@ export async function cellHistory(shape: AnalysisArea): Promise<CellHistory> {
   const months = (Number(meta.lastDay.slice(0, 4)) - meta.epochYear + 1) * 12;
   const firstModeled = (meta.observedUntil + 1 - meta.epochYear) * 12;
   const monthOf = monthOfDay();
-  const history: CellHistory = { firstYear: meta.epochYear, aqua: new Map(), modeled: new Map() };
+  const history: CellHistory = { firstYear: meta.epochYear, aqua: new Map(), modeled: new Map(), harmonized: new Map() };
 
   for (const tile of tiles) {
     // Share of each local cell inside the area, as the area's own sums use it:
@@ -63,7 +64,12 @@ export async function cellHistory(shape: AnalysisArea): Promise<CellHistory> {
     };
     const m = tile.monthly;
     for (let i = 0; i < m.mu.length; i++) {
-      if (w[m.cell[i]] > 0 && m.month[i] >= firstModeled) estimate(m.cell[i], m.month[i])[0] = m.mu[i];
+      if (w[m.cell[i]] <= 0 || m.month[i] >= months) continue;
+      const id = at[m.cell[i]].id;
+      let values = history.harmonized.get(id);
+      if (!values) history.harmonized.set(id, (values = new Float32Array(months).fill(NaN)));
+      values[m.month[i]] = m.mu[i];
+      if (m.month[i] >= firstModeled) estimate(m.cell[i], m.month[i])[0] = m.mu[i];
     }
     const v = tile.variance;
     for (let i = 0; i < v.value.length; i++) {

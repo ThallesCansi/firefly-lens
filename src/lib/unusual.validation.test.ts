@@ -2,7 +2,6 @@ import { readFileSync } from "node:fs";
 import { beforeAll, describe, expect, it } from "vitest";
 import { cellHistory } from "./data/history";
 import { meta } from "./data/meta";
-import { loadTile, tilesFor } from "./data/tiles";
 import { rectangleArea } from "./data/types";
 import { UNUSUAL_PROBABILITY, isUnusual, tailProbability, unusualThreshold } from "./unusual";
 
@@ -30,22 +29,6 @@ beforeAll(async () => {
   const history = await cellHistory(area);
   const at = (year: number, month0: number) => (year - history.firstYear) * 12 + month0;
 
-  // The harmonized value of every cell-month, read straight from the tiles.
-  const harmonized = new Map<number, Map<number, number>>();
-  for (const [tx, ty] of tilesFor(area.bbox)) {
-    const tile = await loadTile(tx, ty);
-    for (let i = 0; i < tile.monthly.mu.length; i++) {
-      const local = tile.monthly.cell[i];
-      const id =
-        (tile.ty * meta.tileCells + Math.floor(local / meta.tileCells)) * 1000 +
-        tile.tx * meta.tileCells +
-        (local % meta.tileCells);
-      let cell = harmonized.get(id);
-      if (!cell) harmonized.set(id, (cell = new Map()));
-      cell.set(tile.monthly.month[i], tile.monthly.mu[i]);
-    }
-  }
-
   const dispersions: number[] = [];
   for (const cell of history.modeled.values())
     for (const [mean, variance] of cell.values()) if (mean >= 5) dispersions.push((variance - mean) / (mean * mean));
@@ -58,7 +41,7 @@ beforeAll(async () => {
         const others: number[] = [];
         for (let y = meta.climatologyBase[0]; y <= meta.climatologyBase[1]; y++) if (y !== year) others.push(aqua[at(y, month)]);
         const observed = isUnusual(aqua[at(year, month)], others);
-        const mean = harmonized.get(id)?.get(at(year, month)) ?? 0;
+        const mean = history.harmonized.get(id)?.[at(year, month)] || 0;
         const probability = mean > 0 ? tailProbability(unusualThreshold(others), mean, mean + dispersion * mean * mean) : 0;
         const glows = probability >= UNUSUAL_PROBABILITY;
         totals.expected += probability;
