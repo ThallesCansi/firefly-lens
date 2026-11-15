@@ -22,7 +22,8 @@ describe("polygon rules", () => {
   });
 
   it("keep shapes inside the coverage and within the size limit", () => {
-    expect(polygonProblem([[-80, -10], [-60, -10], [-60, -5]])).toMatch(/coverage/);
+    expect(polygonProblem([[-90, -10], [-80, -10], [-80, -5]])).toMatch(/South American/);
+    expect(polygonProblem([[-73,-50],[-68,-50],[-68,-45],[-73,-45]])).toBeNull();
     const wide: Vertex[] = [[-60, -10], [-45, -10], [-45, -5]];
     expect(polygonProblem(wide)).toMatch(/12/);
     expect(polygonProblem(wide, false)).toBeNull();

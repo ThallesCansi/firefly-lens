@@ -20,6 +20,18 @@ def fixture():
 
 
 class NationalTests(unittest.TestCase):
+    def test_older_observed_history_does_not_enter_sensor_calibration(self):
+        data=fixture()
+        before,_=calibrate(data,bootstrap=12)
+        old=data[data.year==2018].copy()
+        old['year']=2003
+        old['date']=old.date.str.replace('2018','2003')
+        old['n_modis']*=1000
+        old['n_viirs_1km']=0
+        after,_=calibrate(pd.concat([old,data],ignore_index=True),bootstrap=12)
+        self.assertEqual(before['parameters'],after['parameters'])
+        self.assertEqual(before['holdout'],after['holdout'])
+
     def test_shared_level1_keeps_the_original_shrinkage_formula(self):
         data=fixture()
         result=fit_l1(data,200.)

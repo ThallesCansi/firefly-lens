@@ -1,0 +1,111 @@
+{
+  "country_count": 11,
+  "source_archives": 352,
+  "published_assets": {
+    "map": {
+      "files": 27643,
+      "bytes": 6168692,
+      "largest_bytes": 1768
+    },
+    "map-days": {
+      "files": 3073,
+      "bytes": 14852278,
+      "largest_bytes": 72946
+    },
+    "daily": {
+      "files": 264,
+      "bytes": 556523,
+      "largest_bytes": 5321
+    }
+  },
+  "countries": [
+    {
+      "code": "PRY",
+      "period": {
+        "start": "2002-07",
+        "end": "2025-12"
+      },
+      "national_sha256": "daa704e1c389ff9ccc1ec98342754f384a17d3bdc3a7172f92ef982c01faae42"
+    },
+    {
+      "code": "ARG",
+      "period": {
+        "start": "2002-07",
+        "end": "2025-12"
+      },
+      "national_sha256": "7eea5047b8658f91c27597029538a902d7e3b79838cbb12a3a5c86ba29502ad1"
+    },
+    {
+      "code": "BOL",
+      "period": {
+        "start": "2002-07",
+        "end": "2025-12"
+      },
+      "national_sha256": "e05671e711ffe02a3edd5fe33154362768c629377572b099cf736368cf521045"
+    },
+    {
+      "code": "CHL",
+      "period": {
+        "start": "2002-07",
+        "end": "2025-12"
+      },
+      "national_sha256": "5289ee1fd1ac2e12026d6062b9cafe865412074f185bf8b8a43c0280d8bc0a2b"
+    },
+    {
+      "code": "COL",
+      "period": {
+        "start": "2002-07",
+        "end": "2025-12"
+      },
+      "national_sha256": "947ca59a28b2346c6d3d9157852f447178c824b813740a83f5d18caddbfed07c"
+    },
+    {
+      "code": "ECU",
+      "period": {
+        "start": "2002-07",
+        "end": "2025-12"
+      },
+      "national_sha256": "cbbc5d12f2450b9642d4f28db962dfa7c66e8dee29156e5f6cb31703bb884bf4"
+    },
+    {
+      "code": "GUY",
+      "period": {
+        "start": "2002-07",
+        "end": "2025-12"
+      },
+      "national_sha256": "4d0fdcbd55c95070775ea128380d8610f50b3050bd8e6491dd4f453026343d5b"
+    },
+    {
+      "code": "PER",
+      "period": {
+        "start": "2002-07",
+        "end": "2025-12"
+      },
+      "national_sha256": "75566d15ba9d71fb97e3c159c2098c1f0f5c660ecb60db9ea7b245f116b526c9"
+    },
+    {
+      "code": "SUR",
+      "period": {
+        "start": "2002-07",
+        "end": "2025-12"
+      },
+      "national_sha256": "232890dbd549ac0aece539bd9930164885c9979b459f504fdf1ab69fbc8c66da"
+    },
+    {
+      "code": "URY",
+      "period": {
+        "start": "2002-07",
+        "end": "2025-12"
+      },
+      "national_sha256": "28bdd5cc9820f48b6386e4c7997664351db8013c3f5398c1f5465b71d2a755db"
+    },
+    {
+      "code": "VEN",
+      "period": {
+        "start": "2002-07",
+        "end": "2025-12"
+      },
+      "national_sha256": "5f7dd12240c75de3af48a38e06d84969f2c4af5a381bcd253fe9fc2c0b9385f4"
+    }
+  ]
+}

@@ -25,12 +25,11 @@ import {
   type CalendarMode,
 } from "./FireCalendar";
 import { DayDetail } from "./DayDetail";
-import { HistoryHeatmap, againstMedian } from "./HistoryHeatmap";
+import { PagedHistory, againstMedian } from "./HistoryHeatmap";
 import { SensorCompare } from "./SensorCompare";
 import { AnalyticsReport } from "./analytics/AnalyticsReport";
-import { CountryReport } from "./analytics/CountryReport";
-import { BrowserHistoryChart } from "./analytics/BrowserHistoryChart";
 import { rawPilotFor } from "@/lib/data/coverage";
+import { rawCountryCellDaysCsv } from "@/lib/data/raw-pilot";
 
 const MODES: { value: CalendarMode; label: string }[] = [
   { value: "harmonized", label: "Harmonized" },
@@ -66,10 +65,12 @@ function RecordStatus({
   areaName,
   loading,
   error,
+  period,
 }: {
   areaName: string;
   loading: boolean;
   error: string | null;
+  period?:{start:string;end:string};
 }) {
   if (error)
     return (
@@ -83,7 +84,7 @@ function RecordStatus({
       <span className="h-1 w-48 overflow-hidden rounded-full bg-bark">
         <span className="block h-full w-1/3 animate-pulse bg-lume" />
       </span>
-      Reading {FIRST} to {LAST} for {areaName}
+      Reading {period?.start.slice(0,4) ?? FIRST} to {period?.end.slice(0,4) ?? LAST} for {areaName}
     </div>
   );
 }
@@ -93,7 +94,7 @@ function RecordStatus({
  * opens its days; everything else lives in the report below the map.
  */
 export function AnalysisCalendar(props: Parameters<typeof HarmonizedAnalysisCalendar>[0]) {
-  return rawPilotFor(props.area) ? <CountryReport area={props.area} period={props.period} onPeriod={props.onPeriod} compact onReport={props.onReport} /> : <HarmonizedAnalysisCalendar {...props} />;
+  return <HarmonizedAnalysisCalendar {...props} />;
 }
 
 function HarmonizedAnalysisCalendar({
@@ -118,16 +119,14 @@ function HarmonizedAnalysisCalendar({
   onMonthOpen: (open: boolean) => void;
   tourActive?: boolean;
 }) {
-  const { record, recordArea, loading, error } = useFireRecord(area);
-  const years = useYears(from, to);
+  const { record:cachedRecord, recordArea, loading, error } = useFireRecord(area);
+  const record=recordArea?.id===area.id ? cachedRecord : null;
   const setMonthOpen = onMonthOpen;
   const ready = !loading && !error && recordArea?.id === area.id;
-  const year = Number(period.slice(0, 4));
-  const shownYear = Math.min(Number(to.slice(0, 4)), Math.max(Number(from.slice(0, 4)), year));
 
   return (
-    <div data-tour="analysis-status" data-tour-ready={ready} data-tour-error={error ?? undefined} className="analysis-content flex flex-col gap-6">
-      <RecordStatus areaName={area.name} loading={loading} error={error} />
+    <div data-tour="analysis-status" data-tour-ready={ready} data-tour-error={error ?? undefined} className={`analysis-content sidebar-calendar ${monthOpen ? "is-month" : ""}`}>
+      <RecordStatus areaName={area.name} loading={loading} error={error} period={rawPilotFor(area)?.period} />
       {record && monthOpen ? (
         <MonthDetail
           record={record}
@@ -143,27 +142,12 @@ function HarmonizedAnalysisCalendar({
         <div
           data-tour="history"
           data-tour-ready={ready}
-          className={`flex flex-col gap-4 transition-opacity duration-200 ${loading ? "opacity-50" : ""}`}
+          className={`calendar-history transition-opacity duration-200 ${loading ? "opacity-50" : ""}`}
           aria-busy={loading}
         >
-          <BrowserHistoryChart record={record} />
-          <p className="text-[0.875rem] text-dim">
-            Each square is one month of hot spots on the MODIS Aqua scale.
-            Select a month to open its days.
-          </p>
-          <HistoryHeatmap
-            record={record}
-            years={years}
-            from={from}
-            to={to}
-            selectedYear={shownYear}
-            selectedMonth={period.slice(0, 7)}
-            onSelect={(y) => onPeriod(`${y}${period.slice(4, 7)}`)}
-            onSelectMonth={(y, m) => {
-              onPeriod(stamp(y, m));
-              setMonthOpen(true);
-            }}
-          />
+          <p className="calendar-intro">Each square is a month. Select one to explore its days.</p>
+          <PagedHistory record={record} from={from} to={to} period={period} onPeriod={onPeriod}
+            onMonth={(month)=>{ onPeriod(month); setMonthOpen(true); }} />
         </div>
       ) : (
         !error && (
@@ -176,7 +160,7 @@ function HarmonizedAnalysisCalendar({
       )}
       <div className="flex flex-wrap items-center gap-2">
         <button data-tour="open-report" type="button" className="btn btn-primary report-jump" onClick={onReport}>
-          Full report below
+          See full report below
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M12 5v14M6 13l6 6 6-6" />
           </svg>
@@ -199,12 +183,9 @@ function HarmonizedAnalysisCalendar({
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M12 4v11M7 11l5 5 5-5M5 20h14" />
           </svg>
-          Download CSV
+          <span className="sr-only">Download daily CSV</span>
         </button>
       </div>
-      <p className="-mt-3 text-[0.8125rem] text-faint">
-        The CSV holds one row per day, {from} to {to}. Grid-cell and monthly files are in the full report.
-      </p>
     </div>
   );
 }
@@ -264,7 +245,7 @@ function MonthDetail({
         <div className="flex gap-1">
           {(["prev", "next"] as const).map((dir) => {
             const target = dir === "prev" ? prev : next;
-            const out = target < fireData.firstMonth || target > fireData.lastMonth;
+            const out = target < record.days[0]?.date.slice(0,7) || target > record.days.at(-1)!.date.slice(0,7);
             return (
               <button
                 key={dir}
@@ -290,12 +271,12 @@ function MonthDetail({
           <p className="mt-1 text-[0.9375rem] text-dim">
             {sentence[0].toUpperCase() + sentence.slice(1)}
             {" · "}
-            {cell.partial ? "month in progress" : `rank ${cell.rank} of ${cell.rankOf}`}
+            {cell.partial ? "incomplete month" : `rank ${cell.rank} of ${cell.rankOf}`}
             {" · "}
             <span className="num text-ink">{count(cell.value)}</span> hot spots
             {cell.source === "modeled" && cell.lo !== null && cell.hi !== null && (
               <>
-                , 95% range <span className="num">{count(cell.lo)}</span>–
+                , {record.scope ? "parameter range" : "95% range"} <span className="num">{count(cell.lo)}</span>–
                 <span className="num">{count(cell.hi)}</span>, estimated from VIIRS
               </>
             )}
@@ -347,6 +328,7 @@ type ReportProps = {
 };
 
 export function AnalysisReport(props: ReportProps) {
+  const covered=rawPilotFor(props.area)?.period;
   return (
     <AnalyticsReport
       tab={props.analyticsTab}
@@ -357,8 +339,8 @@ export function AnalysisReport(props: ReportProps) {
       to={props.to}
       controls={
         <div data-tour="range" role="group" aria-label="Date range" className="flex flex-wrap items-end gap-x-5 gap-y-3">
-          <MonthPicker label="From" value={props.from} min={fireData.firstMonth} max={props.to} onChange={props.onFrom} />
-          <MonthPicker label="To" value={props.to} min={props.from} max={fireData.lastMonth} onChange={props.onTo} />
+          <MonthPicker label="From" value={props.from} min={covered?.start ?? fireData.firstMonth} max={props.to} onChange={props.onFrom} />
+          <MonthPicker label="To" value={props.to} min={props.from} max={covered?.end ?? fireData.lastMonth} onChange={props.onTo} />
           <p className="pb-2 text-[0.8125rem] text-faint">
             History, calendar and downloads use this range. Forecast uses the latest complete origin.
           </p>
@@ -385,13 +367,16 @@ function SensorAndCalendarReport({
   onFrom: (value: string) => void;
   onTo: (value: string) => void;
 }) {
+  const country=rawPilotFor(area);
+  const observedUntil=country ? 2023 : fireData.observedUntil;
   const year = Number(period.slice(0, 4));
   const setYear = (y: number) => onPeriod(`${y}${period.slice(4, 7)}`);
   const [mode, setMode] = useState<CalendarMode>("harmonized");
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
 
-  const { record, recordArea, loading, error } = useFireRecord(area);
+  const { record:cachedRecord, recordArea, loading, error } = useFireRecord(area);
+  const record=recordArea?.id===area.id ? cachedRecord : null;
   const shownArea = recordArea ?? area;
   const areaName = area.name;
 
@@ -421,6 +406,11 @@ function SensorAndCalendarReport({
     setExporting(true);
     setExportError(null);
     try {
+      if (country) {
+        const csv=await rawCountryCellDaysCsv(shownArea,`${from}-01`,`${to}-${lastDay(to)}`);
+        download(`${fileBase}_raw_country_cell_days.csv`,csv,"text/csv");
+        return;
+      }
       const rows = await cellDays(shownArea, `${from}-01`, `${to}-${lastDay(to)}`);
       download(`${fileBase}_cell_days.csv`, cellDaysCsv(rows), "text/csv");
     } catch {
@@ -439,7 +429,7 @@ function SensorAndCalendarReport({
           {exportError}
         </p>
       )}
-      <RecordStatus areaName={areaName} loading={loading} error={error} />
+      <RecordStatus areaName={areaName} loading={loading} error={error} period={country?.period} />
 
       {record && summary && (
         <div
@@ -451,10 +441,10 @@ function SensorAndCalendarReport({
               {latest ? (
                 <>
                   {MONTHS[latest.month]} {latest.year}{" "}
-                  {latest.partial ? "so far is" : "was"} {againstMedian(latest)},{" "}
+                  was {againstMedian(latest)},{" "}
                   <span className="text-dim">
                     {latest.partial
-                      ? "the month is still in progress"
+                      ? "incomplete calendar-month coverage"
                       : `rank ${latest.rank} of ${latest.rankOf} for the month`}
                     {latest.source === "modeled" &&
                       latest.lo !== null &&
@@ -468,8 +458,8 @@ function SensorAndCalendarReport({
             </h3>
             <p className="text-[0.9375rem] text-dim">
               Counts are hot spots on the MODIS Aqua scale: observed by MODIS
-              Aqua through {fireData.observedUntil}, and from{" "}
-              {fireData.observedUntil + 1} converted from VIIRS NOAA-20 by the
+              Aqua through {observedUntil}, and from{" "}
+              {observedUntil + 1} converted from VIIRS NOAA-20 by the
               harmonization model, with a 95% range.
               {record.overlap && record.overlap.modis > 0 && (
                 <>
@@ -486,7 +476,7 @@ function SensorAndCalendarReport({
                   of the MODIS count.
                 </>
               )}{" "}
-              {count(record.cells)} grid cells
+              {country ? "Entire country; local calibration is not validated" : `${count(record.cells)} grid cells`}
               {record.biomes[0]
                 ? `, ${Math.round(record.biomes[0].share * 100)}% ${record.biomes[0].name}`
                 : ""}
@@ -620,7 +610,7 @@ function SensorAndCalendarReport({
               record &&
               download(
                 `${fileBase}_monthly.csv`,
-                monthlyCsv(record.months.filter((m) => inRange(stamp(m.year, m.month)))),
+                monthlyCsv(record.months.filter((m) => inRange(stamp(m.year, m.month))),country?[2003,2023]:undefined),
                 "text/csv",
               )
             }
@@ -638,9 +628,9 @@ function SensorAndCalendarReport({
                 heatmapSvg(record.months, years, areaName, {
                   source: fireData.simulated
                     ? "Simulated FIRMS-shaped detections — not observations"
-                    : "NASA FIRMS Brazil - MODIS Aqua / VIIRS NOAA-20",
+                    : `NASA FIRMS ${country?.name ?? "Brazil"} - MODIS Aqua / VIIRS NOAA-20`,
                   period: `${from} to ${to}`,
-                  processing: "0.25 degree grid - offline NB2 model - MODIS Aqua reference",
+                  processing: country ? "Whole-country Level-1 calibration - MODIS Aqua reference - parameter uncertainty only" : "0.25 degree grid - offline NB2 model - MODIS Aqua reference",
                   exportedAt: new Date().toISOString(),
                   from,
                   to,

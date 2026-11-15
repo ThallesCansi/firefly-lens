@@ -30,7 +30,7 @@ export function countryCoverage(code: string): DataKind {
 export const rawPilots = coverageCatalog.datasets.filter((d) => !!d.manifest_url && d.country_code !== "BRA");
 export function rawPilotArea(entry: CoverageEntry): AnalysisArea {
   if (!entry.geometry) throw new Error("Raw pilot geometry missing");
-  return { id: `raw:${entry.country_code}`, name: `${entry.name} · ${entry.national_url ? "country harmonization" : "raw data pilot"}`, kind: "preset", geometry: entry.geometry, bbox: geometryEnvelope(entry.geometry) };
+  return { id: `raw:${entry.country_code}`, name: entry.name, kind: "preset", geometry: entry.geometry, bbox: geometryEnvelope(entry.geometry) };
 }
 export function rawPilotFor(area: AnalysisArea): CoverageEntry | undefined {
   return rawPilots.find((entry) => area.id === `raw:${entry.country_code}` || area.id === `signal:country-${entry.country_code}`);

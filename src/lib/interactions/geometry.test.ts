@@ -122,10 +122,10 @@ describe("geographic rectangle editing", () => {
     expect(large[2] - large[0]).toBeLessThanOrEqual(12);
     expect(large[3] - large[1]).toBeLessThanOrEqual(12);
   });
-  it("moves the whole area without changing dimensions, clamped to Brazil coverage", () => {
+  it("moves the whole area without changing dimensions, clamped to the South American envelope", () => {
     const moved = moveRectangle(box, [-46, -10], [-179, -50]);
     expect(validateRectangle(moved)).toBe(true);
-    expect(moved[0]).toBe(-74);
+    expect(moved[0]).toBe(-85);
     expect(moved[2] - moved[0]).toBe(8);
     expect(moved[3] - moved[1]).toBe(8);
   });

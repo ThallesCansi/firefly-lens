@@ -11,11 +11,16 @@ const YEARS = Array.from({ length: fireData.lastYear - fireData.firstYear + 1 },
 export function TemporalControl({
   period,
   onChange,
+  firstMonth=fireData.firstMonth,
+  lastMonth=fireData.lastMonth,
 }: {
   period: string;
   onChange: (value: string) => void;
+  firstMonth?:string;
+  lastMonth?:string;
 }) {
   const day = period.length === 10 ? Number(period.slice(8, 10)) : null;
+  const choose=(month:string)=>onChange(month<firstMonth?firstMonth:month>lastMonth?lastMonth:month);
   return (
     <div data-tour="period" className="temporal-control" role="group" aria-label="Map period, UTC">
       <svg
@@ -37,16 +42,16 @@ export function TemporalControl({
         label="Map month"
         title="Map month (UTC)"
         value={period.slice(5, 7)}
-        options={MONTHS.map((m, i) => ({ value: String(i + 1).padStart(2, "0"), label: m.slice(0, 3) }))}
-        onChange={(v) => onChange(`${period.slice(0, 4)}-${v}`)}
+        options={MONTHS.map((m, i) => ({ value: String(i + 1).padStart(2, "0"), label: m.slice(0, 3) })).filter((month)=>`${period.slice(0,4)}-${month.value}`>=firstMonth && `${period.slice(0,4)}-${month.value}`<=lastMonth)}
+        onChange={(v) => choose(`${period.slice(0, 4)}-${v}`)}
       />
       <Picker
         label="Map year"
         title="Map year (UTC)"
         className="field num"
         value={period.slice(0, 4)}
-        options={YEARS}
-        onChange={(v) => onChange(`${v}-${period.slice(5, 7)}`)}
+        options={YEARS.filter((year)=>year.value>=firstMonth.slice(0,4) && year.value<=lastMonth.slice(0,4))}
+        onChange={(v) => choose(`${v}-${period.slice(5, 7)}`)}
       />
       {day !== null && (
         <button

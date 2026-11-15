@@ -24,10 +24,12 @@ it("gives the assistant national harmonization without borrowing Brazilian borde
 it("identifies national calibration in the model context and rejects unsupported periods", async () => {
   const current = host();
   expect(describeHost(current)).toContain("real whole-country harmonization");
-  for (const period of ["2026", "2023-09-01"]) expect((await runTool(current,"set_period",{ period })).ok).toBe(false);
+  for (const period of ["2026", "2002-07-01","2023-02-30"]) expect((await runTool(current,"set_period",{ period })).ok).toBe(false);
   expect(current.setPeriod).not.toHaveBeenCalled();
   expect((await runTool(current,"set_period",{ period: "2022" })).ok).toBe(true);
   expect(current.setPeriod).toHaveBeenCalledWith("2022-09");
+  expect((await runTool(current,"set_period",{period:"2003-09-01"})).ok).toBe(true);
+  expect(current.setPeriod).toHaveBeenCalledWith("2003-09-01");
 });
 
 it("returns unavailable for uncovered global areas instead of manufacturing a zero record", async () => {

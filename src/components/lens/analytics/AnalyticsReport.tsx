@@ -554,6 +554,7 @@ function Forecast({ bundle }: { bundle: Bundle }) {
 
 export function AnalyticsReport(props: Parameters<typeof HarmonizedAnalyticsReport>[0]) {
   return rawPilotFor(props.area) ? <CountryReport area={props.area} period={props.period}
+    tab={props.tab} onTabChange={props.onTabChange} controls={props.controls} legacy={props.children}
     renderHistory={(bundle) => <History bundle={bundle} from={props.from} to={props.to} period={props.period} />}
     renderForecast={(bundle) => <Forecast bundle={bundle} />} /> : <HarmonizedAnalyticsReport {...props} />;
 }

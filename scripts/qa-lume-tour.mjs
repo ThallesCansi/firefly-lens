@@ -26,7 +26,9 @@ async function setup(width, theme, motion = "reduce") {
       document.head.append(style);
     });
   });
-  await context.addInitScript((value) => localStorage.setItem("firefly-lens-theme", value), theme);
+  await context.addInitScript((value) => {
+    try { localStorage.setItem("firefly-lens-theme",value); localStorage.setItem("firefly-lens-basemap-2","map"); } catch { /* about:blank */ }
+  }, theme);
   await context.route("https://tiles.openfreemap.org/**", (route) => route.fulfill({ json: {
     version: 8, sources: {}, layers: [{ id: "background", type: "background", paint: { "background-color": "#24382e" } }],
   } }));
@@ -208,7 +210,7 @@ try {
   const analyze = page.getByRole("button", { name: "Analyze area", exact: true });
   if (await analyze.isVisible()) await analyze.click();
   await page.locator('[data-tour="history"][data-tour-ready="true"]').waitFor();
-  await page.getByRole("button", { name: "Full report below", exact: true }).click();
+  await page.getByRole("button", { name: /see full report below/i }).click();
   await page.locator('[data-tour="tab-forecast"]').click();
   await start(page); for (const [id] of chapters.slice(1, 6)) await next(page, id); await exit(page);
   assert.match(await page.locator('[data-tour="map-canvas"]').getAttribute("aria-label"), /Pampa/);

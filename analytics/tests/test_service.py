@@ -21,6 +21,27 @@ def rectangle(w, s, e, n):
 
 
 class ServiceTests(unittest.TestCase):
+    def test_exact_country_history_and_past_forecast_never_borrow_brazilian_border_cells(self):
+        coverage=json.loads((ROOT/'public/data/coverage.json').read_text())
+        entry=next(d for d in coverage['datasets'] if d['country_code']=='PRY')
+        response=self.post(body=self.request(entry['geometry']))
+        self.assertEqual(response.status_code,200,response.text[:500])
+        bundle=response.json()
+        history=bundle['sections']['history']
+        self.assertEqual(history['source']['provenance']['kind'],'real_country_harmonized')
+        self.assertEqual(history['source']['provenance']['country_code'],'PRY')
+        self.assertEqual(len(history['data']['monthly']),282)
+        self.assertEqual(history['data']['monthly'][0]['date'],'2002-07')
+        retro=self.post('retrospective',self.request(entry['geometry'],forecast_origin='2016-09'))
+        self.assertEqual(retro.status_code,200,retro.text[:500])
+        forecast=retro.json()['sections']['forecast']['data']
+        self.assertEqual(forecast['forecast_origin'],'2016-09')
+        self.assertLessEqual(forecast['training_period']['end'],'2016-09')
+        self.assertEqual([p['date'] for p in forecast['predictions']],['2016-10','2016-11','2016-12'])
+        self.assertTrue(all(p['value'] is not None for p in forecast['predictions']))
+        invalid=self.post('retrospective',self.request(entry['geometry'],forecast_origin='2025-12'))
+        self.assertEqual(invalid.status_code,422)
+
     @classmethod
     def setUpClass(cls):
         cls.client = TestClient(create_app(ROOT, token="test-token", enable_sarima=False))

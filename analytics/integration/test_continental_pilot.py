@@ -21,11 +21,11 @@ class ContinentalExports(unittest.TestCase):
         self.assertFalse(data['signals_eligible'])
         self.assertEqual(data['harmonization_status'],'not_validated')
         self.assertFalse(data['comparability']['brazil_calibration_transferred'])
-        self.assertEqual(len(data['monthly']),93)
-        overlap=[r for r in data['monthly'] if r['date']<'2024-01']
+        self.assertEqual(len(data['monthly']),282)
+        overlap=[r for r in data['monthly'] if '2018-04'<=r['date']<'2024-01']
         self.assertEqual(sum(r['modis'] for r in overlap),147982)
         self.assertEqual(sum(r['viirs'] for r in overlap),784411)
-        self.assertEqual(len(data['inputs']),16)
+        self.assertEqual(len(data['inputs']),32)
         for month in data['monthly']:
             totals = [0,0]
             seen = set()

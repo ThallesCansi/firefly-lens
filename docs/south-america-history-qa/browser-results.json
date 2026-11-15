@@ -1,0 +1,14 @@
+{
+  "checks": [
+    "Brazil opens a fitted year/month calendar with the report button visible and no sidebar chart or vertical scrolling",
+    "Historical monthly/annual analyses remain in the full report below the map",
+    "Paraguay's 2003 year/month/day calendar and day-map CSV reconcile with its own real country archive without Brazilian tile substitution",
+    "Shared country links preserve old historical dates and daily selection",
+    "Countries expose the same History/Forecast report tabs; a genuine 2016 Paraguayan retrospective uses its own long history and no later training data",
+    "Tour sits beside the bottom-right zoom controls; large drags remain bounded to South America in flat/globe modes and the outside mask reloads with themes",
+    "320px: calendar and report button fit without sidebar or document overflow (344px panel)",
+    "390px: calendar and report button fit without sidebar or document overflow (404px panel)",
+    "Switching to Ecuador loads its own long calendar and report"
+  ],
+  "errors": []
+}

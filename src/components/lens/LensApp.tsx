@@ -493,7 +493,7 @@ export function LensApp() {
       if (rawPilot) {
         const cells = await rawPilotCells(area, period);
         const csv = ["period,cell_id,longitude,latitude,modis_aqua_raw,viirs_noaa20_raw",
-          ...cells.map((cell) => [period,cell.id,cell.lon,cell.lat,cell.modis,cell.viirs].join(","))].join("\n");
+          ...cells.map((cell) => [period,cell.id,cell.lon,cell.lat,cell.modis,period<'2018-04'?"":cell.viirs].join(","))].join("\n");
         download(`firefly-lens_${areaSlug(area)}_${period}_raw_country_cells.csv`, csv, "text/csv");
         return;
       }
@@ -602,7 +602,6 @@ export function LensApp() {
   return (
     <main id="main" inert={tourRunning} className="lens-workspace" data-tour-active={tourRunning}>
       <AutoStartTour onStart={startTour} />
-      <button ref={tourLauncher} data-tour="replay" type="button" className="lume-replay map-surface" onClick={startTour} disabled={tourRunning}><Lume size={32} />Tour with FireFlighter</button>
       {tourRunning && <LumeTour workspace={tourWorkspace} onExit={() => { tourGuard.current = false; tourSnapshot.current = null; setTourRunning(false); }} />}
       <div
         className="workspace-body"
@@ -650,6 +649,7 @@ export function LensApp() {
             }}
           />
           <SiteNav current="/lens" className="map-site-card" />
+          <button ref={tourLauncher} data-tour="replay" type="button" className="lume-replay map-surface" onClick={startTour} disabled={tourRunning}><Lume size={24} />Tour with FireFlighter</button>
           <MapToolbar
             onSearch={() => {
               tools.stop();
@@ -679,7 +679,7 @@ export function LensApp() {
             summary={`${periodSummary(period, sensors.length)} · Signals ${signalsEnabled ? "on" : "off"}`}
           >
             <div className="map-settings-row">
-              <TemporalControl period={period} onChange={changePeriod} />
+              <TemporalControl period={period} onChange={changePeriod} firstMonth={rawPilot?.period.start} lastMonth={rawPilot?.period.end} />
               <button
                 type="button"
                 className="layer-chip play-chip"
@@ -889,7 +889,7 @@ export function LensApp() {
                   </button>
                   <button
                     className="btn btn-text"
-                    title={rawPilot ? "Download raw country cell totals for the selected month" : "Download the cells on the map for this period as a CSV file"}
+                    title={rawPilot ? "Download raw country cell totals for the selected period" : "Download the cells on the map for this period as a CSV file"}
                     onClick={downloadMapCsv}
                   >
                     CSV
@@ -950,7 +950,7 @@ export function LensApp() {
                 <CloseButton ref={closeButton} label="Close analysis" onClick={close} />
               </div>
             </div>
-            <div className="analysis-scroll">
+            <div className="analysis-scroll" data-tour-scroll="analysis-panel">
               <AnalysisCalendar
                 key={`${analyzed.id}:${tourAttempt}`}
                 monthOpen={monthOpen}

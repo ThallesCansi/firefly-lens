@@ -6,7 +6,8 @@ const browser = await chromium.launch({ channel: "chrome", headless: true });
 const base = process.env.QA_BASE_URL || "http://localhost:3105";
 const errors = [];
 const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
-await page.addInitScript(() => localStorage.setItem("firefly-lens-tour-auto-disabled-v1", "true"));
+await page.addInitScript(() => { try { localStorage.setItem("firefly-lens-tour-auto-disabled-v1","true"); localStorage.setItem("firefly-lens-basemap-2","map"); } catch { /* about:blank */ } });
+await page.route("https://tiles.openfreemap.org/**",(route)=>route.fulfill({json:{version:8,sources:{},layers:[{id:"background",type:"background",paint:{"background-color":"#24382e"}}]}}));
 page.setDefaultTimeout(30000);
 page.on("pageerror", (error) => errors.push(error.message));
 const index = JSON.parse(readFileSync("public/analytics/manifest.json", "utf8"));
@@ -29,7 +30,7 @@ async function period(year, month, target = page) {
   await target.getByRole("option", { name: months[Number(month) - 1], exact: true }).click();
 }
 try {
-  await page.goto(`${base}/lens`);
+  await page.goto(`${base}/lens`,{waitUntil:"domcontentloaded"});
   const toggle = page.getByRole("switch", { name: "Firefly Signals" });
   assert.equal(await toggle.isChecked(), true);
   await page.waitForFunction(() => document.querySelector("#signal-status")?.textContent.includes("regions assessed"));
@@ -87,9 +88,10 @@ try {
   const narrowCard = await page.locator(".map-card").boundingBox();
   assert.ok(narrowCard.x >= 0 && narrowCard.x + narrowCard.width <= 320);
   const touch = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
-  await touch.addInitScript(() => localStorage.setItem("firefly-lens-tour-auto-disabled-v1", "true"));
+  await touch.addInitScript(() => { try { localStorage.setItem("firefly-lens-tour-auto-disabled-v1","true"); localStorage.setItem("firefly-lens-basemap-2","map"); } catch { /* about:blank */ } });
+  await touch.route("https://tiles.openfreemap.org/**",(route)=>route.fulfill({json:{version:8,sources:{},layers:[{id:"background",type:"background",paint:{"background-color":"#24382e"}}]}}));
   touch.on("pageerror", (error) => errors.push(error.message));
-  await touch.goto(`${base}/lens`);
+  await touch.goto(`${base}/lens`,{waitUntil:"domcontentloaded"});
   await touch.getByRole("button", { name: "Close the introduction", exact: true }).tap();
   await touch.locator(".map-card-chip").tap();
   await period("2024", "06", touch);
@@ -99,9 +101,10 @@ try {
   assert.match(await touch.getByRole("tooltip").innerText(), /Unusually high seasonal fire activity/);
   await touch.close();
   const unavailable = await browser.newPage();
-  await unavailable.addInitScript(() => localStorage.setItem("firefly-lens-tour-auto-disabled-v1", "true"));
+  await unavailable.addInitScript(() => { try { localStorage.setItem("firefly-lens-tour-auto-disabled-v1","true"); localStorage.setItem("firefly-lens-basemap-2","map"); } catch { /* about:blank */ } });
+  await unavailable.route("https://tiles.openfreemap.org/**",(route)=>route.fulfill({json:{version:8,sources:{},layers:[{id:"background",type:"background",paint:{"background-color":"#24382e"}}]}}));
   await unavailable.route("**/analytics/manifest.json", (route) => route.fulfill({ status: 503, body: "Unavailable" }));
-  await unavailable.goto(`${base}/lens`);
+  await unavailable.goto(`${base}/lens`,{waitUntil:"domcontentloaded"});
   await unavailable.getByText("Seasonal signals unavailable", { exact: true }).waitFor();
   assert.equal(await unavailable.locator(".firefly-signal-marker").count(), 0);
   await unavailable.close();

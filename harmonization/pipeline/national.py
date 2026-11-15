@@ -34,7 +34,7 @@ GATES = {'min_holdout_months':20, 'max_abs_bias':.20, 'max_wape':.40,
 
 def country_counts(code, end=2025):
     root=ROOT/f'harmonization/data/continental/{COUNTRIES[code].lower()}/raw'
-    paths=[root/f'{sensor}_{year}.parquet' for year in range(2018,end+1) for sensor in ('modis','viirs_n20')]
+    paths=[root/f'{sensor}_{year}.parquet' for sensor in ('modis','viirs_n20') for year in range(2002 if sensor=='modis' else 2018,end+1)]
     if any(not p.exists() for p in paths):
         raise ValueError(f'{code}: missing country archives')
     with duckdb.connect() as con:
@@ -42,18 +42,18 @@ def country_counts(code, end=2025):
         counts=con.execute("""WITH points AS (
           SELECT DISTINCT latitude,longitude,acq_date,acq_time,satellite,daynight,
             floor((longitude+180)/.01)::INT sx,floor((latitude+90)/.01)::INT sy
-          FROM archive WHERE type=0 AND daynight IN ('D','N') AND acq_date >= '2018-04-01'
+          FROM archive WHERE type=0 AND daynight IN ('D','N') AND acq_date >= '2002-07-04'
             AND isfinite(latitude) AND isfinite(longitude)
             AND latitude BETWEEN -90 AND 90 AND longitude BETWEEN -180 AND 180
             AND ((satellite='Aqua' AND try_cast(confidence AS DOUBLE)>=30)
-              OR (satellite IN ('N20','NOAA-20','1') AND lower(confidence) IN ('n','h','nominal','high'))))
+              OR (satellite IN ('N20','NOAA-20','1') AND acq_date >= '2018-04-01' AND lower(confidence) IN ('n','h','nominal','high'))))
           SELECT year(acq_date)::INT AS year,month(acq_date)::INT AS month,daynight,
             count(*) FILTER(satellite='Aqua') n_modis,
             count(*) FILTER(satellite!='Aqua') n_viirs_raw,
             count(DISTINCT(acq_date,sx,sy)) FILTER(satellite!='Aqua') n_viirs_1km
           FROM points GROUP BY ALL ORDER BY year,month,daynight""").df()
-    skeleton=pd.MultiIndex.from_product([range(2018,end+1),range(1,13),['D','N']],names=['year','month','daynight']).to_frame(index=False)
-    skeleton=skeleton[(skeleton.year>2018)|(skeleton.month>=4)]
+    skeleton=pd.MultiIndex.from_product([range(2002,end+1),range(1,13),['D','N']],names=['year','month','daynight']).to_frame(index=False)
+    skeleton=skeleton[(skeleton.year>2002)|(skeleton.month>=7)]
     data=skeleton.merge(counts,how='left').fillna(0)
     data['bioma']=code  # generic estimator stratum name; this is the whole country, not an IBGE biome
     data['date']=data.year.astype(str)+'-'+data.month.map(lambda x:f'{x:02}')
@@ -91,7 +91,7 @@ def accepted(report):
 
 
 def calibrate(data, *, bootstrap=300):
-    eligible=data[(data.year<=2023)&~data.date.isin(OUTAGES)].copy()
+    eligible=data[(data.date>='2018-04')&(data.year<=2023)&~data.date.isin(OUTAGES)].copy()
     train=eligible[eligible.year<=2021]
     holdout=eligible[eligible.year>=2022].copy()
     factors=fit_l1(train,200.)
@@ -161,7 +161,7 @@ def publish(code,end=2025):
         if stamp in OUTAGES: flags.append('sensor_outage')
         value=estimates[stamp]
         months.append(Month(stamp,value['value'] if modeled else float(row.n_modis),
-            'modeled_viirs' if modeled else 'observed_modis',True,tuple(flags),
+            'modeled_viirs' if modeled else 'observed_modis',stamp!='2002-07',tuple(flags),
             value['lower'] if modeled else None,value['upper'] if modeled else None,
             'country_year_block_bootstrap_parameter_only_95' if modeled and value['lower'] is not None else None))
     series=RegionalSeries('country-'+code,months,feature['geometry'],provenance={
@@ -171,9 +171,12 @@ def publish(code,end=2025):
         limitations=report['limitations']+['Country archive membership follows NASA FIRMS; the generalized navigation outline is not a new border filter.',
           'Zeros denote no retained detections, not verified acquisition coverage or absence of fires.',
           'Bootstrap bounds reflect calibration-parameter variability, not a full predictive interval.'])
-    sections=analyze(series,reference=Reference(2018,2023,5),forecast_config=ForecastConfig(enable_sarima=False,max_origins=32),run_fire_weather=False)
+    sections=analyze(series,reference=Reference(2003,2023,5),forecast_config=ForecastConfig(enable_sarima=False,max_origins=32),run_fire_weather=False)
     for section in sections.values(): validate(section)
-    bundle={'schema_version':'1.0.0','region_id':series.region_id,'geometry':series.geometry,'sections':sections}
+    bundle={'schema_version':'1.0.0','region_id':series.region_id,'geometry':series.geometry,'sections':sections,
+        'calendar':{'first_day':'2002-07-04','last_day':f'{end}-12-31','observed_until':2023,
+            'reference':[2003,2023], 'viirs_monthly':{stamp:value['value'] for stamp,value in estimates.items() if stamp>='2018-04'},
+            'daily_method':'Existing browser calendar allocation: monthly country-converted VIIRS distributed by daily degraded VIIRS counts; not independently validated daily fire activity.'}}
     checksum=write_json(public/'national.json',bundle)
     coverage_path=ROOT/'public/data/coverage.json'
     coverage=json.loads(coverage_path.read_text())
@@ -182,7 +185,7 @@ def publish(code,end=2025):
         scope='entire_country_only',signals_eligible=True,representative_point=list(shape(series.geometry).representative_point().coords)[0],national_url=f'/data/continental/{slug}/national.json',
         national_sha256=checksum,calibration_url=f'/data/continental/{slug}/calibration.json',
         calibration_metrics=report['holdout']['metrics'],
-        national_period={'start':'2018-04','end':f'{end}-12'})
+        national_period={'start':'2002-07','end':f'{end}-12'})
     write_json(coverage_path,coverage)
     return {'country':code,'status':report['status'],'metrics':report['holdout']['metrics'],
         'elapsed_seconds':round(time.perf_counter()-began,3),'national_sha256':checksum}

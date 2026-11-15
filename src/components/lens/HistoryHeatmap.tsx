@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import type { FireRecord, Level, MonthCell } from "@/lib/harmonize";
 import { MONTHS, count } from "@/lib/format";
 import { ScientificInfo } from "@/components/ui/ScientificInfo";
@@ -40,6 +40,7 @@ export function HistoryHeatmap({
   onSelect,
   onSelectMonth,
   selectedMonth,
+  compact = false,
 }: {
   record: FireRecord;
   /** Years to show, newest first. */
@@ -51,6 +52,7 @@ export function HistoryHeatmap({
   onSelect: (year: number) => void;
   onSelectMonth?: (year: number, month: number) => void;
   selectedMonth?: string;
+  compact?: boolean;
 }) {
   const root = useRef<HTMLDivElement>(null);
   const [tip, setTip] = useState<{
@@ -194,7 +196,7 @@ export function HistoryHeatmap({
         </tbody>
       </table>
 
-      <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-[0.8125rem] text-dim">
+      {compact ? <p className="calendar-key"><span>Less</span><span className="calendar-gradient" aria-hidden="true" /><span>More</span><span>• VIIRS estimate</span></p> : <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-[0.8125rem] text-dim">
         <div className="flex items-center gap-2">
           <span>Less burning</span>
           <span className="flex gap-[2px]" aria-hidden="true">
@@ -228,7 +230,7 @@ export function HistoryHeatmap({
           </span>
           <span>Estimated from VIIRS</span>
         </div>
-      </div>
+      </div>}
 
       <div
         className="t-tt"
@@ -251,7 +253,7 @@ export function HistoryHeatmap({
             </span>
             <span className="block">
               {tip.cell.partial ? (
-                "Month in progress"
+                "Incomplete month"
               ) : (
                 <>
                   Rank <span className="num">{tip.cell.rank}</span> of{" "}
@@ -262,7 +264,7 @@ export function HistoryHeatmap({
             </span>
             {tip.cell.source === "modeled" && tip.cell.lo !== null && tip.cell.hi !== null && (
               <span className="block">
-                From VIIRS, 95%: <span className="num">{count(tip.cell.lo)}</span>–
+                From VIIRS, {record.scope ? "parameter range" : "95%"}: <span className="num">{count(tip.cell.lo)}</span>–
                 <span className="num">{count(tip.cell.hi)}</span>
               </span>
             )}
@@ -271,4 +273,37 @@ export function HistoryHeatmap({
       </div>
     </div>
   );
+}
+
+/** The sidebar keeps a readable block of years in view instead of scrolling. */
+export function PagedHistory({ record,from,to,period,onPeriod,onMonth }: {
+  record:FireRecord; from:string; to:string; period:string;
+  onPeriod:(period:string)=>void; onMonth:(period:string)=>void;
+}) {
+  const root=useRef<HTMLDivElement>(null);
+  const [rows,setRows]=useState(8);
+  const selectedYear=Number(period.slice(0,4));
+  const [chosen,setChosen]=useState<{ year:number; rows:number; page:number } | null>(null);
+  useLayoutEffect(() => {
+    const element=root.current;
+    if (!element) return;
+    const observer=new ResizeObserver(([entry]) => setRows(Math.max(3,Math.min(30,Math.floor((entry.contentRect.height-100)/28)))));
+    observer.observe(element); return () => observer.disconnect();
+  },[]);
+  const years=[...record.years].filter((year)=>year>=Number(from.slice(0,4)) && year<=Number(to.slice(0,4))).reverse();
+  const pages=Math.max(1,Math.ceil(years.length/rows));
+  const index=years.indexOf(selectedYear);
+  const page=Math.min(pages-1,chosen?.year===selectedYear && chosen.rows===rows ? chosen.page : Math.max(0,Math.floor(index/rows)));
+  const shown=years.slice(page*rows,(page+1)*rows);
+  const navigate=(next:number) => setChosen({year:selectedYear,rows,page:next});
+  return <div ref={root} className="calendar-overview">
+    <div className="calendar-pager" role="group" aria-label="Calendar years">
+      <button type="button" className="btn btn-text" aria-label="Newer years" disabled={page===0} onClick={()=>navigate(page-1)}>← Newer</button>
+      <span className="num">{shown.at(-1)}–{shown[0]}</span>
+      <button type="button" className="btn btn-text" aria-label="Older years" disabled={page===pages-1} onClick={()=>navigate(page+1)}>Older →</button>
+    </div>
+    <HistoryHeatmap record={record} years={shown} from={from} to={to} selectedYear={selectedYear}
+      selectedMonth={period.slice(0,7)} onSelect={(year)=>onPeriod(`${year}${period.slice(4,7)}`)}
+      onSelectMonth={(year,month)=>onMonth(`${year}-${String(month+1).padStart(2,"0")}`)} compact />
+  </div>;
 }

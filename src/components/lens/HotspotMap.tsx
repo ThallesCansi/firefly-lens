@@ -15,6 +15,7 @@ import { normalizeBBox, type AnalysisArea, type BBox, type Sensor } from "@/lib/
 import type { UnusualMonth } from "@/lib/unusual";
 import { cellIdAt, cellRing, placeReadout } from "@/lib/map/readout";
 import { HOME } from "@/lib/map/camera";
+import { addCoverageMask,continentCenter,MIN_CONTINENT_ZOOM } from "@/lib/map/south-america";
 import { GLOW, glowAt } from "@/lib/map/glow";
 import {
   COLUMN_MOTION_MS,
@@ -177,6 +178,11 @@ function makeMap(
     style,
     center: HOME.center,
     zoom: HOME.zoom[projection],
+    minZoom: MIN_CONTINENT_ZOOM,
+    transformCameraUpdate: (next) => {
+      const [lng,lat]=continentCenter(next.center.lng,next.center.lat);
+      return lng===next.center.lng && lat===next.center.lat ? {} : {center:new lib.LngLat(lng,lat)};
+    },
     attributionControl: false,
     cooperativeGestures: false,
     renderWorldCopies: false,
@@ -590,6 +596,7 @@ export function HotspotMap({
         styled.current = true;
         setOffline(fellBack.current);
         addLayers();
+        addCoverageMask(instance);
         try {
           instance.setSky(
             skyFor(appliedTheme.current) as Parameters<
@@ -607,6 +614,10 @@ export function HotspotMap({
       });
       instance.on("idle", () => {
         if (!dead) setPaintedTheme(appliedTheme.current);
+      });
+      instance.on("moveend", () => {
+        const center=instance.getCenter();
+        if (el.current) el.current.dataset.cameraCenter=`${center.lng.toFixed(5)},${center.lat.toFixed(5)}`;
       });
       instance.on("error", (e) => {
         if (!dead) console.warn("FireFly Lens map:", e.error?.message ?? e);
@@ -1127,6 +1138,7 @@ export function HotspotMap({
           </p>
         )}
         {status && <div className="map-key-status">{status}</div>}
+        <p className="map-key-note">South America coverage · shaded elsewhere</p>
         {offline && (
           <p className="map-key-note">Basemap unavailable offline</p>
         )}

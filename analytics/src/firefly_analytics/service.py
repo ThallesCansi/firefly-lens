@@ -16,6 +16,7 @@ from shapely.errors import GEOSException
 from typing import Literal
 
 from .data_adapter import from_parquet
+from .national_adapter import from_national
 from .engine import analyze
 from .export import envelope, validate
 from .forecasting import ForecastConfig, forecast, engine_fingerprints
@@ -66,6 +67,8 @@ def create_app(repo=None, *, token=None, enable_sarima=None):
                     digest = hashlib.sha256()
                     for path in paths:
                         digest.update((repo / path).read_bytes())
+                    coverage=repo / 'public/data/coverage.json'
+                    if coverage.exists(): digest.update(coverage.read_bytes())
                     digest.update(json.dumps(engine_fingerprints(), sort_keys=True).encode())
                     dataset = (meta, digest.hexdigest())
                 except (OSError, ValueError):
@@ -132,16 +135,28 @@ def create_app(repo=None, *, token=None, enable_sarima=None):
         try:
             def aggregate():
                 try:
-                    series = from_parquet(repo, region, geometry)
+                    series = from_national(repo, geometry)
+                    if series is None:
+                        series = from_parquet(repo, region, geometry)
+                    else:
+                        series.provenance['published_region_id']=series.region_id
+                        series.region_id=region
                 except ValueError as exc:
                     if "intersect" in str(exc):
                         raise HTTPException(422, "region_outside_coverage")
                     raise
                 series.provenance["processing_version"] = version
                 series.provenance["last_complete_month"] = meta["seriesEnd"]
-                series.limitations.append("Spatial resolution is 0.25 degrees; small polygons are fractional grid estimates, not local fire measurements.")
+                if series.provenance.get('scope') != 'entire_country_only':
+                    series.limitations.append("Spatial resolution is 0.25 degrees; small polygons are fractional grid estimates, not local fire measurements.")
                 return series
             series = cached((*base, "series"), aggregate)
+            if series.provenance.get('scope') == 'entire_country_only':
+                if section == 'retrospective':
+                    if not series.months[0].date <= origin <= month_stamp(month_id(series.provenance['series_end'])-request.horizon):
+                        raise HTTPException(422,'retrospective_targets_must_be_within_country_history')
+                else:
+                    origin=series.provenance['series_end']
             def history_result():
                 # Weather changes independently of the immutable fire history.
                 # It has its own product-version/minute cache and endpoint.

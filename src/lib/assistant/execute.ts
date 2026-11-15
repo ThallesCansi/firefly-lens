@@ -8,7 +8,7 @@ import { municipalities, municipalityLabel, searchMunicipalities } from "../inte
 import { navigationForSearch, type SearchSuggestion } from "../interactions/navigation";
 import { MONTHS } from "../format";
 import { rawPilotFor } from "../data/coverage";
-import { loadRawPilot, loadNationalAnalytics } from "../data/raw-pilot";
+import { loadRawPilot, loadNationalAnalytics,loadCountryRecord } from "../data/raw-pilot";
 import { isFailure } from "../analytics/contracts";
 import type { MapDestination } from "@/components/lens/LocationSearch";
 
@@ -88,7 +88,7 @@ const round = (x: number) => Math.round(x);
 const monthName = (m: number) => MONTHS[m];
 
 function recordOf(area: AnalysisArea): Promise<FireRecord> {
-  if (rawPilotFor(area)) return Promise.reject(new Error("The raw country pilot has no validated harmonized record."));
+  if (rawPilotFor(area)) return loadCountryRecord(area);
   let record = records.get(area.id);
   if (!record) {
     record = loadArea(area).then((data) => {
@@ -113,10 +113,12 @@ async function applyPeriod(host: AssistantHost, raw: string): Promise<ToolOutcom
   const pilot = host.area ? rawPilotFor(host.area) : undefined;
   if (pilot) {
     if (/^\d{4}$/.test(period)) period = `${period}-09`;
-    if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(period) || period < pilot.period.start || period > pilot.period.end)
-      return { ok: false, result: `The country record supports monthly maps from ${pilot.period.start} to ${pilot.period.end}. Daily country maps and dates outside this coverage are unavailable.` };
+    const day=period.length===10;
+    if (!/^\d{4}-(0[1-9]|1[0-2])(-\d{2})?$/.test(period) || period.slice(0,7) < pilot.period.start || period.slice(0,7) > pilot.period.end ||
+        !Number.isFinite(Date.parse(day?period:period+'-01')) || (day && (new Date(period).toISOString().slice(0,10)!==period || period<'2002-07-04')))
+      return { ok: false, result: `The country record covers ${pilot.period.start} to ${pilot.period.end}; choose a valid covered month or day.` };
     host.setPeriod(period);
-    return { ok: true, result: `Showing ${period} raw detections. Sensors remain separate; harmonization is not validated.`, note: `Showing ${period}` };
+    return { ok: true, result: `Showing ${period} raw sensor detections. Country harmonization applies to national activity totals, not individual cells.`, note: `Showing ${period}` };
   }
   let why = "";
   if (/^\d{4}$/.test(period)) {

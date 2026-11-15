@@ -79,7 +79,7 @@ export function AreaForm({
         </p>
       ) : (
         <p className="text-[0.8125rem] text-faint">
-          Decimal degrees, west and south negative. Each side up to {MAX_AREA_SIDE} degrees. The records cover Brazil only.
+          Decimal degrees, west and south negative. Each side up to {MAX_AREA_SIDE} degrees. Polygon calibration covers Brazil; use the country selector for other South American national reports.
         </p>
       )}
     </form>
