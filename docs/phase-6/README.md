@@ -8,6 +8,8 @@ Implementation branch: `feature/analytics-ui-integration`. Based on main `1b730a
 
 The input is the existing real `grid_monthly_total.parquet`, harmonization parameters and app metadata. The manifest records source/engine fingerprints, generation timestamp, data version, exact geometries and SHA-256 hashes of output bytes. JSON files are static assets suitable for Vercel; there is no Python execution inside a Next.js request.
 
+`.gitattributes` preserves LF line endings for public analytics JSON so integrity hashes remain valid after Windows and Linux checkouts.
+
 `src/lib/analytics/client.ts` validates the manifest against the app's data metadata, matches the exact polygon independently of winding/start vertex, checks the bundle's content hash, validates the original JSON Schema and verifies fields needed by the UI. It rejects synthetic outputs, nonfinite numbers, incompatible units, wrong regions and retrospective origins. It never falls back to another region or matches only a bounding box. `useAnalytics` caches requests and suppresses stale results when geometry changes; failed requests can be retried.
 
 TypeScript filters and formats existing outputs and computes SVG pixel coordinates. It does not calculate climatology, anomalies, percentiles, trend, model selection or validation metrics. Existing browser calendar/sensor calculations remain intact.
