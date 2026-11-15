@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type {
   GeoJSONSource,
@@ -11,8 +12,20 @@ import type {
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { CellCount } from "@/lib/data/area";
 import { normalizeBBox, type AnalysisArea, type BBox, type Sensor } from "@/lib/data/types";
+import type { UnusualMonth } from "@/lib/unusual";
 import { HOME } from "@/lib/map/camera";
-import { createController, type EngineController } from "@/lib/map/controller";
+import { GLOW, glowAt } from "@/lib/map/glow";
+import {
+  COLUMN_MOTION_MS,
+  createColumnMotion,
+  type ColumnMotion,
+} from "@/lib/map/column-motion";
+import { COLUMN_HEIGHT, COLUMN_OPACITY, columnTop, columns } from "@/lib/map/columns";
+import {
+  createController,
+  prefersReducedMotion,
+  type EngineController,
+} from "@/lib/map/controller";
 import type {
   MapClickHandler,
   MapController,
@@ -29,7 +42,16 @@ import type { MapDestination } from "./LocationSearch";
 import { ProjectionToggle } from "./map/ProjectionToggle";
 import { Starfield } from "./Starfield";
 import { useTheme } from "@/components/ui/ThemeProvider";
-import { BASEMAP_ATTRIBUTION, basemapFor, loadBasemap } from "@/lib/map/basemap";
+import {
+  BASEMAP_ATTRIBUTION,
+  DEFAULT_BASEMAP,
+  IMAGERY_LAYER,
+  basemapFor,
+  loadBasemap,
+  readBasemap,
+  saveBasemap,
+  type BasemapKind,
+} from "@/lib/map/basemap";
 
 function mapColors() {
   const css = getComputedStyle(document.documentElement);
@@ -41,6 +63,7 @@ function mapColors() {
     modis: read("--color-modis"),
     viirs: read("--color-viirs"),
     stroke: read("--color-night"),
+    lume: read("--color-lume"),
   };
 }
 
@@ -79,6 +102,22 @@ function points(cells: CellCount[], scale?: { modis: number; viirs: number }) {
         kv: k(c.viirs, topV),
       },
     })),
+  };
+}
+
+/** Centres of the unusually high cells among those on the map. */
+function glowPoints(cells: CellCount[], unusual: UnusualMonth | null) {
+  return {
+    type: "FeatureCollection" as const,
+    features: unusual
+      ? cells
+          .filter((c) => unusual.ids.has(c.id))
+          .map((c) => ({
+            type: "Feature" as const,
+            geometry: { type: "Point" as const, coordinates: [c.lon, c.lat] },
+            properties: {},
+          }))
+      : [],
   };
 }
 
@@ -135,11 +174,24 @@ function makeMap(
     attributionControl: false,
     cooperativeGestures: false,
     renderWorldCopies: false,
-    // The globe turns by dragging; tilting and spinning the north away add nothing to a fire map.
+    // The globe turns by dragging. Tilting and spinning the north away only
+    // help with the 3D columns, so the controller switches them on with that view.
     dragRotate: false,
-    pitchWithRotate: false,
-    touchPitch: false,
   });
+}
+
+/** Shows each sensor's flat mark or its column, never both. */
+function showMarks(m: MapLibreMap, sensors: Sensor[], inColumns: boolean) {
+  for (const sensor of ["MODIS", "VIIRS"] as Sensor[]) {
+    const id = sensor.toLowerCase();
+    const on = sensors.includes(sensor);
+    const set = (layer: string, visible: boolean) => {
+      if (m.getLayer(layer))
+        m.setLayoutProperty(layer, "visibility", visible ? "visible" : "none");
+    };
+    set(id, on && !inColumns);
+    set(`${id}-columns`, on && inColumns);
+  }
 }
 
 /**
@@ -170,6 +222,8 @@ export function HotspotMap({
   showProjectionToggle = true,
   status,
   onResetView,
+  unusual = null,
+  unusualMonth,
 }: {
   /** The area of interest, outlined on the map. */
   area: AnalysisArea | null;
@@ -205,11 +259,16 @@ export function HotspotMap({
   status?: ReactNode;
   /** Called when the person presses "Reset view" in the map controls. */
   onResetView?: () => void;
+  /** Cells that burn unusually in the month shown; null when no month is judged. */
+  unusual?: UnusualMonth | null;
+  /** Name of that calendar month, for the key. */
+  unusualMonth?: string;
 }) {
   const { theme } = useTheme();
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<MapLibreMap | null>(null);
   const control = useRef<EngineController | null>(null);
+  const motion = useRef<ColumnMotion | null>(null);
   const isDrawing = drawing || interactionMode === "draw-rectangle";
   const bbox = area?.bbox ?? null;
   const latest = useRef({
@@ -221,6 +280,10 @@ export function HotspotMap({
     theme,
     onReady,
     onProjectionChange,
+    inColumns: false,
+    basemap: DEFAULT_BASEMAP as BasemapKind,
+    unusual,
+    showUnusual: true,
   });
   const appliedTheme = useRef(theme);
   const styled = useRef(false);
@@ -233,6 +296,12 @@ export function HotspotMap({
     projection ?? DEFAULT_PROJECTION,
   );
   const [globeUnavailable, setGlobeUnavailable] = useState(false);
+  /** The 3D view: detections as columns, seen from a tilted camera. */
+  const [inColumns, setInColumns] = useState(false);
+  /** NASA's satellite picture under the data, or the drawn map alone. */
+  const [basemap, setBasemap] = useState<BasemapKind>(DEFAULT_BASEMAP);
+  /** The glow under unusually high cells; the key switches it off. */
+  const [showUnusual, setShowUnusual] = useState(true);
 
   useEffect(() => {
     latest.current = {
@@ -244,8 +313,25 @@ export function HotspotMap({
       theme,
       onReady,
       onProjectionChange,
+      inColumns,
+      basemap,
+      unusual,
+      showUnusual,
     };
-  }, [cells, scale, area, onDraw, sensors, theme, onReady, onProjectionChange]);
+  }, [
+    cells,
+    scale,
+    area,
+    onDraw,
+    sensors,
+    theme,
+    onReady,
+    onProjectionChange,
+    inColumns,
+    basemap,
+    unusual,
+    showUnusual,
+  ]);
 
   useEffect(() => {
     let dead = false;
@@ -258,15 +344,19 @@ export function HotspotMap({
       maplibregl.setWorkerUrl("/maplibre/maplibre-gl-worker.mjs");
       let instance: MapLibreMap;
       const initial = projection ?? readProjection();
+      const kind = readBasemap();
+      latest.current.basemap = kind;
+      setBasemap(kind);
       try {
         appliedTheme.current = latest.current.theme;
         fellBack.current = !base;
         instance = makeMap(
           maplibregl,
           el.current,
-          base ? basemapFor(base, latest.current.theme) : blankStyle(),
+          base ? basemapFor(base, latest.current.theme, kind) : blankStyle(),
           initial,
         );
+        instance.touchPitch.disable();
         instance.addControl(
           new maplibregl.AttributionControl({ compact: true, customAttribution: BASEMAP_ATTRIBUTION }),
           "bottom-right",
@@ -278,6 +368,8 @@ export function HotspotMap({
       }
       created = instance;
       map.current = instance;
+      const columnMotion = createColumnMotion(() => (dead ? null : instance), "columns");
+      motion.current = columnMotion;
       const controller = createController(instance, maplibregl.Point, initial, {
         onProjection(next, unavailable) {
           if (dead) return;
@@ -303,6 +395,17 @@ export function HotspotMap({
         m.addSource("hotspots", {
           type: "geojson",
           data: points(latest.current.cells ?? [], latest.current.scale),
+        });
+        m.addSource("columns", {
+          type: "geojson",
+          data: { type: "FeatureCollection", features: [] },
+        });
+        m.addSource("unusual", {
+          type: "geojson",
+          data: glowPoints(
+            latest.current.cells ?? [],
+            latest.current.showUnusual ? latest.current.unusual : null,
+          ),
         });
         m.addSource("brazil", { type: "geojson", data: OUTLINE_URL });
         m.addLayer({
@@ -333,6 +436,23 @@ export function HotspotMap({
             "line-color": colors.ink,
             "line-width": 1.5,
             "line-dasharray": [2, 2],
+          },
+        });
+        // A soft glow on the ground under each unusually high cell, a little
+        // wider than the cell so neighbours merge into one lit region. It lies
+        // flat in the tilted view, around the foot of the columns.
+        m.addLayer({
+          id: "unusual",
+          type: "circle",
+          source: "unusual",
+          paint: {
+            "circle-radius": ["interpolate", ["exponential", 2], ["zoom"], 3, 1.8, 11, 460],
+            "circle-color": colors.lume,
+            "circle-blur": 0.65,
+            "circle-opacity": GLOW.rest,
+            "circle-opacity-transition": { duration: 0 },
+            "circle-pitch-alignment": "map",
+            "circle-pitch-scale": "map",
           },
         });
         // One mark per grid cell, sized by its detections. MODIS: an open ring.
@@ -374,6 +494,31 @@ export function HotspotMap({
             "circle-stroke-width": 0.5,
           },
         });
+        // The 3D view of the same counts: one column per cell and sensor.
+        for (const sensor of ["MODIS", "VIIRS"] as Sensor[]) {
+          const id = sensor.toLowerCase() as "modis" | "viirs";
+          m.addLayer({
+            id: `${id}-columns`,
+            type: "fill-extrusion",
+            source: "columns",
+            filter: ["==", ["get", "sensor"], sensor],
+            layout: { visibility: "none" },
+            paint: {
+              "fill-extrusion-color": colors[id],
+              // @ts-expect-error MapLibre accepts a zoom curve whose stops are data expressions.
+              "fill-extrusion-height": COLUMN_HEIGHT,
+              "fill-extrusion-opacity": COLUMN_OPACITY,
+            },
+          });
+        }
+        // A new style has a new, empty source: the columns go back in at once.
+        columnMotion.reset();
+        if (latest.current.inColumns)
+          columnMotion.show(
+            columns(latest.current.cells ?? [], latest.current.sensors, latest.current.scale),
+            0,
+          );
+        showMarks(m, latest.current.sensors, latest.current.inColumns);
         setReady(true);
       };
 
@@ -415,6 +560,8 @@ export function HotspotMap({
 
     return () => {
       dead = true;
+      motion.current?.stop();
+      motion.current = null;
       map.current = null;
       control.current = null;
       created?.remove();
@@ -434,7 +581,10 @@ export function HotspotMap({
     loadBasemap().then((base) => {
       if (map.current !== m || appliedTheme.current !== theme) return;
       fellBack.current = !base;
-      m.setStyle(base ? basemapFor(base, theme) : blankStyle(), { diff: false });
+      m.setStyle(
+        base ? basemapFor(base, theme, latest.current.basemap) : blankStyle(),
+        { diff: false },
+      );
     });
   }, [theme]);
 
@@ -467,17 +617,66 @@ export function HotspotMap({
     );
   }, [cells, scale, ready]);
 
+  // The columns are built only while the 3D view is on. A change of month,
+  // sensor or time-lapse frame moves each column to its new height instead of
+  // swapping the picture; leaving the view clears them at once.
   useEffect(() => {
     if (!ready) return;
-    for (const sensor of ["MODIS", "VIIRS"] as Sensor[]) {
-      if (!map.current?.getLayer(sensor.toLowerCase())) continue;
-      map.current?.setLayoutProperty(
-        sensor.toLowerCase(),
+    motion.current?.show(
+      inColumns ? columns(cells ?? [], sensors, scale) : [],
+      inColumns && !prefersReducedMotion() ? COLUMN_MOTION_MS : 0,
+    );
+  }, [cells, scale, sensors, inColumns, ready]);
+
+  useEffect(() => {
+    if (ready && map.current) showMarks(map.current, sensors, inColumns);
+  }, [sensors, inColumns, ready]);
+
+  useEffect(() => {
+    if (ready) control.current?.setTilt(inColumns);
+  }, [inColumns, ready]);
+
+  const glowing = showUnusual && !!unusual && unusual.ids.size > 0;
+  useEffect(() => {
+    if (!ready) return;
+    (map.current?.getSource("unusual") as GeoJSONSource | undefined)?.setData(
+      glowPoints(cells ?? [], showUnusual ? unusual : null),
+    );
+  }, [cells, unusual, showUnusual, ready]);
+
+  // The glow breathes only while there is something to light, repaints about
+  // 22 times a second, and stays steady when motion is reduced. The browser
+  // stops these frames by itself in a hidden tab.
+  useEffect(() => {
+    const m = map.current;
+    if (!ready || !m || !glowing || prefersReducedMotion()) return;
+    let frame = 0;
+    let last = 0;
+    const tick = (now: number) => {
+      frame = requestAnimationFrame(tick);
+      if (now - last < GLOW.step) return;
+      last = now;
+      if (m.getLayer("unusual"))
+        m.setPaintProperty("unusual", "circle-opacity", glowAt(now));
+    };
+    frame = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(frame);
+      if (map.current === m && m.getLayer("unusual"))
+        m.setPaintProperty("unusual", "circle-opacity", GLOW.rest);
+    };
+  }, [glowing, ready]);
+
+  // The satellite picture is a layer of the basemap: shown or hidden in place.
+  useEffect(() => {
+    const m = map.current;
+    if (ready && m?.getLayer(IMAGERY_LAYER))
+      m.setLayoutProperty(
+        IMAGERY_LAYER,
         "visibility",
-        sensors.includes(sensor) ? "visible" : "none",
+        basemap === "satellite" ? "visible" : "none",
       );
-    }
-  }, [sensors, ready]);
+  }, [basemap, ready]);
 
   // A search result: fly there, framing its extent when it has one.
   useEffect(() => {
@@ -666,18 +865,65 @@ export function HotspotMap({
       <section className="map-key map-surface" aria-label="Map key">
         <ul className="map-key-rows">
           <li>
-            <span aria-hidden="true" className="sensor-ring" />
+            <span
+              aria-hidden="true"
+              className={inColumns ? "sensor-column sensor-column-modis" : "sensor-ring"}
+            />
             MODIS Aqua <span className="text-faint">· per 0.25° cell</span>
           </li>
           <li>
-            <span aria-hidden="true" className="sensor-dot" />
+            <span
+              aria-hidden="true"
+              className={inColumns ? "sensor-column sensor-column-viirs" : "sensor-dot"}
+            />
             VIIRS NOAA-20 <span className="text-faint">· per cell</span>
           </li>
+          {unusual && (
+            <li>
+              <button
+                type="button"
+                className="map-key-toggle"
+                aria-pressed={showUnusual}
+                title={showUnusual ? "Hide the glow" : "Show the glow"}
+                onClick={() => setShowUnusual((on) => !on)}
+              >
+                <span aria-hidden="true" className="unusual-glow" />
+                Unusually high <span className="text-faint">· for the month</span>
+              </button>
+            </li>
+          )}
           <li>
             <span aria-hidden="true" className="map-key-area" />
             Area of interest
           </li>
         </ul>
+        {unusual && showUnusual && (
+          <p className="map-key-note map-key-detail">
+            {unusual.modeled ? "Modeled: about " : ""}
+            <span className="text-ink">
+              {Math.round(unusual.count).toLocaleString("en-GB")}
+            </span>{" "}
+            {Math.round(unusual.count) === 1 ? "cell" : "cells"} above 9 in 10
+            other years
+            {unusual.modeled
+              ? `, ${unusual.ids.size.toLocaleString("en-GB")} of them likely (glowing)`
+              : ""}
+            ; typical {unusualMonth ?? "month"}:{" "}
+            {Math.round(unusual.typical).toLocaleString("en-GB")}.{" "}
+            <Link href="/method#unusual-cells" className="link">
+              Method
+            </Link>
+          </p>
+        )}
+        {inColumns && (
+          <p className="map-key-note map-key-detail">
+            Height = detections, one scale for both sensors; tallest:{" "}
+            <span className="text-ink">
+              {columnTop(cells ?? [], sensors, scale).toLocaleString("en-GB")}
+            </span>
+            {scale ? " (time-lapse peak)" : ""}. Right-drag to orbit.
+          </p>
+        )}
         {status && <div className="map-key-status">{status}</div>}
         {offline && (
           <p className="map-key-note">Basemap unavailable offline</p>
@@ -696,6 +942,35 @@ export function HotspotMap({
               onChange={(next) => control.current?.setProjection(next)}
             />
           )}
+          <div className="map-projection map-surface">
+            <button
+              type="button"
+              aria-pressed={basemap === "satellite"}
+              aria-label="Satellite imagery"
+              title={
+                basemap === "satellite"
+                  ? "Back to the drawn map"
+                  : "Show NASA Blue Marble satellite imagery"
+              }
+              disabled={offline}
+              onClick={() => {
+                const next = basemap === "satellite" ? "map" : "satellite";
+                saveBasemap(next);
+                setBasemap(next);
+              }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5 9-5ZM3 13l9 5 9-5" /></svg>
+            </button>
+            <button
+              type="button"
+              aria-pressed={inColumns}
+              aria-label="3D columns"
+              title={inColumns ? "Back to the flat marks" : "Show detections as 3D columns"}
+              onClick={() => setInColumns((on) => !on)}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 20v-6M10 20V9M15 20v-9M20 20V4" /></svg>
+            </button>
+          </div>
           <div className="map-zoom map-surface" role="group" aria-label="Zoom">
             <button type="button" aria-label="Zoom in" title="Zoom in" disabled={isDrawing} onClick={() => map.current?.zoomIn()}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>

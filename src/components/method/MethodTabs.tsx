@@ -20,6 +20,7 @@ const sectionTabs: Record<string, Tab> = {
   "seasonal-z-score": "historical-anomalies",
   "robust-anomalies": "historical-anomalies",
   percentiles: "historical-anomalies",
+  "unusual-cells": "historical-anomalies",
   example: "historical-anomalies",
   interpretation: "historical-anomalies",
   "data-sources": "data-limitations",

@@ -14,6 +14,11 @@ const SOURCES = [
     detail: "375 m detections from NOAA-20, April 2018 onward, converted to the MODIS Aqua scale.",
     href: "https://www.earthdata.nasa.gov/data/instruments/viirs",
   },
+  {
+    name: "NASA GIBS, Blue Marble",
+    detail: "The satellite picture under the map: a cloud-free MODIS composite with shaded relief, served by the Global Imagery Browse Services.",
+    href: "https://www.earthdata.nasa.gov/engage/open-data-services-software/earthdata-developer-portal/gibs-api",
+  },
 ];
 
 export function DataCredits() {

@@ -25,6 +25,7 @@ import { MapCard, MapToolbar, MapLayerControl } from "./MapControls";
 import { MONTHS } from "@/lib/format";
 import { TemporalControl } from "./TemporalControl";
 import { useMapCells } from "@/lib/useMapHotspots";
+import { useUnusualCells } from "@/lib/useUnusual";
 import { usePlaybackFrames } from "@/lib/usePlayback";
 import { PlaybackBar } from "./PlaybackBar";
 import { useWorkspaceTools } from "@/components/interactions/useWorkspaceTools";
@@ -156,6 +157,8 @@ export function LensApp() {
   const shown = playing
     ? { cells: play.frames!.months.get(period.slice(0, 7)) ?? [], error: null }
     : mapData;
+  // Unusually high cells are judged per calendar month; a single day is not.
+  const unusual = useUnusualCells(area, period.length === 7 ? period : null);
   const commitRectangle = useCallback((bbox: BBox) => {
     setArea(rectangleArea(normalizeBBox(bbox)));
     setFrame((n) => n + 1);
@@ -451,6 +454,8 @@ export function LensApp() {
             onMapClick={tools.onMapClick}
             onViewChange={tools.editor ? tools.updateView : undefined}
             status={detectionStatus}
+            unusual={shown.cells ? unusual : null}
+            unusualMonth={MONTHS[Number(period.slice(5, 7)) - 1]}
             onResetView={() => {
               tools.stop();
               setDrawing(false);

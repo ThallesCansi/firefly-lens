@@ -153,7 +153,7 @@ Sources:
 - VIIRS active fire, 375 m, NOAA-20: same sources
 - Biomes and the outline of Brazil: IBGE, through [`geobr`](https://github.com/ipeaGIT/geobr)
 
-The map uses [MapLibre GL JS](https://maplibre.org/) with a CARTO basemap built on © OpenStreetMap contributors.
+The map uses [MapLibre GL JS](https://maplibre.org/) with the [OpenFreeMap](https://openfreemap.org/) "Liberty" basemap (© OpenMapTiles, data from © OpenStreetMap contributors, relief from Natural Earth). The satellite picture under the data is NASA's Blue Marble with shaded relief and bathymetry, served as image tiles by [NASA GIBS](https://www.earthdata.nasa.gov/engage/open-data-services-software/earthdata-developer-portal/gibs-api), with no API key; the map credits it on screen. We acknowledge the use of imagery provided by services from NASA's Global Imagery Browse Services (GIBS), part of NASA's Earth Science Data and Information System (ESDIS).
 
 Place search uses [Photon](https://photon.komoot.io/) through `/api/geocode`, with explicit submission, cached results, an eight-second timeout, and a per-process request guard. The public service permits moderate use, may throttle requests, and has no availability guarantee. Set the server-only `PHOTON_URL` to a compatible private Photon `/api/` endpoint for larger deployments. No private key is exposed. See [Phase 3 validation and screenshots](docs/phase-3/validation.md).
 
