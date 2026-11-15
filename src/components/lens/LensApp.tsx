@@ -18,6 +18,7 @@ import { AnalysisCalendar, AnalysisReport } from "./AnalysisContent";
 import { HotspotMap } from "./HotspotMap";
 import { LocationSearch, type MapDestination } from "./LocationSearch";
 import { AssistantDock } from "./AssistantDock";
+import type { AssistantHost } from "@/lib/assistant/execute";
 import { SiteNav } from "@/components/ui/SiteNav";
 import { MapCard, MapToolbar, MapLayerControl } from "./MapControls";
 import { MONTHS } from "@/lib/format";
@@ -217,9 +218,9 @@ export function LensApp() {
     // Before any area, the key says what loads the dots.
     <p role="status">Select an area to load detections</p>
   );
-  function analyze() {
-    if (!area) return;
-    setAnalyzed(area);
+  function analyze(target: Area | null = area) {
+    if (!target) return;
+    setAnalyzed(target);
     setAnalysis(true);
     setCoordinates(false);
     tools.stop();
@@ -227,11 +228,57 @@ export function LensApp() {
       closeButton.current?.focus();
       controller?.navigate({
         id: Date.now(),
-        bounds: area.bbox,
+        bounds: target.bbox,
         animation: "ease",
       });
     });
   }
+  // The assistant acts between renders: its host is kept current here and by
+  // each of its own actions, so a later step of the same answer sees an earlier one.
+  const assistantHost = useRef<AssistantHost | null>(null);
+  const host: AssistantHost = {
+    area,
+    period,
+    sensors,
+    analysisOpen: analysis,
+    chooseArea(next) {
+      stopTools();
+      clearAdministrative();
+      setDrawing(false);
+      setCoordinates(false);
+      setSearching(false);
+      setAnalysis(false);
+      setArea(next);
+      setFrame((n) => n + 1);
+      Object.assign(assistantHost.current!, { area: next, analysisOpen: false });
+    },
+    clearArea() {
+      tools.clear();
+      setArea(null);
+      setAnalysis(false);
+      Object.assign(assistantHost.current!, { area: null, analysisOpen: false });
+    },
+    navigate(place) {
+      stopTools();
+      setDrawing(false);
+      setDestination(place);
+    },
+    setPeriod(next) {
+      changePeriod(next);
+      assistantHost.current!.period = next;
+    },
+    setSensors(next) {
+      setSensors(next);
+      assistantHost.current!.sensors = next;
+    },
+    openAnalysis(target) {
+      analyze(target);
+      assistantHost.current!.analysisOpen = true;
+    },
+  };
+  useEffect(() => {
+    assistantHost.current = host;
+  });
   return (
     <main id="main" className="lens-workspace">
       <div
@@ -426,7 +473,7 @@ export function LensApp() {
                   <button
                     ref={analyzeButton}
                     className="btn btn-primary"
-                    onClick={analyze}
+                    onClick={() => analyze()}
                   >
                     Analyze area
                   </button>
@@ -451,7 +498,7 @@ export function LensApp() {
                 </div>
               </section>
             )}
-          <AssistantDock />
+          <AssistantDock host={assistantHost} />
         </section>
         {analyzed && (
           <ResizableAnalysisPanel
