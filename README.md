@@ -53,6 +53,10 @@ The workspace **Camera** menu offers Earth, Brazil, Pantanal and selected-area f
 
 Open **Camera → Terrain 3D** to enable real Mapterhorn elevation at 1×, off by default. Existing hotspot markers remain visible while scientific detection columns are temporarily paused; switching terrain off restores the saved column preference. The tutorial and regional flight temporarily suspend terrain. NASA Blue Marble and scientific data stay unchanged. See [terrain configuration, screenshots, browser measurements and limitations](docs/terrain-3d-poc-validation.md).
 
+### High-resolution satellite proof of concept
+
+**Camera → Satellite source** switches between NASA Blue Marble (the default on each workspace mount) and **Sentinel-2 · 2025**, independently of terrain and projection. The EOxCloudless reference mosaic is unrelated to the selected analysis dates. Its tiles remain visible at local zooms, with native tile requests capped at 14. Failures reveal the cartographic map and offer Retry imagery. This non-commercial experiment uses direct EOX requests, visible credits and CC BY-NC-SA 4.0 imagery; it does not change scientific calculations or exports. See [comparison gallery, measurements, licensing and validation](docs/hires-satellite-poc-validation.md).
+
 ### Tour with FireFlighter
 
 The workspace automatically opens FireFlighter’s welcome on each new visit or reload. **Don't show again** is an explicit browser preference: only checking it disables future automatic welcomes. Completing, skipping or closing the tour does not opt out. A single welcome is presented per browser document, including across Strict Mode effect replay and client-side navigation. The **Tour with FireFlighter** launcher, beside the original animated mascot, remains available after opt-out.

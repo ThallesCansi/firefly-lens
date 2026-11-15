@@ -1,0 +1,55 @@
+{
+  "checkedAt": "2026-11-15T22:16:57.866Z",
+  "capabilitiesUrl": "https://tiles.maps.eox.at/wmts/1.0.0/WMTSCapabilities.xml",
+  "capabilitiesStatus": 200,
+  "capabilitiesSha256": "446d5e3f75034ee526199c19a81b2d437aa9c19ead02747c5c6fd7e020886bb6",
+  "layer": "s2cloudless-2025_3857",
+  "matrix": "g",
+  "tileOrder": "z/y/x",
+  "configuredMaxZoom": 14,
+  "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+  "checks": [
+    {
+      "place": "andes",
+      "center": [
+        -70.01,
+        -32.68
+      ],
+      "z": 14,
+      "x": 5005,
+      "y": 9767,
+      "url": "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2025_3857/default/g/14/9767/5005.jpg",
+      "status": 200,
+      "bytes": 14978,
+      "cors": "https://firefly-lens.example"
+    },
+    {
+      "place": "serra-do-mar",
+      "center": [
+        -43.04,
+        -22.46
+      ],
+      "z": 14,
+      "x": 6233,
+      "y": 9241,
+      "url": "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2025_3857/default/g/14/9241/6233.jpg",
+      "status": 200,
+      "bytes": 11092,
+      "cors": "https://firefly-lens.example"
+    },
+    {
+      "place": "pantanal",
+      "center": [
+        -56.5,
+        -19
+      ],
+      "z": 14,
+      "x": 5620,
+      "y": 9073,
+      "url": "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2025_3857/default/g/14/9073/5620.jpg",
+      "status": 200,
+      "bytes": 12469,
+      "cors": "https://firefly-lens.example"
+    }
+  ]
+}

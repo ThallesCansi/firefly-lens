@@ -1,0 +1,30 @@
+{
+  "checks": [
+    {
+      "width": 1440,
+      "realCountryDailyCsv": true,
+      "fittedCalendar": true,
+      "profiles": true,
+      "forecastAvailability": true,
+      "continentConstraints": true
+    },
+    {
+      "width": 390,
+      "realCountryDailyCsv": false,
+      "fittedCalendar": true,
+      "profiles": true,
+      "forecastAvailability": true,
+      "continentConstraints": true
+    },
+    {
+      "width": 320,
+      "realCountryDailyCsv": false,
+      "fittedCalendar": true,
+      "profiles": true,
+      "forecastAvailability": true,
+      "continentConstraints": true
+    }
+  ],
+  "errors": [],
+  "scope": "Published real data; no dynamic Python forecast validation"
+}

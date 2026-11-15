@@ -1,0 +1,60 @@
+{
+  "verifiedAt": "2026-11-15T22:34:36.383Z",
+  "branch": "feature/hires-satellite-poc",
+  "baseCommit": "43d8bd1492737a6c2b19f3228bcdf4b404c5f099",
+  "uncommitted": true,
+  "checks": {
+    "unitTests": {
+      "files": 43,
+      "tests": 269,
+      "status": "passed"
+    },
+    "eslint": "passed",
+    "typescript": "passed",
+    "productionBuild": "passed",
+    "diffCheck": "passed"
+  },
+  "renderer": {
+    "cases": 96,
+    "totals": {
+      "eox": {
+        "responses": 1010,
+        "bytes": 16760510,
+        "statuses": {
+          "200": 1010
+        }
+      },
+      "nasa": {
+        "responses": 129,
+        "bytes": 1585796,
+        "statuses": {
+          "200": 129
+        }
+      },
+      "dem": {
+        "responses": 454,
+        "bytes": 65604228,
+        "statuses": {
+          "200": 452,
+          "404": 2
+        }
+      }
+    }
+  },
+  "browserSuites": [
+    "app/results.json",
+    "app-regression/results.json",
+    "lume/results.json",
+    "scientific-regression/results.json",
+    "gestures/after.json"
+  ],
+  "sourceSha256": {
+    "src/lib/map/imagery.ts": "94eb20abb8c5effb32c1df2e66a3b7c12b8b0001b942dd4222f6348ba3d60014",
+    "src/lib/map/imagery-providers.ts": "02cde6344215e862ea8fbe2218f45af9b6eb1de00f8b3f4ddaf122df19c6262b",
+    "src/lib/map/basemap.ts": "748214141317afaf4caafacc88db733dc0221d99c729d0a5600edfa911080795",
+    "src/components/lens/HotspotMap.tsx": "c4136457e500ab8593472cf39a0cc0a8c3f106d830a66ec51f8bee510adcd956",
+    "src/components/lens/map/CameraControls.tsx": "66e5fcb64649661ff50e42a56d212f68e34a57e28b359caf23bae3e944b5ed45",
+    "src/components/lens/map/ImageryControls.tsx": "b1ab5dfce9a3316df07e63ea74ce3d7bfe0d1d1db0f04072fcce78630b74d91c",
+    "src/app/workspace.css": "f97a301ac8f30de8c9b0cd0bbd22c50dcffd8665a23497bcba35e636f18b0c55"
+  }
+}

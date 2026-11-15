@@ -4,10 +4,11 @@ import type { CameraProfile } from "@/lib/map/map-contract";
 import type { CameraAction } from "@/lib/map/camera-presets";
 import { placeCameraPopover } from "@/lib/map/camera-popover";
 
-export function CameraControls({ profile, onProfile, onAction, onStop, running, disabled, hasSelection, globeAvailable, terrainControl }: {
+export function CameraControls({ profile, onProfile, onAction, onStop, running, disabled, hasSelection, globeAvailable, terrainControl, imageryControl }: {
   profile: CameraProfile; onProfile(profile: CameraProfile): void; onAction(action: CameraAction): void;
   onStop(): void; running: boolean; disabled: boolean; hasSelection: boolean; globeAvailable: boolean;
   terrainControl?: ReactNode;
+  imageryControl?: ReactNode;
 }) {
   const id = useId();
   const trigger = useRef<HTMLButtonElement>(null);
@@ -63,6 +64,7 @@ export function CameraControls({ profile, onProfile, onAction, onStop, running, 
         <button type="button" disabled={disabled} onClick={() => onAction("north")}>North up</button>
         <button type="button" disabled={disabled} onClick={() => onAction("top")}>Top-down</button>
       </div></fieldset>
+      {imageryControl}
       {terrainControl}
       <button className="camera-stop" type="button" disabled={disabled || !running} onClick={onStop}>Stop flight</button>
       <span role="status" aria-live="polite">{running ? "Camera moving. Gestures stop the flight." : "Camera ready"}</span>

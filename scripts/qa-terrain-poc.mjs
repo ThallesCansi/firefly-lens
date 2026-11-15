@@ -53,6 +53,13 @@ try {
     p.on("request", (r) => { if (r.url().includes("tiles.mapterhorn.com")) demRequests++; });
     await p.goto(`${base}/lens`); await p.locator(".camera-trigger").waitFor();
     assert.equal(await map(p).getAttribute("data-terrain"), "off"); assert.equal(demRequests, 0);
+    // Reuse the complete terrain/tutorial/selection regressions with either raster.
+    if (process.env.QA_IMAGERY_PROVIDER) {
+      await open(p);
+      await p.getByRole("combobox", { name: "Satellite source", exact: true }).selectOption(process.env.QA_IMAGERY_PROVIDER);
+      await p.waitForFunction(() => document.querySelector(".hotspot-map")?.getAttribute("data-imagery-phase") === "active");
+      await close(p);
+    }
     await p.getByRole("button", { name: "Coordinates", exact: true }).click();
     await p.locator('[data-tour="presets"]').selectOption("pantanal");
     await p.locator('[data-tour="history"][data-tour-ready="true"]').waitFor();

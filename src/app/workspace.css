@@ -21,6 +21,27 @@
 .terrain-trigger[aria-pressed=true] { border-color: var(--color-lume); }
 .terrain-indicator { margin-left: auto; font-size: 10px; color: var(--color-dim); }
 .terrain-help { font-size: 11px; line-height: 1.45; color: var(--color-dim); }
+.imagery-control { display: grid; gap: 4px; min-width: 0; padding-top: 6px; border-top: 1px solid var(--color-line); }
+.imagery-control select { width: 100%; }
+.imagery-status { color: var(--color-dim); font-size: 11px; line-height: 1.45; }
+/* EOX credit stays visible; other source credits retain their existing control. */
+.imagery-credit { position: absolute; z-index: 11; right: 76px; bottom: 100px; max-width: min(430px, calc(100% - 32px)); padding: 5px 7px; border-radius: 6px; color: var(--color-dim); font-size: 11px; line-height: 1.4; }
+.imagery-credit a { text-decoration: underline; }
+.hotspot-map[data-imagery-provider="eox-sentinel-2025"][data-imagery-phase="active"] ~ .lume-replay { bottom: calc(112px + var(--imagery-credit-height, 100px)); }
+@container map (max-width: 760px) {
+  .imagery-credit { right: 12px; bottom: 86px; max-width: calc(100% - 24px); }
+  .hotspot-map[data-imagery-provider="eox-sentinel-2025"][data-imagery-phase="active"] :is(.map-key, .map-view-controls) { bottom: calc(98px + var(--imagery-credit-height, 100px)); }
+  .hotspot-map[data-imagery-provider="eox-sentinel-2025"][data-imagery-phase="active"] ~ .lume-replay { bottom: calc(240px + var(--imagery-credit-height, 100px)); }
+  .hotspot-map[data-imagery-provider="eox-sentinel-2025"][data-imagery-phase="active"] ~ .selection-card { bottom: calc(98px + var(--imagery-credit-height, 100px)); }
+  .workspace-map:has(.selection-card[data-compact="false"]) .hotspot-map[data-imagery-provider="eox-sentinel-2025"][data-imagery-phase="active"] .map-view-controls { bottom: calc(258px + var(--imagery-credit-height, 100px)); }
+  .workspace-map:has(.selection-card[data-compact="false"]) .hotspot-map[data-imagery-provider="eox-sentinel-2025"][data-imagery-phase="active"] ~ .lume-replay { bottom: calc(338px + var(--imagery-credit-height, 100px)); }
+}
+@media (max-width: 700px) {
+  .workspace-body[data-analysis="true"] .imagery-credit { max-width: calc(100% - 98px); }
+  .workspace-body[data-analysis="true"] .hotspot-map[data-imagery-provider="eox-sentinel-2025"][data-imagery-phase="active"] .map-view-controls { bottom: 12px; }
+  .workspace-body[data-analysis="true"] .hotspot-map[data-imagery-provider="eox-sentinel-2025"][data-imagery-phase="active"] ~ .lume-replay { bottom: calc(98px + var(--imagery-credit-height, 100px)); }
+  .workspace-body[data-analysis="true"] .hotspot-map[data-imagery-provider="eox-sentinel-2025"][data-imagery-phase="active"] .map-zoom { flex-direction: row; }
+}
 /* Driver's popover is portaled outside this inert subtree. Keep all highlighted
    descendants out of Driver's focusable-target list as well as mouse hit testing. */
 .lens-workspace[inert], .lens-workspace[inert] * { pointer-events: none !important; }

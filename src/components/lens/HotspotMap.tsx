@@ -19,6 +19,9 @@ import { presetRequest, type CameraAction } from "@/lib/map/camera-presets";
 import { fireData } from "@/lib/data/source";
 import { CameraControls } from "./map/CameraControls";
 import { TerrainControls } from "./map/TerrainControls";
+import { ImageryControls } from "./map/ImageryControls";
+import { createImagery, type ImageryManager, type ImageryPhase } from "@/lib/map/imagery";
+import { DEFAULT_IMAGERY, IMAGERY_PROVIDERS, type ImageryProviderId } from "@/lib/map/imagery-providers";
 import { createTerrain, terrainPresentation, type TerrainManager, type TerrainPhase } from "@/lib/map/terrain";
 import { addCoverageMask,continentCenter,MIN_CONTINENT_ZOOM } from "@/lib/map/south-america";
 import { GLOW, glowAt } from "@/lib/map/glow";
@@ -55,8 +58,8 @@ import { useTheme } from "@/components/ui/ThemeProvider";
 import {
   BASEMAP_ATTRIBUTION,
   DEFAULT_BASEMAP,
-  IMAGERY_LAYER,
   basemapFor,
+  withImagery,
   loadBasemap,
   readBasemap,
   saveBasemap,
@@ -304,6 +307,8 @@ export function HotspotMap({
   const map = useRef<MapLibreMap | null>(null);
   const control = useRef<EngineController | null>(null);
   const terrain = useRef<TerrainManager | null>(null);
+  const imagery = useRef<ImageryManager | null>(null);
+  const imageryCredit = useRef<HTMLDivElement | null>(null);
   const motion = useRef<ColumnMotion | null>(null);
   const isDrawing = drawing || interactionMode === "draw-rectangle";
   const bbox = area?.bbox ?? null;
@@ -351,6 +356,9 @@ export function HotspotMap({
   const { inColumns, terrainEnabled } = terrainPresentation(terrainRequested, terrainSuspended, terrainPhase, columnsChosen, forceColumns);
   /** NASA's satellite picture under the data, or the drawn map alone. */
   const [basemap, setBasemap] = useState<BasemapKind>(DEFAULT_BASEMAP);
+  // This PoC deliberately starts on NASA on every workspace mount.
+  const [imageryProvider, setImageryProvider] = useState<ImageryProviderId>(DEFAULT_IMAGERY);
+  const [imageryPhase, setImageryPhase] = useState<ImageryPhase>("off");
   /** The glow under unusually high cells; the key switches it off. */
   const [showUnusual, setShowUnusual] = useState(true);
   /** The cell under the pointer, whose numbers the readout shows. */
@@ -439,14 +447,11 @@ export function HotspotMap({
         instance = makeMap(
           maplibregl,
           el.current,
-          base ? basemapFor(base, latest.current.theme, kind) : blankStyle(),
+          base ? basemapFor(base, latest.current.theme, "map") : withImagery(blankStyle(), latest.current.theme, "map"),
           initial,
         );
         instance.touchPitch.disable();
-        instance.addControl(
-          new maplibregl.AttributionControl({ compact: true, customAttribution: BASEMAP_ATTRIBUTION }),
-          "bottom-right",
-        );
+        instance.addControl(new maplibregl.AttributionControl({ compact: true, customAttribution: BASEMAP_ATTRIBUTION }), "bottom-right");
       } catch {
         // No WebGL: the map cannot draw at all on this device.
         setFailed(true);
@@ -469,6 +474,9 @@ export function HotspotMap({
       control.current = controller;
       const terrainManager = createTerrain(instance, (phase) => { if (!dead) setTerrainPhase(phase); });
       terrain.current = terrainManager;
+      const imageryManager = createImagery(instance, (phase) => { if (!dead) setImageryPhase(phase); }, { externalCredits: ["eox-sentinel-2025"] });
+      imagery.current = imageryManager;
+      imageryManager.configure(DEFAULT_IMAGERY, kind === "satellite", latest.current.theme);
 
       const addLayers = () => {
         const m = instance;
@@ -643,6 +651,7 @@ export function HotspotMap({
         }
         controller.styleLoaded();
         terrainManager.styleLoaded();
+        imageryManager.styleLoaded();
         if (!announced) {
           announced = true;
           latest.current.onReady?.(controller);
@@ -661,7 +670,7 @@ export function HotspotMap({
         if (styled.current || dead || fellBack.current) return;
         fellBack.current = true;
         setOffline(true);
-        instance.setStyle(blankStyle());
+        instance.setStyle(withImagery(blankStyle(), latest.current.theme, "map"));
       });
     });
 
@@ -671,6 +680,8 @@ export function HotspotMap({
       motion.current = null;
       terrain.current?.dispose();
       terrain.current = null;
+      imagery.current?.dispose();
+      imagery.current = null;
       // Next may preserve the workspace state across client navigation while
       // destroying its effects. Never rebind tools to that removed engine.
       latest.current.onReady?.(null);
@@ -690,12 +701,13 @@ export function HotspotMap({
     fellBack.current = false;
     control.current?.styleUnloading();
     terrain.current?.styleLoading();
+    imagery.current?.styleLoading();
     // Only replace the style. style.load restores data and layer visibility; camera and handlers stay intact.
     loadBasemap().then((base) => {
       if (map.current !== m || appliedTheme.current !== theme) return;
       fellBack.current = !base;
       m.setStyle(
-        base ? basemapFor(base, theme, latest.current.basemap) : blankStyle(),
+        base ? basemapFor(base, theme, "map") : withImagery(blankStyle(), theme, "map"),
         { diff: false },
       );
     });
@@ -885,16 +897,19 @@ export function HotspotMap({
     el.style.transform = `translate(${Math.round(left)}px, ${Math.round(top)}px)`;
   }, [hovered, ready]);
 
-  // The satellite picture is a layer of the basemap: shown or hidden in place.
+  // Replaces only the raster source/layer. Projection, DEM and camera survive.
   useEffect(() => {
-    const m = map.current;
-    if (ready && m?.getLayer(IMAGERY_LAYER))
-      m.setLayoutProperty(
-        IMAGERY_LAYER,
-        "visibility",
-        basemap === "satellite" ? "visible" : "none",
-      );
-  }, [basemap, ready]);
+    if (ready) imagery.current?.configure(imageryProvider, basemap === "satellite", theme);
+  }, [basemap, imageryProvider, theme, ready]);
+
+  useEffect(() => {
+    const root = el.current?.closest<HTMLElement>(".workspace-map");
+    const credit = imageryCredit.current;
+    if (!root || !credit) return;
+    const measure = () => root.style.setProperty("--imagery-credit-height", `${Math.ceil(credit.getBoundingClientRect().height)}px`);
+    const observer = new ResizeObserver(measure); observer.observe(credit); measure();
+    return () => { observer.disconnect(); root.style.removeProperty("--imagery-credit-height"); };
+  }, [imageryProvider, basemap, imageryPhase, ready]);
 
   // A search result: fly there, framing its extent when it has one.
   useEffect(() => {
@@ -1061,8 +1076,15 @@ export function HotspotMap({
       data-projection={ready ? mode : undefined}
       data-terrain={terrainRequested && terrainSuspended ? "suspended" : terrainPhase}
       data-terrain-requested={terrainRequested}
+      data-imagery-provider={imageryProvider}
+      data-imagery-phase={imageryPhase}
     >
       <Starfield />
+      {basemap === "satellite" && imageryProvider === "eox-sentinel-2025" && (imageryPhase === "active" || imageryPhase === "loading") && (
+        <div ref={imageryCredit} className="imagery-credit map-surface" role="note" aria-label="Satellite imagery credits"
+          // Provider-owned static HTML, never user or remote response content.
+          dangerouslySetInnerHTML={{ __html: IMAGERY_PROVIDERS[imageryProvider].source.attribution ?? "" }} />
+      )}
       {/* MapLibre's stylesheet makes its container position: relative, so it fills a positioned parent. */}
       <div className="absolute inset-0">
         <div
@@ -1216,6 +1238,9 @@ export function HotspotMap({
           <CameraControls profile={cameraProfile} onProfile={(next) => { control.current?.setCameraProfile(next); setCameraProfile(next); }} onAction={cameraAction}
             onStop={() => control.current?.stopNavigation()} running={cameraMoving} disabled={isDrawing || tourActive}
             hasSelection={!!bbox} globeAvailable={!globeUnavailable && (!projection || projection === "globe")}
+            imageryControl={<ImageryControls provider={imageryProvider} phase={imageryPhase} disabled={isDrawing || tourActive}
+              onChange={(next) => { setImageryProvider(next); setBasemap("satellite"); saveBasemap("satellite"); }}
+              onRetry={() => imagery.current?.retry()} />}
             terrainControl={<TerrainControls requested={terrainRequested} phase={terrainPhase} suspended={terrainSuspended}
               onChange={(next) => { terrain.current?.setEnabled(next && !terrainSuspended); setTerrainRequested(next); }} />} />
           {showProjectionToggle && !projection && (
@@ -1233,7 +1258,7 @@ export function HotspotMap({
               title={
                 basemap === "satellite"
                   ? "Back to the drawn map"
-                  : "Show NASA Blue Marble satellite imagery"
+                  : `Show ${IMAGERY_PROVIDERS[imageryProvider].label} satellite imagery`
               }
               disabled={offline}
               onClick={() => {

@@ -1,0 +1,33 @@
+{
+  "checks": [
+    {
+      "width": 1440,
+      "defaultOff": true,
+      "columnsRestored": true,
+      "selectionPreserved": true,
+      "realDem": true
+    },
+    {
+      "width": 390,
+      "defaultOff": true,
+      "columnsRestored": true,
+      "selectionPreserved": true,
+      "realDem": true
+    },
+    {
+      "width": 320,
+      "defaultOff": true,
+      "columnsRestored": true,
+      "selectionPreserved": true,
+      "realDem": true
+    }
+  ],
+  "errors": [],
+  "failureFallback": true,
+  "staleLoads": true,
+  "tutorialSteps": 16,
+  "regionFlight": true,
+  "terrainDrawingAndEditing": true,
+  "terrainDuringFlight": true,
+  "terrainGestureCancellation": true
+}
