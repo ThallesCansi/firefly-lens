@@ -2,9 +2,9 @@
 
 Update of 15 November 2026, continuing `feature/scientific-continental-expansion`.
 This supersedes the raw-only pilot and unconfigured-weather status in the first
-[delivery report](scientific-expansion/README.md). No production deployment or
-merge was performed. Brazil's scientific algorithms and published tiles remain
-unchanged.
+[delivery report](scientific-expansion/README.md). Brazil's scientific algorithms
+and published tiles remain unchanged. Integration with the updated main branch
+is documented in [the PR validation record](main-integration-qa/README.md).
 
 ## Actual coverage
 
@@ -197,7 +197,7 @@ not throughput/FPS guarantees. See [expanded benchmarks](continental-expanded-be
 Tests cover temporal calibration isolation, exact national scope/checksums,
 all national quality gates, original NASA hashes/date granularity/expiration,
 old Brazilian algorithms/snapshots and retrospective evidence isolation.
-The full suites passed: **337 TypeScript tests in 56 files, 60 Python tests and
+The initial delivery suites passed: **337 TypeScript tests in 56 files, 60 Python tests and
 5 integration tests**. TypeScript, ESLint and the final production build also passed. The Python suite emits
 an upstream Starlette/httpx deprecation warning without test failures.
 
