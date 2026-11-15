@@ -39,8 +39,20 @@ Fontes aceitas: `observed_modis`, `modeled_viirs`, `missing`, `mixed`. O treino 
 
 `available_at`, quando conhecido, impede usar no treino/referência uma observação que ainda não havia sido publicada na origem. Sem esse campo, assume-se disponibilidade após o fechamento do mês e registra-se que o backtest é de dados retrospectivos finais, sem arquivo de vintages. Isso não demonstra operacionalidade em tempo real.
 
-## Integração futura
+## Integração HTTP e cobertura
 
-O frontend pode consumir os cinco JSONs separadamente e exibir somente seções disponíveis. Para regiões arbitrárias, um futuro adaptador de execução deve obter a série regional, chamar `analyze` e serializar; o motor não mantém estado do mapa. Não foi implementado transporte HTTP, cache, autenticação ou execução remota.
+O frontend consome snapshots e o FastAPI autenticado por proxies Next. History e Forecast usam o motor e contratos existentes; ver [integração dinâmica](../docs/dynamic-polygon-analytics.md). O motor não mantém estado do mapa.
+
+`POST /analytics/fire-weather` aceita o mesmo `AnalyticsRequest`, mas sua cobertura independe do Parquet brasileiro. Retorna `{schema_version,geometry,data}`. O cliente valida geometria exata, proveniência real, unidades, datas/leads, cobertura e distribuição antes de mostrar números. `data_version`/`horizon` preservam compatibilidade de transporte; o horizonte meteorológico vem exclusivamente do produto. HTTP 200 pode conter `unavailable` quando não há produto. Autenticação, validação e sobrecarga usam os mesmos códigos HTTP do serviço.
+
+Linhas FWI podem incluir `coverage_fraction`, `danger_class`, `maximum`, `distribution`, `percentile` e `anomaly`. `build_schemas.py` gera schemas publicados e empacotados juntos. Percentil/anomalia são nulos no leitor atual. O contrato legado `from_records` não é promovido a avaliação espacial na interface.
+
+`public/data/coverage.json` distingue cobertura harmonizada real, detecções brutas reais, demonstração sintética e ausência de cobertura. Somente BRA publica harmonização; PRY é piloto bruto. O manifesto PRY tem contrato separado, unidades por sensor e hashes por bloco/mês; não é convertido em `RegionalSeries` nem aceito em anomalias/previsões. `demo_enabled=false`.
 
 `generated_at` indica a geração do resultado, não aquisição dos dados nem emissão meteorológica. Para FWI, `issued_at` é preservado do fornecedor. Proveniência contém hashes locais e commit; hashes não autenticam a origem FIRMS nem certificam o fornecedor.
+
+Atualização continental: `validateBundle` continua usando os metadados brasileiros por padrão; somente o carregador nacional autenticado por SHA-256 fornece o período e origem explicitamente registrados para cada país. Os novos bundles têm proveniência `real_country_harmonized`, escopo `entire_country_only`, calibração `evaluated_country_aggregate` e identidade geométrica exata. Não podem ser reutilizados em polígonos internos.
+
+`POST /analytics/retrospective` usa `RetrospectiveRequest`, que acrescenta `forecast_origin` ao contrato existente. A origem deve permitir todos os alvos dentro da história completa. Somente esse carregador aceita uma origem passada; o carregador de previsão corrente mantém a proteção original. O endpoint não aceita séries ou métricas fornecidas pelo cliente.
+
+NASA GFWED mantém `valid_at=null`, `lead_hours=null`, `valid_date=YYYY-MM-DD`, `lead_days` inteiro e `validity_basis`. Datas locais diárias não são transformadas em instantes UTC fictícios. CEMS e imports legados mantêm seus timestamps/leads originais. O discriminante de fornecedor/produto impede misturar as duas semânticas. Ver [integração e escopo atual](../docs/continental-harmonization.md).

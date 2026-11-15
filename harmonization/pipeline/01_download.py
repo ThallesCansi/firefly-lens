@@ -101,7 +101,7 @@ def fetch_archive_year(cfg: dict, prefix: str, schema_key: str, url_key: str, ye
         return {"file": out.name, "status": "já existia"}
     url = cfg["archive"][url_key].format(year=year)
     t0 = time.time()
-    zf, raw = open_remote_zip(url, timeout=cfg["api"]["timeout_s"],
+    zf, raw = open_remote_zip(url, buffer_mb=cfg["archive"].get("buffer_mb", 4), timeout=cfg["api"]["timeout_s"],
                               max_retries=cfg["api"]["max_retries"],
                               backoff_s=cfg["api"]["backoff_s"])
     country = cfg["archive"]["country"].lower()

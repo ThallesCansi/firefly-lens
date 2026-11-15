@@ -78,6 +78,10 @@
   flex-direction: column;
   gap: 24px;
 }
+.analytics-insight { font-weight: 500; margin-bottom: 16px; }
+.analytics-digest { overflow-wrap: anywhere; }
+.analytics-card select { max-width: 100%; }
+.analytics-card .analytics-badge { display: inline-block; max-width: 100%; white-space: normal; }
 .analytics-panel-intro {
   margin-bottom: 24px;
 }
@@ -170,6 +174,9 @@
 .analytics-line {
   stroke: currentColor;
   stroke-width: 2;
+}
+.analytics-series-estimated .analytics-line {
+  stroke-dasharray: 5 3;
 }
 .analytics-series-forecast .analytics-line {
   stroke-dasharray: 7 5;

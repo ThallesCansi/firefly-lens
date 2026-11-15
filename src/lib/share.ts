@@ -1,4 +1,5 @@
 import { COVERAGE, SENSORS, editableVertices, type AnalysisArea, type Sensor } from "./data/types";
+import { rawPilotFor, rawPilots } from "./data/coverage";
 
 /**
  * A view of the Lens as a link: the area of interest, the period and the
@@ -7,7 +8,7 @@ import { COVERAGE, SENSORS, editableVertices, type AnalysisArea, type Sensor } f
  * the record is dropped, and the rest still applies.
  */
 export interface SharedView {
-  area: { kind: "drawn"; vertices: [number, number][]; name?: string } | { kind: "state"; id: string } | null;
+  area: { kind: "drawn"; vertices: [number, number][]; name?: string } | { kind: "state"; id: string } | { kind: "country"; code: string } | null;
   /** YYYY-MM or YYYY-MM-DD. */
   period: string | null;
   sensors: Sensor[] | null;
@@ -21,7 +22,9 @@ const round = (n: number) => Math.round(n * 1e4) / 1e4;
 export function shareQuery(view: { area: AnalysisArea | null; period: string; sensors: Sensor[] }): string {
   const query = new URLSearchParams();
   const vertices = editableVertices(view.area);
-  if (view.area?.kind === "state") query.set("area", view.area.id);
+  const country = view.area ? rawPilotFor(view.area) : undefined;
+  if (country) query.set("area", `country:${country.country_code}`);
+  else if (view.area?.kind === "state") query.set("area", view.area.id);
   else if (view.area && vertices) {
     query.set("area", `poly:${vertices.map(([x, y]) => `${round(x)},${round(y)}`).join(";")}`);
     if (view.area.name !== "Custom area") query.set("name", view.area.name);
@@ -33,6 +36,10 @@ export function shareQuery(view: { area: AnalysisArea | null; period: string; se
 
 function parseArea(value: string | null, name: string | null): SharedView["area"] {
   if (!value) return null;
+  if (value.startsWith("country:")) {
+    const entry = rawPilots.find((country) => `country:${country.country_code}` === value);
+    return entry ? { kind: "country", code: entry.country_code } : null;
+  }
   if (/^state:[\w:-]{1,20}$/.test(value)) return { kind: "state", id: value.slice(6) };
   if (!value.startsWith("poly:")) return null;
   const [w, s, e, n] = COVERAGE;
@@ -66,9 +73,12 @@ function parseSensors(value: string | null): Sensor[] | null {
 /** Reads a view from a query string; `first` and `last` are the months the record covers. */
 export function parseShare(search: string, first: string, last: string): SharedView {
   const query = new URLSearchParams(search);
+  const area = parseArea(query.get("area"), query.get("name"));
+  const country = area?.kind === "country" ? rawPilots.find((entry) => entry.country_code === area.code) : undefined;
+  const period = parsePeriod(query.get("period"), country?.period.start ?? first, country?.period.end ?? last);
   return {
-    area: parseArea(query.get("area"), query.get("name")),
-    period: parsePeriod(query.get("period"), first, last),
+    area,
+    period: country && period?.length !== 7 ? null : period,
     sensors: parseSensors(query.get("sensors")),
   };
 }

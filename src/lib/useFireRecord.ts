@@ -45,7 +45,7 @@ export function useFireRecord(area: AnalysisArea): {
       .then((record) => {
         if (!live) return;
         if (record === OUTSIDE) {
-          setError({ key: area.id, message: "This area has no Brazilian land. FireFly Lens covers Brazil only: move or redraw the area." });
+          setError({ key: area.id, message: "No spatially calibrated historical coverage: this area overlaps no Brazilian data cells. Explore the globe or choose a published whole-country report under Coordinates." });
           return;
         }
         setState({ area, record });

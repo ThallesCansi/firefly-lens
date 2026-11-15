@@ -41,6 +41,7 @@ export function DataGuide() {
         </p>
       </MethodSection>
       <MethodSection id="coverage" title="Data coverage">
+        <p>The dates below describe the original spatially calibrated Brazilian tiles. Additional South American countries have separate whole-country reports for 2018–2025, documented under <a href="/method#geographic-expansion">Geographic expansion</a>. They do not extend the Brazilian cell calibration across borders.</p>
         <p>
           Current metadata spans {fireData.firstDay} to {fireData.lastDay},
           restricted to Brazil. VIIRS NOAA-20 begins {fireData.viirsStart}. The

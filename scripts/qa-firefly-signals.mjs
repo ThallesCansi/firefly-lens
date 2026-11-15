@@ -6,10 +6,13 @@ const browser = await chromium.launch({ channel: "chrome", headless: true });
 const base = process.env.QA_BASE_URL || "http://localhost:3105";
 const errors = [];
 const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+await page.addInitScript(() => localStorage.setItem("firefly-lens-tour-auto-disabled-v1", "true"));
 page.setDefaultTimeout(30000);
 page.on("pageerror", (error) => errors.push(error.message));
 const index = JSON.parse(readFileSync("public/analytics/manifest.json", "utf8"));
-const expected = (period) => index.regions.filter((region) => {
+const coverage = JSON.parse(readFileSync("public/data/coverage.json", "utf8"));
+const assessed = [...index.regions, ...coverage.datasets.filter((d) => d.signals_eligible && d.national_url).map((d) => ({ url:d.national_url }))];
+const expected = (period) => assessed.filter((region) => {
   const row = JSON.parse(readFileSync(`public${region.url}`, "utf8"))
     .sections.anomalies.data.months.find((r) => r.date === period);
   return row?.complete && ["available", "partially_available"].includes(row.status) &&
@@ -66,7 +69,7 @@ try {
   if (process.env.QA_SCREENSHOT) await page.screenshot({ path: process.env.QA_SCREENSHOT });
   await period("2026", "11");
   await count(0);
-  assert.match(await page.locator("#signal-status").innerText(), /0\/5 regions assessed/);
+  assert.match(await page.locator("#signal-status").innerText(), new RegExp(`0/${assessed.length} regions assessed`));
   // Rapid period changes must end with the exact final month's signals.
   await period("2024", "03");
   await period("2024", "06");
@@ -84,6 +87,7 @@ try {
   const narrowCard = await page.locator(".map-card").boundingBox();
   assert.ok(narrowCard.x >= 0 && narrowCard.x + narrowCard.width <= 320);
   const touch = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+  await touch.addInitScript(() => localStorage.setItem("firefly-lens-tour-auto-disabled-v1", "true"));
   touch.on("pageerror", (error) => errors.push(error.message));
   await touch.goto(`${base}/lens`);
   await touch.getByRole("button", { name: "Close the introduction", exact: true }).tap();
@@ -95,6 +99,7 @@ try {
   assert.match(await touch.getByRole("tooltip").innerText(), /Unusually high seasonal fire activity/);
   await touch.close();
   const unavailable = await browser.newPage();
+  await unavailable.addInitScript(() => localStorage.setItem("firefly-lens-tour-auto-disabled-v1", "true"));
   await unavailable.route("**/analytics/manifest.json", (route) => route.fulfill({ status: 503, body: "Unavailable" }));
   await unavailable.goto(`${base}/lens`);
   await unavailable.getByText("Seasonal signals unavailable", { exact: true }).waitFor();

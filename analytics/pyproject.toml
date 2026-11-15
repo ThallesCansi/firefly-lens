@@ -21,6 +21,7 @@ firefly-analytics = "firefly_analytics.cli:main"
 
 [project.optional-dependencies]
 api = ["fastapi>=0.115,<1", "uvicorn>=0.34,<1", "httpx>=0.28,<1"]
+weather = ["xarray>=2025.1,<2027", "netCDF4>=1.7,<2", "pyproj>=3.7,<4"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
