@@ -81,6 +81,8 @@ SVG downloads now include region, period, legend, data source and observed/model
 
 ## Deployment
 
+Dynamic History and experimental Forecast for arbitrary selected polygons now use an optional separate Python API. See [diagnosis, contracts, local setup and deployment](docs/dynamic-polygon-analytics.md). Without that service, exact prepared regions and the existing browser calendars remain available. Current numeric forecasts may be scientifically unavailable when eligible observations do not reach the requested origin.
+
 The site deploys on [Vercel](https://vercel.com) from this repository: every push to `main` goes to production and every pull request gets its own preview URL. The only environment variable is `GEMINI_API_KEY`, for the map assistant (set it in the Vercel project settings). The data are static files in `public/data/brazil/` (about 10 MB), fetched by the browser per 4° tile.
 
 ## Project layout

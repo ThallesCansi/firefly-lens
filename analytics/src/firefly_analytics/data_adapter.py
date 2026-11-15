@@ -137,9 +137,15 @@ def from_parquet(repo: str | Path, region_id: str, geometry: dict, *, start=None
         result.append(Month(stamp, total, source, complete, tuple(flags), lower, upper, method))
     if not result:
         raise ValueError("Requested period contains no data")
-    commit = subprocess.run(["git", "-C", str(repo), "rev-parse", "HEAD"], capture_output=True, text=True)
+    commit = None
+    try:
+        revision = subprocess.run(["git", "-C", str(repo), "rev-parse", "HEAD"], capture_output=True, text=True)
+        if revision.returncode == 0:
+            commit = revision.stdout.strip()
+    except FileNotFoundError:
+        pass  # Minimal service images use file fingerprints, without Git installed.
     return RegionalSeries(region_id, result, geometry=geometry, provenance={
-        "kind": "real_harmonized_parquet", "repository_commit": commit.stdout.strip(),
+        "kind": "real_harmonized_parquet", "repository_commit": commit,
         "files": [fingerprint(p) for p in (grid, params_file, meta_file)], "grid_cells": len(weights),
         "aggregation": "cell-intersection fraction in square degrees; sum(w*x); uncertainty sum(w^2*variance)+(c*total)^2",
         "geometry_repaired": repaired, "simplification_deg_if_over_2000_vertices": .005,
