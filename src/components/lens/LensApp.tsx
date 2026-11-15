@@ -28,6 +28,7 @@ import { useMapCells } from "@/lib/useMapHotspots";
 import { useMonthInsight } from "@/lib/useUnusual";
 import { usePlaybackFrames } from "@/lib/usePlayback";
 import { PlaybackBar } from "./PlaybackBar";
+import { RegionFlight } from "./RegionFlight";
 import { useWorkspaceTools } from "@/components/interactions/useWorkspaceTools";
 import { WorkspaceSelectionTools } from "@/components/interactions/WorkspaceSelectionTools";
 import { PolygonEditStatus } from "@/components/interactions/PolygonEditOverlay";
@@ -43,6 +44,8 @@ const LumeTour = dynamic(() => import("@/components/onboarding/LumeTour"), { ssr
 
 type Area = AnalysisArea;
 const presets = fireData.presets();
+/** The month every stop of the regional flight shows: a September of heavy burning, if the record has it. */
+const FLIGHT_PERIOD = "2024-09" >= fireData.firstMonth && "2024-09" <= fireData.lastMonth ? "2024-09" : fireData.lastMonth;
 
 const deg = (n: number) => Math.round(n * 100) / 100;
 /** One line that says what the area is. */
@@ -141,6 +144,8 @@ export function LensApp() {
   const [controller, setController] = useState<MapController | null>(null);
   /** Changes on each new selection, so the camera frames it; edits leave it alone. */
   const [frame, setFrame] = useState(0);
+  /** The regional flight: the stop being shown, or null when it is not running. */
+  const [flight, setFlight] = useState<number | null>(null);
   const analyzeButton = useRef<HTMLButtonElement>(null);
   const closeButton = useRef<HTMLButtonElement>(null);
   // The time-lapse: a range of months played on the map, all loaded at once.
@@ -210,7 +215,7 @@ export function LensApp() {
     [openAnalysis],
   );
   // Corner handles show as soon as a drawn area exists, unless another tool is in use.
-  const editable = area && !tourRunning && !drawing && !coordinates ? area : null;
+  const editable = area && flight === null && !tourRunning && !drawing && !coordinates ? area : null;
   const tools = useWorkspaceTools(
     controller,
     editable,
@@ -379,6 +384,22 @@ export function LensApp() {
     setCoordinates(false);
     return next;
   }
+  // The regional flight: one study region after another, each framed in 3D for
+  // the same month. It only selects and frames; the analysis stays one press away.
+  function flyTo(index: number | null) {
+    setFlight(index);
+    if (index === null) return;
+    const preset = presets[index];
+    tools.clear();
+    setDrawing(false);
+    setCoordinates(false);
+    setSearching(false);
+    setPlayback(false);
+    setAnalysis(false);
+    setArea(rectangleArea(preset.bbox, preset.name));
+    setFrame((n) => n + 1);
+    changePeriod(FLIGHT_PERIOD);
+  }
   const startTour = () => { restoredView.current?.abort(); tourSnapshot.current = tourWorkspace.capture(); tourGuard.current = true; setTourRunning(true); };
   const tourWorkspace: TourWorkspace = {
     capture: () => tourSnapshot.current ?? ({ area, analyzed, analysis, expanded, drawing, coordinates, searching,
@@ -471,6 +492,7 @@ export function LensApp() {
             onMapClick={tools.onMapClick}
             onViewChange={tools.editor ? tools.updateView : undefined}
             status={detectionStatus}
+            forceColumns={flight !== null}
             unusual={shown.cells ? (insight?.unusual ?? null) : null}
             harmonized={insight?.harmonized}
             unusualMonth={MONTHS[Number(period.slice(5, 7)) - 1]}
@@ -523,6 +545,19 @@ export function LensApp() {
                 <path d="M8.5 5.2v13.6a1 1 0 0 0 1.5.86l11-6.8a1 1 0 0 0 0-1.72l-11-6.8a1 1 0 0 0-1.5.86Z" />
               </svg>
               Time-lapse
+            </button>
+            <button
+              type="button"
+              className="layer-chip play-chip"
+              aria-pressed={flight !== null}
+              disabled={tourRunning}
+              title="Fly over the study regions, one after another, in 3D"
+              onClick={() => flyTo(flight === null ? 0 : null)}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M3 11 21 3l-8 18-2-8-8-2Z" />
+              </svg>
+              Regions
             </button>
             <MapLayerControl sensors={sensors} onChange={setSensors} />
           </MapCard>
@@ -630,7 +665,20 @@ export function LensApp() {
                 </button>
               </div>
             )}
+          {flight !== null && (
+            <RegionFlight
+              stops={presets}
+              index={flight}
+              period={FLIGHT_PERIOD}
+              onGo={flyTo}
+              onShowAnalysis={() => {
+                setFlight(null);
+                analyze();
+              }}
+            />
+          )}
           {area &&
+            flight === null &&
             !coordinates &&
             !drawing &&
             !tools.administrativeActive && (

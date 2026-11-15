@@ -339,6 +339,10 @@
 .selection-card .btn {
   padding-inline: 0.875rem;
 }
+/* The regional flight's card is kept short, clear of the map key below it. */
+.region-flight {
+  padding: 16px 18px;
+}
 /* With the analysis open beside the map, its heading already names the area:
    the card shrinks to its actions, so it does not cover the selection. */
 .selection-card[data-compact="true"] {

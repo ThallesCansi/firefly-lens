@@ -219,8 +219,17 @@ export function createController(map: MapLibreMap, Point: PointCtor, initial: Pr
       }
       map.stop();
       const attitude = { pitch: on ? TILT_PITCH : 0, bearing: on ? map.getBearing() : 0 };
-      if (prefersReducedMotion()) map.jumpTo(attitude);
-      else map.easeTo({ ...attitude, duration: 700, essential: false });
+      const duration = prefersReducedMotion() ? 0 : 700;
+      // Stopping the camera would drop a framing still in flight: frame and lean in one move.
+      const [w, s, e, n] = framed ?? [0, 0, 0, 0];
+      const fit = framed ? map.cameraForBounds([w, s, e, n], { padding: cameraPadding(map) }) : undefined;
+      if (fit?.center && fit.zoom !== undefined) {
+        // The fit is computed looking straight down; leaning over needs a little more room.
+        const zoom = fit.zoom - (on ? 0.45 : 0);
+        if (duration === 0) map.jumpTo({ center: fit.center, zoom, ...attitude });
+        else map.easeTo({ center: fit.center, zoom, ...attitude, duration, essential: false });
+      } else if (duration === 0) map.jumpTo(attitude);
+      else map.easeTo({ ...attitude, duration, essential: false });
     },
   };
   return controller;

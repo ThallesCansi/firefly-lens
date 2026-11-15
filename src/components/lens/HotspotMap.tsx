@@ -227,6 +227,7 @@ export function HotspotMap({
   unusual = null,
   unusualMonth,
   harmonized,
+  forceColumns = false,
 }: {
   /** The area of interest, outlined on the map. */
   area: AnalysisArea | null;
@@ -268,6 +269,8 @@ export function HotspotMap({
   unusualMonth?: string;
   /** VIIRS on the MODIS Aqua scale for a cell in the month shown; absent when no month is shown. */
   harmonized?: (cellId: number) => number | null;
+  /** Holds the 3D columns on, for a guided flight; the switch is then disabled. */
+  forceColumns?: boolean;
 }) {
   const { theme } = useTheme();
   const el = useRef<HTMLDivElement>(null);
@@ -304,7 +307,9 @@ export function HotspotMap({
   );
   const [globeUnavailable, setGlobeUnavailable] = useState(false);
   /** The 3D view: detections as columns, seen from a tilted camera. */
-  const [inColumns, setInColumns] = useState(false);
+  const [columnsChosen, setInColumns] = useState(false);
+  // A regional flight shows every stop in 3D, whatever was chosen before it.
+  const inColumns = forceColumns || columnsChosen;
   /** NASA's satellite picture under the data, or the drawn map alone. */
   const [basemap, setBasemap] = useState<BasemapKind>(DEFAULT_BASEMAP);
   /** The glow under unusually high cells; the key switches it off. */
@@ -1148,6 +1153,7 @@ export function HotspotMap({
               aria-pressed={inColumns}
               aria-label="3D columns"
               title={inColumns ? "Back to the flat marks" : "Show detections as 3D columns"}
+              disabled={forceColumns}
               onClick={() => setInColumns((on) => !on)}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 20v-6M10 20V9M15 20v-9M20 20V4" /></svg>
