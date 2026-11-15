@@ -102,7 +102,8 @@ and [offline export timings](continental-long-record-benchmarks.json).
 
 Vitest now explicitly excludes `.worktrees/`. Earlier local test totals included
 duplicate suites from other checkouts and are not a canonical count for this
-application. The current isolated suite has **208 tests in 37 files**; Python has
+application. After integrating main's assistant time-lapse update, the current
+isolated suite has **212 tests in 38 files**; Python has
 **62 unit tests** and **7 real-data integration tests**. These passed, including
 unchanged Brazilian evidence, frozen country calibration, daily/monthly
 reconciliation, native older-Aqua reconciliation when local archives are present,
@@ -112,8 +113,9 @@ Browser evidence is in [south-america-history-qa](south-america-history-qa).
 It covers the old Paraguayan calendar and CSV, a real September 2016 retrospective,
 country switching, fitted calendars at 320/390 px, bottom-right controls, large
 drag constraints in both projections and theme restoration. Basemap services are
-not certified by these local checks. Existing Signals and complete tour
-regressions are also run after the layout changes.
+not certified by these local checks. Existing Signals and all 16 guided-tour
+steps passed after the layout changes, including mobile, retry and workspace
+restoration checks. The Signals console result is saved beside the browser evidence.
 
 ## Reproduce
 
