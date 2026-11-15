@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="src/app/icon.svg" width="96" alt="FireFlighter, the FireFly Lens mascot" />
+<img src="docs/assets/mascot.svg" width="110" alt="FireFlighter, the FireFly Lens mascot" />
 
 # FireFly Lens
 
