@@ -24,6 +24,8 @@ import { MapCard, MapToolbar, MapLayerControl } from "./MapControls";
 import { MONTHS } from "@/lib/format";
 import { TemporalControl } from "./TemporalControl";
 import { useMapCells } from "@/lib/useMapHotspots";
+import { usePlaybackFrames } from "@/lib/usePlayback";
+import { PlaybackBar } from "./PlaybackBar";
 import { useWorkspaceTools } from "@/components/interactions/useWorkspaceTools";
 import { WorkspaceSelectionTools } from "@/components/interactions/WorkspaceSelectionTools";
 import { PolygonEditStatus } from "@/components/interactions/PolygonEditOverlay";
@@ -98,7 +100,20 @@ export function LensApp() {
   const [frame, setFrame] = useState(0);
   const analyzeButton = useRef<HTMLButtonElement>(null);
   const closeButton = useRef<HTMLButtonElement>(null);
-  const mapData = useMapCells(area, period);
+  // The time-lapse: a range of months played on the map, all loaded at once.
+  const [playback, setPlayback] = useState(false);
+  const [playRange, setPlayRange] = useState(() => {
+    const year = `${fireData.lastYear}`;
+    const to = `${year}-12` > fireData.lastMonth ? fireData.lastMonth : `${year}-12`;
+    return { from: `${year}-01`, to };
+  });
+  const play = usePlaybackFrames(area, playRange.from, playRange.to, playback);
+  const playing = playback && play.frames !== null;
+  // While a time-lapse is loaded its frames feed the map, so nothing else loads.
+  const mapData = useMapCells(playing ? null : area, period);
+  const shown = playing
+    ? { cells: play.frames!.months.get(period.slice(0, 7)) ?? [], error: null }
+    : mapData;
   const commitRectangle = useCallback((bbox: BBox) => {
     setArea(rectangleArea(normalizeBBox(bbox)));
     setFrame((n) => n + 1);
@@ -149,12 +164,12 @@ export function LensApp() {
     },
     [stopTools, clearAdministrative, commitRectangle],
   );
-  const changePeriod = (next: string) => {
+  const changePeriod = useCallback((next: string) => {
     setPeriod(next);
     const month = next.slice(0, 7);
-    if (month < from) setFrom(month);
-    if (month > to) setTo(month);
-  };
+    setFrom((f) => (month < f ? month : f));
+    setTo((t) => (month > t ? month : t));
+  }, []);
   const report = useRef<HTMLElement>(null);
   const showReport = () => {
     report.current?.scrollIntoView({ behavior: reducedMotion() ? "auto" : "smooth" });
@@ -197,18 +212,18 @@ export function LensApp() {
   const detectionStatus = area ? (
     <p role="status">
       <ScientificInfo concept="hotspot" />
-      {mapData.error ||
-        (mapData.cells === null
+      {shown.error ||
+        (shown.cells === null
           ? "Loading detections…"
           : `${Math.round(
-              mapData.cells.reduce(
+              shown.cells.reduce(
                 (s, c) =>
                   s +
                   (sensors.includes("MODIS") ? c.modis : 0) +
                   (sensors.includes("VIIRS") ? c.viirs : 0),
                 0,
               ),
-            ).toLocaleString("en-GB")} detections in ${mapData.cells.length.toLocaleString("en-GB")} cells`)}
+            ).toLocaleString("en-GB")} detections in ${shown.cells.length.toLocaleString("en-GB")} cells`)}
       {period < fireData.viirsStart.slice(0, period.length) &&
       sensors.includes("VIIRS")
         ? " · VIIRS starts April 2018"
@@ -291,7 +306,8 @@ export function LensApp() {
             area={area}
             frame={area ? frame : null}
             areaName={area?.name ?? "Earth"}
-            cells={mapData.cells}
+            cells={shown.cells}
+            scale={playing ? play.frames!.top : undefined}
             drawing={drawing}
             onDraw={selectArea}
             sensors={sensors}
@@ -340,6 +356,21 @@ export function LensApp() {
             summary={periodSummary(period, sensors.length)}
           >
             <TemporalControl period={period} onChange={changePeriod} />
+            <button
+              type="button"
+              className="layer-chip play-chip"
+              aria-pressed={playback}
+              onClick={() => {
+                // Opening starts the map at the first month of the range.
+                if (!playback) changePeriod(playRange.from);
+                setPlayback(!playback);
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M8.5 5.2v13.6a1 1 0 0 0 1.5.86l11-6.8a1 1 0 0 0 0-1.72l-11-6.8a1 1 0 0 0-1.5.86Z" />
+              </svg>
+              Time-lapse
+            </button>
             <MapLayerControl sensors={sensors} onChange={setSensors} />
           </MapCard>
           {searching && (
@@ -498,7 +529,25 @@ export function LensApp() {
                 </div>
               </section>
             )}
-          <AssistantDock host={assistantHost} />
+          <div className="map-bottom">
+            {playback && (
+              <PlaybackBar
+                from={playRange.from}
+                to={playRange.to}
+                onRange={(from, to) => {
+                  setPlayRange({ from, to });
+                  changePeriod(from);
+                }}
+                period={period}
+                onPeriod={changePeriod}
+                hasArea={!!area}
+                ready={playing}
+                error={play.error}
+                onClose={() => setPlayback(false)}
+              />
+            )}
+            <AssistantDock host={assistantHost} />
+          </div>
         </section>
         {analyzed && (
           <ResizableAnalysisPanel

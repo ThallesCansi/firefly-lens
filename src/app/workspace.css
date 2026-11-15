@@ -69,17 +69,37 @@
 /* Space behind the globe: deep blue-black with three layers of stars at
    unrelated spacings, so no repeat is visible. The same in both themes. */
 .map-space {
-  background-color: #04070d;
+  background-color: #03060c;
   background-image:
-    radial-gradient(1.2px 1.2px at 23px 41px, #fff9 50%, transparent 51%),
-    radial-gradient(1px 1px at 151px 97px, #fff6 50%, transparent 51%),
-    radial-gradient(1.6px 1.6px at 89px 173px, #e8f0ffcc 50%, transparent 51%),
-    radial-gradient(1px 1px at 251px 13px, #fff5 50%, transparent 51%),
-    radial-gradient(1.3px 1.3px at 307px 229px, #fff8 50%, transparent 51%),
-    radial-gradient(1px 1px at 47px 283px, #ffffff59 50%, transparent 51%),
-    radial-gradient(900px 600px at 70% 35%, #11203a66, transparent 70%),
-    radial-gradient(700px 500px at 15% 80%, #1a1430 55%, transparent 100%);
-  background-size: 211px 211px, 263px 263px, 337px 337px, 389px 389px, 431px 431px, 503px 503px, 100% 100%, 100% 100%;
+    radial-gradient(900px 600px at 70% 35%, #11203a59, transparent 70%),
+    radial-gradient(700px 500px at 15% 80%, #1a143099, transparent 100%);
+}
+/* Painted once on a canvas (Starfield.tsx); only a few stars twinkle, by opacity. */
+.starfield {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.starfield canvas {
+  width: 100%;
+  height: 100%;
+}
+.starfield span {
+  position: absolute;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 6px 1px #dfe8ff99;
+  opacity: 0.35;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .starfield span {
+    animation: twinkle linear infinite alternate;
+  }
+}
+@keyframes twinkle {
+  to {
+    opacity: 1;
+  }
 }
 .status-dot {
   width: 6px;
@@ -370,8 +390,8 @@
   font-size: 12px;
   color: var(--color-dim);
 }
-/* Bottom centre: the assistant (design preview). */
-.assistant-dock {
+/* Bottom centre: the time-lapse bar, when open, above the assistant. */
+.map-bottom {
   position: absolute;
   bottom: 28px;
   left: 50%;
@@ -381,6 +401,161 @@
   flex-direction: column;
   gap: 10px;
   z-index: 20;
+}
+/* The time-lapse: play, the month on screen, a scrubber; the range below. */
+.playback-bar {
+  display: grid;
+  gap: 2px;
+  padding: 6px;
+}
+.playback-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.playback-play {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--color-button);
+  color: var(--color-button-ink);
+  cursor: pointer;
+  transition-property: opacity, scale;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+}
+.playback-play:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.playback-now {
+  flex: none;
+  min-width: 68px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-ink);
+}
+.playback-scrub {
+  flex: 1;
+  min-width: 0;
+  height: 38px;
+  accent-color: var(--color-lume);
+  cursor: pointer;
+}
+.playback-scrub:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+.playback-speed,
+.playback-close {
+  flex: none;
+  display: grid;
+  place-items: center;
+  min-width: 38px;
+  height: 38px;
+  padding: 0 6px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-dim);
+  cursor: pointer;
+  transition-property: background-color, color, scale;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+}
+@media (hover: hover) {
+  .playback-speed:hover,
+  .playback-close:hover {
+    background: var(--color-bark);
+    color: var(--color-ink);
+  }
+}
+.playback-play:not(:disabled):active,
+.playback-speed:active,
+.playback-close:active {
+  scale: 0.96;
+}
+.playback-range {
+  flex-wrap: wrap;
+  row-gap: 4px;
+  padding: 0 4px 2px;
+  font-size: 12px;
+  color: var(--color-dim);
+}
+.playback-when {
+  display: inline-flex;
+  gap: 4px;
+}
+.playback-when .field {
+  height: 30px;
+  padding: 0 6px;
+  border-radius: 7px;
+  font-size: 12px;
+}
+.playback-status {
+  margin-left: auto;
+  color: var(--color-faint);
+}
+.assistant-dock {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 20;
+}
+/* Fireflies circling the assistant while it thinks: each follows the window's
+   rounded outline (offset-path), facing the way it flies. They fade in and out
+   with the thinking state; when idle the orbit is paused, so it costs nothing. */
+.assistant-fireflies {
+  position: absolute;
+  inset: -16px -18px;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 200ms ease-out;
+}
+.assistant-dock[data-busy="true"] .assistant-fireflies {
+  opacity: 1;
+  transition-duration: 300ms;
+}
+.assistant-firefly {
+  position: absolute;
+  top: 0;
+  left: 0;
+  offset-path: inset(0 round 44px);
+  offset-rotate: auto;
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--color-lume) 70%, transparent));
+}
+.assistant-firefly:nth-child(1) { offset-distance: 8%; --orbit: 11s; --at: 0s; }
+.assistant-firefly:nth-child(2) { offset-distance: 34%; --orbit: 14s; --at: -4.6s; }
+.assistant-firefly:nth-child(3) { offset-distance: 61%; --orbit: 12.5s; --at: -7.9s; offset-rotate: reverse; }
+.assistant-firefly:nth-child(4) { offset-distance: 86%; --orbit: 16s; --at: -12.2s; }
+@media (prefers-reduced-motion: no-preference) {
+  .assistant-firefly {
+    animation: firefly-orbit var(--orbit) linear var(--at) infinite paused;
+  }
+  .assistant-firefly:nth-child(3) {
+    animation-direction: reverse;
+  }
+  .assistant-dock[data-busy="true"] .assistant-firefly {
+    animation-play-state: running;
+  }
+}
+@keyframes firefly-orbit {
+  from {
+    offset-distance: 0%;
+  }
+  to {
+    offset-distance: 100%;
+  }
+}
+@supports not (offset-path: inset(0 round 4px)) {
+  .assistant-fireflies {
+    display: none;
+  }
 }
 .assistant-bar {
   display: flex;
@@ -762,7 +937,7 @@
 /* The bottom row shares the map's width: the assistant narrows between the key
    and the view controls, and on a narrow map the key moves above it. */
 @container map (max-width: 1150px) {
-  .assistant-dock {
+  .map-bottom {
     width: max(280px, calc(100% - 600px));
   }
 }
@@ -842,7 +1017,11 @@
   .map-key {
     bottom: 100px;
   }
-  .assistant-dock {
+  /* The open time-lapse adds a row above the assistant: the key moves over it. */
+  .workspace-map:has(.playback-bar) .map-key {
+    bottom: 202px;
+  }
+  .map-bottom {
     width: calc(100% - 150px);
   }
 }
@@ -875,7 +1054,7 @@
     font-size: 22px;
   }
   /* The assistant takes the bottom edge; the key and view controls sit above it. */
-  .assistant-dock {
+  .map-bottom {
     bottom: 28px;
     width: calc(100% - 24px);
     min-width: 0;
@@ -934,6 +1113,17 @@
   }
   .workspace-map:has(.selection-card) .map-view-controls {
     bottom: 250px;
+  }
+  /* With the time-lapse open, everything at the bottom sits above its bar. */
+  .workspace-map:has(.playback-bar) .map-key,
+  .workspace-map:has(.playback-bar) .map-view-controls {
+    bottom: 222px;
+  }
+  .workspace-map:has(.playback-bar) .selection-card {
+    bottom: 192px;
+  }
+  .workspace-map:has(.playback-bar):has(.selection-card) .map-view-controls {
+    bottom: 352px;
   }
   .coordinates-panel {
     left: 86px;
