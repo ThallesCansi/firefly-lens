@@ -1,0 +1,4461 @@
+{
+  "schema_version": "1.0.0",
+  "section": "anomalies",
+  "region_id": "SYNTHETIC_frontend_demo",
+  "period": {
+    "start": "2000-01",
+    "end": "2011-12"
+  },
+  "units": "MODIS-Aqua-equivalent hotspots",
+  "source": {
+    "synthetic": true,
+    "provenance": {
+      "kind": "synthetic_fixture",
+      "seed": 42
+    }
+  },
+  "data_status": "synthetic",
+  "generated_at": "2026-11-15T02:49:55.693332+00:00",
+  "method": {
+    "name": "past_years_only_leave_target_out_seasonal_anomalies",
+    "reference": {
+      "start_year": 2003,
+      "end_year": 2023,
+      "min_years": 5
+    }
+  },
+  "data": {
+    "policy": {
+      "include_drift": false,
+      "include_modeled": false,
+      "exclude_flags": [
+        "sensor_outage",
+        "incomplete_spatial_coverage"
+      ]
+    },
+    "percentile_ties": "midrank: 100*(less+0.5*equal)/n",
+    "classification": "none; scores are descriptive and do not assume normality",
+    "months": [
+      {
+        "date": "2000-01",
+        "value": 4.711819340844143,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2000-02",
+        "value": 7.654192799336961,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2000-03",
+        "value": 11.777368276864674,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2000-04",
+        "value": 21.403967450197726,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2000-05",
+        "value": 34.744823432434224,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2000-06",
+        "value": 47.00529317131809,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2000-07",
+        "value": 80.66463668813543,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2000-08",
+        "value": 119.46532504300566,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2000-09",
+        "value": 179.5660826317096,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2000-10",
+        "value": 90.2317695734017,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2000-11",
+        "value": 30.464595473813443,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2000-12",
+        "value": 12.327117373198286,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2001-01",
+        "value": 6.313273013597338,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2001-02",
+        "value": 8.221014354887664,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2001-03",
+        "value": 10.52335679531036,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2001-04",
+        "value": 17.970675265024568,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2001-05",
+        "value": 35.492684390422404,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2001-06",
+        "value": 52.622161654408096,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2001-07",
+        "value": 80.08331372780677,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2001-08",
+        "value": 119.78735341245843,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2001-09",
+        "value": 181.06355244080174,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2001-10",
+        "value": 87.09290940398265,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2001-11",
+        "value": 29.37544536571088,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2001-12",
+        "value": 10.98072506518705,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2002-01",
+        "value": 6.746808770758894,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2002-02",
+        "value": 7.518740654689729,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2002-03",
+        "value": 12.75319971737582,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2002-04",
+        "value": 20.49642689865683,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2002-05",
+        "value": 36.56465361740729,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2002-06",
+        "value": 47.77355557150366,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2002-07",
+        "value": 81.13650137517077,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2002-08",
+        "value": 116.97095921654972,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2002-09",
+        "value": 174.7601091555623,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2002-10",
+        "value": 88.786218543601,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2002-11",
+        "value": 28.16837990730801,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2002-12",
+        "value": 11.752024486112813,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2003-01",
+        "value": 6.3285317992257895,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2003-02",
+        "value": 5.56185051740861,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2003-03",
+        "value": 13.694722846696001,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2003-04",
+        "value": 17.9955943515153,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2003-05",
+        "value": 34.82751230732743,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2003-06",
+        "value": 49.412200444086935,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2003-07",
+        "value": 80.22883971492185,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2003-08",
+        "value": 121.63727262308754,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2003-09",
+        "value": 181.27682758158488,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2003-10",
+        "value": 90.69977020373842,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2003-11",
+        "value": 31.299896195612597,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2003-12",
+        "value": 10.956984075300237,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [],
+          "n_years": 0,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2004-01",
+        "value": 3.7460290695608003,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003
+          ],
+          "n_years": 1,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2004-02",
+        "value": 6.565257812366845,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003
+          ],
+          "n_years": 1,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2004-03",
+        "value": 11.060063451727972,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003
+          ],
+          "n_years": 1,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2004-04",
+        "value": 20.998652800953565,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003
+          ],
+          "n_years": 1,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2004-05",
+        "value": 34.49976885800523,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003
+          ],
+          "n_years": 1,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2004-06",
+        "value": 54.6715084449611,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003
+          ],
+          "n_years": 1,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2004-07",
+        "value": 78.36141491562701,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003
+          ],
+          "n_years": 1,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2004-08",
+        "value": 117.80225080019568,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003
+          ],
+          "n_years": 1,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2004-09",
+        "value": 181.5369470309394,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003
+          ],
+          "n_years": 1,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2004-10",
+        "value": 92.84369996268693,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003
+          ],
+          "n_years": 1,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2004-11",
+        "value": 31.01138538167852,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003
+          ],
+          "n_years": 1,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2004-12",
+        "value": 11.671634691935347,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003
+          ],
+          "n_years": 1,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2005-01",
+        "value": 7.852689954884324,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004
+          ],
+          "n_years": 2,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2005-02",
+        "value": 7.811945047967392,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004
+          ],
+          "n_years": 2,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2005-03",
+        "value": 9.154082133722046,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004
+          ],
+          "n_years": 2,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2005-04",
+        "value": 18.935846903362574,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004
+          ],
+          "n_years": 2,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2005-05",
+        "value": 36.90579151463315,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004
+          ],
+          "n_years": 2,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2005-06",
+        "value": 47.112643187843425,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004
+          ],
+          "n_years": 2,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2005-07",
+        "value": 80.06706264157452,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004
+          ],
+          "n_years": 2,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2005-08",
+        "value": 120.50647471868412,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004
+          ],
+          "n_years": 2,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2005-09",
+        "value": 179.36881567037267,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004
+          ],
+          "n_years": 2,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2005-10",
+        "value": 91.4472639727362,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004
+          ],
+          "n_years": 2,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2005-11",
+        "value": 31.161559483053132,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004
+          ],
+          "n_years": 2,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2005-12",
+        "value": 14.642817033801462,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004
+          ],
+          "n_years": 2,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2006-01",
+        "value": 6.239935535546271,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005
+          ],
+          "n_years": 3,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2006-02",
+        "value": 6.781193082713876,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005
+          ],
+          "n_years": 3,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2006-03",
+        "value": 10.876404815331938,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005
+          ],
+          "n_years": 3,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2006-04",
+        "value": 18.336837797515987,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005
+          ],
+          "n_years": 3,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2006-05",
+        "value": 36.904547119631644,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005
+          ],
+          "n_years": 3,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2006-06",
+        "value": 48.866334330372595,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005
+          ],
+          "n_years": 3,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2006-07",
+        "value": 79.85947845259881,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005
+          ],
+          "n_years": 3,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2006-08",
+        "value": 121.49860523857934,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005
+          ],
+          "n_years": 3,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2006-09",
+        "value": 178.55307401869717,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005
+          ],
+          "n_years": 3,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2006-10",
+        "value": 89.41268407276456,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005
+          ],
+          "n_years": 3,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2006-11",
+        "value": 26.317427468792168,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005
+          ],
+          "n_years": 3,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2006-12",
+        "value": 7.8350427619225735,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005
+          ],
+          "n_years": 3,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2007-01",
+        "value": 3.8645271756163004,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006
+          ],
+          "n_years": 4,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2007-02",
+        "value": 8.831521977033344,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006
+          ],
+          "n_years": 4,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2007-03",
+        "value": 14.386986544886595,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006
+          ],
+          "n_years": 4,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2007-04",
+        "value": 19.963066373672575,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006
+          ],
+          "n_years": 4,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2007-05",
+        "value": 35.522728558399606,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006
+          ],
+          "n_years": 4,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2007-06",
+        "value": 50.335938737094466,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006
+          ],
+          "n_years": 4,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2007-07",
+        "value": 82.1694822269072,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006
+          ],
+          "n_years": 4,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2007-08",
+        "value": 121.78671039747641,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006
+          ],
+          "n_years": 4,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2007-09",
+        "value": 180.54738663081508,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006
+          ],
+          "n_years": 4,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2007-10",
+        "value": 87.97811139310937,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006
+          ],
+          "n_years": 4,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2007-11",
+        "value": 31.80677062868919,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006
+          ],
+          "n_years": 4,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2007-12",
+        "value": 10.762094255911505,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "insufficient_history",
+        "absolute": null,
+        "percent": null,
+        "z_score": null,
+        "robust_z": null,
+        "percentile": null,
+        "null_reasons": {
+          "absolute": "insufficient_history",
+          "percent": "insufficient_history",
+          "z_score": "insufficient_history",
+          "robust_z": "insufficient_history",
+          "percentile": "insufficient_history"
+        },
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006
+          ],
+          "n_years": 4,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2008-01",
+        "value": 7.45388309942844,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": 1.8475403924617426,
+        "percent": 32.95446762763726,
+        "z_score": 1.046644944090103,
+        "robust_z": 0.507700617347381,
+        "percentile": 80.0,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007
+          ],
+          "n_years": 5,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2008-02",
+        "value": 7.940186814637573,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": 0.82983312713956,
+        "percent": 11.670771435725317,
+        "z_score": 0.663442617541614,
+        "robust_z": 0.7584080252338485,
+        "percentile": 80.0,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007
+          ],
+          "n_years": 5,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2008-03",
+        "value": 15.906201848967692,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": 4.071749890494782,
+        "percent": 34.40590155575055,
+        "z_score": 1.884284293574329,
+        "robust_z": 1.7149567717183394,
+        "percentile": 100.0,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007
+          ],
+          "n_years": 5,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2008-04",
+        "value": 19.282247319356355,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": 0.036247673952352955,
+        "percent": 0.1883387437399699,
+        "z_score": 0.029419474933396295,
+        "robust_z": 0.24849055629535263,
+        "percentile": 60.0,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007
+          ],
+          "n_years": 5,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2008-05",
+        "value": 38.186120828526086,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": 2.454051156926674,
+        "percent": 6.867923351434649,
+        "z_score": 2.166359564599583,
+        "robust_z": 1.7561136322077369,
+        "percentile": 100.0,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007
+          ],
+          "n_years": 5,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2008-06",
+        "value": 50.23023794521447,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": 0.15051291634276254,
+        "percent": 0.30054661094083407,
+        "z_score": 0.053321434625207005,
+        "robust_z": 0.5973106664436486,
+        "percentile": 60.0,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007
+          ],
+          "n_years": 5,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2008-07",
+        "value": 78.96746198150899,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": -1.1697936088168888,
+        "percent": -1.4597375467872966,
+        "z_score": -0.8615625015141457,
+        "robust_z": -3.5728659682040207,
+        "percentile": 20.0,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007
+          ],
+          "n_years": 5,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2008-08",
+        "value": 117.74310425441521,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": -2.9031585011894094,
+        "percent": -2.406339355136422,
+        "z_score": -1.7414216369548627,
+        "robust_z": -8.792104663175973,
+        "percentile": 0.0,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007
+          ],
+          "n_years": 5,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2008-09",
+        "value": 179.69793889692232,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": -0.5586712895595269,
+        "percent": -0.3099310971073747,
+        "z_score": -0.4397871633643259,
+        "robust_z": -0.5789890613013913,
+        "percentile": 40.0,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007
+          ],
+          "n_years": 5,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2008-10",
+        "value": 92.84664205233437,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": 2.370336131327278,
+        "percent": 2.6198418549457214,
+        "z_score": 1.2683795344161557,
+        "robust_z": 1.1250569707893243,
+        "percentile": 100.0,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007
+          ],
+          "n_years": 5,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2008-11",
+        "value": 31.632748993229455,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": 1.313341161664333,
+        "percent": 4.331684737909133,
+        "z_score": 0.5818781517112275,
+        "robust_z": 2.1162968026253743,
+        "percentile": 80.0,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007
+          ],
+          "n_years": 5,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2008-12",
+        "value": 11.377767728532007,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": 0.2040531647577808,
+        "percent": 1.8261891655916462,
+        "z_score": 0.08392608699599288,
+        "robust_z": 0.39713767712110426,
+        "percentile": 60.0,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007
+          ],
+          "n_years": 5,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2009-01",
+        "value": 0.24825485381760437,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": -5.666011251892717,
+        "percent": -95.80244024566446,
+        "z_score": -3.238168467367763,
+        "robust_z": -2.9737434205654565,
+        "percentile": 0.0,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008
+          ],
+          "n_years": 6,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2009-02",
+        "value": 9.421928409140078,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": 2.173269200452138,
+        "percent": 29.981671615177444,
+        "z_score": 1.859215090733627,
+        "robust_z": 2.0852498355805236,
+        "percentile": 100.0,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008
+          ],
+          "n_years": 6,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2009-03",
+        "value": 13.111704821839684,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": 0.5986278816176434,
+        "percent": 4.784018227310772,
+        "z_score": 0.2348231721302246,
+        "robust_z": 0.2821677294070663,
+        "percentile": 50.0,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008
+          ],
+          "n_years": 6,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2009-04",
+        "value": 18.900147431189346,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": -0.35189349320671326,
+        "percent": -1.8278243568493362,
+        "z_score": -0.3192874633377883,
+        "robust_z": -0.17328548519958462,
+        "percentile": 33.333333333333336,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008
+          ],
+          "n_years": 6,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2009-05",
+        "value": 33.745231267639205,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": -2.3958469301146508,
+        "percent": -6.6291517840315874,
+        "z_score": -1.6814241442489164,
+        "robust_z": -1.6022076506102356,
+        "percentile": 0.0,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008
+          ],
+          "n_years": 6,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2009-06",
+        "value": 49.99537909637284,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": -0.10943141855599237,
+        "percent": -0.2184050142718074,
+        "z_score": -0.04333077992444371,
+        "robust_z": 0.1598651226760555,
+        "percentile": 50.0,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008
+          ],
+          "n_years": 6,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2009-07",
+        "value": 83.44975252629746,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": 3.5074625374410573,
+        "percent": 4.387493200319858,
+        "z_score": 2.687828716231726,
+        "robust_z": 3.7286211984997157,
+        "percentile": 100.0,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008
+          ],
+          "n_years": 6,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2009-08",
+        "value": 117.88979860115535,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": -2.272604404251041,
+        "percent": -1.891277427390322,
+        "z_score": -1.1931116575120482,
+        "robust_z": -2.9593498668818365,
+        "percentile": 33.333333333333336,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008
+          ],
+          "n_years": 6,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2009-09",
+        "value": 179.14438993052744,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": -1.0191083743611387,
+        "percent": -0.5656575188368698,
+        "z_score": -0.8793939192357296,
+        "robust_z": -0.6916476594912431,
+        "percentile": 16.666666666666668,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008
+          ],
+          "n_years": 6,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2009-10",
+        "value": 92.72356950070117,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": 1.8522075578061958,
+        "percent": 2.0382742353637804,
+        "z_score": 0.9589956997984187,
+        "robust_z": 0.6487554360374144,
+        "percentile": 66.66666666666667,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008
+          ],
+          "n_years": 6,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2009-11",
+        "value": 29.1076984011445,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": -1.4305996240313448,
+        "percent": -4.684608234722037,
+        "z_score": -0.6848990649049554,
+        "robust_z": -4.609100731150405,
+        "percentile": 16.666666666666668,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008
+          ],
+          "n_years": 6,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2009-12",
+        "value": 9.27149704827812,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": -1.9362263762890688,
+        "percent": -17.27582224276596,
+        "z_score": -0.8897056881757789,
+        "robust_z": -2.8118656790150496,
+        "percentile": 16.666666666666668,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008
+          ],
+          "n_years": 6,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2010-01",
+        "value": 5.195552694577353,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": 0.09071676770884896,
+        "percent": 1.7770750913144038,
+        "z_score": 0.03395556127725073,
+        "robust_z": -0.4367847746333122,
+        "percentile": 42.857142857142854,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008,
+            2009
+          ],
+          "n_years": 7,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2010-02",
+        "value": 5.517421246728609,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": -2.041704990595351,
+        "percent": -27.00980148359242,
+        "z_score": -1.5161771061265523,
+        "robust_z": -1.5014621882908812,
+        "percentile": 0.0,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008,
+            2009
+          ],
+          "n_years": 7,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2010-03",
+        "value": 12.439890860300025,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": -0.15870434872453565,
+        "percent": -1.2596987687234635,
+        "z_score": -0.06787665468021316,
+        "robust_z": -0.22086331253945785,
+        "percentile": 42.857142857142854,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008,
+            2009
+          ],
+          "n_years": 7,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2010-04",
+        "value": 17.58076480605273,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": -1.6210056193137987,
+        "percent": -8.441959170454234,
+        "z_score": -1.5972895278622437,
+        "robust_z": -1.5258371601478402,
+        "percentile": 0.0,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008,
+            2009
+          ],
+          "n_years": 7,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2010-05",
+        "value": 36.77039662071629,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": 0.9715822701216652,
+        "percent": 2.714006840021301,
+        "z_score": 0.6130202431184432,
+        "robust_z": 0.609009462267137,
+        "percentile": 57.142857142857146,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008,
+            2009
+          ],
+          "n_years": 7,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2010-06",
+        "value": 50.00636164551598,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": -0.08281580961913448,
+        "percent": -0.16533673305638252,
+        "z_score": -0.035916042005996476,
+        "robust_z": 0.01270215890707267,
+        "percentile": 57.142857142857146,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008,
+            2009
+          ],
+          "n_years": 7,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2010-07",
+        "value": 84.5668629336955,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": 4.12350686806181,
+        "percent": 5.125975679952292,
+        "z_score": 2.313609224562898,
+        "robust_z": 2.7601599623856194,
+        "percentile": 100.0,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008,
+            2009
+          ],
+          "n_years": 7,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2010-08",
+        "value": 120.56168102706206,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": 0.7239357936915383,
+        "percent": 0.6040966410722721,
+        "z_score": 0.3732779007952615,
+        "robust_z": 0.02908538285768394,
+        "percentile": 57.142857142857146,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008,
+            2009
+          ],
+          "n_years": 7,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2010-09",
+        "value": 182.7313789808655,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": 2.7134675865999327,
+        "percent": 1.5073320013457117,
+        "z_score": 2.4101581297352883,
+        "robust_z": 2.4086559118466915,
+        "percentile": 100.0,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008,
+            2009
+          ],
+          "n_years": 7,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2010-10",
+        "value": 87.39347205656527,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": -3.7424909660163053,
+        "percent": -4.106491929085113,
+        "z_score": -1.9728234336289772,
+        "robust_z": -1.958016842859139,
+        "percentile": 0.0,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008,
+            2009
+          ],
+          "n_years": 7,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2010-11",
+        "value": 29.75572131295627,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": -0.5782053373579537,
+        "percent": -1.906134158044996,
+        "z_score": -0.29173323642632565,
+        "robust_z": -2.012406546773476,
+        "percentile": 28.571428571428573,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008,
+            2009
+          ],
+          "n_years": 7,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2010-12",
+        "value": 10.646291308028205,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": -0.28482834849768857,
+        "percent": -2.605664903939146,
+        "z_score": -0.1345341349077719,
+        "robust_z": -0.29323335862759903,
+        "percentile": 28.571428571428573,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008,
+            2009
+          ],
+          "n_years": 7,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2011-01",
+        "value": 8.491441836742098,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": 3.3752663139099877,
+        "percent": 65.97244951521083,
+        "z_score": 1.3644834648313333,
+        "robust_z": 1.0424340870981028,
+        "percentile": 100.0,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008,
+            2009,
+            2010
+          ],
+          "n_years": 8,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2011-02",
+        "value": 4.6381681239580725,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": -2.6657449895414684,
+        "percent": -36.497490428993125,
+        "z_score": -1.850415118916864,
+        "robust_z": -1.5823988199630608,
+        "percentile": 0.0,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008,
+            2009,
+            2010
+          ],
+          "n_years": 8,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2011-03",
+        "value": 13.981239359617645,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": 1.4024821941836496,
+        "percent": 11.14960862777146,
+        "z_score": 0.6476740604279388,
+        "robust_z": 0.48877544961701563,
+        "percentile": 75.0,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008,
+            2009,
+            2010
+          ],
+          "n_years": 8,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2011-04",
+        "value": 21.182708027631833,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": 2.1835633046795273,
+        "percent": 11.492955796276602,
+        "z_score": 1.9840391977516771,
+        "robust_z": 2.031876782891285,
+        "percentile": 100.0,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008,
+            2009,
+            2010
+          ],
+          "n_years": 8,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2011-05",
+        "value": 38.06709239147626,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": 2.1468302571164273,
+        "percent": 5.976655318065896,
+        "z_score": 1.4245595372174593,
+        "robust_z": 1.2465886201812582,
+        "percentile": 87.5,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008,
+            2009,
+            2010
+          ],
+          "n_years": 8,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2011-06",
+        "value": 51.42477103615744,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": 1.3459455572247094,
+        "percent": 2.6876540021708872,
+        "z_score": 0.6304276623490068,
+        "robust_z": 2.079393803134093,
+        "percentile": 87.5,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008,
+            2009,
+            2010
+          ],
+          "n_years": 8,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2011-07",
+        "value": 80.1041423702079,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": -0.8546520539335205,
+        "percent": -1.0556630197035994,
+        "z_score": -0.3881512804154611,
+        "robust_z": -0.019918019991122318,
+        "percentile": 50.0,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008,
+            2009,
+            2010
+          ],
+          "n_years": 8,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2011-08",
+        "value": 118.95670069916368,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": -0.9715365084182821,
+        "percent": -0.8100982145986724,
+        "z_score": -0.5356690724517537,
+        "robust_z": -0.9032294848174873,
+        "percentile": 37.5,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008,
+            2009,
+            2010
+          ],
+          "n_years": 8,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2011-09",
+        "value": 177.50364056431457,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": -2.85345427827599,
+        "percent": -1.5821136843917265,
+        "z_score": -2.0142667426037506,
+        "robust_z": -1.6567952376824235,
+        "percentile": 0.0,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008,
+            2009,
+            2010
+          ],
+          "n_years": 8,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2011-10",
+        "value": 90.39084552980594,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": -0.27730612202358884,
+        "percent": -0.30584733114275775,
+        "z_score": -0.12610849372129898,
+        "robust_z": -0.2684077676654899,
+        "percentile": 37.5,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008,
+            2009,
+            2010
+          ],
+          "n_years": 8,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2011-11",
+        "value": 29.61660646200938,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": -0.6450445211350981,
+        "percent": -2.1315575990694735,
+        "z_score": -0.34937219450588547,
+        "robust_z": -1.5654994054616995,
+        "percentile": 25.0,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008,
+            2009,
+            2010
+          ],
+          "n_years": 8,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      },
+      {
+        "date": "2011-12",
+        "value": 14.040534676159282,
+        "source": "observed_modis",
+        "quality_flags": [],
+        "complete": true,
+        "status": "available",
+        "absolute": 3.1450185631956007,
+        "percent": 28.865255492152418,
+        "z_score": 1.602409391023754,
+        "robust_z": 3.2256080982572604,
+        "percentile": 87.5,
+        "null_reasons": {},
+        "reference": {
+          "start_year": 2003,
+          "end_year": 2023,
+          "min_years": 5,
+          "years_used": [
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008,
+            2009,
+            2010
+          ],
+          "n_years": 8,
+          "operational_past_years_only": true,
+          "target_year_excluded": true
+        }
+      }
+    ]
+  },
+  "limitations": [
+    "Explicitly synthetic test/demo series; not NASA observations."
+  ],
+  "geometry": null
+}

@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.0.0",
+  "section": "fire_weather",
+  "region_id": "SYNTHETIC_frontend_demo",
+  "period": {
+    "start": "2000-01",
+    "end": "2011-12"
+  },
+  "units": "dimensionless",
+  "source": {
+    "synthetic": true,
+    "provenance": {
+      "kind": "provider_fwi",
+      "source_id": "synthetic_fixture",
+      "provider": {
+        "url": null,
+        "licence": "synthetic test data",
+        "native_formats": [
+          "normalized JSON"
+        ]
+      },
+      "normalized_import": {}
+    }
+  },
+  "data_status": "synthetic",
+  "generated_at": "2026-11-15T02:49:55.693332+00:00",
+  "method": {
+    "name": "synthetic_provider_fixture_point_mean"
+  },
+  "data": {
+    "status": "synthetic",
+    "reason": null,
+    "index": "FWI",
+    "units": "dimensionless",
+    "aggregation": "arithmetic mean of supplied point samples within polygon; no raster area weighting",
+    "source_id": "synthetic_fixture",
+    "source": {
+      "url": null,
+      "licence": "synthetic test data",
+      "native_formats": [
+        "normalized JSON"
+      ]
+    },
+    "provenance": {},
+    "forecasts": [
+      {
+        "issued_at": "2026-11-14T00:00:00+00:00",
+        "valid_at": "2026-11-15T00:00:00+00:00",
+        "lead_hours": 24,
+        "member": "deterministic",
+        "value": 15.0,
+        "sample_count": 2,
+        "valid_samples": 2,
+        "null_reason": null
+      }
+    ],
+    "limitations": [
+      "Original leads, issuance timestamps and ensemble members are preserved.",
+      "This normalized import is not a live EWDS integration or an independent validation of provider FWI values.",
+      "FWI danger and statistical hotspot-activity forecasts are separate indicators."
+    ]
+  },
+  "limitations": [
+    "Explicitly synthetic test/demo series; not NASA observations."
+  ],
+  "geometry": null
+}

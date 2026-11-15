@@ -1,0 +1,109 @@
+{
+  "type": "object",
+  "properties": {
+    "region_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "units": {
+      "const": "MODIS-Aqua-equivalent hotspots"
+    },
+    "months": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$"
+          },
+          "value": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "source": {
+            "enum": [
+              "observed_modis",
+              "modeled_viirs",
+              "missing",
+              "mixed"
+            ]
+          },
+          "complete": {
+            "type": "boolean"
+          },
+          "flags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "lower": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "upper": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "uncertainty_method": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "available_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          }
+        },
+        "required": [
+          "date",
+          "value",
+          "source",
+          "complete"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "geometry": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "provenance": {
+      "type": "object"
+    },
+    "synthetic": {
+      "type": "boolean"
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "region_id",
+    "units",
+    "months",
+    "synthetic"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

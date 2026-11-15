@@ -1,0 +1,90 @@
+{
+  "schema_version": "1.0.0",
+  "section": "fire_weather",
+  "region_id": "pantanal-study",
+  "period": {
+    "start": "2002-07",
+    "end": "2026-11"
+  },
+  "units": "dimensionless",
+  "source": {
+    "synthetic": false,
+    "provenance": {
+      "kind": "unconfigured_fwi_provider",
+      "source_id": null,
+      "provider": null,
+      "normalized_import": {}
+    }
+  },
+  "data_status": "unavailable",
+  "generated_at": "2026-11-15T02:49:55.693332+00:00",
+  "method": {
+    "name": "provider_fwi_adapter_no_live_provider"
+  },
+  "data": {
+    "status": "unavailable",
+    "reason": "no_authenticated_numeric_provider_configured",
+    "index": "FWI",
+    "units": "dimensionless",
+    "forecasts": [],
+    "verified_sources": {
+      "copernicus_ewds_cems_fire_seasonal": {
+        "url": "https://ewds.climate.copernicus.eu/datasets/cems-fire-seasonal?tab=overview",
+        "doi": "10.24381/cds.b9c753f1",
+        "licence": "CC-BY (see dataset terms)",
+        "native_formats": [
+          "GRIB",
+          "NetCDF"
+        ],
+        "access": "registered EWDS account/API credentials and dataset terms; not configured here"
+      },
+      "synthetic_fixture": {
+        "url": null,
+        "licence": "synthetic test data",
+        "native_formats": [
+          "normalized JSON"
+        ]
+      }
+    },
+    "limitations": [
+      "FWI describes meteorological fire danger, not predicted hotspot counts.",
+      "No live data, issuance times or horizons are fabricated; this module does not compute FWI."
+    ],
+    "region_id": "pantanal-study"
+  },
+  "limitations": [
+    "Hotspots are thermal detections, not independent fires, burned area or severity.",
+    "Zero is preserved; acquisition availability/cloud masks are absent, so zeros cannot prove absence of fire.",
+    "Aqua drift affects 2024–2025. Modeled VIIRS from 2026 is not independent observed truth.",
+    "Known outages flag four calendar months; this is not a complete acquisition-quality mask.",
+    "Area fractions use degrees squared, as in the existing pipeline; this is not equal-area aggregation.",
+    "Source files are retrospective final-vintage data; historical publication lags are not provided."
+  ],
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [
+          -57.5,
+          -18.5
+        ],
+        [
+          -56.5,
+          -18.5
+        ],
+        [
+          -56.5,
+          -17.5
+        ],
+        [
+          -57.5,
+          -17.5
+        ],
+        [
+          -57.5,
+          -18.5
+        ]
+      ]
+    ]
+  }
+}
