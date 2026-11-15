@@ -670,6 +670,12 @@ export function LensApp() {
                 period={period}
                 onPeriod={changePeriod}
                 hasArea={!!area}
+                onSelectArea={() => {
+                  tools.stop();
+                  setCoordinates(false);
+                  setSearching(false);
+                  setDrawing(true);
+                }}
                 ready={playing}
                 error={play.error}
                 onClose={() => setPlayback(false)}
