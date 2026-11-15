@@ -46,15 +46,22 @@
 }
 .lens-workspace .ff-interaction-panel-content {
   padding: 0;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
 }
 .lens-workspace .ff-interaction-panel-content > .analysis-scroll {
-  overflow: visible;
+  overflow-y:auto;
+}
+.lens-workspace .ff-interaction-panel-content > .analysis-scroll:has(.sidebar-calendar:not(.is-month)) {
+  overflow:hidden;
 }
 .lens-workspace .ff-interaction-panel-content > .analysis-heading {
   position: sticky;
   top: 0;
   z-index: 2;
   background: var(--color-night);
+  flex:none;
 }
 .lens-workspace .ff-interaction-edit-overlay {
   z-index: 17;

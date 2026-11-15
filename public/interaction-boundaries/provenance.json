@@ -3,12 +3,17 @@
   "sources": {
     "countries": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson",
     "states": "https://servicodados.ibge.gov.br/api/v3/malhas/paises/BR?intrarregiao=UF&formato=application%2Fvnd.geo%2Bjson&qualidade=minima",
-    "names": "https://servicodados.ibge.gov.br/api/v1/localidades/estados"
+    "names": "https://servicodados.ibge.gov.br/api/v1/localidades/estados",
+    "municipalities": "https://servicodados.ibge.gov.br/api/v3/malhas/paises/BR?intrarregiao=municipio&formato=application%2Fvnd.geo%2Bjson&qualidade=minima",
+    "municipalityNames": "https://servicodados.ibge.gov.br/api/v1/localidades/municipios?view=nivelado"
   },
   "rawSha256": {
     "countries": "6866c877d39cba9c357620878839b336d569f8c662d3cfab4cb1dbe2d39c977f",
     "states": "07c671aa87aa1ab296c446de6294df9827112782537b996c0a160284907e7c0f",
-    "names": "7ca1368dea3af83cba1af84ae8a7e88f1173c97586831d086cc8b3c1ba9c6596"
+    "names": "7ca1368dea3af83cba1af84ae8a7e88f1173c97586831d086cc8b3c1ba9c6596",
+    "municipalities": "5efffedf8772dc8654322affafac4e3e8b001839e7c2af5cab4eb1094dcd6240",
+    "municipalityNames": "77bf68d9f5b1237522bcd28c39b8857725ebb25e913a5b13aa4a740ce67041b4"
   },
-  "note": "Simplified boundaries for display/identification, not scientific clipping masks. IBGE API default vintage, not an asserted boundary year."
+  "note": "Simplified boundaries for display/identification, not scientific clipping masks. IBGE API default vintage, not an asserted boundary year.",
+  "municipalitiesRetrievedAt": "2026-11-15T16:34:16.105Z"
 }

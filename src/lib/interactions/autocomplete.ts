@@ -230,7 +230,7 @@ export class AutocompleteController {
       results,
       phase: results.length ? "ready" : "empty",
       message: results.length
-        ? "Choose a place to navigate. This does not select an analysis area."
+        ? "Choose a place to move the map there."
         : "No places found. Try a country, state, city or latitude, longitude.",
     });
   }

@@ -4,6 +4,8 @@ Implemented on `feature/cinematic-globe`, from `5d457c7`. Changes remain uncommi
 
 The initial gesture-cancellation regression has been reproduced against the baseline and corrected. See [root cause, before/after measurements and revised menu screenshots](camera-regression-validation.md).
 
+For the subsequent merge with main (continental history, navigation constraints, default 3D columns and FireFlighter updates), see [PR #21 integration and validation](cinematic-main-integration.md). Its updated South America HOME framing supersedes the original Brazil startup view described by the earlier evidence.
+
 ## Behavior
 
 The Camera menu offers Earth overview, Focus Brazil, Focus Pantanal, Frame selected area, North up, Top-down, Stop flight, and Standard/Cinematic profiles. Cinematic is the default each fresh workspace mount, shared by React state and the controller. Startup preserves HOME and starts no flight. Changing profile never moves the camera. Presets change presentation only, including globe projection for Earth overview. They leave the region, period, sensor settings and analysis unchanged.

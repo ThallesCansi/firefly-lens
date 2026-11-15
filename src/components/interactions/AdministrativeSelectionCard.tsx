@@ -53,11 +53,13 @@ export function AdministrativeSelectionCard({
             {candidate.feature.geometry.type}
           </p>
           <p className={"ff-interaction-notice"}>
-            {candidate.analysis === "available"
+            {candidate.dataCoverage === "national" ? "A country-wide harmonized record is available. Calibration is evaluated for national totals; internal regions and ecosystems are not independently validated." : candidate.dataCoverage === "raw-pilot"
+              ? "Real raw country archives are available. Harmonized activity, anomalies and forecasts are not validated for this pilot."
+              : candidate.analysis === "available"
               ? "The analysis counts each 0.25° grid cell by the share of it inside this outline."
               : candidate.analysis === "too-large"
                 ? "The whole country is too large for one analysis. Switch the level to Brazilian state."
-                : "No data coverage: this application currently serves Brazil only."}
+                : "No historical data coverage for this country. Global map exploration remains available."}
           </p>
           <p className={"ff-interaction-muted"}>
             Envelope:{" "}
@@ -80,7 +82,7 @@ export function AdministrativeSelectionCard({
             className="btn btn-primary"
             onClick={() => controller.confirm()}
           >
-            {candidate.analysis === "available"
+            {candidate.dataCoverage === "national" ? "Use national report" : candidate.dataCoverage === "raw-pilot" ? "Use raw country pilot" : candidate.analysis === "available"
               ? "Use this state"
               : "Confirm boundary for display"}
           </button>

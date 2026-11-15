@@ -26,7 +26,9 @@ async function setup(width, theme, motion = "reduce") {
       document.head.append(style);
     });
   });
-  await context.addInitScript((value) => localStorage.setItem("firefly-lens-theme", value), theme);
+  await context.addInitScript((value) => {
+    try { localStorage.setItem("firefly-lens-theme",value); localStorage.setItem("firefly-lens-basemap-2","map"); } catch { /* about:blank */ }
+  }, theme);
   await context.route("https://tiles.openfreemap.org/**", (route) => route.fulfill({ json: {
     version: 8, sources: {}, layers: [{ id: "background", type: "background", paint: { "background-color": "#24382e" } }],
   } }));
@@ -205,9 +207,10 @@ try {
   await page.locator('[data-tour="presets"]').selectOption("pampa");
   await pick(page, "Map month", "Jun"); await pick(page, "Map year", "2021");
   await page.locator('[data-tour="sensors"] button').first().click();
-  // Preset selection opens analysis in the current workspace.
+  const analyze = page.getByRole("button", { name: "Analyze area", exact: true });
+  if (await analyze.isVisible()) await analyze.click();
   await page.locator('[data-tour="history"][data-tour-ready="true"]').waitFor();
-  await page.getByRole("button", { name: "Full report below", exact: true }).click();
+  await page.getByRole("button", { name: /see full report below/i }).click();
   await page.locator('[data-tour="tab-forecast"]').click();
   await start(page); for (const [id] of chapters.slice(1, 6)) await next(page, id); await exit(page);
   assert.match(await page.locator('[data-tour="map-canvas"]').getAttribute("aria-label"), /Pampa/);
@@ -254,18 +257,25 @@ try {
     await ctx.close();
   }
   const { context: recovery, page: rp } = await setup(1440, "dark", "no-preference");
-  let attempts = 0;
-  let unavailable = true;
-  await recovery.route("**/api/analytics/history", (route) => route.fulfill({ status: 503, json: { detail: "offline" } }));
-  await recovery.route("**/analytics/pantanal.json", (route) => { attempts++; return unavailable ? route.fulfill({ status: 503, body: "offline" }) : route.continue(); });
+  let attempts = 0, recoveredRequests = 0, allowRecovery = false;
+  // Signals may request the same snapshot before the report does. Keep the
+  // outage active until Retry so background prefetch cannot consume the fault.
+  const recoveryRoute = (route) => {
+    attempts++;
+    if (allowRecovery) { recoveredRequests++; return route.continue(); }
+    return route.fulfill({ status: 503, body: "offline" });
+  };
+  await recovery.route("**/analytics/pantanal.json", recoveryRoute);
+  // A configured Python service takes priority over the prepared snapshot.
+  await recovery.route("**/api/analytics/history", recoveryRoute);
   await rp.goto(base); await at(rp, "welcome");
   for (const [id] of chapters.slice(1, 11)) await next(rp, id);
   await card(rp).locator(".driver-popover-next-btn").click();
   await card(rp).getByRole("button", { name: "Retry section", exact: true }).waitFor();
   await shot(rp, "recovery-dark.png");
-  unavailable = false;
+  allowRecovery = true;
   await card(rp).getByRole("button", { name: "Retry section", exact: true }).click(); await at(rp, "science");
-  assert.ok(attempts >= 2); await exit(rp); await recovery.close();
+  assert.ok(attempts >= 2 && recoveredRequests >= 1); await exit(rp); await recovery.close();
   const { context: failed, page: fp } = await setup(390, "dark");
   await failed.route("**/data/brazil/t_*.bin.gz", (route) => route.fulfill({ status: 503, body: "offline" }));
   await fp.goto(base); await at(fp, "welcome");

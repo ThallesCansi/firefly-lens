@@ -18,6 +18,7 @@ import { DEFAULT_CAMERA_PROFILE, HOME } from "@/lib/map/camera";
 import { presetRequest, type CameraAction } from "@/lib/map/camera-presets";
 import { fireData } from "@/lib/data/source";
 import { CameraControls } from "./map/CameraControls";
+import { addCoverageMask,continentCenter,MIN_CONTINENT_ZOOM } from "@/lib/map/south-america";
 import { GLOW, glowAt } from "@/lib/map/glow";
 import {
   COLUMN_MOTION_MS,
@@ -182,6 +183,11 @@ function makeMap(
     style,
     center: HOME.center,
     zoom: HOME.zoom[projection],
+    minZoom: MIN_CONTINENT_ZOOM,
+    transformCameraUpdate: (next) => {
+      const [lng,lat]=continentCenter(next.center.lng,next.center.lat);
+      return lng===next.center.lng && lat===next.center.lat ? {} : {center:new lib.LngLat(lng,lat)};
+    },
     attributionControl: false,
     cooperativeGestures: false,
     renderWorldCopies: false,
@@ -298,6 +304,7 @@ export function HotspotMap({
   const motion = useRef<ColumnMotion | null>(null);
   const isDrawing = drawing || interactionMode === "draw-rectangle";
   const bbox = area?.bbox ?? null;
+  const hasArea = area !== null;
   const latest = useRef({
     cells,
     scale,
@@ -328,7 +335,7 @@ export function HotspotMap({
   );
   const [globeUnavailable, setGlobeUnavailable] = useState(false);
   /** The 3D view: detections as columns, seen from a tilted camera. */
-  const [localColumns, setLocalColumns] = useState(false);
+  const [localColumns, setLocalColumns] = useState(true);
   const columnsChosen = controlledColumns ?? localColumns;
   const setInColumns = (on: boolean) => { setLocalColumns(on); onColumnsChange?.(on); };
   const [cameraProfile, setCameraProfile] = useState<CameraProfile>(DEFAULT_CAMERA_PROFILE);
@@ -615,6 +622,7 @@ export function HotspotMap({
         styled.current = true;
         setOffline(fellBack.current);
         addLayers();
+        addCoverageMask(instance);
         try {
           instance.setSky(
             skyFor(appliedTheme.current) as Parameters<
@@ -632,6 +640,10 @@ export function HotspotMap({
       });
       instance.on("idle", () => {
         if (!dead) setPaintedTheme(appliedTheme.current);
+      });
+      instance.on("moveend", () => {
+        const center=instance.getCenter();
+        if (el.current) el.current.dataset.cameraCenter=`${center.lng.toFixed(5)},${center.lat.toFixed(5)}`;
       });
       instance.on("error", (e) => {
         if (!dead) console.warn("FireFly Lens map:", e.error?.message ?? e);
@@ -724,8 +736,9 @@ export function HotspotMap({
   }, [sensors, inColumns, ready]);
 
   useEffect(() => {
-    if (ready) control.current?.setTilt(inColumns);
-  }, [inColumns, ready]);
+    // Columns stand on an area of interest: without one there is nothing to lean over.
+    if (ready) control.current?.setTilt(inColumns && (forceColumns || hasArea));
+  }, [inColumns, forceColumns, hasArea, ready]);
 
   const glowing = showUnusual && !!unusual && unusual.ids.size > 0;
   useEffect(() => {
@@ -1167,6 +1180,7 @@ export function HotspotMap({
           </p>
         )}
         {status && <div className="map-key-status">{status}</div>}
+        <p className="map-key-note">South America coverage · shaded elsewhere</p>
         {offline && (
           <p className="map-key-note">Basemap unavailable offline</p>
         )}

@@ -1,10 +1,23 @@
 import { describe, expect, it } from "vitest";
 import { drawnArea, rectangleArea, type AnalysisArea } from "./data/types";
 import { parseShare, shareQuery } from "./share";
+import { rawPilots, rawPilotArea } from "./data/coverage";
 
 const read = (query: string) => parseShare(query, "2002-07", "2026-11");
 
 describe("share links", () => {
+  it("preserves each country's identity and its own monthly coverage", () => {
+    for (const entry of rawPilots) {
+      const query = shareQuery({ area:rawPilotArea(entry), period:"2025-09", sensors:["VIIRS"] });
+      expect(read(query)).toEqual({ area:{ kind:"country",code:entry.country_code },period:"2025-09",sensors:["VIIRS"] });
+      expect(read(`area=country:${entry.country_code}&period=2026-09`).period).toBeNull();
+      expect(read(`area=country:${entry.country_code}&period=2025-09-01`).period).toBe("2025-09-01");
+      expect(read(`area=country:${entry.country_code}&period=2003-09`).period).toBe("2003-09");
+      expect(read(`area=country:${entry.country_code}&period=2002-07-01`).period).toBeNull();
+    }
+    expect(read("area=country:ZZZ&period=2025-09").area).toBeNull();
+  });
+
   it("carries a drawn area, the period and the sensors there and back", () => {
     const area = drawnArea(
       [

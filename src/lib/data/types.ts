@@ -36,7 +36,7 @@ export interface AnalysisArea {
   /** Changes whenever the shape changes, so it can key loaded records. */
   id: string;
   name: string;
-  kind: "drawn" | "state" | "preset";
+  kind: "drawn" | "state" | "municipality" | "preset";
   geometry: PolygonGeometry;
   bbox: BBox;
 }
@@ -104,10 +104,10 @@ export function editableVertices(area: AnalysisArea | null): [number, number][] 
 /** Largest side of an area of interest, in degrees. */
 export const MAX_AREA_SIDE = 12;
 
-/** The records cover Brazil: areas are kept inside this box. */
-export const COVERAGE: BBox = [-74, -34, -28.5, 5.5];
+/** Navigation/selection envelope. Scientific coverage is checked separately. */
+export const COVERAGE: BBox = [-85, -58, -32, 14];
 
-/** Keeps an area inside the covered box and within the largest allowed size. */
+/** Keeps an area inside the South American envelope and allowed selection size. */
 export function normalizeBBox([w, s, e, n]: BBox): BBox {
   const [cw, cs, ce, cn] = COVERAGE;
   let west = Math.max(cw, Math.min(w, e));

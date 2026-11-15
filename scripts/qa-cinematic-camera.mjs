@@ -131,7 +131,10 @@ try {
       await p.locator('[data-tour="presets"]').selectOption("pantanal"); await settled(p);
       await picker(p, "Map month", "Sep"); await picker(p, "Map year", "2023");
       const selected = await state(p); await action(p, "Frame selected area"); assert.deepEqual(await state(p), selected); await close(p);
-      await p.getByRole("button", { name: "3D columns", exact: true }).click(); await settled(p);
+      // Main enables columns by default; prepare the desired state explicitly.
+      const columns = p.getByRole("button", { name: "3D columns", exact: true });
+      if (await columns.getAttribute("aria-pressed") !== "true") await columns.click();
+      await settled(p);
       await p.getByRole("button", { name: "2D Map", exact: true }).click(); await action(p, "Frame selected area");
       await shot(p, "desktop-mercator-columns.png");
       const beforeProjection = await p.locator(".hotspot-map").getAttribute("data-projection");

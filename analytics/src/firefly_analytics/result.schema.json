@@ -796,11 +796,17 @@
                           "format": "date-time"
                         },
                         "valid_at": {
-                          "type": "string",
+                          "type": [
+                            "string",
+                            "null"
+                          ],
                           "format": "date-time"
                         },
                         "lead_hours": {
-                          "type": "number",
+                          "type": [
+                            "number",
+                            "null"
+                          ],
                           "minimum": 0
                         },
                         "member": {
@@ -826,6 +832,73 @@
                             "string",
                             "null"
                           ]
+                        },
+                        "coverage_fraction": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "danger_class": {
+                          "enum": [
+                            "Low",
+                            "Moderate",
+                            "High",
+                            "Very high",
+                            "Extreme",
+                            "Very extreme",
+                            null
+                          ]
+                        },
+                        "maximum": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "minimum": 0
+                        },
+                        "percentile": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "anomaly": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "valid_date": {
+                          "type": "string",
+                          "format": "date"
+                        },
+                        "lead_days": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "validity_basis": {
+                          "type": "string"
+                        },
+                        "distribution": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "class": {
+                                "type": "string"
+                              },
+                              "area_fraction": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 1
+                              }
+                            },
+                            "required": [
+                              "class",
+                              "area_fraction"
+                            ],
+                            "additionalProperties": false
+                          }
                         }
                       },
                       "required": [

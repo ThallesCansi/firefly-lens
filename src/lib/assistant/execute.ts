@@ -1,11 +1,16 @@
-import { fireData } from "@/lib/data/source";
-import { meta } from "@/lib/data/meta";
-import { loadArea } from "@/lib/data/area";
-import { normalizeBBox, rectangleArea, SENSORS, type AnalysisArea, type BBox, type Sensor } from "@/lib/data/types";
-import { buildRecord, type FireRecord } from "@/lib/harmonize";
-import { BoundaryRepository, geometryBounds } from "@/lib/interactions/administrative";
-import { navigationForSearch, type SearchSuggestion } from "@/lib/interactions/navigation";
-import { MONTHS } from "@/lib/format";
+import { fireData } from "../data/source";
+import { meta } from "../data/meta";
+import { loadArea } from "../data/area";
+import { normalizeBBox, rectangleArea, SENSORS, type AnalysisArea, type BBox, type Sensor } from "../data/types";
+import { buildRecord, type FireRecord } from "../harmonize";
+import { BoundaryRepository, geometryBounds } from "../interactions/administrative";
+import { municipalities, municipalityLabel, searchMunicipalities } from "../interactions/municipalities";
+import { navigationForSearch, type SearchSuggestion } from "../interactions/navigation";
+import { MONTHS } from "../format";
+import { timelapseRange } from "./timelapse";
+import { rawPilotFor } from "../data/coverage";
+import { loadRawPilot, loadNationalAnalytics,loadCountryRecord } from "../data/raw-pilot";
+import { isFailure } from "../analytics/contracts";
 import type { MapDestination } from "@/components/lens/LocationSearch";
 
 /** What the assistant can read and change in the workspace. */
@@ -19,6 +24,8 @@ export interface AssistantHost {
   navigate(destination: MapDestination): void;
   setPeriod(period: string): void;
   setSensors(sensors: Sensor[]): void;
+  /** Opens the time-lapse on these months (YYYY-MM) and starts it. */
+  playTimelapse(from: string, to: string): void;
   openAnalysis(area: AnalysisArea): void;
 }
 
@@ -38,10 +45,10 @@ const fold = (s: string) =>
 
 /** The map's state, prefixed to every question. */
 export function describeHost(host: AssistantHost): string {
-  const area = host.area ? `${host.area.name} (${host.area.kind === "state" ? "state" : host.area.kind === "preset" ? "prepared study region" : "drawn area"})` : "none";
+  const area = host.area ? `${host.area.name} (${host.area.kind === "state" ? "state" : host.area.kind === "municipality" ? "municipality" : host.area.kind === "preset" ? "prepared study region" : "drawn area"})` : "none";
   return `<map_state>area of interest: ${area}; period shown: ${host.period}; layers: ${
     host.sensors.join(", ") || "none"
-  }; analysis panel: ${host.analysisOpen ? "open" : "closed"}</map_state>`;
+  }; analysis panel: ${host.analysisOpen ? "open" : "closed"}; data kind: ${host.area && rawPilotFor(host.area) ? (rawPilotFor(host.area)?.national_url ? "real whole-country harmonization; local ecosystem skill and current activity forecast are not validated" : "real raw country detections; no validated harmonized history, anomaly or activity forecast") : "Brazilian harmonized grid only where covered"}</map_state>`;
 }
 
 async function findState(query: string): Promise<AnalysisArea | null> {
@@ -84,9 +91,13 @@ const round = (x: number) => Math.round(x);
 const monthName = (m: number) => MONTHS[m];
 
 function recordOf(area: AnalysisArea): Promise<FireRecord> {
+  if (rawPilotFor(area)) return loadCountryRecord(area);
   let record = records.get(area.id);
   if (!record) {
-    record = loadArea(area).then(buildRecord);
+    record = loadArea(area).then((data) => {
+      if (data.cells === 0) throw new Error("No harmonized historical coverage for this area. Missing coverage is not zero fire activity.");
+      return buildRecord(data);
+    });
     records.set(area.id, record);
     record.catch(() => records.delete(area.id));
   }
@@ -102,6 +113,16 @@ const periodLabel = (period: string) =>
  */
 async function applyPeriod(host: AssistantHost, raw: string): Promise<ToolOutcome> {
   let period = raw.trim();
+  const pilot = host.area ? rawPilotFor(host.area) : undefined;
+  if (pilot) {
+    if (/^\d{4}$/.test(period)) period = `${period}-09`;
+    const day=period.length===10;
+    if (!/^\d{4}-(0[1-9]|1[0-2])(-\d{2})?$/.test(period) || period.slice(0,7) < pilot.period.start || period.slice(0,7) > pilot.period.end ||
+        !Number.isFinite(Date.parse(day?period:period+'-01')) || (day && (new Date(period).toISOString().slice(0,10)!==period || period<'2002-07-04')))
+      return { ok: false, result: `The country record covers ${pilot.period.start} to ${pilot.period.end}; choose a valid covered month or day.` };
+    host.setPeriod(period);
+    return { ok: true, result: `Showing ${period} raw sensor detections. Country harmonization applies to national activity totals, not individual cells.`, note: `Showing ${period}` };
+  }
   let why = "";
   if (/^\d{4}$/.test(period)) {
     const year = Number(period);
@@ -139,6 +160,26 @@ async function choose(host: AssistantHost, area: AnalysisArea, input: Record<str
 }
 
 async function history(area: AnalysisArea, fromYear: number, toYear: number): Promise<string> {
+  if (rawPilotFor(area)) {
+    if (rawPilotFor(area)?.national_url) {
+      const bundle = await loadNationalAnalytics(area);
+      const history = bundle.sections.history.data;
+      if (isFailure(history)) return JSON.stringify(history);
+      const end = Math.max(fromYear,toYear), start = Math.max(Math.min(fromYear,toYear),end-4);
+      const months = history.monthly.filter((r) => r.year>=start && r.year<=end);
+      return JSON.stringify({ data_kind:"real_harmonized_data",scope:"entire_country_only", units:"MODIS-Aqua-equivalent hotspots",
+        coverage:bundle.sections.history.period,availability:months.length ? "available_country_only" : "outside_country_coverage",monthly:months,
+        limitations:bundle.sections.history.limitations, current_activity_forecast:"unavailable",subnational_calibration:"not_validated" });
+    }
+    const data = await loadRawPilot(area);
+    const start = Math.min(fromYear, toYear), end = Math.max(fromYear, toYear);
+    const months = data.monthly.filter((r) => Number(r.date.slice(0,4)) >= start && Number(r.date.slice(0,4)) <= end);
+    return JSON.stringify({ data_kind: data.data_kind, country: data.name, coverage: data.period,
+      units: "raw satellite detections; MODIS and VIIRS must remain separate", monthly: months,
+      availability: months.length ? "available_raw_only" : "outside_raw_coverage",
+      harmonized_activity: "unavailable", seasonal_anomaly: "unavailable", activity_forecast: "unavailable",
+      limitations: data.limitations });
+  }
   const r = await recordOf(area);
   let from = Math.max(fireData.firstYear, Math.min(fromYear, toYear));
   const to = Math.min(fireData.lastYear, Math.max(fromYear, toYear));
@@ -181,6 +222,24 @@ export async function runTool(host: AssistantHost, name: string, input: Record<s
         if (!area) return { ok: false, result: `No Brazilian state matches "${input.state}".` };
         return await choose(host, area, input);
       }
+      case "select_municipality": {
+        const query = [input.city, input.state].filter((part) => typeof part === "string" && part.trim()).join(" ");
+        const matches = searchMunicipalities(await municipalities.index(), query, 6);
+        const [first, second] = matches;
+        if (!first) return { ok: false, result: `No Brazilian municipality matches "${query}".` };
+        // The same name in several states: ask rather than pick one silently.
+        if (second && fold(second.name) === fold(first.name) && !input.state)
+          return {
+            ok: false,
+            result: `Several municipalities are called ${first.name}: ${matches
+              .filter((m) => fold(m.name) === fold(first.name))
+              .map(municipalityLabel)
+              .join("; ")}. Ask which state, then call again with it.`,
+          };
+        const area = await municipalities.area(first.id);
+        if (!area) return { ok: false, result: `The outline of ${municipalityLabel(first)} is unavailable.` };
+        return await choose(host, area, input);
+      }
       case "select_region": {
         const preset = fireData.presets().find((p) => p.id === input.region);
         if (!preset) return { ok: false, result: `Unknown region "${input.region}".` };
@@ -216,6 +275,22 @@ export async function runTool(host: AssistantHost, name: string, input: Record<s
       }
       case "set_period":
         return await applyPeriod(host, String(input.period ?? ""));
+      case "play_timelapse": {
+        if (!host.area) return { ok: false, result: "There is no area of interest. Select one first." };
+        if (rawPilotFor(host.area))
+          return { ok: false, result: "The time-lapse is not available for country maps; they show one month at a time." };
+        const span = timelapseRange(String(input.from ?? ""), String(input.to ?? ""), fireData.firstMonth, fireData.lastMonth);
+        if (!span.ok) return { ok: false, result: span.reason };
+        host.playTimelapse(span.from, span.to);
+        const asked = `${input.from}–${input.to}`;
+        return {
+          ok: true,
+          result: span.trimmed
+            ? `Playing ${span.from} to ${span.to}. The request (${asked}) goes beyond the record, which covers ${fireData.firstMonth} to ${fireData.lastMonth}; tell the person the available interval that is playing.`
+            : `Playing ${span.from} to ${span.to}.`,
+          note: `Time-lapse ${span.from} → ${span.to}`,
+        };
+      }
       case "set_layers": {
         const sensors = SENSORS.filter((s) => Array.isArray(input.sensors) && input.sensors.includes(s));
         if (!sensors.length) return { ok: false, result: "Choose MODIS, VIIRS or both." };

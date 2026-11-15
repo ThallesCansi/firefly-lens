@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch
 from firefly_analytics.fire_weather import query_fire_weather, from_records
 
 GEOMETRY = {"type":"Polygon","coordinates":[[[-58,-19],[-56,-19],[-56,-17],[-58,-17],[-58,-19]]]}
@@ -11,7 +12,8 @@ def sample(**kwargs):
 
 class WeatherTests(unittest.TestCase):
     def test_real_query_without_source_is_unavailable(self):
-        result=query_fire_weather("pantanal",GEOMETRY)
+        with patch.dict('os.environ',{'FIREFLY_FWI_NETCDF':'missing-provider-file.nc'}):
+            result=query_fire_weather("pantanal",GEOMETRY)
         self.assertEqual(result["status"],"unavailable")
         self.assertEqual(result["forecasts"],[])
 

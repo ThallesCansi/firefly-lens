@@ -1,8 +1,8 @@
 import type { BBox } from "@/lib/data/types";
 import type { CameraProfile, MapAnimation, MapNavigationRequest, ProjectionMode } from "./map-contract";
 
-/** The view the map opens on: Brazil, whole, with some of the Atlantic around it. */
-export const HOME = { center: [-54, -14] as [number, number], zoom: { globe: 2.6, mercator: 3 } };
+/** The continent in context, with room for the Southern Cone and the Caribbean coast. */
+export const HOME = { center: [-60, -22] as [number, number], zoom: { globe: 2.2, mercator: 2.6 } };
 export const DEFAULT_CAMERA_PROFILE: CameraProfile = "cinematic";
 
 /** Highest latitude the flat map can frame; the globe has no such limit. */

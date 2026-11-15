@@ -4,7 +4,9 @@ One fire calendar from two satellite sensors.
 
 FireFly Lens is a NASA Space Apps Challenge 2026 project for the challenge *Harmonization of MODIS and VIIRS Hot Spots*. It brings the active-fire detections of both instruments onto one shared grid and shows a year of fire activity as a calendar, with the fire season and the unusual days marked.
 
-> **Status: real data for Brazil.** The map-first interface runs on the real NASA FIRMS records for Brazil, July 2002 to November 2026: MODIS Aqua and VIIRS NOAA-20, harmonized into one series on the MODIS Aqua scale and validated year by year. This project is not endorsed by NASA.
+> **Coverage: spatial harmonization for Brazil; national harmonization for the other 11 South American countries.** The map-first interface runs on the real NASA FIRMS records for Brazil, July 2002 to November 2026: MODIS Aqua and VIIRS NOAA-20, harmonized into one series on the MODIS Aqua scale and validated year by year. This project is not endorsed by NASA.
+
+The other eleven countries now have real national histories from **July 2002 to December 2025**, the same month/year and daily calendar interface, and History/Forecast report tabs. The sidebar fits its calendar to the available height; analyses stay below the map. Navigation is bounded to South America with dimming outside the published footprint. See [historical coverage and calendar update](docs/south-america-history-calendar.md) for scientific scope, daily allocation, deployment and verification.
 
 ## Why the two records need harmonizing
 
@@ -47,9 +49,9 @@ In the map workspace a user can:
 
 The workspace **Camera** menu offers Earth, Brazil, Pantanal and selected-area framing, North up, Top-down and Stop flight. **Cinematic** is the default, without an initial flight or change to the opening framing. Selecting either profile changes future navigation without immediately moving the camera. Standard restores traditional animation and north-up/top-down arrival on subsequent navigation, while preserving explicit camera poses and enabled 3D column tilt. Presets change only the view. Gestures interrupt flights, and drawing and Lume take priority. The tour restores the complete camera pose, columns and regional-flight state. No terrain or scientific calculations are added. See [camera implementation and verification](docs/cinematic-camera-validation.md).
 
-### Tour with Lume
+### Tour with FireFlighter
 
-The workspace automatically opens Lume’s welcome on each new visit or reload. **Don't show again** is an explicit browser preference: only checking it disables future automatic welcomes. Completing, skipping or closing the tour does not opt out. A single welcome is presented per browser document, including across Strict Mode effect replay and client-side navigation. The **Tour with Lume** launcher, beside the original animated mascot, remains available after opt-out.
+The workspace automatically opens FireFlighter’s welcome on each new visit or reload. **Don't show again** is an explicit browser preference: only checking it disables future automatic welcomes. Completing, skipping or closing the tour does not opt out. A single welcome is presented per browser document, including across Strict Mode effect replay and client-side navigation. The **Tour with FireFlighter** launcher, beside the original animated mascot, remains available after opt-out.
 
 The read-only demonstration selects the exact Pantanal preset and September 2023, using the existing historical record and geometry-matched Python analytics. History, historical anomalies and experimental Forecast remain distinct; unavailable forecasts remain unavailable. Only the guide’s controls and opt-out checkbox are interactive. Search, map gestures, pickers, calendars, tabs, exports and the assistant remain visible but locked. Next/Back prepare them through existing React handlers; no file is downloaded and no model request is sent by the tour.
 
@@ -103,7 +105,7 @@ Free tiers are small. On Groq each model allows about 1,000 requests a day and 8
 
 ## Themes and scientific documentation
 
-Headers use the original Lume mascot plus the compact wordmark **Lens**; the institutional name remains **FireFly Lens**. The original mascot component is unchanged. The SVG browser icon is rendered directly from that component, with its original geometry and colours.
+Headers use the firefly mascot, FireFlighter, plus the compact wordmark **Lens**; the institutional name remains **FireFly Lens**. The mascot keeps its original drawing and wears a firefighter helmet. The SVG browser icon is the same drawing with its colours resolved.
 
 The header offers **Light**, **Dark** and **System**. The preference is stored locally, applied before the first paint and synchronized with operating-system changes in System mode. Theme changes update CARTO dark/Positron map styles on the existing MapLibre instance, restoring custom layers and sensor visibility without changing the camera, area or analysis period.
 
@@ -112,6 +114,12 @@ The Method page supports keyboard tabs and shareable hashes, such as `/method#se
 SVG downloads now include region, period, legend, data source and observed/modeled status, processing description and export timestamp. Scientific values and CSV schemas are unchanged. See [Phase 4 changes, evidence and limitations](docs/phase-4/validation.md).
 
 ## Deployment
+
+Scientific expansion is documented in [national calibration, real weather, retrospective forecasting and validation](docs/continental-harmonization.md). History opens with the full monthly line chart. Brazil retains its spatial/biome method; **Paraguay, Argentina, Bolivia, Chile, Colombia, Ecuador, Guyana, Peru, Suriname, Uruguay and Venezuela** have separate whole-country reports for April 2018?December 2025. Each country passed predefined aggregate 2022?2023 holdout gates with its own coefficients. Local ecosystems and subnational regions are not validated by these fits.
+
+**Fire Danger Assessment** now reads real NASA GFWED/GEOS-5 experimental NetCDF forecasts. The shipped source was initialized on 12 November 2026 with daily local-noon valid dates 15?17 November. Cached assessments expire automatically and need offline refresh; dates are never relabeled as a fresh forecast. Copernicus seasonal imports remain optional and distinct from operational GWIS products. See [numeric weather provenance and refresh](analytics/FIRE_WEATHER_SOURCES.md) and `/method#fire-danger-risk`.
+
+**Retrospective activity forecasts** can be requested for an eligible past origin, using the existing Python models and strictly past evidence. Unsupported current numeric activity forecasts remain withheld. Check Python hosting with `node scripts/check-analytics-deployment.mjs https://YOUR-PREVIEW-URL`.
 
 Dynamic History and experimental Forecast for arbitrary selected polygons now use an optional separate Python API. See [diagnosis, contracts, local setup and deployment](docs/dynamic-polygon-analytics.md). Without that service, exact prepared regions and the existing browser calendars remain available. Current numeric forecasts may be scientifically unavailable when eligible observations do not reach the requested origin.
 
@@ -123,7 +131,7 @@ The site deploys on [Vercel](https://vercel.com) from this repository: every pus
 src/
   app/                  routes: /, /lens, /method
   components/
-    firefly/            Lume, the firefly mascot
+    firefly/            FireFlighter (component `Lume`), the firefly mascot
     landing/            sections of the landing page
     lens/               history grid, calendar, map, area form, day detail
     ui/                 header, footer, tabs, text transitions
@@ -170,7 +178,7 @@ Place search uses [Photon](https://photon.komoot.io/) through `/api/geocode`, wi
 - Replace the near-real-time tail of 2026 with standard processing when FIRMS releases it.
 - Extend the record back to 2000 with MODIS Terra, and the calibration with Suomi NPP from 2012.
 - Correct the observed 2024–2025 MODIS Aqua for its orbital drift, and fill its outages.
-- Extend coverage beyond Brazil.
+- Extend national records before 2018 and validate subnational/ecosystem calibration beyond Brazil.
 
 ## Built with
 

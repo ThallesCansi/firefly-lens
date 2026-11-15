@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { loadArea } from "./data/area";
 import type { AnalysisArea } from "./data/types";
 import { buildRecord, type FireRecord } from "./harmonize";
+import { rawPilotFor } from "./data/coverage";
+import { loadCountryRecord } from "./data/raw-pilot";
 
 /** No Brazilian land in the area: there is nothing to read. */
 const OUTSIDE = Symbol("outside");
@@ -15,7 +17,7 @@ const records = new Map<string, Promise<FireRecord | typeof OUTSIDE>>();
 function recordFor(area: AnalysisArea) {
   let hit = records.get(area.id);
   if (!hit) {
-    hit = loadArea(area).then((data) => (data.cells === 0 ? OUTSIDE : buildRecord(data)));
+    hit = rawPilotFor(area) ? loadCountryRecord(area) : loadArea(area).then((data) => (data.cells === 0 ? OUTSIDE : buildRecord(data)));
     hit.catch(() => records.delete(area.id));
     records.set(area.id, hit);
     if (records.size > 8) records.delete(records.keys().next().value!);
@@ -45,7 +47,7 @@ export function useFireRecord(area: AnalysisArea): {
       .then((record) => {
         if (!live) return;
         if (record === OUTSIDE) {
-          setError({ key: area.id, message: "This area has no Brazilian land. FireFly Lens covers Brazil only: move or redraw the area." });
+          setError({ key: area.id, message: "No spatially calibrated historical coverage: this area overlaps no Brazilian data cells. Explore the globe or choose a published whole-country report under Coordinates." });
           return;
         }
         setState({ area, record });

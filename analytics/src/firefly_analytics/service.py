@@ -16,9 +16,12 @@ from shapely.errors import GEOSException
 from typing import Literal
 
 from .data_adapter import from_parquet
+from .national_adapter import from_national
 from .engine import analyze
 from .export import envelope, validate
 from .forecasting import ForecastConfig, forecast, engine_fingerprints
+from .fire_weather import query_fire_weather
+from .models import month_id, month_stamp
 
 
 class Geometry(BaseModel):
@@ -35,6 +38,10 @@ class AnalyticsRequest(BaseModel):
     horizon: int = Field(default=3, ge=1, le=3)
 
 
+class RetrospectiveRequest(AnalyticsRequest):
+    forecast_origin: str = Field(pattern=r"^[0-9]{4}-(0[1-9]|1[0-2])$")
+
+
 META_KEYS = ("version", "firstDay", "lastDay", "seriesEnd", "partialMonth",
              "observedUntil", "climatologyBase", "cellDeg", "commonErrorC")
 
@@ -46,6 +53,7 @@ def create_app(repo=None, *, token=None, enable_sarima=None):
     api = FastAPI(title="FireFly regional analytics", version="1.0.0")
     # Bounded, process-local LRU; deploy immutable data per service version.
     cache, lock, work = OrderedDict(), RLock(), BoundedSemaphore(1)
+    weather_work = BoundedSemaphore(1)
     dataset = None
 
     def data():
@@ -59,6 +67,8 @@ def create_app(repo=None, *, token=None, enable_sarima=None):
                     digest = hashlib.sha256()
                     for path in paths:
                         digest.update((repo / path).read_bytes())
+                    coverage=repo / 'public/data/coverage.json'
+                    if coverage.exists(): digest.update(coverage.read_bytes())
                     digest.update(json.dumps(engine_fingerprints(), sort_keys=True).encode())
                     dataset = (meta, digest.hexdigest())
                 except (OSError, ValueError):
@@ -83,6 +93,11 @@ def create_app(repo=None, *, token=None, enable_sarima=None):
         meta, version = data()
         if request.data_version != {key: meta[key] for key in META_KEYS}:
             raise HTTPException(409, "analytics_data_version_mismatch")
+        origin = meta['seriesEnd']
+        if section == 'retrospective':
+            origin = request.forecast_origin
+            if not meta['firstDay'][:7] <= origin <= month_stamp(month_id(meta['seriesEnd'])-request.horizon):
+                raise HTTPException(422, 'retrospective_targets_must_be_within_completed_history')
         try:
             raw = request.geometry.model_dump()
             if (raw.get("type") not in ("Polygon", "MultiPolygon")
@@ -110,7 +125,7 @@ def create_app(repo=None, *, token=None, enable_sarima=None):
         base = (region, version)
         config = ForecastConfig(max_origins=32, enable_sarima=enable_sarima)
         config = ForecastConfig(**{**asdict(config), "horizon": request.horizon})
-        key = (*base, "history") if section == "history" else (*base, section, json.dumps(asdict(config), sort_keys=True))
+        key = (*base, "history") if section == "history" else (*base, section, origin, json.dumps(asdict(config), sort_keys=True))
         # One bounded worker prevents bursts of SARIMA fits. Cache hits stay fast.
         with lock:
             if key in cache:
@@ -120,18 +135,32 @@ def create_app(repo=None, *, token=None, enable_sarima=None):
         try:
             def aggregate():
                 try:
-                    series = from_parquet(repo, region, geometry)
+                    series = from_national(repo, geometry)
+                    if series is None:
+                        series = from_parquet(repo, region, geometry)
+                    else:
+                        series.provenance['published_region_id']=series.region_id
+                        series.region_id=region
                 except ValueError as exc:
                     if "intersect" in str(exc):
                         raise HTTPException(422, "region_outside_coverage")
                     raise
                 series.provenance["processing_version"] = version
                 series.provenance["last_complete_month"] = meta["seriesEnd"]
-                series.limitations.append("Spatial resolution is 0.25 degrees; small polygons are fractional grid estimates, not local fire measurements.")
+                if series.provenance.get('scope') != 'entire_country_only':
+                    series.limitations.append("Spatial resolution is 0.25 degrees; small polygons are fractional grid estimates, not local fire measurements.")
                 return series
             series = cached((*base, "series"), aggregate)
+            if series.provenance.get('scope') == 'entire_country_only':
+                if section == 'retrospective':
+                    if not series.months[0].date <= origin <= month_stamp(month_id(series.provenance['series_end'])-request.horizon):
+                        raise HTTPException(422,'retrospective_targets_must_be_within_country_history')
+                else:
+                    origin=series.provenance['series_end']
             def history_result():
-                sections = analyze(series, run_forecast=False)
+                # Weather changes independently of the immutable fire history.
+                # It has its own product-version/minute cache and endpoint.
+                sections = analyze(series, run_forecast=False, run_fire_weather=False)
                 for payload in sections.values():
                     validate(payload)
                 return {"schema_version": "1.0.0", "region_id": region,
@@ -140,7 +169,7 @@ def create_app(repo=None, *, token=None, enable_sarima=None):
             if section == "history":
                 return bundle
             def forecast_result():
-                result = forecast(series, config, as_of=meta["seriesEnd"])
+                result = forecast(series, config, as_of=origin)
                 payload = envelope("forecast", series, result, {"name": "experimental_expanding_origin_comparison", "config": asdict(config)},
                                    data_status=result["forecast_status"])
                 validate(payload)
@@ -167,6 +196,37 @@ def create_app(repo=None, *, token=None, enable_sarima=None):
     @api.post("/analytics/forecast")
     def forecast_endpoint(request: AnalyticsRequest, authorization: str | None = Header(default=None)):
         return process(request, "forecast", authorization)
+
+    @api.post('/analytics/retrospective')
+    def retrospective_endpoint(request: RetrospectiveRequest, authorization: str | None = Header(default=None)):
+        return process(request, 'retrospective', authorization)
+
+    @api.post("/analytics/fire-weather")
+    def weather_endpoint(request: AnalyticsRequest, authorization: str | None = Header(default=None)):
+        # Weather has independent global coverage and must not depend on Brazil's Parquet.
+        if token and authorization != f"Bearer {token}":
+            raise HTTPException(401, "unauthorized")
+        raw = request.geometry.model_dump()
+        try:
+            geom = shape(raw)
+            polygons = [raw["coordinates"]] if raw["type"] == "Polygon" else raw["coordinates"]
+            if any(len(ring) < 4 or ring[0] != ring[-1] or any(len(p) != 2 for p in ring)
+                   for polygon in polygons for ring in polygon):
+                raise ValueError()
+            w, s, e, n = geom.bounds
+            if (geom.is_empty or not geom.is_valid or get_num_coordinates(geom) > 20000
+                    or not (-180 <= w < e <= 180 and -90 <= s < n <= 90) or e-w > 180):
+                raise ValueError()
+            region = "polygon-" + hashlib.sha256(normalize(geom).wkb).hexdigest()
+        except (ValueError, TypeError, GEOSException):
+            raise HTTPException(422, "invalid_polygon")
+        if not weather_work.acquire(blocking=False):
+            raise HTTPException(429, "analytics_busy_retry", headers={"Retry-After": "2"})
+        try:
+            return {"schema_version": "1.0.0", "geometry": raw,
+                    "data": query_fire_weather(region, raw)}
+        finally:
+            weather_work.release()
 
     return api
 

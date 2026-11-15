@@ -13,6 +13,12 @@ import {
   type GeographicPoint,
   type SearchSuggestion,
 } from "@/lib/interactions/navigation";
+import {
+  municipalities,
+  municipalityLabel,
+  searchMunicipalities,
+  type Municipality,
+} from "@/lib/interactions/municipalities";
 import type { BBox } from "@/lib/data/types";
 import "./LocationSearch.css";
 
@@ -27,12 +33,20 @@ export type MapDestination = {
   maxZoom?: number;
 };
 
+/** A row of the list: a Brazilian municipality to select, or a place to move the map to. */
+type Option =
+  | { type: "municipality"; place: Municipality }
+  | { type: "place"; place: SearchSuggestion };
+
 export function LocationSearch({
   onNavigate,
+  onSelectMunicipality,
   currentCenter,
   debounceMs = 650,
 }: {
   onNavigate: (place: MapDestination) => void;
+  /** Makes the municipality the area of interest. Rejects when its outline cannot be loaded. */
+  onSelectMunicipality?: (place: Municipality) => Promise<void>;
   currentCenter?: GeographicPoint;
   debounceMs?: number;
 }) {
@@ -58,7 +72,22 @@ export function LocationSearch({
   const root = useRef<HTMLDivElement>(null);
   const id = useId();
   const listId = id + "-places";
-  const open = focused && state.results.length > 0;
+  // Brazilian municipalities are matched in the browser, as the person types.
+  const [index, setIndex] = useState<Municipality[]>([]);
+  const [failure, setFailure] = useState("");
+  useEffect(() => {
+    if (!onSelectMunicipality) return;
+    let live = true;
+    municipalities.index().then((list) => live && setIndex(list), () => {});
+    return () => {
+      live = false;
+    };
+  }, [onSelectMunicipality]);
+  const options: Option[] = [
+    ...searchMunicipalities(index, state.query, 4).map((place) => ({ type: "municipality" as const, place })),
+    ...state.results.map((place) => ({ type: "place" as const, place })),
+  ];
+  const open = focused && options.length > 0;
   useEffect(() => () => controller.close(), [controller]);
   useEffect(() => {
     if (active >= 0 && open)
@@ -66,7 +95,18 @@ export function LocationSearch({
         .getElementById(id + "-option-" + active)
         ?.scrollIntoView({ block: "nearest" });
   }, [active, open, id]);
-  const choose = (result: SearchSuggestion) => {
+  const choose = (option: Option) => {
+    if (option.type === "place") return navigate(option.place);
+    const label = municipalityLabel(option.place);
+    controller.close(label);
+    setActive(-1);
+    setFailure("");
+    onSelectMunicipality?.(option.place).then(
+      () => setAnnouncement(label + " selected as the area of interest."),
+      (error) => setFailure(error instanceof Error ? error.message : "The municipality could not be selected."),
+    );
+  };
+  const navigate = (result: SearchSuggestion) => {
     const intent = navigationForSearch(result, {
       from: currentCenter,
       reducedMotion: matchMedia("(prefers-reduced-motion: reduce)").matches,
@@ -106,7 +146,7 @@ export function LocationSearch({
         className="flex gap-2"
         onSubmit={(e) => {
           e.preventDefault();
-          const result = state.results[active >= 0 ? active : 0];
+          const result = options[active >= 0 ? active : 0];
           if (result) choose(result);
           else controller.setQuery(state.query, true);
         }}
@@ -128,7 +168,7 @@ export function LocationSearch({
           autoComplete="off"
           spellCheck={false}
           className="field w-full min-w-0"
-          placeholder="Search Earth: city or coordinates"
+          placeholder="City in Brazil, a place or lat, lon"
           value={state.query}
           maxLength={160}
           onFocus={() => {
@@ -143,20 +183,21 @@ export function LocationSearch({
           onChange={(e) => {
             setActive(-1);
             setAnnouncement("");
+            setFailure("");
             controller.setQuery(e.target.value);
           }}
           onKeyDown={(e) => {
             if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
             e.preventDefault();
-            if (!state.results.length) {
+            if (!options.length) {
               controller.setQuery(state.query, true);
               return;
             }
             setActive((i) =>
               e.key === "ArrowDown"
-                ? (i + 1) % state.results.length
+                ? (i + 1) % options.length
                 : i <= 0
-                  ? state.results.length - 1
+                  ? options.length - 1
                   : i - 1,
             );
           }}
@@ -174,8 +215,14 @@ export function LocationSearch({
       </form>
       <span id={id + "-hint"} className="sr-only">
         Type at least three characters. Use arrow keys to choose a suggestion
-        and Enter to navigate. Search does not select an analysis area.
+        and Enter to choose it. A Brazilian municipality becomes the area of
+        interest; any other place only moves the map.
       </span>
+      {failure && (
+        <p role="alert" className="ff-location-status">
+          {failure}
+        </p>
+      )}
       {focused && (state.message || open) && (
         <div className={"ff-location-dropdown" + " map-surface"}>
           <p role="status" className={"ff-location-status"}>
@@ -188,9 +235,9 @@ export function LocationSearch({
             className={"ff-location-options"}
             hidden={!open}
           >
-            {state.results.map((result, i) => (
+            {options.map((option, i) => (
               <li
-                key={result.label + ":" + result.center.join()}
+                key={option.type === "municipality" ? "m" + option.place.id : option.place.label + ":" + option.place.center.join()}
                 role="option"
                 id={id + "-option-" + i}
                 aria-selected={active === i}
@@ -201,14 +248,13 @@ export function LocationSearch({
                   type="button"
                   tabIndex={-1}
                   onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => choose(result)}
+                  onClick={() => choose(option)}
                 >
-                  <span>{result.label}</span>
+                  <span>{option.type === "municipality" ? municipalityLabel(option.place) : option.place.label}</span>
                   <small>
-                    {result.kind === "coordinates"
-                      ? "Coordinates"
-                      : result.kind || "Place"}{" "}
-                    - navigate only
+                    {option.type === "municipality"
+                      ? "Brazilian municipality - select as area"
+                      : (option.place.kind === "coordinates" ? "Coordinates" : option.place.kind || "Place") + " - navigate only"}
                   </small>
                 </button>
               </li>

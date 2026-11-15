@@ -4,6 +4,8 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { fireData } from "@/lib/data/source";
+import { rawPilots, rawPilotArea, rawPilotFor } from "@/lib/data/coverage";
+import { rawPilotCells } from "@/lib/data/raw-pilot";
 import {
   drawnArea,
   normalizeBBox,
@@ -34,6 +36,7 @@ import { parseShare, shareQuery } from "@/lib/share";
 import { cellDays } from "@/lib/data/area";
 import { areaSlug, cellDaysCsv, download } from "@/lib/export";
 import { BoundaryRepository, geometryBounds } from "@/lib/interactions/administrative";
+import { municipalities, type Municipality } from "@/lib/interactions/municipalities";
 import { useWorkspaceTools } from "@/components/interactions/useWorkspaceTools";
 import { WorkspaceSelectionTools } from "@/components/interactions/WorkspaceSelectionTools";
 import { PolygonEditStatus } from "@/components/interactions/PolygonEditOverlay";
@@ -57,8 +60,11 @@ const FLIGHT_PERIOD = "2024-09" >= fireData.firstMonth && "2024-09" <= fireData.
 const deg = (n: number) => Math.round(n * 100) / 100;
 /** One line that says what the area is. */
 function describe(area: Area): string {
+  const country = rawPilotFor(area);
+  if (country) return country.national_url ? "Country-wide harmonization · national totals only" : "Real raw detections · harmonization not validated";
   if (area.kind === "preset") return "Study region · Prepared seasonal analytics";
   if (area.kind === "state") return "Brazilian state · IBGE outline";
+  if (area.kind === "municipality") return "Brazilian municipality · IBGE outline";
   const corners = area.geometry.type === "Polygon" ? area.geometry.coordinates[0].length - 1 : 0;
   const [w, s, e, n] = area.bbox;
   return `${corners} corners · W ${deg(w)} · S ${deg(s)} · E ${deg(e)} · N ${deg(n)}`;
@@ -157,27 +163,30 @@ export function LensApp() {
   const [frame, setFrame] = useState(0);
   /** The regional flight: the stop being shown, or null when it is not running. */
   const [flight, setFlight] = useState<number | null>(null);
-  const [columnsChosen, setColumnsChosen] = useState(false);
+  const [columnsChosen, setColumnsChosen] = useState(true);
   /** Feedback after "Share": whether the link reached the clipboard. */
   const [shared, setShared] = useState<"copied" | "address" | "failed" | null>(null);
   const analyzeButton = useRef<HTMLButtonElement>(null);
   const closeButton = useRef<HTMLButtonElement>(null);
   // The time-lapse: a range of months played on the map, all loaded at once.
   const [playback, setPlayback] = useState(false);
+  /** The assistant opened the time-lapse: it starts playing as soon as the months load. */
+  const [autoPlay, setAutoPlay] = useState(0);
   const [playRange, setPlayRange] = useState(() => {
     const year = `${fireData.lastYear}`;
     const to = `${year}-12` > fireData.lastMonth ? fireData.lastMonth : `${year}-12`;
     return { from: `${year}-01`, to };
   });
-  const play = usePlaybackFrames(area, playRange.from, playRange.to, playback && !tourRunning);
-  const playing = playback && !tourRunning && play.frames !== null;
+  const rawPilot = area ? rawPilotFor(area) : undefined;
+  const play = usePlaybackFrames(rawPilot ? null : area, playRange.from, playRange.to, playback && !tourRunning);
+  const playing = !rawPilot && playback && !tourRunning && play.frames !== null;
   // While a time-lapse is loaded its frames feed the map, so nothing else loads.
   const mapData = useMapCells(playing ? null : area, period);
   const shown = playing
     ? { cells: play.frames!.months.get(period.slice(0, 7)) ?? [], error: null }
     : mapData;
   // Unusually high cells and harmonized values exist per calendar month; a single day has neither.
-  const insight = useMonthInsight(area, period.length === 7 ? period : null);
+  const insight = useMonthInsight(rawPilot ? null : area, period.length === 7 ? period : null);
   // Selecting an area analyzes it at once: the history opens beside the map
   // with no further step. The Lume tour keeps it closed, to open it as a step.
   const openAnalysis = useCallback((next: Area) => {
@@ -214,6 +223,16 @@ export function LensApp() {
         return false;
       }
       const { id, name } = candidate.feature.properties;
+      const pilot = rawPilots.find((entry) => entry.country_code === candidate.feature.properties.countryCode);
+      if (pilot) {
+        const next = rawPilotArea(pilot);
+        setArea(next);
+        setPeriod(`${pilot.period.end.slice(0,4)}-09`);
+        setFrom(pilot.period.start); setTo(pilot.period.end); setPlayback(false);
+        setFrame((n) => n + 1);
+        openAnalysis(next);
+        return true;
+      }
       const next: Area = {
         id: `state:${id}`,
         name,
@@ -245,6 +264,22 @@ export function LensApp() {
     },
     [stopTools, clearAdministrative, commitRectangle],
   );
+  // A municipality chosen in the search becomes the area of interest, with its own outline.
+  const selectMunicipality = useCallback(
+    async (place: Municipality) => {
+      const next = await municipalities.area(place.id);
+      if (!next) throw new Error("This municipality's outline is unavailable.");
+      stopTools();
+      clearAdministrative();
+      setDrawing(false);
+      setCoordinates(false);
+      setSearching(false);
+      setArea(next);
+      setFrame((n) => n + 1);
+      openAnalysis(next);
+    },
+    [stopTools, clearAdministrative, openAnalysis],
+  );
   const changePeriod = useCallback((next: string) => {
     setPeriod(next);
     const month = next.slice(0, 7);
@@ -263,6 +298,15 @@ export function LensApp() {
     void (async () => {
       let next: Area | null = null;
       if (view.area?.kind === "drawn") next = drawnArea(view.area.vertices, view.area.name);
+      else if (view.area?.kind === "country") {
+        const code = view.area.code;
+        const entry = rawPilots.find((country) => country.country_code === code);
+        if (entry) {
+          next = rawPilotArea(entry);
+          setFrom(entry.period.start); setTo(entry.period.end); setPlayback(false);
+          if (!view.period) changePeriod(`${entry.period.end.slice(0,4)}-09`);
+        }
+      }
       else if (view.area?.kind === "state") {
         const id = view.area.id;
         const state = await new BoundaryRepository()
@@ -278,6 +322,7 @@ export function LensApp() {
             bbox: geometryBounds(state.geometry),
           };
       }
+      else if (view.area?.kind === "municipality") next = await municipalities.area(view.area.id).catch(() => null);
       if (view.period) changePeriod(view.period);
       if (view.sensors?.length) setSensors(view.sensors);
       if (next) {
@@ -330,6 +375,7 @@ export function LensApp() {
   const detectionStatus = area ? (
     <p role="status">
       <ScientificInfo concept="hotspot" />
+      {rawPilot && "Raw map detections · country calibration applies to national totals only · "}
       {shown.error ||
         (shown.cells === null
           ? "Loading detections…"
@@ -372,7 +418,7 @@ export function LensApp() {
   // each of its own actions, so a later step of the same answer sees an earlier one.
   const assistantHost = useRef<AssistantHost | null>(null);
   const assertAssistantAvailable = () => {
-    if (tourGuard.current) throw new Error("Workspace actions are paused during the Lume tour. Finish or skip the tour to continue.");
+    if (tourGuard.current) throw new Error("Workspace actions are paused during the FireFlighter tour. Finish or skip the tour to continue.");
   };
   const host: AssistantHost = {
     area,
@@ -409,6 +455,15 @@ export function LensApp() {
       changePeriod(next);
       assistantHost.current!.period = next;
     },
+    playTimelapse(from, to) {
+      assertAssistantAvailable();
+      setSearching(false);
+      setPlayRange({ from, to });
+      changePeriod(from);
+      setPlayback(true);
+      setAutoPlay((n) => n + 1);
+      assistantHost.current!.period = from;
+    },
     setSensors(next) {
       assertAssistantAvailable();
       setSensors(next);
@@ -424,6 +479,13 @@ export function LensApp() {
     assistantHost.current = host;
   });
   function selectPreset(id: string) {
+    const pilot = rawPilots.find((entry) => `raw:${entry.country_code}` === id);
+    if (pilot) {
+      const next = rawPilotArea(pilot);
+      tools.clear(); setArea(next); setFrame((n) => n+1); openAnalysis(next); setCoordinates(false);
+      setPeriod(`${pilot.period.end.slice(0,4)}-09`); setFrom(pilot.period.start); setTo(pilot.period.end); setPlayback(false);
+      return next;
+    }
     const preset = presets.find((p) => p.id === id);
     if (!preset) throw new Error("The example study region is unavailable.");
     const next = rectangleArea(preset.bbox, preset.name);
@@ -440,6 +502,13 @@ export function LensApp() {
     const last = new Date(Date.UTC(Number(period.slice(0, 4)), Number(period.slice(5, 7)), 0)).getUTCDate();
     const [first, end] = period.length === 10 ? [period, period] : [`${period}-01`, `${period}-${last}`];
     try {
+      if (rawPilot) {
+        const cells = await rawPilotCells(area, period);
+        const csv = ["period,cell_id,longitude,latitude,modis_aqua_raw,viirs_noaa20_raw",
+          ...cells.map((cell) => [period,cell.id,cell.lon,cell.lat,cell.modis,period<'2018-04'?"":cell.viirs].join(","))].join("\n");
+        download(`firefly-lens_${areaSlug(area)}_${period}_raw_country_cells.csv`, csv, "text/csv");
+        return;
+      }
       const rows = await cellDays(area, first, end);
       download(`firefly-lens_${areaSlug(area)}_${period}_cell_days.csv`, cellDaysCsv(rows), "text/csv");
     } catch {
@@ -552,7 +621,6 @@ export function LensApp() {
   return (
     <main id="main" inert={tourRunning} className="lens-workspace" data-tour-active={tourRunning}>
       <AutoStartTour onStart={startTour} />
-      <button ref={tourLauncher} data-tour="replay" type="button" className="lume-replay map-surface" onClick={startTour} disabled={tourRunning}><Lume size={32} />Tour with Lume</button>
       {tourRunning && <LumeTour workspace={tourWorkspace} onExit={() => { tourGuard.current = false; tourSnapshot.current = null; setTourRunning(false); }} />}
       <div
         className="workspace-body"
@@ -603,6 +671,7 @@ export function LensApp() {
             }}
           />
           <SiteNav current="/lens" className="map-site-card" />
+          <button ref={tourLauncher} data-tour="replay" type="button" className="lume-replay map-surface" onClick={startTour} disabled={tourRunning}><Lume size={24} />Tour with FireFlighter</button>
           <MapToolbar
             onSearch={() => {
               tools.stop();
@@ -632,15 +701,18 @@ export function LensApp() {
             summary={`${periodSummary(period, sensors.length)} · Signals ${signalsEnabled ? "on" : "off"}`}
           >
             <div className="map-settings-row">
-              <TemporalControl period={period} onChange={changePeriod} />
+              <TemporalControl period={period} onChange={changePeriod} firstMonth={rawPilot?.period.start} lastMonth={rawPilot?.period.end} />
               <button
                 type="button"
                 className="layer-chip play-chip"
+                disabled={!!rawPilot}
+                title={rawPilot ? "Country maps support individual months" : "Play monthly detections"}
                 aria-pressed={playback}
                 onClick={() => {
                   // Opening starts the map at the first month of the range.
                   if (!playback) changePeriod(playRange.from);
                   setPlayback(!playback);
+                  setAutoPlay(0);
                 }}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -677,6 +749,7 @@ export function LensApp() {
                 <CloseButton label="Close search" onClick={() => setSearching(false)} />
               </div>
               <LocationSearch
+                onSelectMunicipality={selectMunicipality}
                 onNavigate={(place) => {
                   tools.stop();
                   setDrawing(false);
@@ -685,8 +758,9 @@ export function LensApp() {
                 }}
               />
               <p className="map-search-hint">
-                Cities, states or <span className="num">lat, lon</span>. The
-                records cover Brazil; draw an area there to analyze it.
+                A Brazilian city becomes the area of interest, with its IBGE
+                outline. Other places and <span className="num">lat, lon</span>{" "}
+                only move the map.
               </p>
             </section>
           )}
@@ -722,6 +796,7 @@ export function LensApp() {
                       {p.name} · {p.place}
                     </option>
                   ))}
+                  {rawPilots.map((entry) => <option key={entry.country_code} value={`raw:${entry.country_code}`}>{entry.name} · {entry.national_url ? "national harmonization" : "raw detections"} ({entry.period.start}–{entry.period.end})</option>)}
                 </select>
               </label>
               <AreaForm
@@ -837,7 +912,7 @@ export function LensApp() {
                   </button>
                   <button
                     className="btn btn-text"
-                    title="Download the cells on the map for this period as a CSV file"
+                    title={rawPilot ? "Download raw country cell totals for the selected period" : "Download the cells on the map for this period as a CSV file"}
                     onClick={downloadMapCsv}
                   >
                     CSV
@@ -849,8 +924,10 @@ export function LensApp() {
               </section>
             )}
           <div className="map-bottom">
-            {playback && !tourRunning && (
+            {playback && !rawPilot && !tourRunning && (
               <PlaybackBar
+                key={autoPlay}
+                autoPlay={autoPlay > 0}
                 from={playRange.from}
                 to={playRange.to}
                 onRange={(from, to) => {
@@ -868,7 +945,10 @@ export function LensApp() {
                 }}
                 ready={playing}
                 error={play.error}
-                onClose={() => setPlayback(false)}
+                onClose={() => {
+                  setPlayback(false);
+                  setAutoPlay(0);
+                }}
               />
             )}
             <AssistantDock host={assistantHost} />
@@ -898,7 +978,7 @@ export function LensApp() {
                 <CloseButton ref={closeButton} label="Close analysis" onClick={close} />
               </div>
             </div>
-            <div className="analysis-scroll">
+            <div className="analysis-scroll" data-tour-scroll="analysis-panel">
               <AnalysisCalendar
                 key={`${analyzed.id}:${tourAttempt}`}
                 monthOpen={monthOpen}
@@ -932,7 +1012,7 @@ export function LensApp() {
               </h2>
               <p className="num text-xs text-dim">{describe(analyzed)}</p>
               <p className="mt-3 max-w-[70ch] text-[0.9375rem] text-dim">
-                Real detections, harmonized to the MODIS Aqua scale. Hot spots
+                {rawPilotFor(analyzed) ? (rawPilotFor(analyzed)?.national_url ? "Real country-wide harmonization. Local ecosystem and subnational calibration are not validated." : "Real raw sensor detections. Harmonization is not validated for this country.") : "Real detections on Brazil’s MODIS Aqua scale. Selected areas aggregate only covered Brazilian grid cells."} Hot spots
                 are detected pixels, not independent fires.{" "}
                 <Link href="/method">Read the methodology and limitations.</Link>
               </p>

@@ -81,7 +81,7 @@ export interface MonthCell {
   /** 95% interval of a modeled month; null when observed. */
   lo: number | null;
   hi: number | null;
-  /** The month is still in progress. */
+  /** The record covers only part of this calendar month. */
   partial: boolean;
   /** Raw detections in the month, per sensor, as reported. */
   detections: Record<Sensor, number>;
@@ -106,6 +106,7 @@ export interface Season {
 }
 
 export interface FireRecord {
+  scope?: "entire_country_only";
   years: number[];
   days: DaySummary[];
   /** Hot spots that scale to an index of 1. */
@@ -161,8 +162,10 @@ const ANOMALY_FLOOR = 0.22;
 /** Smallest gap over the neighbours' median that counts as unusual. */
 const ANOMALY_MARGIN = 0.15;
 
-export function buildRecord(area: AreaData): FireRecord {
-  const { observedUntil, climatologyBase, commonErrorC, viirsStart, partialMonth, epochYear } = meta;
+export type RecordContext = Pick<typeof meta, "observedUntil" | "climatologyBase" | "commonErrorC" | "viirsStart" | "partialMonth" | "epochYear">;
+
+export function buildRecord(area: AreaData, context: RecordContext = meta): FireRecord {
+  const { observedUntil, climatologyBase, commonErrorC, viirsStart, partialMonth, epochYear } = context;
   const monthOf = (date: string) =>
     (Number(date.slice(0, 4)) - epochYear) * 12 + Number(date.slice(5, 7)) - 1 - area.firstMonth;
 
@@ -270,7 +273,7 @@ export function buildRecord(area: AreaData): FireRecord {
       source: modeled ? "modeled" : "observed",
       lo: modeled ? Math.max(0, value - 1.96 * sd) : null,
       hi: modeled ? value + 1.96 * sd : null,
-      partial: monthStamp(year, month) === partialMonth,
+      partial: monthStamp(year, month) === partialMonth || mDays[m] < new Date(Date.UTC(year,month+1,0)).getUTCDate(),
       detections: { MODIS: mAqua[m], VIIRS: mViirs[m] },
       viirsHarmonized: Number.isNaN(mu) ? null : mu,
       median: 0,

@@ -133,8 +133,10 @@ export interface WeatherData {
   index: "FWI";
   forecasts: {
     issued_at: string;
-    valid_at: string;
-    lead_hours: number;
+    valid_at: string | null;
+    lead_hours: number | null;
+    valid_date?: string;
+    lead_days?: number;
     member: string;
     value: number | null;
     sample_count: number;

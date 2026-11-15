@@ -4,6 +4,8 @@ import json
 from pathlib import Path
 import unittest
 from unittest.mock import patch
+from concurrent.futures import ThreadPoolExecutor
+from threading import Event
 
 from fastapi.testclient import TestClient
 from firefly_analytics.service import create_app, META_KEYS, AnalyticsRequest
@@ -19,6 +21,27 @@ def rectangle(w, s, e, n):
 
 
 class ServiceTests(unittest.TestCase):
+    def test_exact_country_history_and_past_forecast_never_borrow_brazilian_border_cells(self):
+        coverage=json.loads((ROOT/'public/data/coverage.json').read_text())
+        entry=next(d for d in coverage['datasets'] if d['country_code']=='PRY')
+        response=self.post(body=self.request(entry['geometry']))
+        self.assertEqual(response.status_code,200,response.text[:500])
+        bundle=response.json()
+        history=bundle['sections']['history']
+        self.assertEqual(history['source']['provenance']['kind'],'real_country_harmonized')
+        self.assertEqual(history['source']['provenance']['country_code'],'PRY')
+        self.assertEqual(len(history['data']['monthly']),282)
+        self.assertEqual(history['data']['monthly'][0]['date'],'2002-07')
+        retro=self.post('retrospective',self.request(entry['geometry'],forecast_origin='2016-09'))
+        self.assertEqual(retro.status_code,200,retro.text[:500])
+        forecast=retro.json()['sections']['forecast']['data']
+        self.assertEqual(forecast['forecast_origin'],'2016-09')
+        self.assertLessEqual(forecast['training_period']['end'],'2016-09')
+        self.assertEqual([p['date'] for p in forecast['predictions']],['2016-10','2016-11','2016-12'])
+        self.assertTrue(all(p['value'] is not None for p in forecast['predictions']))
+        invalid=self.post('retrospective',self.request(entry['geometry'],forecast_origin='2025-12'))
+        self.assertEqual(invalid.status_code,422)
+
     @classmethod
     def setUpClass(cls):
         cls.client = TestClient(create_app(ROOT, token="test-token", enable_sarima=False))
@@ -126,6 +149,36 @@ class ServiceTests(unittest.TestCase):
             self.assertEqual(recompute.call_count, 1)
             self.assertEqual(result["forecast_status"], "experimental")
             self.assertTrue(all(p["value"] is not None for p in result["predictions"]))
+
+    def test_real_retrospective_origin_uses_only_past_evidence_and_matches_current_geometry(self):
+        body={**self.request(), 'forecast_origin':'2023-09'}
+        response=self.client.post('/analytics/retrospective',json=body,headers={'Authorization':'Bearer test-token'})
+        self.assertEqual(response.status_code,200,response.text[:300])
+        data=response.json()['sections']['forecast']['data']
+        self.assertEqual(data['forecast_origin'],'2023-09')
+        self.assertEqual(data['last_complete_observation_used'],'2023-09')
+        self.assertLessEqual(data['training_period']['end'],'2023-09')
+        self.assertEqual([p['date'] for p in data['predictions']],['2023-10','2023-11','2023-12'])
+        self.assertEqual(data['forecast_status'],'experimental')
+        self.assertTrue(all(p['value'] is not None for p in data['predictions']))
+        self.assertEqual(self.client.post('/analytics/retrospective',json={**body,'forecast_origin':'2026-10'},headers={'Authorization':'Bearer test-token'}).status_code,422)
+        self.assertEqual(self.client.post('/analytics/retrospective',json=body).status_code,401)
+
+    def test_slow_weather_initialization_does_not_lock_historical_analytics(self):
+        from firefly_analytics.fire_weather import unavailable
+        active,release=Event(),Event()
+        def slow_weather(*args):
+            active.set(); release.wait(10)
+            return unavailable('software_test_slow_provider')
+        client=TestClient(create_app(ROOT,token='',enable_sarima=False))
+        with patch('firefly_analytics.service.query_fire_weather',side_effect=slow_weather),ThreadPoolExecutor(max_workers=2) as pool:
+            pending=pool.submit(client.post,'/analytics/fire-weather',json=self.request())
+            self.assertTrue(active.wait(5))
+            try:
+                response=client.post('/analytics/history',json=self.request())
+                self.assertEqual(response.status_code,200,response.text[:300])
+            finally: release.set()
+            self.assertEqual(pending.result().status_code,200)
 
 
 if __name__ == "__main__":

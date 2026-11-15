@@ -6,9 +6,9 @@ export interface TourStep {
   description: string;
 }
 export const TOUR_STEPS = [
-  { id: "welcome", title: "Hi, I’m Lume", description: "Let’s explore real satellite records together in a read-only demonstration. I’ll prepare the controls as you choose Next or Back. We’ll visit the Pantanal in September 2023. Your workspace is saved; skip at any time or restore it when we finish." },
+  { id: "welcome", title: "Hi, I’m FireFlighter", description: "Let’s explore real satellite records together in a read-only demonstration. I’ll prepare the controls as you choose Next or Back. We’ll visit the Pantanal in September 2023. Your workspace is saved; skip at any time or restore it when we finish." },
   { id: "map", target: "map-controls", title: "Explore the map", description: "Outside this demonstration, these controls pan, zoom and switch between globe and flat views. Moving the camera does not select an analysis area. The workspace stays read-only while I guide you." },
-  { id: "search", target: "search", title: "Find a place", description: "Search moves the camera; it does not select an analysis region. This is where you can find cities or coordinates after the tour. No search request is needed for our demonstration." },
+  { id: "search", target: "search", title: "Find a place", description: "Search finds a Brazilian city and selects it as the analysis area, with its official outline; any other place or coordinates only move the camera. You can use it after the tour. No search request is needed for our demonstration." },
   { id: "region", target: "presets", title: "Select a region", description: "Coordinates contains the existing study regions. You can also draw an area or pick a state. Next will select the exact Pantanal preset for our demonstration." },
   { id: "pantanal", target: "selection", title: "Try the Pantanal", description: "This is the application’s Pantanal study rectangle, not an official biome boundary. Analysis weights each grid cell by its overlap with this exact geometry. Your previous selection is saved." },
   { id: "sensors", target: "sensors", title: "Two sensors, different pixels", description: "These switches show raw MODIS Aqua and VIIRS NOAA-20 detections on the map. Their pixels differ: adding their raw counts does not count independent fires. You can toggle layers after the tour." },

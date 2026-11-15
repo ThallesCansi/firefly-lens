@@ -1,0 +1,30 @@
+{
+  "label": "interruptions",
+  "baseline": "5d457c7",
+  "engine": "6.18.0",
+  "controllerSha256": "9aa81643bc57d8ab329352f9d8455a659bd3f92466ad7ff2463bf69e794365e0",
+  "rows": [],
+  "interruptions": [
+    {
+      "input": "left",
+      "passed": true,
+      "stopsDuringGesture": 0
+    },
+    {
+      "input": "wheel",
+      "passed": true,
+      "stopsDuringGesture": 0
+    },
+    {
+      "input": "touch",
+      "passed": true,
+      "stopsDuringGesture": 0
+    },
+    {
+      "input": "drawing-lock-with-tilt",
+      "passed": true
+    }
+  ],
+  "profiles": [],
+  "errors": []
+}

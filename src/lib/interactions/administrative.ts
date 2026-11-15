@@ -4,6 +4,7 @@ import {
   type GeographicPoint,
 } from "./navigation";
 import type { PolygonGeometry } from "../data/types";
+import { countryCoverage } from "../data/coverage";
 export type { PolygonGeometry };
 export type BoundaryFeature = {
   type: "Feature";
@@ -24,7 +25,7 @@ export type AdministrativeCandidate = {
   bounds: GeographicBounds;
   center: [number, number];
   centerKind: "bounding-box-center";
-  dataCoverage: "brazil" | "none";
+  dataCoverage: "brazil" | "raw-pilot" | "national" | "none";
   /** A Brazilian state can be analysed; the whole country is too large for one area. */
   analysis: "available" | "too-large" | "outside-data-coverage";
 };
@@ -111,14 +112,15 @@ export function administrativeCandidate(
   feature: BoundaryFeature,
 ): AdministrativeCandidate {
   const bounds = geometryBounds(feature.geometry),
-    brazil = feature.properties.countryCode === "BRA";
+    brazil = feature.properties.countryCode === "BRA",
+    raw = !brazil && ["real_raw_detections", "real_harmonized_data"].includes(countryCoverage(feature.properties.countryCode));
   return {
     feature,
     bounds,
     center: [(bounds[0] + bounds[2]) / 2, (bounds[1] + bounds[3]) / 2],
     centerKind: "bounding-box-center",
-    dataCoverage: brazil ? "brazil" : "none",
-    analysis: !brazil
+    dataCoverage: brazil ? "brazil" : raw ? (countryCoverage(feature.properties.countryCode) === "real_harmonized_data" ? "national" : "raw-pilot") : "none",
+    analysis: raw ? "available" : !brazil
       ? "outside-data-coverage"
       : feature.properties.level === "state"
         ? "available"

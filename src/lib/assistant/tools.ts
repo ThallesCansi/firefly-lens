@@ -40,6 +40,19 @@ export const ASSISTANT_TOOLS: ToolSpec[] = [
     ),
   },
   {
+    name: "select_municipality",
+    description:
+      "Make a Brazilian municipality (city) the area of interest, with its official IBGE outline, and frame it on the map. Use this whenever the request names a Brazilian city or town. Give the state when the request names it, since several municipalities share a name.",
+    parameters: object(
+      {
+        city: { type: "string", description: "Municipality name, e.g. 'Sorriso'." },
+        state: { type: "string", description: "Optional two-letter state code, e.g. 'MT'." },
+        period: PERIOD,
+      },
+      ["city"],
+    ),
+  },
+  {
     name: "select_region",
     description: `Make one of the ready-made study regions the area of interest: ${meta.presets
       .map((p) => `'${p.id}' (${p.name}: ${p.place})`)
@@ -49,7 +62,7 @@ export const ASSISTANT_TOOLS: ToolSpec[] = [
   {
     name: "select_box",
     description:
-      "Make a rectangle the area of interest, in degrees. Kept inside Brazil and at most 12° a side. Use it for places that are not a state or a ready-made region; find the place's coordinates with go_to_place first when you do not know them.",
+      "Make a rectangle the area of interest, in degrees. Kept inside Brazil and at most 12° a side. Use it for places that are not a state, a municipality or a ready-made region; find the place's coordinates with go_to_place first when you do not know them.",
     parameters: object(
       {
         west: { type: "number" },
@@ -75,6 +88,15 @@ export const ASSISTANT_TOOLS: ToolSpec[] = [
     parameters: object({ period: { type: "string", description: "YYYY, YYYY-MM or YYYY-MM-DD." } }),
   },
   {
+    name: "play_timelapse",
+    description:
+      "Open the time-lapse and play the map month by month over a range, in the current area of interest. Use it whenever the request names a span of time ('from 2001 to 2024', 'over the last years', 'animate'). Select the area first. A year means its whole span. Months outside the record are left out automatically; the result says the interval actually played.",
+    parameters: object({
+      from: { type: "string", description: "Start: YYYY or YYYY-MM." },
+      to: { type: "string", description: "End: YYYY or YYYY-MM." },
+    }),
+  },
+  {
     name: "set_layers",
     description: "Choose which sensors' detections the map draws.",
     parameters: object({
@@ -92,7 +114,7 @@ export const ASSISTANT_TOOLS: ToolSpec[] = [
   {
     name: "get_fire_history",
     description:
-      "Read the fire record of the current area of interest: yearly totals for the whole record, and monthly values between from_year and to_year (at most 5 years). Values are harmonized hot spots on the MODIS Aqua scale. Use it before stating any number.",
+      "Read the current area's fire record before stating numbers. Brazilian covered cells return yearly totals and up to five years of monthly Aqua-equivalent activity. A selected raw country pilot returns separate observed MODIS/VIIRS counts and explicit unavailability of harmonization, anomalies and forecasts. Missing coverage must never be interpreted as zero fire activity.",
     parameters: object({ from_year: { type: "integer" }, to_year: { type: "integer" } }),
   },
 ];
