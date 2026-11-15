@@ -5,7 +5,7 @@ import { rawPilots, rawPilotArea } from "../data/coverage";
 import { rectangleArea } from "../data/types";
 
 const host = (): AssistantHost => ({ area: rawPilotArea(rawPilots[0]), period: "2023-09", sensors: ["MODIS","VIIRS"], analysisOpen: true,
-  chooseArea: vi.fn(), clearArea: vi.fn(), navigate: vi.fn(), setPeriod: vi.fn(), setSensors: vi.fn(), openAnalysis: vi.fn() });
+  chooseArea: vi.fn(), clearArea: vi.fn(), navigate: vi.fn(), setPeriod: vi.fn(), setSensors: vi.fn(), playTimelapse: vi.fn(), openAnalysis: vi.fn() });
 afterEach(() => vi.unstubAllGlobals());
 
 it("gives the assistant national harmonization without borrowing Brazilian border cells", async () => {
