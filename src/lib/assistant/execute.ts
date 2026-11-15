@@ -7,6 +7,7 @@ import { BoundaryRepository, geometryBounds } from "../interactions/administrati
 import { municipalities, municipalityLabel, searchMunicipalities } from "../interactions/municipalities";
 import { navigationForSearch, type SearchSuggestion } from "../interactions/navigation";
 import { MONTHS } from "../format";
+import { timelapseRange } from "./timelapse";
 import { rawPilotFor } from "../data/coverage";
 import { loadRawPilot, loadNationalAnalytics } from "../data/raw-pilot";
 import { isFailure } from "../analytics/contracts";
@@ -23,6 +24,8 @@ export interface AssistantHost {
   navigate(destination: MapDestination): void;
   setPeriod(period: string): void;
   setSensors(sensors: Sensor[]): void;
+  /** Opens the time-lapse on these months (YYYY-MM) and starts it. */
+  playTimelapse(from: string, to: string): void;
   openAnalysis(area: AnalysisArea): void;
 }
 
@@ -270,6 +273,22 @@ export async function runTool(host: AssistantHost, name: string, input: Record<s
       }
       case "set_period":
         return await applyPeriod(host, String(input.period ?? ""));
+      case "play_timelapse": {
+        if (!host.area) return { ok: false, result: "There is no area of interest. Select one first." };
+        if (rawPilotFor(host.area))
+          return { ok: false, result: "The time-lapse is not available for country maps; they show one month at a time." };
+        const span = timelapseRange(String(input.from ?? ""), String(input.to ?? ""), fireData.firstMonth, fireData.lastMonth);
+        if (!span.ok) return { ok: false, result: span.reason };
+        host.playTimelapse(span.from, span.to);
+        const asked = `${input.from}–${input.to}`;
+        return {
+          ok: true,
+          result: span.trimmed
+            ? `Playing ${span.from} to ${span.to}. The request (${asked}) goes beyond the record, which covers ${fireData.firstMonth} to ${fireData.lastMonth}; tell the person the available interval that is playing.`
+            : `Playing ${span.from} to ${span.to}.`,
+          note: `Time-lapse ${span.from} → ${span.to}`,
+        };
+      }
       case "set_layers": {
         const sensors = SENSORS.filter((s) => Array.isArray(input.sensors) && input.sensors.includes(s));
         if (!sensors.length) return { ok: false, result: "Choose MODIS, VIIRS or both." };

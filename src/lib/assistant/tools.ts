@@ -88,6 +88,15 @@ export const ASSISTANT_TOOLS: ToolSpec[] = [
     parameters: object({ period: { type: "string", description: "YYYY, YYYY-MM or YYYY-MM-DD." } }),
   },
   {
+    name: "play_timelapse",
+    description:
+      "Open the time-lapse and play the map month by month over a range, in the current area of interest. Use it whenever the request names a span of time ('from 2001 to 2024', 'over the last years', 'animate'). Select the area first. A year means its whole span. Months outside the record are left out automatically; the result says the interval actually played.",
+    parameters: object({
+      from: { type: "string", description: "Start: YYYY or YYYY-MM." },
+      to: { type: "string", description: "End: YYYY or YYYY-MM." },
+    }),
+  },
+  {
     name: "set_layers",
     description: "Choose which sensors' detections the map draws.",
     parameters: object({

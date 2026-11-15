@@ -83,7 +83,10 @@ export function PlaybackBar({
   ready,
   error,
   onClose,
+  autoPlay = false,
 }: {
+  /** Start playing once every month is loaded, without a press. */
+  autoPlay?: boolean;
   from: string;
   to: string;
   onRange: (from: string, to: string) => void;
@@ -99,7 +102,7 @@ export function PlaybackBar({
   onClose: () => void;
 }) {
   const months = useMemo(() => monthsBetween(from, to), [from, to]);
-  const [playing, setPlaying] = useState(false);
+  const [playing, setPlaying] = useState(autoPlay);
   const [speed, setSpeed] = useState(1);
   const current = period.slice(0, 7);
   const at = months.indexOf(current);
