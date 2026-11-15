@@ -13,8 +13,9 @@ export function createTourDriver(session: TourSession, options: {
 }) {
   const steps: DriveStep[] = TOUR_STEPS.map((definition: TourStep, index) => ({
     element: definition.target ? targetSelector(definition.target) : undefined,
-    disableActiveInteraction: !definition.interactive,
-    allowedElements: definition.id === "map" ? '[data-tour="map-canvas"]' : undefined,
+    disableActiveInteraction: true,
+    allowPageInteraction: false,
+    focus: "popover",
     // Native waiting handles React-mounted targets. Readiness attributes are
     // set by the component that actually owns the correct region's data.
     waitForElement: 12000,
@@ -27,20 +28,16 @@ export function createTourDriver(session: TourSession, options: {
       onNextClick: () => { void session.go(index + 1); },
       onPrevClick: () => { void session.go(index - 1); },
     },
-    onInteraction: (_element, _step, { event, region }) => {
-      if (definition.id === "analyze" && region === "element" && event.type === "click")
-        queueMicrotask(() => { if (session.snapshot().index === index) void session.go(index + 1); });
-    },
-    onElementMissing: (_element, _step, { cause }) => {
+    onElementMissing: () => {
       if (session.snapshot().phase !== "ready" || session.snapshot().index !== index) return false;
-      if (definition.id === "analyze" && cause === "removed") void session.go(index + 1);
-      else session.fail("This section is not ready. Its controls or data could not be loaded. You can retry, skip the section, or exit and restore your workspace.");
+      session.fail("This section is not ready. Its controls or data could not be loaded. You can retry, skip the section, or exit and restore your workspace.");
       return false;
     },
   }));
   return driver({
     steps, animate: !matchMedia("(prefers-reduced-motion: reduce)").matches,
     duration: 220, smoothScroll: false, allowScroll: true,
+    disableActiveInteraction: true, allowPageInteraction: false, focus: "popover",
     overlayOpacity: 0.58, overlayClickBehavior: "none", stagePadding: 7, stageRadius: 12,
     popoverClass: "lume-tour-card", popoverOffset: 14,
     showProgress: true, progressText: "{{current}} of {{total}}", prevBtnText: "Back",

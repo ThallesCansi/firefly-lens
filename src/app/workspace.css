@@ -1,11 +1,8 @@
-.lume-replay { position: fixed; left: 12px; bottom: max(2px, env(safe-area-inset-bottom)); z-index: 32; min-height: 24px; padding: 3px 10px; font-size: 12px; color: var(--color-ink); cursor: pointer; }
+.lume-replay { position: fixed; left: 12px; bottom: max(2px, env(safe-area-inset-bottom)); z-index: 32; display: flex; align-items: center; gap: 6px; min-height: 36px; padding: 2px 10px 2px 4px; font-size: 12px; color: var(--color-ink); cursor: pointer; }
 .lume-replay:disabled { opacity: .4; cursor: default; }
-.lume-invitation { display: flex; align-items: center; gap: 8px; margin-top: 16px; border-top: 1px solid var(--color-line); padding-top: 12px; font-size: 13px; }
-.lume-invitation .lume { flex-shrink: 0; }
-.lume-invitation-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-top: 6px; }
-.lume-invitation .btn { padding: 6px 10px; font-size: 12px; }
-[data-tour-active="true"] .assistant-dock { pointer-events: none; }
-@media (max-width: 700px) { .explore-hint:has(.lume-invitation) { max-height: calc(100% - 220px); overflow-y: auto; } }
+/* Driver's popover is portaled outside this inert subtree. Keep all highlighted
+   descendants out of Driver's focusable-target list as well as mouse hit testing. */
+.lens-workspace[inert], .lens-workspace[inert] * { pointer-events: none !important; }
 
 /* The map remains mounted while a separately scrolling analysis pane opens. */
 /* The map and its side panel fill the first screen; the area report, when

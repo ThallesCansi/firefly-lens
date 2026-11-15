@@ -1,5 +1,53 @@
 # Lume Guided Tour — implementation and verification
 
+## Automatic presentation and read-only demonstration — 2026-11-15
+
+Implemented locally on `feature/lume-auto-start`, based on `b3a051a`. The current checkout includes the latest picker, time-lapse, visual, analytics and assistant integrations. No dependencies, scientific calculations, data assets, export formats or original Lume artwork were changed.
+
+### Current behavior and architecture
+
+- Every new workspace document, including a reload, automatically opens the existing Driver welcome. A document-scoped claim prevents repeated launches during rerenders, Strict Mode effect replay and client navigation. Returning through About/Lens in the same document does not launch a second automatic welcome.
+- Only the explicit **Don't show again** checkbox writes `firefly-lens-tour-auto-disabled-v1`. Completed, dismissed and partial outcomes still use the separate `firefly-lens-tour-v1` key. Outcomes never suppress the next visit. Unchecking the checkbox during a manual replay enables automatic presentation on the next new document.
+- The permanent **Tour with Lume** launcher includes the original animated SVG. The old invitation component was removed. The existing introductory hint is hidden while the tour runs, preventing overlapping welcome panels.
+- All sixteen steps are read-only. Driver's global and per-step configuration disables active-element and page interaction, focuses the popover and retains native target waiting. There are no interactive-step flags or map exceptions. Instructional copy explains a demonstration controlled by Next/Back.
+- The workspace is `inert`, including highlighted controls. Scoped capture listeners additionally block background pointer, touch, wheel, typing and application shortcuts. The React popover portal remains outside that subtree; its buttons, checkbox, scrolling and Driver keyboard traversal remain accessible. Browser reload shortcuts are preserved. Cleanup immediately removes the gate and restores focus to the launcher.
+- React preparation handlers still select the actual Pantanal preset, September 2023, calendars and scientific tabs. Time-lapse playback is suspended while the demonstration runs and returns paused when restoring the workspace. Keep example exits playback. The real Aqua-equivalent value remains **535**, and the checked-in unavailable Forecast state is preserved.
+- Browser navigation testing exposed a stale map-controller reference when Next preserves workspace state but tears down map effects. `HotspotMap` now announces `null` when its engine is removed, preventing selection tools from rebinding to a destroyed engine on return.
+
+### Files changed in this update
+
+- `src/components/lens/LensApp.tsx`: automatic start, guarded snapshot, inert workspace, mascot launcher, time-lapse suspension and restoration.
+- `src/components/lens/HotspotMap.tsx`: controller teardown notification.
+- `src/components/onboarding/AutoStartTour.tsx`: new automatic launch bridge; replaces the removed `TourInvitation.tsx`.
+- `src/components/onboarding/LumeTour.tsx` and `.css`: checkbox and Escape behavior within the existing popover.
+- `src/lib/onboarding/persistence.ts`: independent opt-out and document-scoped launch claim.
+- `src/lib/onboarding/interaction-lock.ts`: new removable interaction gate.
+- `src/lib/onboarding/steps.ts` and `driver-adapter.ts`: read-only step copy and Driver configuration.
+- `src/app/workspace.css`: inert hit testing and mascot launcher styling.
+- `src/lib/onboarding/session.test.ts`, new `driver-adapter.test.ts` and `interaction-lock.test.ts`: preference, lifecycle, Driver and event-boundary checks.
+- `scripts/qa-lume-tour.mjs`, `README.md` and this document: reproducible browser checks and usage documentation.
+
+### Verification
+
+- `pnpm.cmd test`: **125 tests passed across 19 files**.
+- `pnpm.cmd lint`: passed.
+- `pnpm.cmd exec tsc --noEmit`: passed.
+- `pnpm.cmd build`: passed; all 13 static pages generated.
+- Browser QA uses installed Chrome/Playwright, real MapLibre/WebGL, real scientific tiles and analytics. Only the external OpenFreeMap basemap is replaced with a deterministic blank style; analytics/tile failures are injected exclusively for recovery checks. No production fixtures or datasets are changed.
+- All sixteen steps run at 1440, 1000, 390 and 320 px, in both themes and with reduced motion. Checks cover repeated visits/reloads, all three outcomes, explicit opt-out and re-enabling, manual replay after opt-out, client navigation without duplicate welcomes, one popover only, and the recognizable mascot launcher.
+- At every step, browser checks attempt background clicks, touch, typing, focus and wheel input, inspect unchanged workspace state and cycle Tab within the popover. Real map drag/zoom/touch handlers receive no events. Conditional calendars, History/Forecast, Back, Retry, Skip section, Keep, Replay, Escape and Pampa restoration are exercised. No automatic download or assistant request occurs; a real CSV download succeeds after exit.
+- The full browser suite passed against both the production server and Next development/Strict Mode. It also verifies that an already running time-lapse stops changing the period during the tour and returns paused after restoration. Development QA sets `QA_HIDE_DEVTOOLS=1` to hide only Next's developer portal, whose bottom-left indicator otherwise covers the launcher; production QA uses the normal page without that override.
+
+Evidence and final browser results are retained in `docs/lume-tour/auto-readonly/`. See [welcome](lume-tour/auto-readonly/desktop-welcome.png), [History](lume-tour/auto-readonly/desktop-history.png), [320px dark](lume-tour/auto-readonly/320-dark-sensors.png), [390px light](lume-tour/auto-readonly/390-light-sensors.png), [recovery](lume-tour/auto-readonly/recovery-dark.png) and [production browser results](lume-tour/auto-readonly/results.json).
+
+### Limits
+
+Browser QA uses desktop Chrome with mobile viewport/touch emulation; physical-device and screen-reader testing remains manual. Blocked browser storage cannot retain opt-out across reloads. Forecast availability and extent-based camera restoration retain their existing limitations. Live geocoder, basemap and assistant-model services are outside deterministic QA. Development navigation to About surfaced an existing hydration warning for tiny floating-point differences in the unrelated Harmonize illustration's SVG coordinates; that component was preserved.
+
+## Original implementation record (historical)
+
+The following describes the earlier manual-start implementation and its original verification; the update above supersedes its invitation and interactive-step behavior.
+
 Local branch: `feature/tutorial-lume`. Baseline: `13269c5`. The pre-existing Driver.js 1.14.0 changes to `package.json` and `pnpm-lock.yaml` are retained. No additional dependency, commit, push, merge or deployment is required.
 
 ## Architecture and behavior

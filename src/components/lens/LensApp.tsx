@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { fireData } from "@/lib/data/source";
 import {
   drawnArea,
@@ -35,7 +35,9 @@ import { ResizableAnalysisPanel } from "@/components/interactions/ResizableAnaly
 import type { MapController } from "@/lib/map/map-contract";
 import "@/components/interactions/WorkspaceTools.css";
 import { ScientificInfo } from "@/components/ui/ScientificInfo";
-import { TourInvitation } from "@/components/onboarding/TourInvitation";
+import { AutoStartTour } from "@/components/onboarding/AutoStartTour";
+import { Lume } from "@/components/firefly/Lume";
+import { lockTourInteractions } from "@/lib/onboarding/interaction-lock";
 import { afterPaint, type TourWorkspace, type WorkspaceSnapshot } from "@/lib/onboarding/session";
 import { TOUR_PERIOD, stepIndex, type TourStepId } from "@/lib/onboarding/steps";
 
@@ -91,6 +93,7 @@ export function LensApp() {
   const [searching, setSearching] = useState(false);
   const [tourRunning, setTourRunning] = useState(false);
   const tourGuard = useRef(false);
+  useLayoutEffect(() => { if (tourRunning) return lockTourInteractions(); }, [tourRunning]);
   const tourSnapshot = useRef<WorkspaceSnapshot | null>(null);
   const analysisFrame = useRef(0);
   const restoredView = useRef<AbortController | null>(null);
@@ -153,8 +156,8 @@ export function LensApp() {
     const to = `${year}-12` > fireData.lastMonth ? fireData.lastMonth : `${year}-12`;
     return { from: `${year}-01`, to };
   });
-  const play = usePlaybackFrames(area, playRange.from, playRange.to, playback);
-  const playing = playback && play.frames !== null;
+  const play = usePlaybackFrames(area, playRange.from, playRange.to, playback && !tourRunning);
+  const playing = playback && !tourRunning && play.frames !== null;
   // While a time-lapse is loaded its frames feed the map, so nothing else loads.
   const mapData = useMapCells(playing ? null : area, period);
   const shown = playing
@@ -363,7 +366,10 @@ export function LensApp() {
     setCoordinates(false);
     return next;
   }
-  const startTour = () => { restoredView.current?.abort(); tourSnapshot.current = tourWorkspace.capture(); tourGuard.current = true; setTourRunning(true); };
+  const startTour = () => {
+    if (tourGuard.current) return;
+    restoredView.current?.abort(); tourSnapshot.current = tourWorkspace.capture(); tourGuard.current = true; setTourRunning(true);
+  };
   const tourWorkspace: TourWorkspace = {
     capture: () => tourSnapshot.current ?? ({ area, analyzed, analysis, expanded, drawing, coordinates, searching,
       period, from, to, sensors: [...sensors], monthOpen, cardOpen, analyticsTab,
@@ -420,13 +426,15 @@ export function LensApp() {
       void afterPaint(view.signal).then(() => {
         if (saved.projection) controller?.setProjection(saved.projection);
         if (saved.bounds) controller?.navigate({ id: `tour-restore-${Date.now()}`, bounds: saved.bounds, animation: "jump" });
+        else controller?.resetView();
       }).catch(() => { /* A newer tour/navigation superseded restoration. */ });
     },
-    keep() { restoreUi.current = null; cancelAnimationFrame(analysisFrame.current); setSearching(false); setCoordinates(false); setDrawing(false); setCardOpen(false); setAnalyticsTab("history"); },
+    keep() { restoreUi.current = null; cancelAnimationFrame(analysisFrame.current); setPlayback(false); setSearching(false); setCoordinates(false); setDrawing(false); setCardOpen(false); setAnalyticsTab("history"); },
   };
   return (
-    <main id="main" className="lens-workspace" data-tour-active={tourRunning}>
-      <button ref={tourLauncher} data-tour="replay" type="button" className="lume-replay map-surface" onClick={startTour} disabled={tourRunning}>Tour with Lume</button>
+    <main id="main" inert={tourRunning} className="lens-workspace" data-tour-active={tourRunning}>
+      <AutoStartTour onStart={startTour} />
+      <button ref={tourLauncher} data-tour="replay" type="button" className="lume-replay map-surface" onClick={startTour} disabled={tourRunning}><Lume size={32} />Tour with Lume</button>
       {tourRunning && <LumeTour workspace={tourWorkspace} onExit={() => { tourGuard.current = false; tourSnapshot.current = null; setTourRunning(false); }} />}
       <div
         className="workspace-body"
@@ -614,7 +622,6 @@ export function LensApp() {
                   area anywhere in Brazil, or pick a state, to investigate its
                   fire activity.
                 </p>
-                <TourInvitation onStart={startTour} />
                 <button
                   className="btn btn-primary mt-4"
                   onClick={() => setDrawing(true)}
@@ -675,7 +682,7 @@ export function LensApp() {
               </section>
             )}
           <div className="map-bottom">
-            {playback && (
+            {playback && !tourRunning && (
               <PlaybackBar
                 from={playRange.from}
                 to={playRange.to}
