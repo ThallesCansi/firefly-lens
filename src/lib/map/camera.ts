@@ -1,8 +1,9 @@
 import type { BBox } from "@/lib/data/types";
-import type { MapAnimation, MapNavigationRequest, ProjectionMode } from "./map-contract";
+import type { CameraProfile, MapAnimation, MapNavigationRequest, ProjectionMode } from "./map-contract";
 
 /** The continent in context, with room for the Southern Cone and the Caribbean coast. */
 export const HOME = { center: [-60, -22] as [number, number], zoom: { globe: 2.2, mercator: 2.6 } };
+export const DEFAULT_CAMERA_PROFILE: CameraProfile = "cinematic";
 
 /** Highest latitude the flat map can frame; the globe has no such limit. */
 const MERCATOR_MAX_LAT = 85;
@@ -73,10 +74,12 @@ export function planNavigation(
   request: MapNavigationRequest,
   camera: { center: [number, number]; zoom: number; projection: ProjectionMode },
   reducedMotion: boolean,
+  profile: CameraProfile = "standard",
 ): CameraPlan {
   const target = request.bounds ? boundsCenter(request.bounds) : (request.center ?? camera.center);
   const zoomTo = request.zoom ?? camera.zoom;
-  const animation: MapAnimation = reducedMotion ? "jump" : (request.animation ?? (request.bounds ? "ease" : "fly"));
+  const cinematic = profile === "cinematic" && (!request.source || request.source === "user");
+  const animation: MapAnimation = reducedMotion ? "jump" : (cinematic && request.animation !== "jump" ? "fly" : request.animation ?? (request.bounds ? "ease" : "fly"));
   const travel = flightDuration(camera.center, target, camera.zoom, zoomTo);
   if (request.bounds) {
     return {
@@ -84,12 +87,14 @@ export function planNavigation(
       bounds: safeBounds(request.bounds, camera.projection),
       ...(request.maxZoom === undefined ? {} : { maxZoom: request.maxZoom }),
       duration: animation === "jump" ? 0 : animation === "fly" ? travel : Math.min(1200, travel),
+      ...(cinematic && animation === "fly" ? { curve: camera.projection === "globe" ? 1.8 : 1.5 } : {}),
     };
   }
   if (animation === "jump") return { method: "jumpTo", center: target, zoom: zoomTo, duration: 0 };
   if (animation === "ease") return { method: "easeTo", center: target, zoom: zoomTo, duration: Math.min(1200, travel) };
   // A gentler arc on the globe, where zooming out shows the Earth turning underneath.
-  return { method: "flyTo", center: target, zoom: zoomTo, duration: travel, curve: camera.projection === "globe" ? 1.6 : 1.42 };
+  return { method: "flyTo", center: target, zoom: zoomTo, duration: cinematic ? Math.min(4000, Math.round(travel * 1.15)) : travel,
+    curve: cinematic ? (camera.projection === "globe" ? 1.8 : 1.5) : camera.projection === "globe" ? 1.6 : 1.42 };
 }
 
 /** True when every corner of `inner` lies inside `outer` (both [w, s, e, n], no antimeridian crossing). */

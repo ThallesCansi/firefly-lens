@@ -1,8 +1,9 @@
 import type { Map as MapLibreMap, MapMouseEvent, MapTouchEvent } from "maplibre-gl";
 import type { BBox } from "@/lib/data/types";
-import { HOME, planNavigation } from "./camera";
+import { DEFAULT_CAMERA_PROFILE, HOME, planNavigation } from "./camera";
 import { TILT_PITCH } from "./columns";
-import type { MapController, MapLike, MapNavigationRequest, MapPointerEvent, ProjectionMode } from "./map-contract";
+import { boundsSamples, clampPitch, normalizeBearing, pitchedPadding, viewportPadding } from "./camera-presets";
+import type { CameraProfile, MapController, MapLike, MapNavigationRequest, MapPointerEvent, ProjectionMode } from "./map-contract";
 import { projectionSpec, saveProjection } from "./projection";
 
 type PointCtor = new (x: number, y: number) => { x: number; y: number };
@@ -10,6 +11,7 @@ type PointCtor = new (x: number, y: number) => { x: number; y: number };
 export interface EngineHooks {
   /** Called after the projection really changed (or fell back to the flat map). */
   onProjection(mode: ProjectionMode, fellBack: boolean): void;
+  onFlightChange?(running: boolean): void;
 }
 
 /** Whether the person asked the system for less motion. */
@@ -26,12 +28,116 @@ export function createController(map: MapLibreMap, Point: PointCtor, initial: Pr
   const setups = new Set<(m: MapLike) => void>();
   let styleReady = false;
   let tilted = false;
+  let locked = false;
+  let tutorial = false;
+  let profile: CameraProfile = DEFAULT_CAMERA_PROFILE;
+  let generation = 0;
+  let frame = 0;
+  let pending: MapNavigationRequest | null = null;
+  let active: { generation: number; bounds?: BBox; corrections: number } | null = null;
+  let beforeTilt: { pitch: number; bearing: number } | null = null;
   /** The area the camera last framed, until the person moves the map themself. */
   let framed: BBox | null = null;
-  map.on("movestart", (e) => {
-    // Only a gesture carries the browser's event; camera moves made here do not.
-    if ((e as { originalEvent?: unknown }).originalEvent) framed = null;
+  const invalidate = (forget = true) => {
+    const owned = !!(frame || pending || active);
+    generation++;
+    cancelAnimationFrame(frame);
+    frame = 0; pending = null; active = null;
+    if (forget) framed = null;
+    if (owned) hooks.onFlightChange?.(false);
+  };
+  const stop = (forget = true) => { invalidate(forget); map.stop(); };
+  // MapLibre's own input pipeline interrupts its animation scheduler. Calling
+  // Map.stop here also resets native handlers and clears their inertia, losing
+  // all but the first drag frame. Gestures invalidate only our pending work.
+  const gesture = () => invalidate();
+  const canvas = map.getCanvas();
+  // Capture before MapLibre starts a gesture; never resume a cancelled flight.
+  for (const type of ["pointerdown", "touchstart", "wheel", "keydown"]) canvas.addEventListener(type, gesture, { capture: true, passive: true });
+  map.on("movestart", (e) => { if ((e as { originalEvent?: unknown }).originalEvent) invalidate(); });
+  const applyLocks = () => {
+    for (const h of [map.dragPan, map.scrollZoom, map.boxZoom, map.doubleClickZoom, map.touchZoomRotate, map.keyboard]) {
+      if (locked || tutorial) h.disable(); else h.enable();
+    }
+    for (const h of [map.dragRotate, map.touchPitch]) {
+      if (tilted && !locked && !tutorial) h.enable(); else h.disable();
+    }
+  };
+  const motionPreference = typeof matchMedia === "function" ? matchMedia("(prefers-reduced-motion: reduce)") : null;
+  const motionChanged = () => { if (motionPreference?.matches) stop(); };
+  motionPreference?.addEventListener("change", motionChanged);
+  map.on("remove", () => {
+    cancelAnimationFrame(frame); generation++; pending = null; active = null;
+    motionPreference?.removeEventListener("change", motionChanged);
+    for (const type of ["pointerdown", "touchstart", "wheel", "keydown"]) canvas.removeEventListener(type, gesture, true);
   });
+
+  // Only the current animation may validate its arrival. stop() invalidates it
+  // before MapLibre emits moveend, including events fired synchronously.
+  map.on("moveend", (event) => {
+    if (!active || (event as { navigationGeneration?: number }).navigationGeneration !== active.generation) return;
+    const current = active;
+    if (current.bounds && map.getPitch() > 0 && current.corrections < 1 && !locked && !tutorial) {
+      const padding = cameraPadding(map);
+      const { clientWidth: w, clientHeight: h } = map.getContainer();
+      const margin = 8;
+      const cx = (padding.left + w - padding.right) / 2, cy = (padding.top + h - padding.bottom) / 2;
+      const halfWidth = Math.max(1, (w - padding.left - padding.right) / 2 + margin);
+      const halfHeight = Math.max(1, (h - padding.top - padding.bottom) / 2 + margin);
+      const overflow = Math.max(1, ...boundsSamples(current.bounds).map((point) => {
+        const p = map.project(point);
+        return Number.isFinite(p.x) && Number.isFinite(p.y) ? Math.max(Math.abs(p.x - cx) / halfWidth, Math.abs(p.y - cy) / halfHeight) : 2;
+      }));
+      if (overflow > 1) {
+        current.corrections++;
+        // Bounded settling adjustment; no timer or idle listener can restart it.
+        const adjustment = Math.min(1.5, Math.log2(overflow) + 0.08);
+        map.easeTo({ zoom: Math.max(map.getMinZoom(), map.getZoom() - adjustment), duration: prefersReducedMotion() ? 0 : 420, essential: false }, { navigationGeneration: current.generation });
+        return;
+      }
+    }
+    active = null;
+    hooks.onFlightChange?.(false);
+  });
+
+  const execute = (request: MapNavigationRequest) => {
+    const c = map.getCenter();
+    const effectiveProfile = tutorial ? "standard" : profile;
+    const plan = planNavigation(request, { center: [c.lng, c.lat], zoom: map.getZoom(), projection }, prefersReducedMotion(), effectiveProfile);
+    const cinematic = !tutorial && profile === "cinematic" && (!request.source || request.source === "user");
+    const standardNavigation = !tutorial && profile === "standard" && (!request.source || request.source === "user");
+    // A profile change retains the physical pose. The next Standard navigation
+    // starts from traditional north-up/top-down defaults, not an inherited
+    // cinematic arrival. Explicit attitude, column tilt and restoration win.
+    const attitude = { bearing: normalizeBearing(request.bearing ?? (plan.bounds && !cinematic || standardNavigation && !tilted ? 0 : map.getBearing())),
+      pitch: clampPitch(request.pitch ?? (standardNavigation ? (tilted ? TILT_PITCH : 0)
+        : cinematic && request.bounds ? (tilted ? TILT_PITCH : 35) : map.getPitch())) };
+    const padding = cameraPadding(map);
+    const eventData = { navigationGeneration: generation };
+    framed = plan.bounds ?? null;
+    active = { generation, bounds: plan.bounds, corrections: 0 };
+    const options = { duration: plan.duration, essential: false, ...attitude };
+    if (plan.bounds) {
+      const [w, s, e, n] = plan.bounds;
+      const container = map.getContainer();
+      const fit = map.cameraForBounds([w, s, e, n], {
+        padding: pitchedPadding(padding, container.clientWidth, container.clientHeight, attitude.pitch),
+        absolutePadding: true, bearing: attitude.bearing,
+        ...(plan.maxZoom === undefined ? {} : { maxZoom: plan.maxZoom }),
+      });
+      if (!fit) { stop(); return; }
+      const destination = { ...fit, ...options };
+      if (plan.duration === 0) map.jumpTo(destination, eventData);
+      else if (cinematic || request.animation === "fly") map.flyTo({ ...destination, ...(plan.curve === undefined ? {} : { curve: plan.curve }) }, eventData);
+      else map.easeTo(destination, eventData);
+    } else {
+      // Reset retained fit padding when navigating to a point/explicit pose.
+      const destination = { center: plan.center, zoom: plan.zoom, padding: request.padding ?? { top: 0, bottom: 0, left: 0, right: 0 }, ...options };
+      if (plan.method === "flyTo") map.flyTo({ ...destination, curve: plan.curve }, eventData);
+      else if (plan.method === "easeTo") map.easeTo(destination, eventData);
+      else map.jumpTo(destination, eventData);
+    }
+  };
 
   /** False when the pixel shows space around the globe or sky above the horizon. */
   const onSurface = ([x, y]: [number, number]): boolean => {
@@ -69,30 +175,6 @@ export function createController(map: MapLibreMap, Point: PointCtor, initial: Pr
     }
   };
 
-  /**
-   * Frames bounds. Looking straight down the fit is exact; a leaning camera
-   * sees less ground at the same zoom, so it frames a little wider and keeps
-   * its lean (the 3D view is the default, so most framings happen leaning).
-   */
-  const frame = (
-    [w, s, e, n]: BBox,
-    duration: number,
-    maxZoom?: number,
-    attitude: { bearing?: number; pitch?: number } = {},
-  ) => {
-    const padding = cameraPadding(map);
-    // Only pass maxZoom when set: an explicit undefined overrides MapLibre's default and breaks the fit.
-    const limit = maxZoom === undefined ? {} : { maxZoom };
-    const pitch = attitude.pitch ?? (tilted ? TILT_PITCH : 0);
-    const flat = pitch > 0 ? map.cameraForBounds([w, s, e, n], { padding, ...limit }) : undefined;
-    if (!flat?.center || flat.zoom === undefined) {
-      map.fitBounds([w, s, e, n], { padding, duration, essential: false, ...limit, ...attitude });
-      return;
-    }
-    const camera = { center: flat.center, zoom: flat.zoom - 0.45, pitch, bearing: attitude.bearing ?? map.getBearing() };
-    if (duration === 0) map.jumpTo(camera);
-    else map.easeTo({ ...camera, duration, essential: false });
-  };
   const controller: MapController & {
     /** Engine only: re-apply projection and run the tools' setups after a style load. */
     styleLoaded(): void;
@@ -104,8 +186,6 @@ export function createController(map: MapLibreMap, Point: PointCtor, initial: Pr
      * panel opened beside it), unless the person has moved the map since.
      */
     refit(): void;
-    /** Engine only: a camera move that also sets where the camera faces and how far it leans. */
-    navigate(request: MapNavigationRequest, attitude?: { bearing?: number; pitch?: number }): void;
     /**
      * Engine only: leans the camera over for the 3D columns and lets a drag with
      * the right button (or two fingers) orbit; false brings it back to straight
@@ -113,54 +193,49 @@ export function createController(map: MapLibreMap, Point: PointCtor, initial: Pr
      */
     setTilt(on: boolean): void;
   } = {
-    navigate(request: MapNavigationRequest, attitude: { bearing?: number; pitch?: number } = {}) {
+    navigate(request: MapNavigationRequest) {
+      if (tutorial && request.source !== "tutorial" && request.source !== "restore") return;
+      if (locked && request.source !== "restore" && request.source !== "tutorial") return;
+      stop(false);
+      pending = request;
+      hooks.onFlightChange?.(true);
+      // Coalesce React's selection and column-tilt effects into one camera call.
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        const next = pending; pending = null;
+        if (next) execute(next);
+      });
+    },
+    stopNavigation: () => stop(),
+    setCameraProfile(next) { profile = next; },
+    setTutorialActive(next) { if (tutorial !== next) { stop(); tutorial = next; applyLocks(); } },
+    getCameraPose() {
       const c = map.getCenter();
-      const plan = planNavigation(request, { center: [c.lng, c.lat], zoom: map.getZoom(), projection }, prefersReducedMotion());
-      // A newer request replaces the flight in progress instead of queueing behind it.
-      map.stop();
-      framed = plan.method === "fitBounds" ? (plan.bounds as BBox) : null;
-      switch (plan.method) {
-        case "fitBounds":
-          frame(plan.bounds as BBox, plan.duration, plan.maxZoom, attitude);
-          break;
-        case "flyTo":
-          map.flyTo({ center: plan.center, zoom: plan.zoom, duration: plan.duration, curve: plan.curve, essential: false, ...attitude });
-          break;
-        case "easeTo":
-          map.easeTo({ center: plan.center, zoom: plan.zoom, duration: plan.duration, essential: false, ...attitude });
-          break;
-        default:
-          map.jumpTo({ center: plan.center, zoom: plan.zoom, ...attitude });
-      }
+      return { center: [c.lng, c.lat], zoom: map.getZoom(), bearing: map.getBearing(), pitch: map.getPitch(), projection,
+        padding: { top: 0, bottom: 0, left: 0, right: 0, ...map.getPadding() } };
+    },
+    restoreCamera(pose) {
+      stop();
+      if (projection !== pose.projection) applyProjection(pose.projection);
+      controller.navigate({ id: "restore-camera", ...pose, animation: "jump", source: "restore" });
     },
     resetView() {
       // Home also faces north again, at the angle of the current view.
       controller.navigate(
-        { id: `home-${Date.now()}`, center: HOME.center, zoom: HOME.zoom[projection], animation: "ease" },
-        { bearing: 0, pitch: tilted ? TILT_PITCH : 0 },
+        { id: `home-${Date.now()}`, center: HOME.center, zoom: HOME.zoom[projection], animation: "ease", bearing: 0, pitch: tilted ? TILT_PITCH : 0 },
       );
     },
     getProjection: () => projection,
     setProjection(mode: ProjectionMode) {
       if (mode === projection) return;
+      stop();
       saveProjection(mode);
       applyProjection(mode);
     },
-    lockCamera(locked: boolean) {
-      const handlers = [
-        map.dragPan,
-        map.scrollZoom,
-        map.boxZoom,
-        map.doubleClickZoom,
-        map.touchZoomRotate,
-        map.keyboard,
-        // Orbiting exists only in the tilted view; releasing the lock must not switch it on elsewhere.
-        ...(tilted ? [map.dragRotate, map.touchPitch] : []),
-      ];
-      for (const h of handlers) {
-        if (locked) h.disable();
-        else h.enable();
-      }
+    lockCamera(next: boolean) {
+      locked = next;
+      if (next) stop();
+      applyLocks();
     },
     onPointer(handler, options) {
       const layers = options?.layers;
@@ -216,34 +291,25 @@ export function createController(map: MapLibreMap, Point: PointCtor, initial: Pr
       }
     },
     styleUnloading() {
+      stop();
       styleReady = false;
     },
     isOnSurface: onSurface,
     refit() {
-      if (!framed) return;
-      const [w, s, e, n] = framed;
-      map.stop();
-      frame([w, s, e, n], prefersReducedMotion() ? 0 : 350);
+      if (!framed || pending || active || locked || tutorial) return;
+      controller.navigate({ id: "resize-fit", bounds: framed, bearing: map.getBearing(), pitch: map.getPitch(), source: "layout", animation: "jump" });
     },
     setTilt(on: boolean) {
+      if (tilted === on) return;
+      if (on) beforeTilt = { pitch: map.getPitch(), bearing: map.getBearing() };
       tilted = on;
-      for (const h of [map.dragRotate, map.touchPitch]) {
-        if (on) h.enable();
-        else h.disable();
-      }
-      map.stop();
-      const attitude = { pitch: on ? TILT_PITCH : 0, bearing: on ? map.getBearing() : 0 };
-      const duration = prefersReducedMotion() ? 0 : 700;
-      // Stopping the camera would drop a framing still in flight: frame and lean in one move.
-      const [w, s, e, n] = framed ?? [0, 0, 0, 0];
-      const fit = framed ? map.cameraForBounds([w, s, e, n], { padding: cameraPadding(map) }) : undefined;
-      if (fit?.center && fit.zoom !== undefined) {
-        // The fit is computed looking straight down; leaning over needs a little more room.
-        const zoom = fit.zoom - (on ? 0.45 : 0);
-        if (duration === 0) map.jumpTo({ center: fit.center, zoom, ...attitude });
-        else map.easeTo({ center: fit.center, zoom, ...attitude, duration, essential: false });
-      } else if (duration === 0) map.jumpTo(attitude);
-      else map.easeTo({ ...attitude, duration, essential: false });
+      applyLocks();
+      if (locked || tutorial || pending?.source === "restore") return;
+      const attitude = on ? { pitch: TILT_PITCH, bearing: map.getBearing() }
+        : profile === "cinematic" ? beforeTilt ?? { pitch: 0, bearing: 0 } : { pitch: 0, bearing: 0 };
+      const c = map.getCenter();
+      controller.navigate({ ...(pending ?? (framed ? { bounds: framed } : { center: [c.lng, c.lat] as [number, number], zoom: map.getZoom() })), id: pending?.id ?? "column-tilt",
+        ...attitude, animation: pending?.animation ?? "ease" });
     },
   };
   return controller;
@@ -259,16 +325,10 @@ export type EngineController = ReturnType<typeof createController>;
 export function cameraPadding(map: MapLibreMap) {
   const container = map.getContainer();
   const { clientHeight: h, clientWidth: w } = container;
-  const padding = {
-    top: Math.min(90, h * 0.15),
-    bottom: Math.min(160, h * 0.25),
-    left: Math.min(90, w * 0.2),
-    right: Math.min(60, w * 0.12),
-  };
-  const card = container.closest(".workspace-map")?.querySelector(".selection-card")?.getBoundingClientRect();
-  if (card && card.width > 0) {
-    const edge = card.right - container.getBoundingClientRect().left + 24;
-    if (edge < w * 0.45) padding.left = Math.max(padding.left, edge);
-  }
-  return padding;
+  const cards = container.closest(".workspace-map")?.querySelectorAll<HTMLElement>(".selection-card, .explore-hint, .map-card");
+  const origin = container.getBoundingClientRect();
+  return viewportPadding(w, h, Array.from(cards ?? []).map((element) => {
+    const r = element.getBoundingClientRect();
+    return { left: r.left - origin.left, right: r.right - origin.left, top: r.top - origin.top, bottom: r.bottom - origin.top };
+  }));
 }

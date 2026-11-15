@@ -14,6 +14,15 @@ import type { BBox } from "@/lib/data/types";
 
 /** How the Earth is drawn. "globe" is the default and becomes flat by itself at street zooms. */
 export type ProjectionMode = "globe" | "mercator";
+export type CameraProfile = "standard" | "cinematic";
+export interface CameraPose {
+  center: [number, number];
+  zoom: number;
+  bearing: number;
+  pitch: number;
+  projection: ProjectionMode;
+  padding?: { top: number; bottom: number; left: number; right: number };
+}
 
 /**
  * What a pointer gesture on the map does.
@@ -45,6 +54,11 @@ export interface MapNavigationRequest {
   /** Never zoom in past this when framing `bounds`. */
   maxZoom?: number;
   animation?: MapAnimation;
+  bearing?: number;
+  pitch?: number;
+  /** Background restoration and the tutorial never inherit cinematic styling. */
+  source?: "user" | "tutorial" | "restore" | "layout";
+  padding?: { top: number; bottom: number; left: number; right: number };
 }
 
 /** The area the analysis runs on. Rectangles exist today; administrative areas come next. */
@@ -104,6 +118,11 @@ export interface MapController {
   project(lngLat: [number, number]): [number, number];
   /** Current view as [west, south, east, north]. */
   getBounds(): BBox;
+  getCameraPose(): CameraPose;
+  restoreCamera(pose: CameraPose): void;
+  stopNavigation(): void;
+  setCameraProfile(profile: CameraProfile): void;
+  setTutorialActive(active: boolean): void;
 }
 
 /**

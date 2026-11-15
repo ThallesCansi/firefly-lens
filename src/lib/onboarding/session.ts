@@ -1,5 +1,5 @@
 import type { AnalysisArea, BBox, Sensor } from "../data/types";
-import type { ProjectionMode } from "../map/map-contract";
+import type { CameraPose, ProjectionMode } from "../map/map-contract";
 import { TOUR_STEPS, type TourStepId } from "./steps";
 
 export interface WorkspaceSnapshot {
@@ -19,6 +19,9 @@ export interface WorkspaceSnapshot {
   analyticsTab: "history" | "forecast";
   bounds?: BBox;
   projection?: ProjectionMode;
+  camera?: CameraPose;
+  columnsChosen?: boolean;
+  flight?: number | null;
   scrollY?: number;
   panelScrollTop?: number;
 }

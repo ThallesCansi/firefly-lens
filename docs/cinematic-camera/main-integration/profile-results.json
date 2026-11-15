@@ -1,0 +1,225 @@
+{
+  "label": "profiles",
+  "baseline": "5d457c7",
+  "engine": "6.18.0",
+  "controllerSha256": "9aa81643bc57d8ab329352f9d8455a659bd3f92466ad7ff2463bf69e794365e0",
+  "rows": [],
+  "interruptions": [],
+  "profiles": [
+    {
+      "iteration": 0,
+      "profile": "cinematic",
+      "target": "Pantanal",
+      "invocation": {
+        "method": "flyTo",
+        "center": {
+          "lng": -56.500000000000014,
+          "lat": -19.02707655807548
+        },
+        "zoom": 6.324540274044174,
+        "bearing": 19,
+        "padding": {
+          "top": 183.20617090704496,
+          "bottom": 253.20617090704496,
+          "right": 132.2706309802318,
+          "left": 162.2706309802318
+        },
+        "duration": 1575,
+        "essential": false,
+        "pitch": 35,
+        "curve": 1.8
+      },
+      "finalPose": {
+        "center": [
+          -56.49999999998647,
+          -19.027076558074395
+        ],
+        "zoom": 5.926705936400732,
+        "bearing": 18.999999999999996,
+        "pitch": 35,
+        "stops": 2,
+        "starts": 3,
+        "moves": 330
+      }
+    },
+    {
+      "iteration": 0,
+      "profile": "cinematic",
+      "target": "São Paulo",
+      "invocation": {
+        "method": "flyTo",
+        "center": {
+          "lng": -48.635399999999976,
+          "lat": -22.57520650056499
+        },
+        "zoom": 6.1188661438766925,
+        "bearing": 19,
+        "padding": {
+          "top": 183.20617090704496,
+          "bottom": 253.20617090704496,
+          "right": 132.2706309802318,
+          "left": 162.2706309802318
+        },
+        "duration": 1943,
+        "essential": false,
+        "pitch": 35,
+        "curve": 1.8
+      },
+      "finalPose": {
+        "center": [
+          -48.63539999998932,
+          -22.575206500554838
+        ],
+        "zoom": 5.665236101116119,
+        "bearing": 18.999999999999996,
+        "pitch": 35,
+        "stops": 4,
+        "starts": 6,
+        "moves": 636
+      }
+    },
+    {
+      "iteration": 1,
+      "profile": "standard",
+      "target": "Pantanal",
+      "invocation": {
+        "method": "easeTo",
+        "center": {
+          "lng": -56.500000000000014,
+          "lat": -19.02707655807548
+        },
+        "zoom": 6.5222754936214935,
+        "bearing": 0,
+        "padding": {
+          "top": 90,
+          "bottom": 160,
+          "right": 60,
+          "left": 90
+        },
+        "duration": 1200,
+        "essential": false,
+        "pitch": 0
+      },
+      "finalPose": {
+        "center": [
+          -56.5,
+          -19.02707655807548
+        ],
+        "zoom": 6.5222754936214935,
+        "bearing": 0,
+        "pitch": 0,
+        "stops": 6,
+        "starts": 8,
+        "moves": 836
+      }
+    },
+    {
+      "iteration": 1,
+      "profile": "standard",
+      "target": "São Paulo",
+      "invocation": {
+        "method": "easeTo",
+        "center": {
+          "lng": -48.635399999999976,
+          "lat": -22.57520650056499
+        },
+        "zoom": 6.531182311584907,
+        "bearing": 0,
+        "padding": {
+          "top": 90,
+          "bottom": 160,
+          "right": 60,
+          "left": 90
+        },
+        "duration": 1200,
+        "essential": false,
+        "pitch": 0
+      },
+      "finalPose": {
+        "center": [
+          -48.635400000000004,
+          -22.57520650056499
+        ],
+        "zoom": 6.531182311584907,
+        "bearing": 0,
+        "pitch": 0,
+        "stops": 8,
+        "starts": 10,
+        "moves": 1036
+      }
+    },
+    {
+      "iteration": 2,
+      "profile": "cinematic",
+      "target": "Pantanal",
+      "invocation": {
+        "method": "flyTo",
+        "center": {
+          "lng": -56.500000000000014,
+          "lat": -19.02707655807548
+        },
+        "zoom": 6.324540274044174,
+        "bearing": 19,
+        "padding": {
+          "top": 183.20617090704496,
+          "bottom": 253.20617090704496,
+          "right": 132.2706309802318,
+          "left": 162.2706309802318
+        },
+        "duration": 1575,
+        "essential": false,
+        "pitch": 35,
+        "curve": 1.8
+      },
+      "finalPose": {
+        "center": [
+          -56.49999999998647,
+          -19.027076558074395
+        ],
+        "zoom": 5.926705936400732,
+        "bearing": 18.999999999999996,
+        "pitch": 35,
+        "stops": 10,
+        "starts": 13,
+        "moves": 1366
+      }
+    },
+    {
+      "iteration": 2,
+      "profile": "cinematic",
+      "target": "São Paulo",
+      "invocation": {
+        "method": "flyTo",
+        "center": {
+          "lng": -48.635399999999976,
+          "lat": -22.57520650056499
+        },
+        "zoom": 6.1188661438766925,
+        "bearing": 19,
+        "padding": {
+          "top": 183.20617090704496,
+          "bottom": 253.20617090704496,
+          "right": 132.2706309802318,
+          "left": 162.2706309802318
+        },
+        "duration": 1943,
+        "essential": false,
+        "pitch": 35,
+        "curve": 1.8
+      },
+      "finalPose": {
+        "center": [
+          -48.63539999998932,
+          -22.575206500554838
+        ],
+        "zoom": 5.665236101116119,
+        "bearing": 18.999999999999996,
+        "pitch": 35,
+        "stops": 12,
+        "starts": 16,
+        "moves": 1759
+      }
+    }
+  ],
+  "errors": []
+}
