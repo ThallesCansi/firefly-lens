@@ -21,13 +21,15 @@ const spin = (i: number, k: number) => {
   return v - Math.floor(v);
 };
 
+// Rounded so server and browser print the same coordinates (Math.sin may differ in the last digits).
+const r2 = (v: number) => Math.round(v * 100) / 100;
 const VIIRS = FIRES.flatMap((f, i) =>
   Array.from({ length: f.size }, (_, k) => ({
-    x: f.x + (spin(i * 7 + k, 1) - 0.5) * 34,
-    y: f.y + (spin(i * 7 + k, 2) - 0.5) * 34,
+    x: r2(f.x + (spin(i * 7 + k, 1) - 0.5) * 34),
+    y: r2(f.y + (spin(i * 7 + k, 2) - 0.5) * 34),
   })),
 );
-const MODIS = FIRES.filter((f) => f.modis).map((f, i) => ({ x: f.x + (spin(i, 3) - 0.5) * 16, y: f.y + (spin(i, 4) - 0.5) * 16 }));
+const MODIS = FIRES.filter((f) => f.modis).map((f, i) => ({ x: r2(f.x + (spin(i, 3) - 0.5) * 16), y: r2(f.y + (spin(i, 4) - 0.5) * 16) }));
 
 const cellsOf = (points: { x: number; y: number }[]) =>
   [...new Set(points.map((p) => `${Math.floor(p.x / CELL)}:${Math.floor(p.y / CELL)}`))].map((key) => {

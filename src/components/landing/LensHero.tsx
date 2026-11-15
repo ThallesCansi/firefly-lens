@@ -3,16 +3,74 @@
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { Lume } from "@/components/firefly/Lume";
-import { fireData } from "@/lib/data/source";
-import { shortDate } from "@/lib/format";
-import { useYearData } from "@/lib/useYearData";
+import { WORLD_PATH } from "@/lib/geo/worldOutline";
 
-/** One 0.25° grid cell on the peak day: MODIS Aqua and VIIRS NOAA-20 detections in it. */
+/** One illustrative grid cell on screen, with the detections each sensor put in it. */
 interface Point {
   x: number;
   y: number;
   modis: number;
   viirs: number;
+}
+
+/** Where the world tends to burn, as cluster centres: lon, lat, spread in degrees, weight. */
+const FIRE_BELTS: [number, number, number, number][] = [
+  [-55, -11, 5, 1], // arc of deforestation
+  [-46, -8, 3.5, 0.8], // Matopiba
+  [-62, -10, 3, 0.8], // Rondônia and Acre
+  [-58, -17, 3, 0.7], // Pantanal and eastern Bolivia
+  [-60, -25, 3, 0.5], // Chaco
+  [-72, 6, 3, 0.45], // Llanos
+  [-90, 17, 3, 0.4], // Yucatán and Guatemala
+  [-120, 40, 3, 0.25], // US West
+  [-3, 10, 4, 0.6], // Sahel
+  [9, 9, 4, 0.75], // Nigeria and Cameroon
+  [24, 7, 5, 0.9], // Central African belt
+  [22, -9, 6, 1], // Angola and Congo basin
+  [31, -15, 4, 0.7], // Zambia and Mozambique
+  [46, -18, 2, 0.4], // Madagascar
+  [79, 22, 4, 0.35], // central India
+  [100, 18, 4, 0.6], // mainland Southeast Asia
+  [112, -1, 3, 0.5], // Borneo and Sumatra
+  [132, -15, 6, 0.6], // northern Australia
+  [122, 58, 7, 0.35], // Siberia
+];
+
+/** A fixed mock set: the same points on every visit, kept on land. */
+function mockDetections(land: Path2D): { lon: number; lat: number; modis: number; viirs: number }[] {
+  const probe = document.createElement("canvas").getContext("2d")!;
+  const rand = (i: number, k: number) => {
+    const v = Math.sin((i + 1) * 91.345 * k) * 43758.5453;
+    return v - Math.floor(v);
+  };
+  const STEP = 1.25; // degrees per grid cell
+  const cells = new Map<string, { lon: number; lat: number; modis: number; viirs: number }>();
+  let seed = 0;
+  for (const [lon0, lat0, spread, weight] of FIRE_BELTS) {
+    const n = Math.round(60 * weight);
+    for (let i = 0; i < n; i++, seed++) {
+      // A rough bell shape: the sum of two uniforms, so belts thin out at the edges.
+      const lon = lon0 + (rand(seed, 1) + rand(seed, 2) - 1) * spread * 1.7;
+      const lat = lat0 + (rand(seed, 3) + rand(seed, 4) - 1) * spread * 1.3;
+      const gx = Math.floor(lon / STEP);
+      const gy = Math.floor(lat / STEP);
+      const key = `${gx}:${gy}`;
+      let cell = cells.get(key);
+      if (!cell) {
+        // Sit off the cell centre, so the marks read as places, not a lattice.
+        const cx = (gx + 0.5 + (rand(gx * 31 + gy, 6) - 0.5) * 0.7) * STEP;
+        const cy = (gy + 0.5 + (rand(gy * 17 + gx, 7) - 0.5) * 0.7) * STEP;
+        if (!probe.isPointInPath(land, cx + 180, 90 - cy)) continue;
+        cell = { lon: cx, lat: cy, modis: 0, viirs: 0 };
+        cells.set(key, cell);
+      }
+      const heat = rand(seed, 5);
+      cell.viirs += 1 + Math.round(heat * heat * 5 * weight);
+      // MODIS misses the small fires VIIRS catches.
+      if (heat > 0.5) cell.modis += 1 + Math.round((heat - 0.5) * 4 * weight);
+    }
+  }
+  return [...cells.values()];
 }
 
 interface Fly {
@@ -26,10 +84,10 @@ interface Fly {
 }
 
 /**
- * The first screen is the product in miniature: a dark field, and a lens that
- * shows what two satellites saw underneath it on one day. Each mark is one
- * 0.25° grid cell of real NASA FIRMS detections; the counts beside the lens
- * are the detections in the cells inside it.
+ * The first screen is the product in miniature: a field of fireflies, and a
+ * lens that uncovers the world map beneath them with what two satellites saw.
+ * The marks are a fixed illustrative set placed on the world's fire belts;
+ * the counts beside the lens are the detections in the cells inside it.
  */
 export function LensHero() {
   const section = useRef<HTMLElement>(null);
@@ -38,10 +96,6 @@ export function LensHero() {
   const ring = useRef<HTMLDivElement>(null);
   const modisOut = useRef<HTMLSpanElement>(null);
   const viirsOut = useRef<HTMLSpanElement>(null);
-  const { data } = useYearData("amazon");
-
-  const peak = data?.peak ?? null;
-
   useEffect(() => {
     const host = section.current;
     const swarmCanvas = swarm.current;
@@ -58,6 +112,20 @@ export function LensHero() {
     let h = 0;
     let radius = 120;
     let points: Point[] = [];
+    let k = 1; // screen pixels per degree
+    let ox = 0; // screen x of longitude −180
+    let oy = 0; // screen y of latitude 90
+    const land = new Path2D(WORLD_PATH);
+    const fires = mockDetections(land);
+    const css = getComputedStyle(document.documentElement);
+    let ink = "#eef0e6";
+    let modisColor = "#3f8fe6";
+    let viirsColor = "#d9569a";
+    const readColors = () => {
+      ink = css.getPropertyValue("--color-ink").trim() || ink;
+      modisColor = css.getPropertyValue("--color-modis").trim() || modisColor;
+      viirsColor = css.getPropertyValue("--color-viirs").trim() || viirsColor;
+    };
     let flies: Fly[] = [];
     const lens = { x: 0, y: 0 };
     let pointer: { x: number; y: number } | null = null;
@@ -77,36 +145,63 @@ export function LensHero() {
 
     const home = () => (w < 768 ? { x: w * 0.5, y: h * 0.72 } : { x: w * 0.69, y: h * 0.52 });
 
+    /** Every horizontal copy of the world that touches the screen. */
+    const copies = () => {
+      const span = 360 * k;
+      const out: number[] = [];
+      for (let x = ox - Math.ceil(ox / span) * span; x < w; x += span) out.push(x);
+      return out;
+    };
+
     const drawEmbers = () => {
       ectx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ectx.clearRect(0, 0, w, h);
-      // The shared grid shows under the lens too.
-      ectx.strokeStyle = "rgba(238,240,230,0.09)";
+
+      // Graticule every 10°, then the land: the world map the lens reveals.
+      ectx.strokeStyle = ink;
+      ectx.globalAlpha = 0.06;
       ectx.lineWidth = 1;
       ectx.beginPath();
-      for (let x = 0.5; x < w; x += 44) {
-        ectx.moveTo(x, 0);
-        ectx.lineTo(x, h);
+      for (const x0 of copies()) {
+        for (let lon = 0; lon < 360; lon += 10) {
+          const x = Math.round(x0 + lon * k) + 0.5;
+          ectx.moveTo(x, 0);
+          ectx.lineTo(x, h);
+        }
       }
-      for (let y = 0.5; y < h; y += 44) {
+      for (let lat = 80; lat > -90; lat -= 10) {
+        const y = Math.round(oy + (90 - lat) * k) + 0.5;
         ectx.moveTo(0, y);
         ectx.lineTo(w, y);
       }
       ectx.stroke();
+
+      for (const x0 of copies()) {
+        ectx.setTransform(dpr * k, 0, 0, dpr * k, dpr * x0, dpr * oy);
+        ectx.fillStyle = ink;
+        ectx.globalAlpha = 0.07;
+        ectx.fill(land);
+        ectx.globalAlpha = 0.34;
+        ectx.lineWidth = 1 / k;
+        ectx.stroke(land);
+      }
+      ectx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ectx.globalAlpha = 1;
+
       const topM = Math.max(1, ...points.map((p) => p.modis));
       const topV = Math.max(1, ...points.map((p) => p.viirs));
       for (const p of points) {
         if (p.modis > 0) {
           ectx.beginPath();
-          ectx.arc(p.x, p.y, 3 + 9 * Math.sqrt(p.modis / topM), 0, Math.PI * 2);
-          ectx.strokeStyle = "#3f8fe6";
+          ectx.arc(p.x, p.y, 3 + 7 * Math.sqrt(p.modis / topM), 0, Math.PI * 2);
+          ectx.strokeStyle = modisColor;
           ectx.lineWidth = 1.5;
           ectx.stroke();
         }
         if (p.viirs > 0) {
           ectx.beginPath();
-          ectx.arc(p.x, p.y, 1.6 + 5 * Math.sqrt(p.viirs / topV), 0, Math.PI * 2);
-          ectx.fillStyle = "#d9569a";
+          ectx.arc(p.x, p.y, 1.6 + 4 * Math.sqrt(p.viirs / topV), 0, Math.PI * 2);
+          ectx.fillStyle = viirsColor;
           ectx.fill();
         }
       }
@@ -123,33 +218,19 @@ export function LensHero() {
       }
       host.style.setProperty("--lens-r", `${radius}px`);
 
-      if (data && peak) {
-        const [west, south, east, north] = fireData.presets()[0].bbox;
-        const day = data.peakCells.map((c) => ({
-          u: (c.lon - west) / (east - west),
-          v: (north - c.lat) / (north - south),
-          modis: c.modis,
-          viirs: c.viirs,
-        }));
-        // Frame the map so the busiest fire front sits where the lens rests.
-        const bins = new Map<string, number>();
-        let busiest = { u: 0.5, v: 0.5, n: 0 };
-        for (const p of day) {
-          const key = `${Math.floor(p.u * 8)}:${Math.floor(p.v * 6)}`;
-          const n = (bins.get(key) ?? 0) + p.modis + p.viirs;
-          bins.set(key, n);
-          if (n > busiest.n) busiest = { u: (Math.floor(p.u * 8) + 0.5) / 8, v: (Math.floor(p.v * 6) + 0.5) / 6, n };
+      // Plate carrée, scaled so the lens at rest frames central Brazil.
+      readColors();
+      k = Math.max(1600, w * 2.2) / 360;
+      const rest = home();
+      ox = rest.x - (-54 + 180) * k;
+      oy = rest.y - (90 - -11) * k;
+      points = [];
+      for (const x0 of copies()) {
+        for (const f of fires) {
+          const x = x0 + (f.lon + 180) * k;
+          const y = oy + (90 - f.lat) * k;
+          if (x > -20 && x < w + 20 && y > -20 && y < h + 20) points.push({ x, y, modis: f.modis, viirs: f.viirs });
         }
-        const rest = home();
-        const zoom = 1.5;
-        points = day
-          .map((p) => ({
-            x: rest.x + (p.u - busiest.u) * w * zoom,
-            y: rest.y + (p.v - busiest.v) * h * zoom,
-            modis: p.modis,
-            viirs: p.viirs,
-          }))
-          .filter((p) => p.x > -20 && p.x < w + 20 && p.y > -20 && p.y < h + 20);
       }
 
       const n = Math.min(70, Math.round((w * h) / 26000));
@@ -252,6 +333,12 @@ export function LensHero() {
     layout();
     const ro = new ResizeObserver(layout);
     ro.observe(host);
+    // The theme toggle swaps the colour tokens; redraw the map in the new ones.
+    const themeWatch = new MutationObserver(() => {
+      readColors();
+      drawEmbers();
+    });
+    themeWatch.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme", "class"] });
     host.addEventListener("pointermove", onMove);
     host.addEventListener("pointerleave", onLeave);
     if (!still) raf = requestAnimationFrame(tick);
@@ -259,10 +346,11 @@ export function LensHero() {
     return () => {
       cancelAnimationFrame(raf);
       ro.disconnect();
+      themeWatch.disconnect();
       host.removeEventListener("pointermove", onMove);
       host.removeEventListener("pointerleave", onLeave);
     };
-  }, [data, peak]);
+  }, []);
 
   return (
     <section
@@ -304,11 +392,12 @@ export function LensHero() {
       <div className="wrap flex flex-1 flex-col justify-start pb-16 pt-28 md:justify-end md:pb-24">
         <div className="max-w-[35rem]">
           <h1 id="hero-title" className="rise text-[2.5rem] leading-[1.02] md:text-[4.25rem]" style={{ ["--i" as string]: 0 }}>
-            One fire calendar from two satellite sensors
+            See when a fire season turns unusual
           </h1>
           <p className="rise mt-5 max-w-[32rem] text-lg text-dim" style={{ ["--i" as string]: 1 }}>
-            MODIS sees fire in 1 km pixels and VIIRS in 375 m pixels, so their counts never match. FireFly Lens converts
-            VIIRS to the MODIS scale and shows 24 years of burning in Brazil as one calendar, from real NASA records.
+            Pick any patch of Brazil, a farm, a park or a whole biome, and read 24 years of fire as one calendar. Days
+            that burn far above their season get a ring, so a brigade, a researcher or a reporter can tell a normal dry
+            season from a dangerous one.
           </p>
           <div className="rise mt-7 flex flex-wrap gap-3" style={{ ["--i" as string]: 2 }}>
             <Link href="/lens" className="btn btn-primary">
@@ -319,7 +408,7 @@ export function LensHero() {
             </Link>
           </div>
           <p className="rise mt-8 text-[0.875rem] text-faint" style={{ ["--i" as string]: 3 }}>
-            Under the lens: the Southern Amazon{peak ? ` on ${shortDate(peak)}` : ""}, NASA FIRMS detections per 0.25° cell.
+            The points under the lens are illustrative. The Lens itself runs on NASA FIRMS records.
           </p>
         </div>
       </div>

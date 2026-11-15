@@ -1,7 +1,11 @@
+import Link from "next/link";
+import { BRAZIL_BOX, BRAZIL_PATH } from "@/lib/geo/brazilOutline";
+
 /**
- * One burning patch, 5 km across, drawn twice: once on each sensor's pixel
- * grid. The lit pixels are computed from the same fire shape, so the two
- * counts differ for the reason they differ in orbit.
+ * One burning patch drawn twice: once on each sensor's pixel grid, over the
+ * same stylised map of Brazil (not to scale; it is there to make the two grid
+ * sizes read as two views of one ground). The lit pixels are computed from the
+ * same fire shape, so the two counts differ for the reason they differ in orbit.
  */
 
 const PATCH = 300;
@@ -61,8 +65,9 @@ export function TwoSensors() {
             Two sensors count the same fire differently
           </h2>
           <p className="mt-5 text-lg text-dim">
-            A hot spot is a pixel that looked hot, not a fire. Below, one burning patch 5 km across lands on each
-            sensor&rsquo;s grid. Adding the two counts would measure pixel size, not burning.
+            MODIS sees the ground in 1 km pixels, VIIRS in 375 m pixels, so their counts never match. A hot spot is a
+            pixel that looked hot, not a fire. Below, one burning patch lands on each sensor&rsquo;s grid: adding the two
+            counts would measure pixel size, not burning.
           </p>
         </div>
 
@@ -78,7 +83,9 @@ export function TwoSensors() {
                   role="img"
                   aria-label={`${s.name} reports ${lit} detections for the patch on a ${s.cells} by ${s.cells} pixel grid.`}
                 >
+                  {/* Unlit pixels first, the map over them, the lit pixels on top. */}
                   {s.lit.map((on, i) => {
+                    if (on) return null;
                     const col = i % s.cells;
                     const row = Math.floor(i / s.cells);
                     return (
@@ -89,7 +96,35 @@ export function TwoSensors() {
                         width={size - 2}
                         height={size - 2}
                         rx={s.cells > 8 ? 2 : 4}
-                        fill={on ? s.color : "var(--color-bark)"}
+                        fill="var(--color-bark)"
+                      />
+                    );
+                  })}
+                  <path
+                    d={BRAZIL_PATH}
+                    transform={`translate(${(PATCH - BRAZIL_BOX.width * 0.9) / 2} ${(PATCH - BRAZIL_BOX.height * 0.9) / 2}) scale(0.9)`}
+                    fill="var(--color-ink)"
+                    fillOpacity={0.08}
+                    stroke="var(--color-ink)"
+                    strokeOpacity={0.32}
+                    strokeWidth={0.75}
+                    strokeLinejoin="round"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                  {s.lit.map((on, i) => {
+                    if (!on) return null;
+                    const col = i % s.cells;
+                    const row = Math.floor(i / s.cells);
+                    return (
+                      <rect
+                        key={i}
+                        x={col * size + 1}
+                        y={row * size + 1}
+                        width={size - 2}
+                        height={size - 2}
+                        rx={s.cells > 8 ? 2 : 4}
+                        fill={s.color}
+                        fillOpacity={0.92}
                       />
                     );
                   })}
@@ -108,6 +143,20 @@ export function TwoSensors() {
               </div>
             );
           })}
+        </div>
+
+        <div className="mt-16 grid gap-6 border-t border-line pt-10 md:grid-cols-[minmax(0,44rem)_auto] md:items-end md:justify-between md:gap-16">
+          <div>
+            <h3 className="text-2xl md:text-3xl">So we put both sensors on one scale</h3>
+            <p className="mt-4 text-dim">
+              The conversion builds on the published detection algorithms for each sensor (Giglio et al., 2016 for
+              MODIS; Schroeder et al., 2014 for VIIRS) and on a count model fitted to 2018&ndash;2023, the years both
+              flew over Brazil. The result is checked against held-out months before it reaches the calendar.
+            </p>
+          </div>
+          <Link href="/method#approach" className="btn btn-primary justify-self-start">
+            See how we harmonized the data
+          </Link>
         </div>
       </div>
     </section>
