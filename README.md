@@ -1,197 +1,115 @@
+<div align="center">
+
+<img src="src/app/icon.svg" width="96" alt="FireFlighter, the FireFly Lens mascot" />
+
 # FireFly Lens
 
-One fire calendar from two satellite sensors.
+**One fire calendar from two satellite sensors.**
 
-FireFly Lens is a NASA Space Apps Challenge 2026 project for the challenge *Harmonization of MODIS and VIIRS Hot Spots*. It brings the active-fire detections of both instruments onto one shared grid and shows a year of fire activity as a calendar, with the fire season and the unusual days marked.
+MODIS and VIIRS active-fire detections, harmonized onto one scale and read as a calendar of fire activity across South America.
 
-> **Coverage: spatial harmonization for Brazil; national harmonization for the other 11 South American countries.** The map-first interface runs on the real NASA FIRMS records for Brazil, July 2002 to November 2026: MODIS Aqua and VIIRS NOAA-20, harmonized into one series on the MODIS Aqua scale and validated year by year. This project is not endorsed by NASA.
+[![Live app](https://img.shields.io/badge/live-firefly--lens.vercel.app-ff6a13?style=flat-square)](https://firefly-lens.vercel.app)
+[![CI](https://img.shields.io/github/actions/workflow/status/ThallesCansi/firefly-lens/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/ThallesCansi/firefly-lens/actions/workflows/ci.yml)
+[![NASA Space Apps 2026](https://img.shields.io/badge/NASA%20Space%20Apps-2026-0b3d91?style=flat-square)](https://www.spaceappschallenge.org/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-2a221c?style=flat-square)](LICENSE)
 
-The other eleven countries now have real national histories from **July 2002 to December 2025**, the same month/year and daily calendar interface, and History/Forecast report tabs. The sidebar fits its calendar to the available height; analyses stay below the map. Navigation is bounded to South America with dimming outside the published footprint. See [historical coverage and calendar update](docs/south-america-history-calendar.md) for scientific scope, daily allocation, deployment and verification.
+[**Open the app**](https://firefly-lens.vercel.app) · [Method](https://firefly-lens.vercel.app/method) · [Methodology (PT)](harmonization/docs/METHODOLOGY.md)
 
-## Why the two records need harmonizing
+<br />
 
-A hot spot is a pixel that looked hot, not a fire. MODIS reports fire in 1 km pixels; VIIRS in 375 m pixels, and over Brazil it reports about six times as many. Adding the two counts would measure pixel size, not burning, and MODIS Aqua, the longest record, is near its end.
+<img src="docs/south-america-history-qa/brazil-sidebar.png" alt="Pantanal selected on the map, with 3D detection columns and a month-by-year fire calendar from 2006 to 2026" width="100%" />
 
-FireFly Lens therefore writes the whole record on the MODIS Aqua scale. In short:
+</div>
 
-1. Real FIRMS detections for Brazil are filtered (confidence, vegetation fire only) and counted per 0.25° cell, month and day or night, with VIIRS also counted degraded to ~1 km.
-2. Over April 2018 to December 2023, when both flew and Aqua kept its orbit, a negative binomial model learns how many MODIS Aqua hot spots each VIIRS count stands for, by biome, month and day or night.
-3. Through 2025 the series is MODIS Aqua as observed; from 2026 it is VIIRS converted, with a 95% range.
-4. Checked on years left out of the fit: raw VIIRS reads 506% above MODIS Aqua over Brazil; harmonized, the bias is below 1% and the ranking of the worst months matches (Spearman 0.99).
-5. In the app, any area (a drawn polygon or a Brazilian state) sums its cells, each weighted by the share of it inside the area; each month is compared with the median of the same month over 2003–2025, and days are scaled into an index from 0 to 100 for the calendar, with the fire season and unusual days marked.
+<br />
 
-The method, its validation and its limits are on the `/method` page and, in full (in Portuguese), in [`harmonization/docs/METHODOLOGY.md`](harmonization/docs/METHODOLOGY.md).
+## The problem
 
-## What is in the app
+A hot spot is a pixel that looked hot, not a fire. MODIS sees the ground in 1 km pixels, VIIRS in 375 m, so over Brazil VIIRS reports about **six times** as many detections. Adding the two counts measures pixel size, not burning, and MODIS Aqua, the longest record, is reaching its end.
 
-| Route | What it shows |
+FireFly Lens writes the whole record on the **MODIS Aqua scale**, so 2002 and 2026 can be compared on the same terms.
+
+<table>
+  <tr>
+    <td align="center"><h3>506% → &lt;1%</h3>bias of VIIRS against MODIS Aqua,<br/>raw vs. harmonized</td>
+    <td align="center"><h3>ρ = 0.99</h3>Spearman rank agreement<br/>on held-out years</td>
+    <td align="center"><h3>2002 – 2026</h3>daily record on<br/>a 0.25° grid</td>
+    <td align="center"><h3>12 countries</h3>Brazil by biome,<br/>11 more nationally</td>
+  </tr>
+</table>
+
+## What you can do
+
+|  |  |
 |---|---|
-| `/` and `/lens` | Full-viewport map workspace: explore, select an area, then open its historical analysis. |
-| `/about` | The original project introduction, sensor comparison, method overview and calendar preview. |
-| `/method` | Three linked tabs: Harmonization, Historical Anomalies, and Data & Limitations, with equations and references. |
+| 🗺️ **Explore** | Pan a 3D globe with MODIS and VIIRS detections per grid cell, over NASA Blue Marble imagery. |
+| ✏️ **Select** | Draw a polygon, pick a state or country, type coordinates, or choose a study region. |
+| 📅 **Read the history** | Every month of every year in one grid, unusual months ringed, each year opening into a daily calendar. |
+| 🔥 **Check fire danger** | Current Fire Weather Index for the area, from NASA GFWED / GEOS-5 forecasts. |
+| 💬 **Ask FireFlighter** | *"Compare Mato Grosso in 2020 and 2024"*: the assistant moves the map and answers from the record. |
+| ⬇️ **Export** | Detections, daily series and monthly tables as CSV; the history grid as SVG. |
 
-In the map workspace a user can:
+<table>
+  <tr>
+    <td width="50%"><img src="docs/cinematic-camera/1440-light-brazil-satellite.png" alt="Map workspace over South America in satellite view" /></td>
+    <td width="50%"><img src="docs/main-integration-qa/history-dark.png" alt="Monthly fire activity chart from 2002 to 2026, dark theme" /></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Map workspace</sub></td>
+    <td align="center"><sub>Historical fire activity</sub></td>
+  </tr>
+</table>
 
-- **Explore first**: pan and zoom, search places or `latitude, longitude`, and toggle MODIS and VIIRS independently. The map shows detections per 0.25° grid cell (MODIS Aqua as rings, VIIRS NOAA-20 as dots), inside Brazil's outline. Search only navigates the camera; it never selects administrative boundaries.
-- **Select, then analyze**: draw an area, pick a Brazilian state, type bounds, or choose a study region under Coordinates. Press **Analyze Area** to compute the history. A scrollable right panel opens on desktop, and a bottom sheet opens on mobile. Closing preserves context; editing an area requires pressing Analyze again. Camera movement never recalculates the history.
-- **Coordinate views**: choosing a history-grid month updates the map month; selecting a daily calendar cell or sensor-chart day shows that day's detections. The compact map control switches month and year. Detections load only inside the selected area, not globally.
+## How it works
 
-- **Choose an area of interest** in Brazil: five ready-made regions (Southern Amazon, Matopiba, Pantanal, Sertão, Pampa), coordinates typed in decimal degrees, a Brazilian state picked on the map (cut by its IBGE outline), or an area drawn on the map (up to 12° in each direction). A drawn area shows its corners right away: drag a corner on its own, drag the + on an edge to add one, double-click a corner to remove it, or drag the centre to move the whole shape. Edges may not cross.
-- **Choose a date range**, by month, from July 2002 to November 2026.
-- **Read the history grid**: every month of every year in MODIS-Aqua-equivalent hot spots, with months at least twice their 2003–2025 median ringed, months estimated from VIIRS dotted, and each year's total set against the median year. The headline compares the selected month with its median and rank, with a 95% range when it is estimated.
-- **Open any year** as a daily calendar with the typical fire season and unusual days marked, switch between the harmonized series, MODIS Aqua and harmonized VIIRS, and inspect any day in figures per sensor and on the map.
-- **Ask the assistant** at the bottom of the map, in any language: "Show Santa Catarina in 2006", "Which month burned most in the Pantanal?", "Compare Mato Grosso in 2020 and 2024". It selects states, regions and boxes, moves the map, sets the period and layers, opens the analysis, and answers questions from the area's own record.
-- **Download** detections per grid cell and day (CSV, up to 36 months), the daily harmonized series (CSV), the monthly table with medians, ranks and ranges (CSV), and the history grid (SVG).
-
-## Run it
-
-### Camera navigation
-
-The workspace **Camera** menu offers Earth, Brazil, Pantanal and selected-area framing, North up, Top-down and Stop flight. **Cinematic** is the default, without an initial flight or change to the opening framing. Selecting either profile changes future navigation without immediately moving the camera. Standard restores traditional animation and north-up/top-down arrival on subsequent navigation, while preserving explicit camera poses and enabled 3D column tilt. Presets change only the view. Gestures interrupt flights, and drawing and Lume take priority. The tour restores the complete camera pose, columns and regional-flight state. No terrain or scientific calculations are added. See [camera implementation and verification](docs/cinematic-camera-validation.md).
-
-### Tour with FireFlighter
-
-The workspace automatically opens FireFlighter’s welcome on each new visit or reload. **Don't show again** is an explicit browser preference: only checking it disables future automatic welcomes. Completing, skipping or closing the tour does not opt out. A single welcome is presented per browser document, including across Strict Mode effect replay and client-side navigation. The **Tour with FireFlighter** launcher, beside the original animated mascot, remains available after opt-out.
-
-The read-only demonstration selects the exact Pantanal preset and September 2023, using the existing historical record and geometry-matched Python analytics. History, historical anomalies and experimental Forecast remain distinct; unavailable forecasts remain unavailable. Only the guide’s controls and opt-out checkbox are interactive. Search, map gestures, pickers, calendars, tabs, exports and the assistant remain visible but locked. Next/Back prepare them through existing React handlers; no file is downloaded and no model request is sent by the tour.
-
-At completion, choose **Keep example**, **Restore previous workspace**, or **Replay tour**. Skip and Escape restore the prior region, period, range, sensors, panel/calendar view and analytics tab. Camera restoration uses the existing bounds/projection contract. Outcomes use `firefly-lens-tour-v1`; opt-out uses the independent `firefly-lens-tour-auto-disabled-v1` preference. Unchecking it during manual replay enables automatic presentation on the next visit. Neither preference depends on the original introductory hint.
-
-Tour transitions prepare application state before highlighting semantic `data-tour` anchors. Driver performs target waiting, spotlight positioning and focus handling; failed sections offer Retry, Skip section and Exit. The workspace is `inert`, with scoped event blocking for background gestures and shortcuts. Driver’s popover is portaled outside that subtree. Time-lapse playback is suspended during the guide. On exit, workspace interactions are immediately restored. Scientific functions, data and export schemas remain unchanged; the assistant conversation is retained.
-
-Browser QA can reuse an existing Playwright installation without adding it to project dependencies:
-
-```powershell
-pnpm.cmd build
-pnpm.cmd start --port 3106
-# In another terminal, if Playwright is installed outside this project:
-$env:PLAYWRIGHT_MODULE = 'C:/path/to/playwright/index.mjs'
-node scripts/qa-lume-tour.mjs
+```mermaid
+flowchart LR
+    A[NASA FIRMS<br/>MODIS Aqua + VIIRS NOAA-20] --> B[Filter & grid<br/>0.25° · day / night]
+    B --> C[Negative binomial model<br/>overlap 2018–2023<br/>by biome & month]
+    C --> D[One series on the<br/>MODIS Aqua scale<br/>with 95% range]
+    D --> E[Static data tiles]
+    E --> F[Next.js app<br/>calendar · anomalies · export]
 ```
 
-`QA_BASE_URL` overrides the server URL and `QA_OUTPUT` overrides the evidence directory (the default is the system temporary directory, `firefly-lume-readonly-qa`). The script uses installed Chrome. See [implementation and verification notes](docs/lume-tour-validation.md).
+Through 2025 the series is MODIS Aqua as observed; from 2026 it is VIIRS converted. Any area sums its cells weighted by overlap, and each month is compared with the 2003–2025 median for the same month. The full method, validation and limits live on the [`/method`](https://firefly-lens.vercel.app/method) page.
 
-Requires Node 20.9 or newer and [pnpm](https://pnpm.io).
+## Run it locally
+
+Requires Node 20.9+ and [pnpm](https://pnpm.io).
 
 ```bash
 pnpm install
 pnpm dev        # http://localhost:3000
+pnpm test       # data tiles vs. the Python pipeline
 ```
 
-Other commands:
-
-```bash
-pnpm test       # checks the data tiles and the area record against the Python pipeline
-pnpm lint
-pnpm build && pnpm start
-```
-
-The map assistant calls an AI model through `/api/assistant`: [Groq](https://console.groq.com/keys) by default, or Google Gemini. Both have a free tier. Put the key in `.env.local` (ignored by git):
+The map assistant needs a free [Groq](https://console.groq.com/keys) or Google Gemini key in `.env.local`. Without one, everything else still works.
 
 ```bash
 GROQ_API_KEY=...
-# GROQ_MODELS=openai/gpt-oss-120b,openai/gpt-oss-20b   # optional, the default, tried in order
-# or, for Gemini:
-# GEMINI_API_KEY=...
-# GEMINI_MODEL=gemini-3.6-flash
-# ASSISTANT_PROVIDER=groq   # or gemini; without it, the first provider with a key
+# or GEMINI_API_KEY=...
 ```
 
-Without a key the rest of the app works and the assistant says it is not configured. The key never reaches the browser: the route forwards one turn at a time, while the browser keeps the conversation (in a provider-neutral format, `src/lib/assistant/protocol.ts`) and runs the map actions and record lookups the model asks for. Each provider is one adapter in `src/lib/assistant/providers/`. The route allows 20 requests per minute per address.
-
-Free tiers are small. On Groq each model allows about 1,000 requests a day and 8,000 tokens a minute, and a question takes 2 to 4 requests and a few thousand tokens, so the route moves to the next model in `GROQ_MODELS` when one runs out. Gemini's free tier allowed only 20 requests a day per model (November 2026).
-
-`pnpm dev` and `pnpm build` first copy the MapLibre worker into `public/maplibre/` (see [`scripts/copy-maplibre-worker.mjs`](scripts/copy-maplibre-worker.mjs)); the map needs it.
-
-## Themes and scientific documentation
-
-Headers use the firefly mascot, FireFlighter, plus the compact wordmark **Lens**; the institutional name remains **FireFly Lens**. The mascot keeps its original drawing and wears a firefighter helmet. The SVG browser icon is the same drawing with its colours resolved.
-
-The header offers **Light**, **Dark** and **System**. The preference is stored locally, applied before the first paint and synchronized with operating-system changes in System mode. Theme changes update CARTO dark/Positron map styles on the existing MapLibre instance, restoring custom layers and sensor visibility without changing the camera, area or analysis period.
-
-The Method page supports keyboard tabs and shareable hashes, such as `/method#seasonal-z-score`. KaTeX renders the equations on the server with accessible MathML. Monthly medians/ranks and the local daily MAD heuristic are documented as implemented. Seasonal z-scores are explained as conceptual extensions, not displayed indicators. The offline Python pipeline is integrated through its exported real-data tiles; Python reference-calendar percentiles are not yet displayed. Contextual explanations cover activity, hot spots, medians, anomalies and FRP.
-
-SVG downloads now include region, period, legend, data source and observed/modeled status, processing description and export timestamp. Scientific values and CSV schemas are unchanged. See [Phase 4 changes, evidence and limitations](docs/phase-4/validation.md).
-
-## Deployment
-
-Scientific expansion is documented in [national calibration, real weather, retrospective forecasting and validation](docs/continental-harmonization.md). History opens with the full monthly line chart. Brazil retains its spatial/biome method; **Paraguay, Argentina, Bolivia, Chile, Colombia, Ecuador, Guyana, Peru, Suriname, Uruguay and Venezuela** have separate whole-country reports for April 2018?December 2025. Each country passed predefined aggregate 2022?2023 holdout gates with its own coefficients. Local ecosystems and subnational regions are not validated by these fits.
-
-**Fire Danger Assessment** leads the full report, above centered History/Forecast tabs. It reads real NASA GFWED/GEOS-5 experimental NetCDF forecasts, with original initialization and daily local-noon validity dates. Render supports custom-polygon assessments and an independent, twice-daily verified data refresh; expired products stay unavailable. See [weather layout, delivery and verification](docs/weather-first-report.md) and [numeric source provenance](analytics/FIRE_WEATHER_SOURCES.md).
-
-**Retrospective activity forecasts** can be requested for an eligible past origin, using the existing Python models and strictly past evidence. Unsupported current numeric activity forecasts remain withheld. Check Python hosting with `node scripts/check-analytics-deployment.mjs https://YOUR-PREVIEW-URL`.
-
-Dynamic History and experimental Forecast for arbitrary selected polygons now use an optional separate Python API. See [diagnosis, contracts, local setup and deployment](docs/dynamic-polygon-analytics.md). Without that service, exact prepared regions and the existing browser calendars remain available. Current numeric forecasts may be scientifically unavailable when eligible observations do not reach the requested origin.
-
-The site deploys on [Vercel](https://vercel.com) from this repository: every push to `main` goes to production and every pull request gets its own preview URL. For the map assistant, configure `GROQ_API_KEY` (or `GEMINI_API_KEY`) in the Vercel project settings. The data are static files in `public/data/brazil/` (about 10 MB), fetched by the browser per 4° tile.
-
-## Project layout
+## Repository
 
 ```
-src/
-  app/                  routes: /, /lens, /method
-  components/
-    firefly/            FireFlighter (component `Lume`), the firefly mascot
-    landing/            sections of the landing page
-    lens/               history grid, calendar, map, area form, day detail
-    ui/                 header, footer, tabs, text transitions
-  lib/
-    data/meta.ts        what the data files hold (public/data/brazil/meta.json)
-    data/tiles.ts       reads one 4° data tile (binary, gzip)
-    data/area.ts        sums the tiles' cells over an area
-    data/source.ts      years, presets and coverage, before any data loads
-    harmonize.ts        the area's record: series, index, monthly medians, season
-    export.ts           CSV and SVG downloads
-    harmonize.test.ts
-public/data/brazil/     data tiles, meta.json and Brazil's outline
-harmonization/          the Python pipeline that builds them (see below)
-scripts/                build helpers
+src/              Next.js app: map workspace, calendars, method page, assistant
+public/data/      static data tiles read by the browser
+harmonization/    Python pipeline: FIRMS download, model, validation, export
+analytics/        optional Python API for polygon history and forecasts
+docs/             design notes, validation and screenshots
 ```
 
-## Data
+Deep dives: [continental harmonization](docs/continental-harmonization.md) · [fire danger report](docs/weather-first-report.md) · [polygon analytics](docs/dynamic-polygon-analytics.md) · [pipeline](harmonization/README.md)
 
-The app reads static files written by [`harmonization/pipeline/09_app_data.py`](harmonization/pipeline/09_app_data.py) into `public/data/brazil/`:
+## Data & credits
 
-- `t_{tx}_{ty}.bin.gz`: one per 4° × 4° tile, 67 in all. For each 0.25° cell: MODIS Aqua and VIIRS NOAA-20 detections per day (day and night) and VIIRS degraded to ~1 km; the harmonized monthly value from April 2018; and its variance for the modeled months. The layout is documented in [`src/lib/data/tiles.ts`](src/lib/data/tiles.ts).
-- `meta.json`: the period, the series rules (observed through 2025, modeled after), the common-error term of the 95% range, biomes and presets.
-- `brazil.geojson`: Brazil's outline for the map.
+[NASA FIRMS](https://www.earthdata.nasa.gov/data/tools/firms) (MODIS C6.1 Aqua, VIIRS 375 m NOAA-20) · NASA GFWED / GEOS-5 · Imagery from [NASA GIBS](https://www.earthdata.nasa.gov/engage/open-data-services-software/earthdata-developer-portal/gibs-api) Blue Marble · IBGE boundaries via [geobr](https://github.com/ipeaGIT/geobr) · [MapLibre GL JS](https://maplibre.org/) · [OpenFreeMap](https://openfreemap.org/) · [Photon](https://photon.komoot.io/)
 
-Single detections are not shipped (17 million rows); the finest level in the app is the cell and day. `harmonization/pipeline/export_points.py` exports single detections from the full pipeline output.
+Built with Next.js, React, TypeScript, Tailwind CSS, MapLibre, Motion and d3.
 
-Sources:
+<br />
 
-- [NASA FIRMS](https://www.earthdata.nasa.gov/data/tools/firms), Fire Information for Resource Management System
-- MODIS active fire, Collection 6.1, Aqua (1 km): yearly country archives, standard processing, and the area API for 2026
-- VIIRS active fire, 375 m, NOAA-20: same sources
-- Biomes and the outline of Brazil: IBGE, through [`geobr`](https://github.com/ipeaGIT/geobr)
-
-The map uses [MapLibre GL JS](https://maplibre.org/) with the [OpenFreeMap](https://openfreemap.org/) "Liberty" basemap (© OpenMapTiles, data from © OpenStreetMap contributors, relief from Natural Earth). The satellite picture under the data is NASA's Blue Marble with shaded relief and bathymetry, served as image tiles by [NASA GIBS](https://www.earthdata.nasa.gov/engage/open-data-services-software/earthdata-developer-portal/gibs-api), with no API key; the map credits it on screen. We acknowledge the use of imagery provided by services from NASA's Global Imagery Browse Services (GIBS), part of NASA's Earth Science Data and Information System (ESDIS).
-
-Place search uses [Photon](https://photon.komoot.io/) through `/api/geocode`, with explicit submission, cached results, an eight-second timeout, and a per-process request guard. The public service permits moderate use, may throttle requests, and has no availability guarantee. Set the server-only `PHOTON_URL` to a compatible private Photon `/api/` endpoint for larger deployments. No private key is exposed. See [Phase 3 validation and screenshots](docs/phase-3/validation.md).
-
-## The harmonization pipeline
-
-[`harmonization/`](harmonization/) holds the Python pipeline behind the data: download from FIRMS, filters, grid, models, validation and exports. To rerun it: `cd harmonization && uv sync`, then the numbered scripts; see [`harmonization/README.md`](harmonization/README.md). Its outputs, the method and every column are documented in [`harmonization/docs/`](harmonization/docs/) (in Portuguese).
-
-## Roadmap
-
-- Replace the near-real-time tail of 2026 with standard processing when FIRMS releases it.
-- Extend the record back to 2000 with MODIS Terra, and the calibration with Suomi NPP from 2012.
-- Correct the observed 2024–2025 MODIS Aqua for its orbital drift, and fill its outages.
-- Extend national records before 2018 and validate subnational/ecosystem calibration beyond Brazil.
-
-## Built with
-
-Next.js, React, TypeScript, Tailwind CSS, MapLibre GL JS, Motion, d3-scale and Vitest. Typefaces: Funnel Display, Funnel Sans and DM Mono.
-
-The design work used three agent skills, which are not vendored in this repository. [`skills-lock.json`](skills-lock.json) records two of them; to install all three locally:
-
-```bash
-npx skills add Leonxlnx/taste-skill
-npx skills add Jakubantalik/transitions.dev
-npx impeccable install
-```
-
-## License
-
-[MIT](LICENSE)
+<div align="center">
+<sub>Made for the NASA Space Apps Challenge 2026 · <i>Harmonization of MODIS and VIIRS Hot Spots</i><br/>Not endorsed by NASA · <a href="LICENSE">MIT License</a></sub>
+</div>
