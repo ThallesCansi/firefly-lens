@@ -7,7 +7,7 @@ import { Lume } from "@/components/firefly/Lume";
 import { TourSession, type TourWorkspace } from "@/lib/onboarding/session";
 import { createTourDriver } from "@/lib/onboarding/driver-adapter";
 import { TOUR_STEPS } from "@/lib/onboarding/steps";
-import { saveTourOutcome } from "@/lib/onboarding/persistence";
+import { readTourOptOut, saveTourOptOut, saveTourOutcome } from "@/lib/onboarding/persistence";
 import "driver.js/dist/driver.css";
 import "./LumeTour.css";
 
@@ -17,6 +17,7 @@ export default function LumeTour({ workspace, onExit }: { workspace: TourWorkspa
   const state = useSyncExternalStore(session.subscribe, session.snapshot, session.snapshot);
   const [engine, setEngine] = useState<Driver | null>(null);
   const [slot, setSlot] = useState<HTMLElement | null>(null);
+  const [optOut, setOptOut] = useState(() => readTourOptOut());
   const exit = useRef<(keep: boolean, completed: boolean) => void>(() => {});
   const finished = useRef(false);
   const exitCallback = useRef(onExit);
@@ -50,11 +51,9 @@ export default function LumeTour({ workspace, onExit }: { workspace: TourWorkspa
     const motion = matchMedia("(prefers-reduced-motion: reduce)");
     const changeMotion = () => instance.setConfig({ ...instance.getConfig(), animate: !motion.matches });
     motion.addEventListener("change", changeMotion);
-    // Driver preserves widget keys; Escape still needs an exit path when a
-    // closed native select/input owns focus. Autocomplete gets its first Escape.
+    // Escape always exits the read-only demonstration; no workspace widget owns focus.
     const escape = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
-      if ((event.target as Element | null)?.closest('[role="combobox"][aria-expanded="true"]')) return;
       event.preventDefault(); event.stopImmediatePropagation();
       exit.current(false, false);
     };
@@ -81,6 +80,10 @@ export default function LumeTour({ workspace, onExit }: { workspace: TourWorkspa
   return slot && createPortal(<>
     <div className="lume-tour-mascot"><Lume size={72} mood={state.phase === "error" ? "alert" : "idle"} /></div>
     <span className="lume-tour-signature">LUME · YOUR GUIDE</span>
+    <label className="lume-tour-opt-out"><input type="checkbox" checked={optOut} onChange={(event) => {
+      const disabled = event.target.checked;
+      setOptOut(disabled); saveTourOptOut(disabled);
+    }} />Don&apos;t show again</label>
     <div className="lume-tour-actions">
       {state.phase === "error" ? <>
         <button type="button" onClick={() => { void session.retry(); }}>Retry section</button>

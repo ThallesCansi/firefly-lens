@@ -12,6 +12,79 @@ export const BASEMAP_URL = "https://tiles.openfreemap.org/styles/liberty";
 /** Shown with the source attributions MapLibre reads from the tiles. */
 export const BASEMAP_ATTRIBUTION = '<a href="https://www.naturalearthdata.com/" target="_blank" rel="noreferrer">Natural Earth</a>';
 
+/** What covers the land and the sea: NASA's satellite picture, or the drawn map alone. */
+export type BasemapKind = "satellite" | "map";
+
+export const DEFAULT_BASEMAP: BasemapKind = "map";
+
+const KIND_KEY = "firefly-lens-basemap";
+
+/** The basemap the person chose last time, or the default. Storage may be unavailable. */
+export function readBasemap(): BasemapKind {
+  try {
+    const value = localStorage.getItem(KIND_KEY);
+    return value === "satellite" || value === "map" ? value : DEFAULT_BASEMAP;
+  } catch {
+    return DEFAULT_BASEMAP;
+  }
+}
+
+export function saveBasemap(kind: BasemapKind): void {
+  try {
+    localStorage.setItem(KIND_KEY, kind);
+  } catch {
+    // Private windows and blocked storage: the choice simply is not remembered.
+  }
+}
+
+/**
+ * The satellite picture: NASA's Blue Marble with shaded relief and ocean
+ * depth, a cloud-free composite of MODIS images at 500 m, served as plain
+ * image tiles by NASA GIBS with no API key. It is a still picture of the land,
+ * not the day's image: forest, savanna and cleared land read at a glance.
+ */
+export const IMAGERY_LAYER = "nasa-imagery";
+const IMAGERY_TILES =
+  "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/{z}/{y}/{x}.jpeg";
+const IMAGERY_ATTRIBUTION =
+  '<a href="https://www.earthdata.nasa.gov/engage/open-data-services-software/earthdata-developer-portal/gibs-api" target="_blank" rel="noreferrer">Imagery: NASA GIBS, Blue Marble</a>';
+
+/** Drawn layers the picture replaces; roads, borders and names stay on top of it. */
+const UNDER_IMAGERY = new Set(["park", "landuse", "landcover", "waterway", "water"]);
+
+/**
+ * Adds the satellite picture to a style, above the drawn land and water and
+ * below roads, borders and names. The layer is always present and hidden for
+ * the drawn map, so switching is a visibility change, not a new style. Past
+ * the picture's detail (zoom 8) it fades into the drawn map underneath.
+ */
+export function withImagery(style: StyleSpecification, theme: "light" | "dark", kind: BasemapKind): StyleSpecification {
+  const layers = style.layers as unknown as { id: string; type: string; "source-layer"?: string }[];
+  const first = layers.findIndex(
+    (l) => l.type !== "background" && l.type !== "raster" && !UNDER_IMAGERY.has(l["source-layer"] ?? ""),
+  );
+  const at = first === -1 ? layers.length : first;
+  const imagery = {
+    id: IMAGERY_LAYER,
+    type: "raster",
+    source: IMAGERY_LAYER,
+    layout: { visibility: kind === "satellite" ? "visible" : "none" },
+    paint: {
+      "raster-opacity": ["interpolate", ["linear"], ["zoom"], 9, 1, 11.5, 0],
+      // The same picture at night: darker and a little greyer, like the rest of the dark theme.
+      ...(theme === "dark" ? { "raster-brightness-max": 0.55, "raster-saturation": -0.2 } : {}),
+    },
+  };
+  return {
+    ...style,
+    sources: {
+      ...style.sources,
+      [IMAGERY_LAYER]: { type: "raster", tiles: [IMAGERY_TILES], tileSize: 256, maxzoom: 8, attribution: IMAGERY_ATTRIBUTION },
+    },
+    layers: [...layers.slice(0, at), imagery, ...layers.slice(at)],
+  } as unknown as StyleSpecification;
+}
+
 type Json = string | number | boolean | null | Json[] | { [key: string]: Json };
 
 /** Colour paint properties to rewrite; everything else in the style stays as it is. */
@@ -133,6 +206,6 @@ export function loadBasemap(): Promise<StyleSpecification | null> {
   return cached;
 }
 
-/** The basemap for a theme, as a fresh object MapLibre may keep. */
-export const basemapFor = (base: StyleSpecification, theme: "light" | "dark") =>
-  styleFor(theme)(undefined, structuredClone(base));
+/** The basemap for a theme, with the satellite picture shown or hidden, as a fresh object MapLibre may keep. */
+export const basemapFor = (base: StyleSpecification, theme: "light" | "dark", kind: BasemapKind = "map") =>
+  withImagery(styleFor(theme)(undefined, structuredClone(base)), theme, kind);

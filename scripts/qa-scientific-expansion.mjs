@@ -1,6 +1,6 @@
 // Uses an existing Playwright installation; start Next with the real Python API configured.
 import assert from "node:assert/strict";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || "playwright");
 const base = process.env.QA_BASE_URL || "http://localhost:3118";
 const out = process.env.QA_OUTPUT || "docs/national-qa";
@@ -11,7 +11,7 @@ const context = await browser.newContext({ viewport: { width: 1440, height: 1000
 await context.route(/https:\/\/(basemaps\.cartocdn\.com|tiles\.openfreemap\.org)\/.*/, (route) => route.fulfill({ json: {
   version: 8, sources: {}, layers: [{ id: "background", type: "background", paint: { "background-color": "#24382e" } }],
 } }));
-await context.addInitScript(() => { localStorage.setItem("firefly-lens-intro-done", "1"); localStorage.setItem("firefly-lens-theme", "dark"); });
+await context.addInitScript(() => { localStorage.setItem("firefly-lens-intro-done", "1"); localStorage.setItem("firefly-lens-theme", "dark"); localStorage.setItem("firefly-lens-tour-auto-disabled-v1", "true"); });
 const page = await context.newPage();
 const errors = [], checks = [], requests = [];
 const showTop = (locator) => locator.evaluate((el) => window.scrollTo({ top: Math.max(0, scrollY+el.getBoundingClientRect().top-96), behavior: "instant" }));
@@ -80,6 +80,25 @@ try {
   checks.push("Paraguay national harmonization uses its own country report while the map loads selected-month raw tiles");
   await showTop(raw.locator(".analytics-card").first());
   await page.screenshot({ path: `${out}/paraguay-dark.png` });
+  const downloadReady = page.waitForEvent("download");
+  await page.getByRole("button", { name:"CSV",exact:true }).click();
+  const download = await downloadReady;
+  const csv = (await readFile(await download.path(),"utf8")).trim().split("\n");
+  assert.equal(csv[0],"period,cell_id,longitude,latitude,modis_aqua_raw,viirs_noaa20_raw");
+  const ownRaw = await (await context.request.get(`${base}/data/continental/paraguay/manifest.json`)).json();
+  const ownMonth = ownRaw.monthly.find((r) => r.date === "2022-09");
+  const values = csv.slice(1).map((line) => line.split(","));
+  assert.equal(values.every((row) => row[0] === "2022-09"),true);
+  assert.equal(values.reduce((sum,row) => sum+Number(row[4]),0),ownMonth.modis);
+  assert.equal(values.reduce((sum,row) => sum+Number(row[5]),0),ownMonth.viirs);
+  await page.getByRole("button", { name:"Share",exact:true }).click();
+  assert.equal(new URL(page.url()).searchParams.get("area"),"country:PRY");
+  const sharedPage = await context.newPage();
+  await sharedPage.goto(page.url());
+  await sharedPage.locator(".analysis-report").getByRole("heading",{ name:"National fire activity · Paraguay",exact:true }).waitFor();
+  assert.equal(await sharedPage.locator(".analysis-scroll").getByLabel("Map month").inputValue(),"2022-09");
+  await sharedPage.close();
+  checks.push("Country share links restore the exact country/month and CSV totals reconcile with that country's raw archive");
   await page.setViewportSize({ width: 320, height: 900 });
   await showTop(raw.locator(".analytics-card").first());
   await page.screenshot({ path: `${out}/paraguay-mobile-320.png` });

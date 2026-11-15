@@ -1,6 +1,7 @@
 import type { Map as MapLibreMap, MapMouseEvent, MapTouchEvent } from "maplibre-gl";
 import type { BBox } from "@/lib/data/types";
 import { HOME, planNavigation } from "./camera";
+import { TILT_PITCH } from "./columns";
 import type { MapController, MapLike, MapNavigationRequest, MapPointerEvent, ProjectionMode } from "./map-contract";
 import { projectionSpec, saveProjection } from "./projection";
 
@@ -24,6 +25,13 @@ export function createController(map: MapLibreMap, Point: PointCtor, initial: Pr
   let projection: ProjectionMode = initial;
   const setups = new Set<(m: MapLike) => void>();
   let styleReady = false;
+  let tilted = false;
+  /** The area the camera last framed, until the person moves the map themself. */
+  let framed: BBox | null = null;
+  map.on("movestart", (e) => {
+    // Only a gesture carries the browser's event; camera moves made here do not.
+    if ((e as { originalEvent?: unknown }).originalEvent) framed = null;
+  });
 
   /** False when the pixel shows space around the globe or sky above the horizon. */
   const onSurface = ([x, y]: [number, number]): boolean => {
@@ -67,13 +75,27 @@ export function createController(map: MapLibreMap, Point: PointCtor, initial: Pr
     /** Engine only: the style is being replaced. */
     styleUnloading(): void;
     isOnSurface(point: [number, number]): boolean;
+    /**
+     * Engine only: frames the last area again after the map changed size (a
+     * panel opened beside it), unless the person has moved the map since.
+     */
+    refit(): void;
+    /** Engine only: a camera move that also sets where the camera faces and how far it leans. */
+    navigate(request: MapNavigationRequest, attitude?: { bearing?: number; pitch?: number }): void;
+    /**
+     * Engine only: leans the camera over for the 3D columns and lets a drag with
+     * the right button (or two fingers) orbit; false brings it back to straight
+     * down, north up, where rotating adds nothing.
+     */
+    setTilt(on: boolean): void;
   } = {
-    navigate(request: MapNavigationRequest) {
+    navigate(request: MapNavigationRequest, attitude: { bearing?: number; pitch?: number } = {}) {
       const c = map.getCenter();
       const plan = planNavigation(request, { center: [c.lng, c.lat], zoom: map.getZoom(), projection }, prefersReducedMotion());
       // A newer request replaces the flight in progress instead of queueing behind it.
       map.stop();
       const padding = cameraPadding(map);
+      framed = plan.method === "fitBounds" ? (plan.bounds as BBox) : null;
       switch (plan.method) {
         case "fitBounds": {
           const [w, s, e, n] = plan.bounds as BBox;
@@ -83,21 +105,26 @@ export function createController(map: MapLibreMap, Point: PointCtor, initial: Pr
             duration: plan.duration,
             essential: false,
             ...(plan.maxZoom === undefined ? {} : { maxZoom: plan.maxZoom }),
+            ...attitude,
           });
           break;
         }
         case "flyTo":
-          map.flyTo({ center: plan.center, zoom: plan.zoom, duration: plan.duration, curve: plan.curve, essential: false });
+          map.flyTo({ center: plan.center, zoom: plan.zoom, duration: plan.duration, curve: plan.curve, essential: false, ...attitude });
           break;
         case "easeTo":
-          map.easeTo({ center: plan.center, zoom: plan.zoom, duration: plan.duration, essential: false });
+          map.easeTo({ center: plan.center, zoom: plan.zoom, duration: plan.duration, essential: false, ...attitude });
           break;
         default:
-          map.jumpTo({ center: plan.center, zoom: plan.zoom });
+          map.jumpTo({ center: plan.center, zoom: plan.zoom, ...attitude });
       }
     },
     resetView() {
-      controller.navigate({ id: `home-${Date.now()}`, center: HOME.center, zoom: HOME.zoom[projection], animation: "ease" });
+      // Home also faces north again, at the angle of the current view.
+      controller.navigate(
+        { id: `home-${Date.now()}`, center: HOME.center, zoom: HOME.zoom[projection], animation: "ease" },
+        { bearing: 0, pitch: tilted ? TILT_PITCH : 0 },
+      );
     },
     getProjection: () => projection,
     setProjection(mode: ProjectionMode) {
@@ -106,7 +133,16 @@ export function createController(map: MapLibreMap, Point: PointCtor, initial: Pr
       applyProjection(mode);
     },
     lockCamera(locked: boolean) {
-      const handlers = [map.dragPan, map.scrollZoom, map.boxZoom, map.doubleClickZoom, map.touchZoomRotate, map.keyboard];
+      const handlers = [
+        map.dragPan,
+        map.scrollZoom,
+        map.boxZoom,
+        map.doubleClickZoom,
+        map.touchZoomRotate,
+        map.keyboard,
+        // Orbiting exists only in the tilted view; releasing the lock must not switch it on elsewhere.
+        ...(tilted ? [map.dragRotate, map.touchPitch] : []),
+      ];
       for (const h of handlers) {
         if (locked) h.disable();
         else h.enable();
@@ -169,19 +205,56 @@ export function createController(map: MapLibreMap, Point: PointCtor, initial: Pr
       styleReady = false;
     },
     isOnSurface: onSurface,
+    refit() {
+      if (!framed) return;
+      const [w, s, e, n] = framed;
+      map.stop();
+      map.fitBounds([w, s, e, n], { padding: cameraPadding(map), duration: prefersReducedMotion() ? 0 : 350, essential: false });
+    },
+    setTilt(on: boolean) {
+      tilted = on;
+      for (const h of [map.dragRotate, map.touchPitch]) {
+        if (on) h.enable();
+        else h.disable();
+      }
+      map.stop();
+      const attitude = { pitch: on ? TILT_PITCH : 0, bearing: on ? map.getBearing() : 0 };
+      const duration = prefersReducedMotion() ? 0 : 700;
+      // Stopping the camera would drop a framing still in flight: frame and lean in one move.
+      const [w, s, e, n] = framed ?? [0, 0, 0, 0];
+      const fit = framed ? map.cameraForBounds([w, s, e, n], { padding: cameraPadding(map) }) : undefined;
+      if (fit?.center && fit.zoom !== undefined) {
+        // The fit is computed looking straight down; leaning over needs a little more room.
+        const zoom = fit.zoom - (on ? 0.45 : 0);
+        if (duration === 0) map.jumpTo({ center: fit.center, zoom, ...attitude });
+        else map.easeTo({ center: fit.center, zoom, ...attitude, duration, essential: false });
+      } else if (duration === 0) map.jumpTo(attitude);
+      else map.easeTo({ ...attitude, duration, essential: false });
+    },
   };
   return controller;
 }
 
 export type EngineController = ReturnType<typeof createController>;
 
-/** Room around a framed area, so it clears the floating panels. */
+/**
+ * Room around a framed area, so it clears the floating panels. The card of
+ * the selected area sits over the left of the map: when the map is wide enough
+ * to spare that strip, the area is framed in the space beside the card.
+ */
 export function cameraPadding(map: MapLibreMap) {
-  const { clientHeight: h, clientWidth: w } = map.getContainer();
-  return {
+  const container = map.getContainer();
+  const { clientHeight: h, clientWidth: w } = container;
+  const padding = {
     top: Math.min(90, h * 0.15),
     bottom: Math.min(160, h * 0.25),
     left: Math.min(90, w * 0.2),
     right: Math.min(60, w * 0.12),
   };
+  const card = container.closest(".workspace-map")?.querySelector(".selection-card")?.getBoundingClientRect();
+  if (card && card.width > 0) {
+    const edge = card.right - container.getBoundingClientRect().left + 24;
+    if (edge < w * 0.45) padding.left = Math.max(padding.left, edge);
+  }
+  return padding;
 }

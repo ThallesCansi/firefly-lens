@@ -1,0 +1,15 @@
+{
+  "status": "passed",
+  "steps": 16,
+  "layouts": [
+    1440,
+    1000,
+    390,
+    320
+  ],
+  "errors": [],
+  "pantanalSeptember2023": 535,
+  "automaticVisits": true,
+  "explicitOptOut": true,
+  "readOnly": true
+}

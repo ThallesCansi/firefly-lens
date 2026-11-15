@@ -46,6 +46,15 @@ const references: Record<string, Reference> = {
     publication: "e-Handbook of Statistical Methods, §1.3.5.17",
     url: "https://www.itl.nist.gov/div898/handbook/eda/section3/eda35h.htm",
   },
+  heldout: {
+    authors: "Zhang, X.; Hegerl, G.; Zwiers, F. W.; Kenyon, J.",
+    year: "2005",
+    title:
+      "Avoiding inhomogeneity in percentile-based indices of temperature extremes",
+    publication: "Journal of Climate, 18(11), 1641–1651",
+    doi: "10.1175/JCLI3366.1",
+    url: "https://doi.org/10.1175/JCLI3366.1",
+  },
   mad: {
     authors: "R Core Team",
     year: "Online documentation",
