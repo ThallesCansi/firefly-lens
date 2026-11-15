@@ -159,7 +159,7 @@ export function ResizableAnalysisPanel({
           <span />
         </div>
       )}
-      <div id={id} className={"ff-interaction-panel-content"}>
+      <div id={id} data-tour-scroll="analysis-panel" className={"ff-interaction-panel-content"}>
         {children}
       </div>
     </aside>
