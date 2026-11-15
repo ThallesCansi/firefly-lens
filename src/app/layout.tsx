@@ -18,13 +18,30 @@ const mono = DM_Mono({
   weight: ["400", "500"],
 });
 
+const shareDescription =
+  "MODIS and VIIRS hot spots harmonized into one fire record for South America, 2002 to 2026, read as a calendar of fire activity.";
+
 export const metadata: Metadata = {
+  // Link previews (WhatsApp, Slack, social) need absolute image URLs.
+  metadataBase: new URL("https://firefly-lens.vercel.app"),
   title: {
     default: "FireFly Lens: one fire calendar from MODIS and VIIRS",
     template: "%s · FireFly Lens",
   },
   description:
     "FireFly Lens harmonizes real MODIS and VIIRS hot spots for Brazil into one series and shows 24 years of fire activity as a calendar, with unusual days and the fire season marked.",
+  // The image itself comes from app/opengraph-image.jpg.
+  openGraph: {
+    type: "website",
+    siteName: "FireFly Lens",
+    title: "FireFly Lens: one fire calendar from two satellite sensors",
+    description: shareDescription,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "FireFly Lens: one fire calendar from two satellite sensors",
+    description: shareDescription,
+  },
 };
 
 export const viewport: Viewport = {
