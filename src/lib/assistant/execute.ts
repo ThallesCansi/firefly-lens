@@ -41,7 +41,7 @@ const fold = (s: string) =>
 
 /** The map's state, prefixed to every question. */
 export function describeHost(host: AssistantHost): string {
-  const area = host.area ? `${host.area.name} (${host.area.kind === "state" ? "state" : host.area.kind === "preset" ? "prepared study region" : "drawn area"})` : "none";
+  const area = host.area ? `${host.area.name} (${host.area.kind === "state" ? "state" : host.area.kind === "municipality" ? "municipality" : host.area.kind === "preset" ? "prepared study region" : "drawn area"})` : "none";
   return `<map_state>area of interest: ${area}; period shown: ${host.period}; layers: ${
     host.sensors.join(", ") || "none"
   }; analysis panel: ${host.analysisOpen ? "open" : "closed"}; data kind: ${host.area && rawPilotFor(host.area) ? (rawPilotFor(host.area)?.national_url ? "real whole-country harmonization; local ecosystem skill and current activity forecast are not validated" : "real raw country detections; no validated harmonized history, anomaly or activity forecast") : "Brazilian harmonized grid only where covered"}</map_state>`;
@@ -214,6 +214,24 @@ export async function runTool(host: AssistantHost, name: string, input: Record<s
       case "select_state": {
         const area = await findState(String(input.state ?? ""));
         if (!area) return { ok: false, result: `No Brazilian state matches "${input.state}".` };
+        return await choose(host, area, input);
+      }
+      case "select_municipality": {
+        const query = [input.city, input.state].filter((part) => typeof part === "string" && part.trim()).join(" ");
+        const matches = searchMunicipalities(await municipalities.index(), query, 6);
+        const [first, second] = matches;
+        if (!first) return { ok: false, result: `No Brazilian municipality matches "${query}".` };
+        // The same name in several states: ask rather than pick one silently.
+        if (second && fold(second.name) === fold(first.name) && !input.state)
+          return {
+            ok: false,
+            result: `Several municipalities are called ${first.name}: ${matches
+              .filter((m) => fold(m.name) === fold(first.name))
+              .map(municipalityLabel)
+              .join("; ")}. Ask which state, then call again with it.`,
+          };
+        const area = await municipalities.area(first.id);
+        if (!area) return { ok: false, result: `The outline of ${municipalityLabel(first)} is unavailable.` };
         return await choose(host, area, input);
       }
       case "select_region": {

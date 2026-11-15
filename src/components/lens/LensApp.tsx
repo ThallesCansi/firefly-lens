@@ -36,6 +36,7 @@ import { parseShare, shareQuery } from "@/lib/share";
 import { cellDays } from "@/lib/data/area";
 import { areaSlug, cellDaysCsv, download } from "@/lib/export";
 import { BoundaryRepository, geometryBounds } from "@/lib/interactions/administrative";
+import { municipalities, type Municipality } from "@/lib/interactions/municipalities";
 import { useWorkspaceTools } from "@/components/interactions/useWorkspaceTools";
 import { WorkspaceSelectionTools } from "@/components/interactions/WorkspaceSelectionTools";
 import { PolygonEditStatus } from "@/components/interactions/PolygonEditOverlay";
@@ -63,6 +64,7 @@ function describe(area: Area): string {
   if (country) return country.national_url ? "Country-wide harmonization · national totals only" : "Real raw detections · harmonization not validated";
   if (area.kind === "preset") return "Study region · Prepared seasonal analytics";
   if (area.kind === "state") return "Brazilian state · IBGE outline";
+  if (area.kind === "municipality") return "Brazilian municipality · IBGE outline";
   const corners = area.geometry.type === "Polygon" ? area.geometry.coordinates[0].length - 1 : 0;
   const [w, s, e, n] = area.bbox;
   return `${corners} corners · W ${deg(w)} · S ${deg(s)} · E ${deg(e)} · N ${deg(n)}`;
@@ -259,6 +261,22 @@ export function LensApp() {
     },
     [stopTools, clearAdministrative, commitRectangle],
   );
+  // A municipality chosen in the search becomes the area of interest, with its own outline.
+  const selectMunicipality = useCallback(
+    async (place: Municipality) => {
+      const next = await municipalities.area(place.id);
+      if (!next) throw new Error("This municipality's outline is unavailable.");
+      stopTools();
+      clearAdministrative();
+      setDrawing(false);
+      setCoordinates(false);
+      setSearching(false);
+      setArea(next);
+      setFrame((n) => n + 1);
+      openAnalysis(next);
+    },
+    [stopTools, clearAdministrative, openAnalysis],
+  );
   const changePeriod = useCallback((next: string) => {
     setPeriod(next);
     const month = next.slice(0, 7);
@@ -301,6 +319,7 @@ export function LensApp() {
             bbox: geometryBounds(state.geometry),
           };
       }
+      else if (view.area?.kind === "municipality") next = await municipalities.area(view.area.id).catch(() => null);
       if (view.period) changePeriod(view.period);
       if (view.sensors?.length) setSensors(view.sensors);
       if (next) {
@@ -396,7 +415,7 @@ export function LensApp() {
   // each of its own actions, so a later step of the same answer sees an earlier one.
   const assistantHost = useRef<AssistantHost | null>(null);
   const assertAssistantAvailable = () => {
-    if (tourGuard.current) throw new Error("Workspace actions are paused during the Lume tour. Finish or skip the tour to continue.");
+    if (tourGuard.current) throw new Error("Workspace actions are paused during the FireFlighter tour. Finish or skip the tour to continue.");
   };
   const host: AssistantHost = {
     area,
@@ -583,7 +602,7 @@ export function LensApp() {
   return (
     <main id="main" inert={tourRunning} className="lens-workspace" data-tour-active={tourRunning}>
       <AutoStartTour onStart={startTour} />
-      <button ref={tourLauncher} data-tour="replay" type="button" className="lume-replay map-surface" onClick={startTour} disabled={tourRunning}><Lume size={32} />Tour with Lume</button>
+      <button ref={tourLauncher} data-tour="replay" type="button" className="lume-replay map-surface" onClick={startTour} disabled={tourRunning}><Lume size={32} />Tour with FireFlighter</button>
       {tourRunning && <LumeTour workspace={tourWorkspace} onExit={() => { tourGuard.current = false; tourSnapshot.current = null; setTourRunning(false); }} />}
       <div
         className="workspace-body"
@@ -707,6 +726,7 @@ export function LensApp() {
                 <CloseButton label="Close search" onClick={() => setSearching(false)} />
               </div>
               <LocationSearch
+                onSelectMunicipality={selectMunicipality}
                 onNavigate={(place) => {
                   tools.stop();
                   setDrawing(false);
@@ -715,8 +735,9 @@ export function LensApp() {
                 }}
               />
               <p className="map-search-hint">
-                Cities, states or <span className="num">lat, lon</span>. The
-                records cover Brazil; draw an area there to analyze it.
+                A Brazilian city becomes the area of interest, with its IBGE
+                outline. Other places and <span className="num">lat, lon</span>{" "}
+                only move the map.
               </p>
             </section>
           )}

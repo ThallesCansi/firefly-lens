@@ -1,5 +1,6 @@
 /**
- * Lume, the firefly. Drawn in the page's own colours; the abdomen is the only
+ * FireFlighter, the firefly in a firefighter's helmet (the component keeps its
+ * first name, Lume). Drawn in the page's own colours; the abdomen is the only
  * part that glows, and it warms to ember when Lume is pointing at a problem.
  */
 export function Lume({
@@ -48,6 +49,13 @@ export function Lume({
         <circle cx="50.3" cy="25.2" r="1.4" fill="var(--color-night)" />
         {/* antennae */}
         <path d="M49 19c1-5 4-8 8-9M52 21c3-3 6-4 9-3" stroke="var(--color-dim)" strokeWidth="1.5" strokeLinecap="round" />
+        {/* firefighter's helmet: red in both themes, tipped back so the eye stays clear */}
+        <g transform="rotate(-16 47 26)">
+          <path d="M40.2 21.6a7.3 7.3 0 0 1 14.6 0z" fill="#d7301f" />
+          <path d="M47.5 14.3v7.3" stroke="#8f1a10" strokeWidth="1.6" strokeLinecap="round" />
+          <path d="M35.6 23.6q1.2-2.6 5-2.6h13.6q2.6 0 3.4 1.5.5 1.1-.9 1.1z" fill="#b3221a" />
+          <path d="M50.2 16.6h3.2v2.3q0 1.5-1.6 2.1-1.6-.6-1.6-2.1z" fill="#ffc94d" />
+        </g>
       </g>
     </svg>
   );

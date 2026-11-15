@@ -36,7 +36,7 @@ export interface AnalysisArea {
   /** Changes whenever the shape changes, so it can key loaded records. */
   id: string;
   name: string;
-  kind: "drawn" | "state" | "preset";
+  kind: "drawn" | "state" | "municipality" | "preset";
   geometry: PolygonGeometry;
   bbox: BBox;
 }

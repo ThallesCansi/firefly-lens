@@ -69,6 +69,30 @@ export function createController(map: MapLibreMap, Point: PointCtor, initial: Pr
     }
   };
 
+  /**
+   * Frames bounds. Looking straight down the fit is exact; a leaning camera
+   * sees less ground at the same zoom, so it frames a little wider and keeps
+   * its lean (the 3D view is the default, so most framings happen leaning).
+   */
+  const frame = (
+    [w, s, e, n]: BBox,
+    duration: number,
+    maxZoom?: number,
+    attitude: { bearing?: number; pitch?: number } = {},
+  ) => {
+    const padding = cameraPadding(map);
+    // Only pass maxZoom when set: an explicit undefined overrides MapLibre's default and breaks the fit.
+    const limit = maxZoom === undefined ? {} : { maxZoom };
+    const pitch = attitude.pitch ?? (tilted ? TILT_PITCH : 0);
+    const flat = pitch > 0 ? map.cameraForBounds([w, s, e, n], { padding, ...limit }) : undefined;
+    if (!flat?.center || flat.zoom === undefined) {
+      map.fitBounds([w, s, e, n], { padding, duration, essential: false, ...limit, ...attitude });
+      return;
+    }
+    const camera = { center: flat.center, zoom: flat.zoom - 0.45, pitch, bearing: attitude.bearing ?? map.getBearing() };
+    if (duration === 0) map.jumpTo(camera);
+    else map.easeTo({ ...camera, duration, essential: false });
+  };
   const controller: MapController & {
     /** Engine only: re-apply projection and run the tools' setups after a style load. */
     styleLoaded(): void;
@@ -94,21 +118,11 @@ export function createController(map: MapLibreMap, Point: PointCtor, initial: Pr
       const plan = planNavigation(request, { center: [c.lng, c.lat], zoom: map.getZoom(), projection }, prefersReducedMotion());
       // A newer request replaces the flight in progress instead of queueing behind it.
       map.stop();
-      const padding = cameraPadding(map);
       framed = plan.method === "fitBounds" ? (plan.bounds as BBox) : null;
       switch (plan.method) {
-        case "fitBounds": {
-          const [w, s, e, n] = plan.bounds as BBox;
-          // Only pass maxZoom when set: an explicit undefined overrides MapLibre's default and breaks the fit.
-          map.fitBounds([w, s, e, n], {
-            padding,
-            duration: plan.duration,
-            essential: false,
-            ...(plan.maxZoom === undefined ? {} : { maxZoom: plan.maxZoom }),
-            ...attitude,
-          });
+        case "fitBounds":
+          frame(plan.bounds as BBox, plan.duration, plan.maxZoom, attitude);
           break;
-        }
         case "flyTo":
           map.flyTo({ center: plan.center, zoom: plan.zoom, duration: plan.duration, curve: plan.curve, essential: false, ...attitude });
           break;
@@ -209,7 +223,7 @@ export function createController(map: MapLibreMap, Point: PointCtor, initial: Pr
       if (!framed) return;
       const [w, s, e, n] = framed;
       map.stop();
-      map.fitBounds([w, s, e, n], { padding: cameraPadding(map), duration: prefersReducedMotion() ? 0 : 350, essential: false });
+      frame([w, s, e, n], prefersReducedMotion() ? 0 : 350);
     },
     setTilt(on: boolean) {
       tilted = on;

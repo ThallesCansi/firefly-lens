@@ -41,6 +41,7 @@ function parseArea(value: string | null, name: string | null): SharedView["area"
     return entry ? { kind: "country", code: entry.country_code } : null;
   }
   if (/^state:[\w:-]{1,20}$/.test(value)) return { kind: "state", id: value.slice(6) };
+  if (/^municipality:\d{7}$/.test(value)) return { kind: "municipality", id: value.slice(13) };
   if (!value.startsWith("poly:")) return null;
   const [w, s, e, n] = COVERAGE;
   const vertices: [number, number][] = [];

@@ -79,7 +79,7 @@ export default function LumeTour({ workspace, onExit }: { workspace: TourWorkspa
   const done = state.index === TOUR_STEPS.length - 1;
   return slot && createPortal(<>
     <div className="lume-tour-mascot"><Lume size={72} mood={state.phase === "error" ? "alert" : "idle"} /></div>
-    <span className="lume-tour-signature">LUME · YOUR GUIDE</span>
+    <span className="lume-tour-signature">FIREFLIGHTER · YOUR GUIDE</span>
     <label className="lume-tour-opt-out"><input type="checkbox" checked={optOut} onChange={(event) => {
       const disabled = event.target.checked;
       setOptOut(disabled); saveTourOptOut(disabled);
