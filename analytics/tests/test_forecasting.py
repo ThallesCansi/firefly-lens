@@ -86,13 +86,24 @@ class ForecastTests(unittest.TestCase):
         self.assertEqual(result["backtesting"],past["comparison"])
 
     def test_actual_sarima_temporal_predictions_ignore_later_observations(self):
+        import math
+        import random
         series=synthetic(8)
+        # A stationary, noisy software fixture avoids near-unit-root fits of
+        # the perfectly repeating counts whose convergence varies by BLAS.
+        # The real optimizer still runs, and all three predictions must exist.
+        rng=random.Random(742)
+        log_values=[3.]*12
+        for _ in range(120+len(series.months)):
+            log_values.append(3.+.35*(log_values[-1]-3.)+.3*(log_values[-12]-3.)+rng.gauss(0.,.15))
+        series.months=[replace(row,value=math.expm1(value)) for row,value in zip(series.months,log_values[-len(series.months):])]
         config=ForecastConfig(min_train_months=48,min_season_years=2,max_origins=4,min_validation_origins=2,
                               candidates=(((1,0,0),(1,0,0,12)),),maxiter=100)
         first=backtest(series,config)
         origin=first["origins"][0]
         expected=[r["prediction"] for r in first["records"] if r["origin"]==origin and r["model"]=="sarima"]
-        self.assertTrue(all(v is not None for v in expected))
+        self.assertEqual(len(expected),3)
+        self.assertTrue(all(v is not None for v in expected),first['fit_diagnostics'])
         series.months=[replace(r,value=r.value+10000) if r.date>origin else r for r in series.months]
         train=training_values(series,origin,config)
         actual,_=sarima(train,3,config)

@@ -26,7 +26,8 @@ try {
   async function choose(id) {
     await page.getByRole("button", { name: "Coordinates", exact: true }).click();
     await page.locator('[data-tour="presets"]').selectOption(id);
-    await page.getByRole("button", { name: "Analyze area", exact: true }).click();
+    const analyze = page.getByRole("button", { name: "Analyze area", exact: true });
+    if (await analyze.isVisible()) await analyze.click();
   }
   await choose("pantanal");
   await page.locator('[data-tour="analysis-status"][data-tour-ready="true"]').waitFor({ timeout: 60000 });

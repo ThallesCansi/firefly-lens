@@ -61,7 +61,7 @@ async function exit(p, name = "Skip tour") {
 async function shot(p, name) { await p.screenshot({ path: join(output, name), animations: "disabled" }); }
 async function pick(p, label, value) {
   await p.getByRole("button", { name: new RegExp(`^${label}:`) }).click();
-  await p.getByRole("option", { name: value, exact: true }).click();
+  await p.getByRole("listbox", { name: label, exact: true }).getByRole("option", { name: value, exact: true }).click();
 }
 async function state(p) {
   return p.evaluate(() => ({
