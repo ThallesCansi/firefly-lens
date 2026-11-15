@@ -585,7 +585,7 @@ export function AnalyticsReport({
   } = useFireRecord(area);
   const currentRecord = recordArea?.id === area.id ? record : null;
   return (
-    <div data-tour="analytics" data-tour-ready={!loading && !error && !!result} data-tour-area={area.id} data-tour-error={error ?? undefined} className="analytics-report">
+    <div data-tour="analytics" data-tour-ready={!loading && !error && !!bundle} data-tour-area={area.id} data-tour-error={error ?? undefined} className="analytics-report">
       <div className="analytics-report-heading">
         <div>
           <span className="analytics-eyebrow">Scientific analytics</span>
@@ -655,7 +655,7 @@ export function AnalyticsReport({
         role="tabpanel"
         id={`${id}-history`}
         data-tour="analytics-history"
-        data-tour-ready={!loading && !error && !!result}
+        data-tour-ready={!loading && !error && !!bundle}
         aria-labelledby={`${id}-history-tab`}
         hidden={tab !== "history"}
       >
@@ -730,7 +730,7 @@ export function AnalyticsReport({
         role="tabpanel"
         id={`${id}-forecast`}
         data-tour="analytics-forecast"
-        data-tour-ready={!loading && !error && !!result}
+        data-tour-ready={!loading && !error && !!bundle}
         aria-labelledby={`${id}-forecast-tab`}
         hidden={tab !== "forecast"}
       >
