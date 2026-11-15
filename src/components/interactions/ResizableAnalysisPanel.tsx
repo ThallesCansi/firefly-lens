@@ -110,6 +110,7 @@ export function ResizableAnalysisPanel({
           role="separator"
           aria-orientation="vertical"
           aria-label="Resize analysis panel"
+          title="Drag to resize · double-click to reset"
           aria-controls={id}
           aria-valuemin={Math.round(state.limits.min)}
           aria-valuemax={Math.round(state.limits.max)}
@@ -158,21 +159,6 @@ export function ResizableAnalysisPanel({
           <span />
         </div>
       )}
-      <div className={"ff-interaction-panel-tools"}>
-        <span>Analysis</span>
-        <button
-          type="button"
-          className="btn btn-quiet"
-          onClick={() => {
-            controller.reset();
-            try {
-              localStorage.removeItem(storageKey);
-            } catch {}
-          }}
-        >
-          Reset width
-        </button>
-      </div>
       <div id={id} className={"ff-interaction-panel-content"}>
         {children}
       </div>

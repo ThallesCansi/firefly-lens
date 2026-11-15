@@ -69,9 +69,9 @@ export function LensHero() {
     sprite.width = sprite.height = 64;
     const g = sprite.getContext("2d")!;
     const glow = g.createRadialGradient(32, 32, 0, 32, 32, 32);
-    glow.addColorStop(0, "rgba(232,250,120,1)");
-    glow.addColorStop(0.18, "rgba(216,242,78,0.75)");
-    glow.addColorStop(1, "rgba(216,242,78,0)");
+    glow.addColorStop(0, "rgba(255,214,140,1)");
+    glow.addColorStop(0.18, "rgba(255,176,32,0.75)");
+    glow.addColorStop(1, "rgba(255,176,32,0)");
     g.fillStyle = glow;
     g.fillRect(0, 0, 64, 64);
 

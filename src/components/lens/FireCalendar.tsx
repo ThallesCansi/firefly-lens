@@ -179,7 +179,7 @@ export function FireCalendar({
                     {day.anomaly && (
                       <span
                         aria-hidden="true"
-                        className="absolute inset-[6%] rounded-full border-[1.5px] border-lume"
+                        className="absolute inset-[6%] rounded-full border-[1.5px] border-marker shadow-[inset_0_0_0_1px_var(--color-night)]"
                       />
                     )}
                     {isSelected && (
@@ -245,7 +245,7 @@ export function CalendarLegend() {
       <div className="flex items-center gap-2">
         <span
           aria-hidden="true"
-          className="block size-4 rounded-full border-[1.5px] border-lume"
+          className="block size-4 rounded-full border-[1.5px] border-marker shadow-[inset_0_0_0_1px_var(--color-night)]"
         />
         <span>
           Unusual burning <ScientificInfo concept="anomaly" />

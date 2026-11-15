@@ -3,24 +3,28 @@
 @import "./themes.css";
 
 /*
-  FireFly Lens: a forest at night. Flat darkness, points of light.
-  Neutrals carry a faint green cast so greys never read as plain grey.
+  FireFly Lens: a landscape at night, lit by fire. Flat darkness, points of light.
+  Neutrals carry a faint warm (ash) cast so greys never read as plain grey.
 */
 @theme {
-  --color-night: #0b0e0c;
-  --color-canopy: #121713;
-  --color-bark: #1a201b;
-  --color-line: #2b332c;
-  --color-ink: #eef0e6;
-  --color-dim: #a6ae9f;
-  --color-faint: #7d8677;
+  --color-night: #0e0c0b;
+  --color-canopy: #161311;
+  --color-bark: #211c19;
+  --color-line: #362e29;
+  --color-ink: #f3eee9;
+  --color-dim: #b5aaa1;
+  --color-faint: #8f837a;
 
-  /* The firefly's light: the one brand accent. */
-  --color-lume: #d8f24e;
-  --color-lume-ink: #141a05;
+  /* Flame orange: the one interface accent (actions, selection, focus). */
+  --color-lume: #ff6b1a;
+  --color-lume-ink: #1c0b02;
+
+  /* Highlights drawn on top of fire data (rings, selected marks): neutral, so
+     they never read as more fire on the orange ember scale. */
+  --color-marker: #f3eee9;
 
   /* Fire activity, quiet to extreme. Lightness rises with every step. */
-  --color-ember-0: #2b332c;
+  --color-ember-0: #2e2723;
   --color-ember-1: #6a2f1d;
   --color-ember-2: #a63f1c;
   --color-ember-3: #dc5f1f;
@@ -141,26 +145,62 @@ a {
     background-color var(--duration-quick) ease-out,
     border-color var(--duration-quick) ease-out;
 }
-.btn:hover {
-  transform: translateY(-1px);
+/* Press: one scale for every button, never on a disabled one. */
+.btn:not(:disabled):active,
+.icon-btn:not(:disabled):active {
+  transform: scale(0.96);
 }
-.btn:active {
-  transform: translateY(0) scale(0.98);
+/* A close or dismiss control: icon only, 36 px, quiet until hovered. */
+.icon-btn {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  color: var(--color-dim);
+  cursor: pointer;
+  transition-property: background-color, color, transform;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+}
+/* A low-emphasis action in a row of buttons, such as "Clear". */
+.btn-text {
+  padding-inline: 0.625rem;
+  color: var(--color-dim);
+}
+@media (hover: hover) {
+  .icon-btn:hover,
+  .btn-text:hover {
+    background: var(--color-bark);
+    color: var(--color-ink);
+  }
+}
+/* While the theme switches, no colour transitions run, so the swap is instant. */
+.theme-switching,
+.theme-switching *,
+.theme-switching *::before,
+.theme-switching *::after {
+  transition: none !important;
 }
 .btn-primary {
   background: var(--color-button);
   color: var(--color-button-ink);
 }
-.btn-primary:hover {
-  background: var(--color-button-hover);
+@media (hover: hover) {
+  .btn-primary:hover {
+    background: var(--color-button-hover);
+  }
 }
 .btn-quiet {
   border: 1px solid var(--color-line);
   color: var(--color-ink);
 }
-.btn-quiet:hover {
-  border-color: var(--color-faint);
-  background: var(--color-canopy);
+@media (hover: hover) {
+  .btn-quiet:hover {
+    border-color: var(--color-faint);
+    background: var(--color-canopy);
+  }
 }
 
 /* ── Form fields ── */
@@ -175,8 +215,10 @@ a {
   cursor: pointer;
   transition: border-color var(--duration-quick) ease-out;
 }
-.field:hover {
-  border-color: var(--color-faint);
+@media (hover: hover) {
+  .field:hover {
+    border-color: var(--color-faint);
+  }
 }
 .btn:disabled {
   cursor: not-allowed;
@@ -192,9 +234,13 @@ a {
   transition: background-size var(--duration-fast) var(--ease-smooth-out);
   padding-bottom: 2px;
 }
-.link:hover,
 .link:focus-visible {
   background-size: 100% 1px;
+}
+@media (hover: hover) {
+  .link:hover {
+    background-size: 100% 1px;
+  }
 }
 .link-lume {
   color: var(--color-lume);
@@ -227,8 +273,10 @@ a {
   cursor: pointer;
   transition: color var(--tabs-dur) var(--tabs-ease);
 }
-.t-tab:not([aria-selected="true"]):hover {
-  color: var(--color-ink);
+@media (hover: hover) {
+  .t-tab:not([aria-selected="true"]):hover {
+    color: var(--color-ink);
+  }
 }
 .t-tab[aria-selected="true"] {
   color: var(--color-button-ink);

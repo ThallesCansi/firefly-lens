@@ -64,8 +64,13 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     } catch {
       /* The current session still works when storage is blocked. */
     }
+    // Switch with every transition off, then restore them after the next frame.
+    const root = document.documentElement;
+    root.classList.add("theme-switching");
     apply(next);
+    void root.offsetHeight;
     window.dispatchEvent(new Event(EVENT));
+    requestAnimationFrame(() => requestAnimationFrame(() => root.classList.remove("theme-switching")));
   };
   return (
     <ThemeContext.Provider value={{ preference, theme, setPreference }}>

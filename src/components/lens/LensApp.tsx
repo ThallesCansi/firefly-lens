@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { fireData } from "@/lib/data/source";
 import {
   drawnArea,
@@ -19,7 +19,8 @@ import { HotspotMap } from "./HotspotMap";
 import { LocationSearch, type MapDestination } from "./LocationSearch";
 import { AssistantDock } from "./AssistantDock";
 import { SiteNav } from "@/components/ui/SiteNav";
-import { MapToolbar, MapLayerControl } from "./MapControls";
+import { MapCard, MapToolbar, MapLayerControl } from "./MapControls";
+import { MONTHS } from "@/lib/format";
 import { TemporalControl } from "./TemporalControl";
 import { useMapCells } from "@/lib/useMapHotspots";
 import { useWorkspaceTools } from "@/components/interactions/useWorkspaceTools";
@@ -42,6 +43,33 @@ function describe(area: Area): string {
   return `${corners} corners · W ${deg(w)} · S ${deg(s)} · E ${deg(e)} · N ${deg(n)}`;
 }
 
+const INTRO_KEY = "firefly-lens-intro-done";
+const subscribeStorage = (notify: () => void) => {
+  window.addEventListener("storage", notify);
+  return () => window.removeEventListener("storage", notify);
+};
+function readIntroSeen(): boolean {
+  try {
+    return localStorage.getItem(INTRO_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+function rememberIntro() {
+  try {
+    localStorage.setItem(INTRO_KEY, "1");
+  } catch {
+    /* Storage blocked: the guidance shows again next time. */
+  }
+}
+
+/** The folded map card's one line: "Sep 2026 · 2 layers" or "14 Sep 2026 · 1 layer". */
+function periodSummary(period: string, layers: number): string {
+  const month = MONTHS[Number(period.slice(5, 7)) - 1].slice(0, 3);
+  const day = period.length === 10 ? `${Number(period.slice(8, 10))} ` : "";
+  return `${day}${month} ${period.slice(0, 4)} · ${layers} ${layers === 1 ? "layer" : "layers"}`;
+}
+
 export function LensApp() {
   const [area, setArea] = useState<Area | null>(null);
   const [analyzed, setAnalyzed] = useState<Area | null>(null);
@@ -50,13 +78,20 @@ export function LensApp() {
   const [drawing, setDrawing] = useState(false);
   const [coordinates, setCoordinates] = useState(false);
   const [searching, setSearching] = useState(false);
+  // First-run guidance: closed by its ×, or for good once an area is chosen.
+  const introSeen = useSyncExternalStore(subscribeStorage, readIntroSeen, () => true);
+  const [introClosed, setIntroClosed] = useState(false);
+  const introDone = introSeen || introClosed;
+  const finishIntro = useCallback(() => {
+    setIntroClosed(true);
+    rememberIntro();
+  }, []);
   const searchPanel = useRef<HTMLElement>(null);
   const [period, setPeriod] = useState(`${fireData.lastYear}-09`);
   const [from, setFrom] = useState(fireData.firstMonth);
   const [to, setTo] = useState(fireData.lastMonth);
   const [sensors, setSensors] = useState<Sensor[]>(["MODIS", "VIIRS"]);
   const [destination, setDestination] = useState<MapDestination | null>(null);
-  const [reset, setReset] = useState(0);
   const [controller, setController] = useState<MapController | null>(null);
   /** Changes on each new selection, so the camera frames it; edits leave it alone. */
   const [frame, setFrame] = useState(0);
@@ -148,6 +183,31 @@ export function LensApp() {
   useEffect(() => {
     if (searching) searchPanel.current?.querySelector("input")?.focus();
   }, [searching]);
+  // Remember that the guidance did its job; this only writes to storage.
+  useEffect(() => {
+    if (area) rememberIntro();
+  }, [area]);
+  const detectionStatus = area ? (
+    <p role="status">
+      <ScientificInfo concept="hotspot" />
+      {mapData.error ||
+        (mapData.cells === null
+          ? "Loading detections…"
+          : `${Math.round(
+              mapData.cells.reduce(
+                (s, c) =>
+                  s +
+                  (sensors.includes("MODIS") ? c.modis : 0) +
+                  (sensors.includes("VIIRS") ? c.viirs : 0),
+                0,
+              ),
+            ).toLocaleString("en-GB")} detections in ${mapData.cells.length.toLocaleString("en-GB")} cells`)}
+      {period < fireData.viirsStart.slice(0, period.length) &&
+      sensors.includes("VIIRS")
+        ? " · VIIRS starts April 2018"
+        : ""}
+    </p>
+  ) : null;
   function analyze() {
     if (!area) return;
     setAnalyzed(area);
@@ -180,7 +240,6 @@ export function LensApp() {
             onDraw={selectArea}
             sensors={sensors}
             destination={destination}
-            reset={reset}
             onReady={setController}
             interactionMode={
               tools.administrativeActive
@@ -191,6 +250,11 @@ export function LensApp() {
             }
             onMapClick={tools.onMapClick}
             onViewChange={tools.editor ? tools.updateView : undefined}
+            status={detectionStatus}
+            onResetView={() => {
+              tools.stop();
+              setDrawing(false);
+            }}
           />
           <SiteNav current="/lens" className="map-site-card" />
           <MapToolbar
@@ -202,7 +266,6 @@ export function LensApp() {
             }}
             searchActive={searching}
             tool={drawing ? "draw" : coordinates ? "coordinates" : "navigate"}
-            hasArea={!!area || !!tools.boundary || !!tools.preview}
             onSelectAdministrative={() => {
               setDrawing(false);
               setCoordinates(false);
@@ -216,26 +279,14 @@ export function LensApp() {
               setDrawing(tool === "draw");
               setCoordinates(tool === "coordinates");
             }}
-            onClear={() => {
-              tools.clear();
-              setArea(null);
-              setAnalysis(false);
-              setDrawing(false);
-            }}
-            onReset={() => {
-              tools.stop();
-              setDrawing(false);
-              setReset((n) => n + 1);
-            }}
           />
-          <div className="map-top-right">
-            <TemporalControl
-              period={period}
-              onChange={changePeriod}
-              disabled={!area}
-            />
+          <MapCard
+            summary={periodSummary(period, sensors.length)}
+            hint={area ? undefined : "Select an area to load detections"}
+          >
+            <TemporalControl period={period} onChange={changePeriod} />
             <MapLayerControl sensors={sensors} onChange={setSensors} />
-          </div>
+          </MapCard>
           {searching && (
             <section
               ref={searchPanel}
@@ -244,13 +295,7 @@ export function LensApp() {
             >
               <div className="map-search-head">
                 <h2>Search places</h2>
-                <button
-                  className="btn btn-quiet"
-                  onClick={() => setSearching(false)}
-                  aria-label="Close search"
-                >
-                  ×
-                </button>
+                <CloseButton label="Close search" onClick={() => setSearching(false)} />
               </div>
               <LocationSearch
                 onNavigate={(place) => {
@@ -278,13 +323,7 @@ export function LensApp() {
             >
               <div className="mb-3 flex items-center justify-between">
                 <h2>Area coordinates</h2>
-                <button
-                  className="btn btn-quiet"
-                  onClick={() => setCoordinates(false)}
-                  aria-label="Close coordinates"
-                >
-                  ×
-                </button>
+                <CloseButton label="Close coordinates" onClick={() => setCoordinates(false)} />
               </div>
               <label className="mb-3 block text-sm">
                 Study region
@@ -325,6 +364,7 @@ export function LensApp() {
             </section>
           )}
           {!area &&
+            !introDone &&
             !drawing &&
             !coordinates &&
             !searching &&
@@ -332,7 +372,10 @@ export function LensApp() {
             !tools.boundary &&
             !tools.editor && (
               <div className="explore-hint map-surface">
-                <p className="eyebrow">EXPLORE THE RECORD</p>
+                <div className="flex items-start justify-between gap-3">
+                  <p className="eyebrow">EXPLORE THE RECORD</p>
+                  <CloseButton label="Close the introduction" onClick={finishIntro} />
+                </div>
                 <h1 className="text-2xl">
                   A place. Two sensors.
                   <br />
@@ -371,13 +414,13 @@ export function LensApp() {
                   )}
                   {tools.editor && <PolygonEditStatus editor={tools.editor} />}
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <button
                     ref={analyzeButton}
                     className="btn btn-primary"
                     onClick={analyze}
                   >
-                    Analyze Area
+                    Analyze area
                   </button>
                   <button
                     className="btn btn-quiet"
@@ -389,7 +432,7 @@ export function LensApp() {
                     Redraw
                   </button>
                   <button
-                    className="btn btn-quiet"
+                    className="btn btn-text"
                     onClick={() => {
                       tools.clear();
                       setArea(null);
@@ -401,29 +444,6 @@ export function LensApp() {
               </section>
             )}
           <AssistantDock />
-          {area && (
-            <p className="map-data-status map-surface" role="status">
-              <ScientificInfo concept="hotspot" />
-              {mapData.error ||
-                (mapData.cells === null
-                  ? "Loading detections…"
-                  : `${Math.round(
-                      mapData.cells.reduce(
-                        (s, c) =>
-                          s +
-                          (sensors.includes("MODIS") ? c.modis : 0) +
-                          (sensors.includes("VIIRS") ? c.viirs : 0),
-                        0,
-                      ),
-                    ).toLocaleString(
-                      "en-GB",
-                    )} visible detections in ${mapData.cells.length.toLocaleString("en-GB")} grid cells · selected area only`)}
-              {period < fireData.viirsStart.slice(0, period.length) &&
-              sensors.includes("VIIRS")
-                ? " · VIIRS NOAA-20 starts in April 2018"
-                : ""}
-            </p>
-          )}
         </section>
         {analyzed && (
           <ResizableAnalysisPanel
@@ -434,8 +454,7 @@ export function LensApp() {
             }}
           >
             <div className="analysis-heading">
-              <div>
-                <p className="eyebrow">INVESTIGATE / NASA FIRMS, BRAZIL</p>
+              <div className="min-w-0">
                 <h2 className="text-2xl">{analyzed.name}</h2>
                 <p className="num text-xs text-dim">{describe(analyzed)}</p>
               </div>
@@ -447,14 +466,7 @@ export function LensApp() {
                 >
                   {expanded ? "Compact" : "Expand"}
                 </button>
-                <button
-                  ref={closeButton}
-                  className="btn btn-quiet"
-                  onClick={close}
-                  aria-label="Close analysis"
-                >
-                  ×
-                </button>
+                <CloseButton ref={closeButton} label="Close analysis" onClick={close} />
               </div>
             </div>
             <div className="analysis-scroll">
@@ -486,5 +498,24 @@ export function LensApp() {
         )}
       </div>
     </main>
+  );
+}
+
+/** The one close control used by every card and panel. */
+function CloseButton({
+  label,
+  onClick,
+  ref,
+}: {
+  label: string;
+  onClick: () => void;
+  ref?: React.Ref<HTMLButtonElement>;
+}) {
+  return (
+    <button ref={ref} type="button" className="icon-btn" aria-label={label} title={label} onClick={onClick}>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
+        <path d="M6 6l12 12M18 6 6 18" />
+      </svg>
+    </button>
   );
 }

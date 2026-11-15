@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import type {
   GeoJSONSource,
   Map as MapLibreMap,
@@ -165,6 +165,8 @@ export function HotspotMap({
   onReady,
   onViewChange,
   showProjectionToggle = true,
+  status,
+  onResetView,
 }: {
   /** The area of interest, outlined on the map. */
   area: AnalysisArea | null;
@@ -194,6 +196,10 @@ export function HotspotMap({
   onViewChange?: () => void;
   /** Shows the 3D globe / 2D map switch inside the map. */
   showProjectionToggle?: boolean;
+  /** Live line shown at the foot of the map key (for example the detection count). */
+  status?: ReactNode;
+  /** Called when the person presses "Reset view" in the map controls. */
+  onResetView?: () => void;
 }) {
   const { theme } = useTheme();
   const el = useRef<HTMLDivElement>(null);
@@ -253,10 +259,6 @@ export function HotspotMap({
           el.current,
           base ? basemapFor(base, latest.current.theme) : blankStyle(),
           initial,
-        );
-        instance.addControl(
-          new maplibregl.NavigationControl({ showCompass: false }),
-          "bottom-right",
         );
         instance.addControl(
           new maplibregl.AttributionControl({ compact: true, customAttribution: BASEMAP_ATTRIBUTION }),
@@ -616,7 +618,7 @@ export function HotspotMap({
 
   return (
     <div
-      className={`hotspot-map map-space relative h-full overflow-hidden ${isDrawing ? "ring-2 ring-lume" : ""}`}
+      className={`hotspot-map map-space relative h-full overflow-hidden ${isDrawing ? "ring-2 ring-[var(--color-selected)] ring-inset" : ""}`}
       data-map-theme={paintedTheme}
       data-projection={ready ? mode : undefined}
     >
@@ -651,41 +653,60 @@ export function HotspotMap({
           No detections in the selected area and period.
         </p>
       )}
-      <div className="map-legend pointer-events-none absolute bottom-8 left-3 flex flex-col gap-1.5 rounded-lg bg-night/90 px-3 py-2 text-[0.8125rem] text-dim">
-        <span className="flex items-center gap-2">
-          <span
-            aria-hidden="true"
-            className="block size-3 rounded-full border-[1.5px] border-modis"
-          />
-          MODIS Aqua, detections per 0.25° cell
-        </span>
-        <span className="flex items-center gap-2">
-          <span
-            aria-hidden="true"
-            className="mx-[3px] block size-1.5 rounded-full bg-viirs"
-          />
-          VIIRS NOAA-20, detections per cell
-        </span>
-        <span className="flex items-center gap-2">
-          <span aria-hidden="true" className="block h-px w-3 bg-lume" />
-          Area of interest
-        </span>
+      {/* The map key: what the marks mean, and what is on screen now. */}
+      <section className="map-key map-surface" aria-label="Map key">
+        <ul className="map-key-rows">
+          <li>
+            <span aria-hidden="true" className="sensor-ring" />
+            MODIS Aqua <span className="text-faint">· per 0.25° cell</span>
+          </li>
+          <li>
+            <span aria-hidden="true" className="sensor-dot" />
+            VIIRS NOAA-20 <span className="text-faint">· per cell</span>
+          </li>
+          <li>
+            <span aria-hidden="true" className="map-key-area" />
+            Area of interest
+          </li>
+        </ul>
+        {status && <div className="map-key-status">{status}</div>}
         {offline && (
-          <span className="text-faint">Basemap unavailable offline</span>
+          <p className="map-key-note">Basemap unavailable offline</p>
         )}
         {globeUnavailable && (
-          <span className="text-faint">
-            Globe unavailable here: flat map shown
-          </span>
+          <p className="map-key-note">Globe unavailable here: flat map shown</p>
         )}
-      </div>
-      {ready && showProjectionToggle && !projection && (
-        <ProjectionToggle
-          value={mode}
-          disabled={globeUnavailable}
-          onChange={(next) => control.current?.setProjection(next)}
-          className="absolute bottom-[7.25rem] right-[10px]"
-        />
+      </section>
+      {/* One column of view controls: projection, zoom, reset. */}
+      {ready && (
+        <div className="map-view-controls">
+          {showProjectionToggle && !projection && (
+            <ProjectionToggle
+              value={mode}
+              disabled={globeUnavailable}
+              onChange={(next) => control.current?.setProjection(next)}
+            />
+          )}
+          <div className="map-zoom map-surface" role="group" aria-label="Zoom">
+            <button type="button" aria-label="Zoom in" title="Zoom in" disabled={isDrawing} onClick={() => map.current?.zoomIn()}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+            </button>
+            <button type="button" aria-label="Zoom out" title="Zoom out" disabled={isDrawing} onClick={() => map.current?.zoomOut()}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M5 12h14" /></svg>
+            </button>
+            <button
+              type="button"
+              aria-label="Reset view"
+              title="Reset view"
+              onClick={() => {
+                onResetView?.();
+                control.current?.resetView();
+              }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 10a8 8 0 1 1 1 8M4 4v6h6" /></svg>
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -70,10 +70,15 @@
   border-radius: 2px;
   background: var(--color-faint);
 }
-.ff-interaction-resize-handle:hover span,
 .ff-interaction-resize-handle:focus-visible span {
   width: 4px;
   background: var(--color-selected);
+}
+@media (hover: hover) {
+  .ff-interaction-resize-handle:hover span {
+    width: 4px;
+    background: var(--color-selected);
+  }
 }
 .ff-interaction-panel-tools {
   display: flex;
@@ -146,11 +151,16 @@
   box-shadow: var(--surface-shadow);
   transition: transform 120ms ease-out;
 }
-.ff-polygon-vertex:hover > span,
 .ff-polygon-vertex:focus-visible > span,
 .ff-polygon-vertex[data-active] > span {
   transform: scale(1.3);
   background: var(--color-selected);
+}
+@media (hover: hover) {
+  .ff-polygon-vertex:hover > span {
+    transform: scale(1.3);
+    background: var(--color-selected);
+  }
 }
 .ff-polygon-vertex:focus-visible {
   outline: none;
@@ -182,8 +192,10 @@
   border-radius: 999px;
   background: var(--color-selected);
 }
-.ff-polygon-mid:hover {
-  opacity: 1;
+@media (hover: hover) {
+  .ff-polygon-mid:hover {
+    opacity: 1;
+  }
 }
 .ff-interaction-edit-overlay[data-dragging] .ff-polygon-mid,
 .ff-interaction-edit-overlay[data-dragging] .ff-polygon-move {

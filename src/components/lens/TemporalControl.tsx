@@ -4,15 +4,13 @@ import { MONTHS } from "@/lib/format";
 export function TemporalControl({
   period,
   onChange,
-  disabled,
 }: {
   period: string;
   onChange: (value: string) => void;
-  disabled: boolean;
 }) {
   return (
     <div
-      className="temporal-control map-surface"
+      className="temporal-control"
       role="group"
       aria-label="Map period"
     >
@@ -59,13 +57,6 @@ export function TemporalControl({
           Whole month
         </button>
       )}
-      <p className="temporal-caption">
-        {disabled
-          ? "Select an area to load detections"
-          : period.length === 10
-            ? `${period} · one day`
-            : `${period} · whole month`}
-      </p>
     </div>
   );
 }

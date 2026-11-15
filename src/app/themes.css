@@ -1,36 +1,41 @@
 /* Retain existing token names so all scientific views share the same theme. */
 :root {
-  --surface-floating: #121713f5;
-  --surface-shadow: 0 8px 32px #0004;
-  --color-button: #d8f24e;
-  --color-button-ink: #141a05;
-  --color-button-hover: #e5fa72;
-  --color-accent: #f59a35;
-  --color-selected: #d8f24e;
-  --map-ground: #121713;
+  --surface-floating: #161311f2;
+  --surface-shadow: 0 0 0 1px #ffffff12, 0 8px 28px #00000052, 0 2px 6px #00000038;
+  --color-button: #ff6b1a;
+  --color-button-ink: #1c0b02;
+  --color-button-hover: #ff8540;
+  --color-accent: #ffa25c;
+  --color-selected: #ff6b1a;
+  --map-ground: #161311;
+  /* Radius scale: control, card, panel, pill. */
+  --radius-control: 10px;
+  --radius-card: 14px;
+  --radius-panel: 18px;
 }
 :root[data-theme="light"] {
   color-scheme: light;
-  --color-night: #f5f7f2;
+  --color-night: #f8f5f2;
   --color-canopy: #ffffff;
-  --color-bark: #e6ece1;
-  --color-line: #cbd5c7;
-  --color-ink: #17291f;
-  --color-dim: #495e4e;
-  --color-faint: #5d705f;
-  --color-lume: #526b12;
-  --color-lume-ink: #f8fbe9;
-  --color-button: #d8f24e;
-  --color-button-ink: #141a05;
-  --color-button-hover: #cce43e;
-  --color-accent: #914911;
-  --color-selected: #526b12;
-  --color-ember-0: #e0e7dc;
+  --color-bark: #efe8e2;
+  --color-line: #ddd2c9;
+  --color-ink: #2a1d15;
+  --color-dim: #6b5a4e;
+  --color-faint: #76655a;
+  --color-lume: #c2410c;
+  --color-lume-ink: #fff7f0;
+  --color-marker: #2a1d15;
+  --color-button: #ff6b1a;
+  --color-button-ink: #1c0b02;
+  --color-button-hover: #ff8540;
+  --color-accent: #9a3412;
+  --color-selected: #ea580c;
+  --color-ember-0: #ece4dd;
   --color-modis: #2167b8;
   --color-viirs: #a02f70;
-  --surface-floating: #fffffff5;
-  --surface-shadow: 0 8px 32px #17301e14;
-  --map-ground: #e6ece1;
+  --surface-floating: #fffffff2;
+  --surface-shadow: 0 0 0 1px #2a1d1514, 0 8px 28px #2a1d151a, 0 2px 6px #2a1d1512;
+  --map-ground: #efe8e2;
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
@@ -42,15 +47,15 @@
 :root[data-theme="light"] .history-month {
   box-shadow: inset 0 0 0 .75px var(--color-faint);
 }
-/* Keep every original Lume colour, shape, proportion and animation in both themes. */
+/* Lume keeps the same colours in both themes: an amber lantern, the brand's own light. */
 .lume {
-  --color-ink: #eef0e6;
-  --color-night: #0b0e0c;
-  --color-dim: #a6ae9f;
-  --color-faint: #7d8677;
-  --color-lume: #d8f24e;
-  --color-lume-ink: #141a05;
-  --color-ember-4: #f59a35;
+  --color-ink: #f3eee9;
+  --color-night: #0e0c0b;
+  --color-dim: #b5aaa1;
+  --color-faint: #8f837a;
+  --color-lume: #ffb020;
+  --color-lume-ink: #2a1600;
+  --color-ember-4: #ff6b1a;
 }
 .brand-signature {
   display: inline-flex;
@@ -110,9 +115,11 @@
   cursor: pointer;
   border-radius: 50%;
 }
-.scientific-info-trigger:hover {
-  color: var(--color-ink);
-  background: var(--color-bark);
+@media (hover: hover) {
+  .scientific-info-trigger:hover {
+    color: var(--color-ink);
+    background: var(--color-bark);
+  }
 }
 .scientific-popover {
   position: fixed;
@@ -192,8 +199,10 @@
   background: var(--color-button);
   color: var(--color-button-ink);
 }
-.btn-primary:hover {
-  background: var(--color-button-hover);
+@media (hover: hover) {
+  .btn-primary:hover {
+    background: var(--color-button-hover);
+  }
 }
 .t-tab[aria-selected="true"] {
   color: var(--color-button-ink);
@@ -258,11 +267,15 @@
   font-weight: 500;
   color: var(--color-dim);
   text-decoration: none;
-  transition: color 160ms, background 160ms;
+  transition-property: color, background-color, transform;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
 }
-.site-card-links a:hover {
-  color: var(--color-ink);
-  background: var(--color-bark);
+@media (hover: hover) {
+  .site-card-links a:hover {
+    color: var(--color-ink);
+    background: var(--color-bark);
+  }
 }
 .site-card-links a[aria-current="page"] {
   color: var(--color-lume);
@@ -272,14 +285,18 @@
   place-items: center;
   width: 40px;
   height: 40px;
-  border-radius: 10px;
+  border-radius: 8px;
   color: var(--color-dim);
   cursor: pointer;
-  transition: color 160ms, background 160ms;
+  transition-property: color, background-color, transform;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
 }
-.theme-toggle:hover {
-  color: var(--color-ink);
-  background: var(--color-bark);
+@media (hover: hover) {
+  .theme-toggle:hover {
+    color: var(--color-ink);
+    background: var(--color-bark);
+  }
 }
 /* Content pages: the same card, floating and staying in view while scrolling. */
 .site-header-float {
@@ -312,4 +329,9 @@
     padding: 0 7px;
     font-size: 0.8125rem;
   }
+}
+
+.theme-toggle:active,
+.site-card-links a:active {
+  transform: scale(0.96);
 }
