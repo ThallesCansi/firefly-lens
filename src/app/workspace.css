@@ -411,27 +411,30 @@
   gap: 10px;
   z-index: 20;
 }
-/* The time-lapse: play, the month on screen, a scrubber; the range below. */
+/* The time-lapse: what is playing, a timeline that fills as it plays, and the range. */
 .playback-bar {
   display: grid;
-  gap: 2px;
-  padding: 6px;
+  gap: 10px;
+  padding: 10px 12px 12px;
+  border-radius: var(--radius-panel);
 }
-.playback-row {
+.playback-head {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
 }
 .playback-play {
+  position: relative;
   flex: none;
   display: grid;
   place-items: center;
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: var(--color-button);
   color: var(--color-button-ink);
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
   transition-property: opacity, scale;
   transition-duration: 150ms;
   transition-timing-function: ease-out;
@@ -440,59 +443,196 @@
   opacity: 0.35;
   cursor: default;
 }
-.playback-now {
-  flex: none;
-  min-width: 68px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--color-ink);
+/* Play and pause stay in the DOM and cross-fade. */
+.playback-icon {
+  grid-area: 1 / 1;
+  transition-property: opacity, scale, filter;
+  transition-duration: 300ms;
+  transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
 }
-.playback-scrub {
+.playback-icon[data-on="false"] {
+  opacity: 0;
+  scale: 0.25;
+  filter: blur(4px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .playback-icon {
+    transition-property: opacity;
+    scale: 1 !important;
+    filter: none !important;
+  }
+}
+.playback-title {
   flex: 1;
   min-width: 0;
-  height: 38px;
-  accent-color: var(--color-lume);
-  cursor: pointer;
+  display: grid;
 }
-.playback-scrub:disabled {
-  cursor: default;
-  opacity: 0.5;
+.playback-now {
+  font-size: 16px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink);
 }
-.playback-speed,
-.playback-close {
+.playback-hint {
+  font-size: 12px;
+  color: var(--color-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.playback-speeds {
   flex: none;
+  display: flex;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--color-bark);
+}
+.playback-speeds button,
+.playback-close {
   display: grid;
   place-items: center;
-  min-width: 38px;
-  height: 38px;
+  min-width: 36px;
+  height: 30px;
   padding: 0 6px;
   border-radius: 7px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--color-dim);
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
   transition-property: background-color, color, scale;
   transition-duration: 150ms;
   transition-timing-function: ease-out;
 }
+.playback-speeds button[aria-pressed="true"] {
+  background: var(--surface-floating);
+  color: var(--color-ink);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.3);
+}
+.playback-close {
+  flex: none;
+  height: 36px;
+}
 @media (hover: hover) {
-  .playback-speed:hover,
+  .playback-speeds button:hover,
+  .playback-close:hover {
+    color: var(--color-ink);
+  }
   .playback-close:hover {
     background: var(--color-bark);
-    color: var(--color-ink);
   }
 }
 .playback-play:not(:disabled):active,
-.playback-speed:active,
-.playback-close:active {
+.playback-speeds button:active,
+.playback-close:active,
+.playback-presets button:active {
   scale: 0.96;
 }
-.playback-range {
-  flex-wrap: wrap;
-  row-gap: 4px;
-  padding: 0 4px 2px;
-  font-size: 12px;
+/* The timeline: a track, the fill and knob (moved by transform only), and a
+   transparent native range on top that takes the pointer and the keyboard. */
+.playback-timeline {
+  display: grid;
+  gap: 6px;
+  padding: 0 4px;
+}
+.playback-track {
+  position: relative;
+  height: 6px;
+  margin: 8px 0;
+  border-radius: 999px;
+  background: var(--color-bark);
+}
+.playback-fill,
+.playback-rail {
+  position: absolute;
+  inset: 0;
+  transition-property: transform;
+}
+.playback-fill {
+  border-radius: inherit;
+  background: var(--color-lume);
+  transform-origin: left;
+}
+.playback-rail {
+  pointer-events: none;
+}
+.playback-knob {
+  position: absolute;
+  right: -8px;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  margin-top: -8px;
+  border-radius: 50%;
+  background: var(--color-ink);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-lume) 30%, transparent), 0 1px 3px rgb(0 0 0 / 0.4);
+}
+.playback-tick {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 1px;
+  background: color-mix(in srgb, var(--color-ink) 22%, transparent);
+  pointer-events: none;
+}
+.playback-input {
+  position: absolute;
+  inset: -12px -8px;
+  width: calc(100% + 16px);
+  height: 30px;
+  opacity: 0;
+  cursor: pointer;
+}
+.playback-input:disabled {
+  cursor: default;
+}
+.playback-track:has(.playback-input:focus-visible) {
+  outline: 2px solid var(--color-lume);
+  outline-offset: 6px;
+}
+.playback-timeline[data-disabled="true"] .playback-knob {
+  opacity: 0.4;
+}
+.playback-scale {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  height: 14px;
+  font-size: 11px;
+  color: var(--color-faint);
+}
+.playback-scale span:not(:first-child):not(:last-child) {
+  position: absolute;
+  translate: -50% 0;
+}
+.playback-empty {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--color-bark);
+  font-size: 13px;
   color: var(--color-dim);
+}
+.playback-empty .btn {
+  flex: none;
+}
+.playback-range {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-line);
+}
+.playback-range-fields {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-faint);
 }
 .playback-when {
   display: inline-flex;
@@ -504,9 +644,40 @@
   border-radius: 7px;
   font-size: 12px;
 }
-.playback-status {
-  margin-left: auto;
-  color: var(--color-faint);
+.playback-presets {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.playback-presets button {
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--color-dim);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition-property: background-color, border-color, color, scale;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+}
+.playback-presets button[aria-pressed="true"] {
+  border-color: var(--color-lume);
+  color: var(--color-ink);
+  background: color-mix(in srgb, var(--color-lume) 14%, transparent);
+}
+@media (hover: hover) {
+  .playback-presets button:hover {
+    color: var(--color-ink);
+    border-color: var(--color-dim);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .playback-fill,
+  .playback-rail {
+    transition-duration: 0ms !important;
+  }
 }
 .assistant-dock {
   position: relative;
@@ -515,12 +686,11 @@
   gap: 10px;
   z-index: 20;
 }
-/* Fireflies circling the assistant while it thinks: each follows the window's
-   rounded outline (offset-path), facing the way it flies. They fade in and out
-   with the thinking state; when idle the orbit is paused, so it costs nothing. */
+/* Fireflies wandering round the assistant while it thinks (FireflySwarm.tsx
+   moves them). The layer reaches 40px past the window so they can stray. */
 .assistant-fireflies {
   position: absolute;
-  inset: -16px -18px;
+  inset: -40px;
   z-index: 1;
   pointer-events: none;
   opacity: 0;
@@ -534,37 +704,8 @@
   position: absolute;
   top: 0;
   left: 0;
-  offset-path: inset(0 round 44px);
-  offset-rotate: auto;
+  will-change: transform;
   filter: drop-shadow(0 0 6px color-mix(in srgb, var(--color-lume) 70%, transparent));
-}
-.assistant-firefly:nth-child(1) { offset-distance: 8%; --orbit: 11s; --at: 0s; }
-.assistant-firefly:nth-child(2) { offset-distance: 34%; --orbit: 14s; --at: -4.6s; }
-.assistant-firefly:nth-child(3) { offset-distance: 61%; --orbit: 12.5s; --at: -7.9s; offset-rotate: reverse; }
-.assistant-firefly:nth-child(4) { offset-distance: 86%; --orbit: 16s; --at: -12.2s; }
-@media (prefers-reduced-motion: no-preference) {
-  .assistant-firefly {
-    animation: firefly-orbit var(--orbit) linear var(--at) infinite paused;
-  }
-  .assistant-firefly:nth-child(3) {
-    animation-direction: reverse;
-  }
-  .assistant-dock[data-busy="true"] .assistant-firefly {
-    animation-play-state: running;
-  }
-}
-@keyframes firefly-orbit {
-  from {
-    offset-distance: 0%;
-  }
-  to {
-    offset-distance: 100%;
-  }
-}
-@supports not (offset-path: inset(0 round 4px)) {
-  .assistant-fireflies {
-    display: none;
-  }
 }
 .assistant-bar {
   display: flex;
@@ -1026,9 +1167,13 @@
   .map-key {
     bottom: 100px;
   }
-  /* The open time-lapse adds a row above the assistant: the key moves over it. */
+  /* The open time-lapse stands above the assistant: the key moves over it. */
   .workspace-map:has(.playback-bar) .map-key {
-    bottom: 202px;
+    bottom: 286px;
+  }
+  /* The bar spans the map here; the area card would sit on it. */
+  .workspace-map:has(.playback-bar) .selection-card {
+    display: none;
   }
   .map-bottom {
     width: calc(100% - 150px);
@@ -1123,16 +1268,32 @@
   .workspace-map:has(.selection-card) .map-view-controls {
     bottom: 250px;
   }
-  /* With the time-lapse open, everything at the bottom sits above its bar. */
-  .workspace-map:has(.playback-bar) .map-key,
-  .workspace-map:has(.playback-bar) .map-view-controls {
-    bottom: 222px;
+  /* A phone has no room for both: while the time-lapse is open it owns the
+     bottom of the map, and the key, view controls and cards step aside
+     (pinch zooms; closing the bar brings them back). */
+  .workspace-map:has(.playback-bar) :is(.map-key, .map-view-controls, .selection-card, .explore-hint) {
+    display: none;
   }
-  .workspace-map:has(.playback-bar) .selection-card {
-    bottom: 192px;
+  .playback-bar {
+    padding: 8px 10px 10px;
   }
-  .workspace-map:has(.playback-bar):has(.selection-card) .map-view-controls {
-    bottom: 352px;
+  .playback-head {
+    gap: 8px;
+  }
+  .playback-play {
+    width: 40px;
+    height: 40px;
+  }
+  .playback-now {
+    font-size: 15px;
+    white-space: nowrap;
+  }
+  .playback-speeds button {
+    min-width: 30px;
+    padding: 0 4px;
+  }
+  .playback-empty {
+    flex-wrap: wrap;
   }
   .coordinates-panel {
     left: 86px;

@@ -3,7 +3,7 @@
 import type { AssistantResponse, AssistantTurn, ChatTurn, ToolResult } from "@/lib/assistant/protocol";
 import { useEffect, useId, useRef, useState, type RefObject } from "react";
 import { describeHost, runTool, type AssistantHost } from "@/lib/assistant/execute";
-import { Lume } from "@/components/firefly/Lume";
+import { FireflySwarm } from "./FireflySwarm";
 
 const EXAMPLES = [
   "Show Santa Catarina in 2006",
@@ -184,14 +184,8 @@ export function AssistantDock({ host }: { host: RefObject<AssistantHost | null> 
           )}
         </section>
       )}
-      {/* While the assistant thinks, a few fireflies circle its window. */}
-      <div className="assistant-fireflies" aria-hidden="true">
-        {[24, 19, 24, 21].map((size, i) => (
-          <span key={i} className="assistant-firefly">
-            <Lume size={size} />
-          </span>
-        ))}
-      </div>
+      {/* While the assistant thinks, a few fireflies wander round its window. */}
+      <FireflySwarm active={busy} />
       <form className="assistant-bar map-surface" onSubmit={submit} role="search" aria-label="Ask the map assistant">
         <span className="assistant-spark" aria-hidden="true" />
         <input
