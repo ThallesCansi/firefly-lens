@@ -20,7 +20,12 @@ export interface Region {
   name: string;
   /** Where the region sits, in a few words. */
   place: string;
+  /** Envelope of `geometry`, or the whole region when it has no outline. */
   bbox: BBox;
+  /** The region's real outline (IBGE biome, Embrapa delimitation…). */
+  geometry?: PolygonGeometry;
+  /** A point inside the outline, for markers. */
+  representative_point?: [number, number];
 }
 
 /** GeoJSON polygon coordinates, [longitude, latitude] in degrees. */
@@ -92,6 +97,12 @@ export function rectangleArea([w, s, e, n]: BBox, name?: string): AnalysisArea {
     ],
     name,
   );
+}
+
+/** A prepared study region as an analysis area: its real outline, which is not edited by hand. */
+export function presetArea(region: Region): AnalysisArea {
+  if (!region.geometry) return { ...rectangleArea(region.bbox, region.name), id: `preset:${region.id}`, kind: "preset" };
+  return { id: `preset:${region.id}`, name: region.name, kind: "preset", geometry: region.geometry, bbox: geometryEnvelope(region.geometry) };
 }
 
 /** The vertices of a drawn area, when it is a single ring that can be edited by hand. */

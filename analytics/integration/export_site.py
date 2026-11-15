@@ -39,8 +39,7 @@ def export_site(repo=REPO, out=None, *, ids=None, origins=48):
     entries = []
     out.mkdir(parents=True, exist_ok=True)
     for region in selected:
-        west, south, east, north = region["bbox"]
-        geometry = {"type": "Polygon", "coordinates": [[[west, south], [east, south], [east, north], [west, north], [west, south]]]}
+        geometry = region["geometry"]  # exact preset outline (harmonization/pipeline/presets.geojson)
         print(f"Processing {region['id']}: actual polygon + {origins} backtest origins", flush=True)
         series = from_parquet(repo, region["id"], geometry)
         result = analyze(series, generated_at=now, forecast_config=ForecastConfig(max_origins=origins))
@@ -53,9 +52,12 @@ def export_site(repo=REPO, out=None, *, ids=None, origins=48):
         raw = (json.dumps(bundle, ensure_ascii=False, separators=(",", ":"), allow_nan=False) + "\n").encode("utf-8")
         filename = f"{region['id']}.json"
         (out / filename).write_bytes(raw)
-        entries.append({"id": region["id"], "name": region["name"], "geometry": geometry,
-                        "url": f"/analytics/{filename}", "sha256": sha(raw),
-                        "forecast_status": result["forecast"]["data_status"]})
+        entry = {"id": region["id"], "name": region["name"], "geometry": geometry,
+                 "url": f"/analytics/{filename}", "sha256": sha(raw),
+                 "forecast_status": result["forecast"]["data_status"]}
+        if region.get("representative_point"):
+            entry["representative_point"] = region["representative_point"]
+        entries.append(entry)
         print(f"Exported {filename}: history={result['history']['data_status']}, forecast={result['forecast']['data_status']}", flush=True)
     sources = []
     for relative in ("harmonization/output/grid_monthly_total.parquet", "harmonization/output/harmonization_params.json", "public/data/brazil/meta.json"):

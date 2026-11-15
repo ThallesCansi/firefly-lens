@@ -15,7 +15,7 @@ const chapters = [
   ["welcome"], ["map", "map-controls"], ["search", "search"], ["region", "presets"],
   ["pantanal", "selection"], ["sensors", "sensors"], ["period", "period"], ["analyze", "analyze"],
   ["history", "history"], ["month", "month"], ["report", "report-heading"], ["science", "analytics-history"],
-  ["forecast", "analytics-forecast"], ["range", "range"], ["exports", "exports"], ["complete"],
+  ["forecast", "analytics-forecast"], ["range", "range"], ["exports", "exports"], ["pages", "site-links"], ["complete"],
 ];
 async function setup(width, theme, motion = "reduce") {
   const context = await browser.newContext({ viewport: { width, height: 1000 }, colorScheme: theme, reducedMotion: motion, hasTouch: true, acceptDownloads: true });
@@ -45,14 +45,34 @@ async function at(p, id) {
   await p.locator(`.lume-tour-card[data-tour-step="${id}"]`).waitFor();
   const target = chapters.find((step) => step[0] === id)?.[1];
   if (target) await p.locator(`[data-tour="${target}"].driver-active-element`).waitFor();
-  await card(p).locator(".lume").waitFor();
+  // FireFlighter flies above the page and lands on the card's perch.
+  await card(p).locator(".lume-tour-mascot").waitFor();
   assert.equal(await card(p).count(), 1);
-  assert.equal(await card(p).locator(".lume").count(), 1);
+  assert.equal(await p.locator(".lume-tour-flier .lume").count(), 1);
   assert.equal(await p.locator("main.lens-workspace:visible").getAttribute("inert"), "");
   assert.equal(await p.locator(".explore-hint:visible, .lume-invitation:visible").count(), 0, "No overlapping welcome");
   assert.equal(await p.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false, `${id}: horizontal overflow`);
 }
-async function next(p, id) { await card(p).locator(".driver-popover-next-btn").click(); await at(p, id); }
+async function next(p, id) {
+  if (id === "complete" && await p.locator('.lume-tour-card[data-tour-step="pages"]').count()) return visitPages(p);
+  await card(p).locator(".driver-popover-next-btn").click(); await at(p, id);
+}
+/** From "pages": About's and Method's stops, then back to the Lens for the last step. */
+async function visitPages(p) {
+  const stops = [["about", 4, 17], ["method", 3, 21]];
+  await card(p).locator(".driver-popover-next-btn").click();
+  for (const [path, count, first] of stops) {
+    await p.waitForURL(`**/${path}`);
+    for (let i = 0; i < count; i++) {
+      await p.waitForFunction((n) => document.querySelector(".lume-tour-card .driver-popover-progress-text")?.textContent === `${n} of 24`, first + i);
+      assert.equal(await p.locator(".lume-tour-flier .lume").count(), 1, `${path}: FireFlighter is flying with the tour`);
+      await card(p).locator(".driver-popover-next-btn").click();
+    }
+  }
+  await p.waitForURL("**/lens");
+  await at(p, "complete");
+  assert.equal(await card(p).locator(".driver-popover-progress-text").textContent(), "24 of 24");
+}
 async function start(p) { await p.locator('[data-tour="replay"]').click(); await at(p, "welcome"); }
 async function exit(p, name = "Skip tour") {
   await card(p).getByRole("button", { name, exact: true }).click();
@@ -167,12 +187,12 @@ try {
       assert.match(await mapMonth(page).textContent(), /Sep/);
     }
     if (id === "month") {
-      assert.match(await page.locator('[data-tour="month"]').innerText(), /535 hot spots/);
+      assert.match(await page.locator('[data-tour="month"]').innerText(), /356 hot spots/);
       await card(page).locator(".driver-popover-prev-btn").click(); await at(page, "history"); await next(page, "month");
     }
     if (id === "science") {
       assert.equal(await page.locator('[data-tour="tab-history"]').getAttribute("aria-selected"), "true");
-      assert.equal(await page.locator('[data-tour="analytics-history"] .analytics-stats strong').first().innerText(), "535");
+      assert.equal(await page.locator('[data-tour="analytics-history"] .analytics-stats strong').first().innerText(), "355.68");
       await shot(page, "desktop-history.png");
     }
     if (id === "forecast") {
@@ -285,6 +305,6 @@ try {
   await fp.reload(); await at(fp, "welcome"); // Partial outcome doesn't opt out.
   await fp.keyboard.press("Escape"); await failed.close();
   assert.deepEqual(errors, []);
-  writeFileSync(join(output, "results.json"), JSON.stringify({ status: "passed", steps: 16, layouts: [1440, 1000, 390, 320], errors, pantanalSeptember2023: 535, automaticVisits: true, explicitOptOut: true, readOnly: true }, null, 2));
+  writeFileSync(join(output, "results.json"), JSON.stringify({ status: "passed", steps: 24, layouts: [1440, 1000, 390, 320], errors, pantanalSeptember2023: 355.68, automaticVisits: true, explicitOptOut: true, readOnly: true }, null, 2));
   console.log(`Lume automatic/read-only browser QA passed. Evidence: ${output}`);
 } finally { await browser.close(); }

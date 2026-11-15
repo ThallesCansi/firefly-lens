@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { fireData } from "@/lib/data/source";
 import { SiteFooter } from "@/components/ui/SiteFooter";
 import { SiteHeader } from "@/components/ui/SiteHeader";
+import { PageTour } from "@/components/onboarding/PageTour";
 import { MethodTabs } from "@/components/method/MethodTabs";
 import { HarmonizationGuide } from "@/components/method/HarmonizationGuide";
 import { AnomaliesGuide } from "@/components/method/AnomaliesGuide";
@@ -47,6 +48,7 @@ export default function MethodPage() {
         />
       </main>
       <SiteFooter />
+      <PageTour page="method" />
     </>
   );
 }

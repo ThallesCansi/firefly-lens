@@ -44,13 +44,15 @@ TILE = 16                   # células por lado do bloco
 EPOCH_DAY = dt.date(2002, 1, 1)
 EPOCH_YEAR = 2002
 BIOMES = ["Amazônia", "Caatinga", "Cerrado", "Mata Atlântica", "Pampa", "Pantanal"]
-PRESETS = [
-    {"id": "amazon", "name": "Southern Amazon", "place": "Brazil, arc of deforestation (Pará, Mato Grosso, Rondônia)", "bbox": [-62, -13, -50, -5]},
-    {"id": "matopiba", "name": "Matopiba", "place": "Brazil, Cerrado frontier (Maranhão, Tocantins, Piauí, Bahia)", "bbox": [-50, -14, -42, -6]},
-    {"id": "pantanal", "name": "Pantanal", "place": "Brazil, wetlands of Mato Grosso and Mato Grosso do Sul", "bbox": [-58.5, -22, -54.5, -16]},
-    {"id": "caatinga", "name": "Sertão", "place": "Brazil, Caatinga of the northeast", "bbox": [-42, -11, -36, -5]},
-    {"id": "pampa", "name": "Pampa", "place": "Brazil, grasslands of Rio Grande do Sul", "bbox": [-57.5, -33.5, -50, -28]},
-]
+# Regiões prontas: contornos reais gerados por build_presets.py (IBGE/geobr, Embrapa GITE).
+PRESETS_FILE = Path(__file__).resolve().parent / "presets.geojson"
+
+
+def load_presets() -> list[dict]:
+    """id, name, place, bbox (envelope), representative_point e geometry de cada região pronta."""
+    features = json.loads(PRESETS_FILE.read_text(encoding="utf-8"))["features"]
+    keys = ("id", "name", "place", "bbox", "representative_point")
+    return [{**{k: f["properties"][k] for k in keys}, "geometry": f["geometry"]} for f in features]
 
 
 def pad4(buf: bytearray) -> None:
@@ -137,7 +139,7 @@ def main() -> None:
         "firstDay": str(first_aqua), "lastDay": str(last_day), "viirsStart": str(first_viirs),
         "observedUntil": params["observed_until"], "seriesEnd": params["series_end"], "partialMonth": params["partial_month"],
         "climatologyBase": params["climatology_base"], "commonErrorC": params["common_error_c"],
-        "biomes": BIOMES, "presets": PRESETS, "tiles": tiles,
+        "biomes": BIOMES, "presets": load_presets(), "tiles": tiles,
         "bounds": [round(float(x0 + cells.ix.min() * 0.25), 2), round(float(y0 + cells.iy.min() * 0.25), 2),
                    round(float(x0 + (cells.ix.max() + 1) * 0.25), 2), round(float(y0 + (cells.iy.max() + 1) * 0.25), 2)],
         "sources": "NASA FIRMS: MODIS C6.1 Aqua (SP to Aug 2026, NRT after), VIIRS NOAA-20 375 m (SP to Jul 2026, NRT after)",

@@ -180,6 +180,40 @@ export function loadRawPilot(area: AnalysisArea): Promise<RawPilot> {
   return hit;
 }
 
+/**
+ * Monthly cell totals for a run of months, for the time-lapse: one daily
+ * partition per month (a single small file), summed per cell. Raw counts, as
+ * on the country map; country calibration is never spread over cells.
+ */
+export async function rawPilotMonths(area: AnalysisArea, months: string[], signal?: AbortSignal): Promise<Map<string, CellCount[]>> {
+  const data = await loadRawPilot(area);
+  if (!data.day_tiles) throw new Error("Daily country maps unavailable");
+  const wanted = months.filter((month) => month >= data.period.start && month <= data.period.end);
+  const out = new Map<string, CellCount[]>();
+  // A few months at a time: a long range is hundreds of small files.
+  for (let i = 0; i < wanted.length; i += 6) {
+    if (signal?.aborted) throw new DOMException("Cancelled", "AbortError");
+    await Promise.all(wanted.slice(i, i + 6).map(async (month) => {
+      const cells = new Map<number, CellCount>();
+      for (const entry of data.day_tiles![month] ?? []) {
+        if (!/^\/data\/continental\/[a-z]+\/map-days\/\d{4}-\d{2}\.json\.gz$/.test(entry.url)) throw new Error("Invalid raw tile URL");
+        const rows = await decodedJson(entry);
+        if (!Array.isArray(rows)) throw new Error("Invalid raw tile");
+        for (const r of rows) {
+          if (!Array.isArray(r) || r.length !== 6 || !r.every((v) => typeof v === "number") || !Number.isInteger(r[0]) ||
+              Math.abs(r[1]) > 180 || Math.abs(r[2]) > 90 || !r.slice(3).every((v) => Number.isInteger(v) && v >= 0)) throw new Error("Invalid raw tile row");
+          let cell = cells.get(r[0]);
+          if (!cell) cells.set(r[0], (cell = { id: r[0], lon: r[1], lat: r[2], modis: 0, viirs: 0, biome: "Country sensor counts · national calibration only", weight: 1 }));
+          cell.modis += r[4];
+          cell.viirs += r[5];
+        }
+      }
+      out.set(month, [...cells.values()]);
+    }));
+  }
+  return out;
+}
+
 /** Fetch selected-month partitions; a daily view reuses that month's daily blocks. */
 export async function rawPilotCells(area: AnalysisArea, period: string): Promise<CellCount[]> {
   const data = await loadRawPilot(area);

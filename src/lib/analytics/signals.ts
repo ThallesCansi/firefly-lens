@@ -43,9 +43,8 @@ export function fireflySignals(regions: SignalRegion[], period: string): Firefly
     const anomaly = seasonalAnomaly(bundle, period);
     if (!anomaly || !isHighSeasonalActivity(anomaly)) return [];
     const bbox = geometryEnvelope(region.geometry);
-    // The prepared catalog consists of rectangular study regions: the envelope
-    // midpoint is their centroid and lies inside each exact analysis geometry.
-    // Future polygon catalogs can provide an interior representative point here.
+    // Prepared regions carry an interior representative point (their outlines
+    // are not convex); the envelope midpoint is only a fallback.
     return [{
       area: { id: `signal:${region.id}`, name: region.name, kind: "preset" as const,
         geometry: region.geometry, bbox },

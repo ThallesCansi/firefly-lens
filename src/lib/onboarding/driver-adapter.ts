@@ -1,5 +1,5 @@
 import { driver, type DriveStep, type PopoverDOM } from "driver.js";
-import { TOUR_STEPS, type TourStep } from "./steps";
+import { TOUR_STEPS, TOUR_TOTAL, tourNumber, type TourStep } from "./steps";
 import type { TourSession } from "./session";
 
 const readiness = new Set(["history", "month", "analytics-history", "analytics-forecast", "exports"]);
@@ -10,6 +10,8 @@ export function targetSelector(target: string) {
 export function createTourDriver(session: TourSession, options: {
   render(popover: PopoverDOM): void;
   close(): void;
+  /** Next on the "pages" step: the tour goes on to the About and Method pages. */
+  leave?(): void;
 }) {
   const steps: DriveStep[] = TOUR_STEPS.map((definition: TourStep, index) => ({
     element: definition.target ? targetSelector(definition.target) : undefined,
@@ -25,7 +27,9 @@ export function createTourDriver(session: TourSession, options: {
       side: "bottom", align: "center",
       nextBtnText: definition.id === "welcome" ? "Start tour" : "Next",
       showButtons: definition.id === "complete" ? ["close"] : index === 0 ? ["next", "close"] : ["previous", "next", "close"],
-      onNextClick: () => { void session.go(index + 1); },
+      // The count includes the stops on About and Method, visited before the last step.
+      progressText: `${tourNumber({ lens: index })} of ${TOUR_TOTAL}`,
+      onNextClick: () => { if (definition.id === "pages" && options.leave) options.leave(); else void session.go(index + 1); },
       onPrevClick: () => { void session.go(index - 1); },
     },
     onElementMissing: () => {

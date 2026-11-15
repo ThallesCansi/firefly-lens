@@ -61,7 +61,7 @@ class ServiceTests(unittest.TestCase):
         states = json.loads((ROOT / "public/interaction-boundaries/states.geojson").read_text(encoding="utf-8"))
         state = min(states["features"], key=lambda f: len(json.dumps(f["geometry"])))
         geometries = {
-            "preset": rectangle(*preset["bbox"]),
+            "preset": preset["geometry"],
             "custom_rectangle": self.geometry,
             "irregular": {"type": "Polygon", "coordinates": [[[-57.47, -18.47], [-56.57, -18.43], [-56.83, -17.67], [-57.47, -18.47]]]},
             "brazilian_state": state["geometry"],
@@ -83,7 +83,7 @@ class ServiceTests(unittest.TestCase):
 
     def test_dynamic_equals_preprocessed_same_region(self):
         preset = self.meta["presets"][0]
-        geometry = rectangle(*preset["bbox"])
+        geometry = preset["geometry"]
         dynamic = self.post(body=self.request(geometry)).json()["sections"]
         prepared = json.loads((ROOT / f"public/analytics/{preset['id']}.json").read_text(encoding="utf-8"))["sections"]
         for section in ("history", "climatology", "anomalies"):

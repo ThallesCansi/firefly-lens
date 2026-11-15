@@ -1,5 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it, afterEach, vi } from "vitest";
+import { presetArea } from "./types";
+import { meta } from "./meta";
 import { countryCoverage, DEMO_ENABLED, rawPilots, rawPilotArea } from "./coverage";
 import { rawPilotCells, validateRawPilot, loadNationalAnalytics, loadCountryRecord,rawCountryCellDaysCsv,type RawPilot } from "./raw-pilot";
 
@@ -69,4 +71,14 @@ describe("explicit geographic coverage", () => {
     expect(csv.slice(1).every((row)=>row.endsWith(","))).toBe(true);
     expect(fetcher.mock.calls.every(([url])=>url.startsWith("/data/continental/paraguay/"))).toBe(true);
   });
+});
+
+it("turns each prepared region into a fixed, non-editable area with its own outline", () => {
+  for (const preset of meta.presets) {
+    const area = presetArea(preset);
+    expect(area).toMatchObject({ id: `preset:${preset.id}`, kind: "preset", name: preset.name });
+    if (preset.geometry) expect(area.geometry).toBe(preset.geometry);
+    const [w, s, e, n] = area.bbox;
+    expect(w < e && s < n).toBe(true);
+  }
 });

@@ -1,7 +1,7 @@
 import { fireData } from "../data/source";
 import { meta } from "../data/meta";
 import { loadArea } from "../data/area";
-import { normalizeBBox, rectangleArea, SENSORS, type AnalysisArea, type BBox, type Sensor } from "../data/types";
+import { normalizeBBox, presetArea, rectangleArea, SENSORS, type AnalysisArea, type BBox, type Sensor } from "../data/types";
 import { buildRecord, type FireRecord } from "../harmonize";
 import { BoundaryRepository, geometryBounds } from "../interactions/administrative";
 import { municipalities, municipalityLabel, searchMunicipalities } from "../interactions/municipalities";
@@ -243,7 +243,7 @@ export async function runTool(host: AssistantHost, name: string, input: Record<s
       case "select_region": {
         const preset = fireData.presets().find((p) => p.id === input.region);
         if (!preset) return { ok: false, result: `Unknown region "${input.region}".` };
-        return await choose(host, rectangleArea(preset.bbox, preset.name), input);
+        return await choose(host, presetArea(preset), input);
       }
       case "select_box": {
         const box = [input.west, input.south, input.east, input.north].map(Number) as BBox;
@@ -277,17 +277,18 @@ export async function runTool(host: AssistantHost, name: string, input: Record<s
         return await applyPeriod(host, String(input.period ?? ""));
       case "play_timelapse": {
         if (!host.area) return { ok: false, result: "There is no area of interest. Select one first." };
-        if (rawPilotFor(host.area))
-          return { ok: false, result: "The time-lapse is not available for country maps; they show one month at a time." };
-        const span = timelapseRange(String(input.from ?? ""), String(input.to ?? ""), fireData.firstMonth, fireData.lastMonth);
+        // A country plays its raw detections over its own record.
+        const country = rawPilotFor(host.area);
+        const [first, last] = country ? [country.period.start, country.period.end] : [fireData.firstMonth, fireData.lastMonth];
+        const span = timelapseRange(String(input.from ?? ""), String(input.to ?? ""), first, last);
         if (!span.ok) return { ok: false, result: span.reason };
         host.playTimelapse(span.from, span.to);
         const asked = `${input.from}–${input.to}`;
         return {
           ok: true,
           result: span.trimmed
-            ? `Playing ${span.from} to ${span.to}. The request (${asked}) goes beyond the record, which covers ${fireData.firstMonth} to ${fireData.lastMonth}; tell the person the available interval that is playing.`
-            : `Playing ${span.from} to ${span.to}.`,
+            ? `Playing ${span.from} to ${span.to}. The request (${asked}) goes beyond the record, which covers ${first} to ${last}; tell the person the available interval that is playing.`
+            : `Playing ${span.from} to ${span.to}.${country ? " Country maps show raw sensor detections; national calibration applies to country totals, not cells." : ""}`,
           note: `Time-lapse ${span.from} → ${span.to}`,
         };
       }

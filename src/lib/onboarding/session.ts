@@ -67,10 +67,19 @@ export class TourSession {
   snapshot = () => this.state;
   subscribe = (listener: () => void) => { this.listeners.add(listener); return () => this.listeners.delete(listener); };
   private publish(state: SessionState) { this.state = state; this.listeners.forEach((listener) => listener()); }
-  start() {
+  start(index = 0) {
     if (!this.saved) this.saved = this.workspace.capture();
     this.publish({ ...this.state, skipped: [] });
-    return this.go(0);
+    return this.go(index);
+  }
+  /** Hands the saved workspace to the next page of the tour; nothing is restored here. */
+  detach(): WorkspaceSnapshot | null {
+    this.activation?.abort();
+    this.generation++;
+    const saved = this.saved;
+    this.saved = null;
+    this.publish({ phase: "idle", index: 0, error: null, skipped: [] });
+    return saved;
   }
   async go(index: number) {
     if (!this.saved || index < 0 || index >= TOUR_STEPS.length) return;

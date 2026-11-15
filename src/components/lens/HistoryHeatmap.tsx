@@ -275,6 +275,10 @@ export function HistoryHeatmap({
   );
 }
 
+/** Height of the pager, month names and key around the year rows, in pixels. */
+const ROW_CHROME=92;
+/** Tallest a year row gets: the squares stay squarish on a tall screen. */
+const ROW_MAX=32;
 /** The sidebar keeps a readable block of years in view instead of scrolling. */
 export function PagedHistory({ record,from,to,period,onPeriod,onMonth }: {
   record:FireRecord; from:string; to:string; period:string;
@@ -282,12 +286,16 @@ export function PagedHistory({ record,from,to,period,onPeriod,onMonth }: {
 }) {
   const root=useRef<HTMLDivElement>(null);
   const [rows,setRows]=useState(8);
+  const [height,setHeight]=useState(0);
   const selectedYear=Number(period.slice(0,4));
   const [chosen,setChosen]=useState<{ year:number; rows:number; page:number } | null>(null);
   useLayoutEffect(() => {
     const element=root.current;
     if (!element) return;
-    const observer=new ResizeObserver(([entry]) => setRows(Math.max(3,Math.min(30,Math.floor((entry.contentRect.height-100)/28)))));
+    const observer=new ResizeObserver(([entry]) => {
+      setHeight(entry.contentRect.height);
+      setRows(Math.max(3,Math.min(30,Math.floor((entry.contentRect.height-ROW_CHROME)/28))));
+    });
     observer.observe(element); return () => observer.disconnect();
   },[]);
   const years=[...record.years].filter((year)=>year>=Number(from.slice(0,4)) && year<=Number(to.slice(0,4))).reverse();
@@ -296,7 +304,9 @@ export function PagedHistory({ record,from,to,period,onPeriod,onMonth }: {
   const page=Math.min(pages-1,chosen?.year===selectedYear && chosen.rows===rows ? chosen.page : Math.max(0,Math.floor(index/rows)));
   const shown=years.slice(page*rows,(page+1)*rows);
   const navigate=(next:number) => setChosen({year:selectedYear,rows,page:next});
-  return <div ref={root} className="calendar-overview">
+  // The rows grow into the room the page leaves, a little, never past ROW_MAX.
+  const rowHeight=shown.length ? Math.max(24,Math.min(ROW_MAX,Math.floor((height-ROW_CHROME)/shown.length)-2)) : 24;
+  return <div ref={root} className="calendar-overview" style={{ "--history-row": `${rowHeight}px` } as React.CSSProperties}>
     <div className="calendar-pager" role="group" aria-label="Calendar years">
       <button type="button" className="btn btn-text" aria-label="Newer years" disabled={page===0} onClick={()=>navigate(page-1)}>← Newer</button>
       <span className="num">{shown.at(-1)}–{shown[0]}</span>

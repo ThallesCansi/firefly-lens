@@ -52,3 +52,19 @@
   .driver-popover.lume-tour-card { animation: none; }
   .driver-popover.lume-tour-card *, .driver-active-element { transition: none !important; }
 }
+/* FireFlighter flies between cards (TourFirefly); the card keeps an empty perch. */
+.lume-tour-mascot { width: 72px; height: 72px; }
+.lume-tour-flier { position: fixed; left: 0; top: 0; z-index: 1000000001; pointer-events: none; opacity: 0; transform-origin: 36px 36px; will-change: transform; transition: opacity 200ms ease-out; }
+.lume-tour-flier .lume { display: block; }
+.lume-tour-flier .lume-wing { transform-box: fill-box; transform-origin: 85% 95%; }
+.lume-tour-flier[data-flying="true"] .lume-wing { animation: lume-flap 70ms ease-in-out infinite alternate; }
+.lume-tour-flier[data-flying="false"] .lume-body { animation: lume-hover 2.6s ease-in-out infinite; }
+@keyframes lume-flap { from { transform: rotate(-14deg) scaleY(1.05); } to { transform: rotate(16deg) scaleY(.82); } }
+@keyframes lume-hover { 50% { transform: translateY(-3px); } }
+@media (max-width: 700px) {
+  .lume-tour-mascot { width: 56px; height: 56px; }
+  .lume-tour-flier .lume { width: 56px; height: 56px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lume-tour-flier .lume-wing, .lume-tour-flier .lume-body { animation: none !important; }
+}

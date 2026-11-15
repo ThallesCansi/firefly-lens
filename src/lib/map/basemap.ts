@@ -73,8 +73,9 @@ export function withImagery(style: StyleSpecification, theme: "light" | "dark", 
     layout: { visibility: kind === "satellite" ? "visible" : "none" },
     paint: {
       "raster-opacity": ["interpolate", ["linear"], ["zoom"], 9, 1, 11.5, 0],
-      // The same picture at night: darker and a little greyer, like the rest of the dark theme.
-      ...(theme === "dark" ? { "raster-brightness-max": 0.55, "raster-saturation": -0.2 } : {}),
+      // At night the covered continent stays as clear as by day; the fog
+      // outside South America does the darkening (see addCoverageMask).
+      ...(theme === "dark" ? { "raster-brightness-max": 0.92, "raster-saturation": -0.08 } : {}),
     },
   };
   return {

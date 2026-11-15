@@ -9,6 +9,7 @@ import { rawPilotCells } from "@/lib/data/raw-pilot";
 import {
   drawnArea,
   normalizeBBox,
+  presetArea,
   rectangleArea,
   type AnalysisArea,
   type BBox,
@@ -49,6 +50,7 @@ import { Lume } from "@/components/firefly/Lume";
 import { lockTourInteractions } from "@/lib/onboarding/interaction-lock";
 import { afterPaint, type TourWorkspace, type WorkspaceSnapshot } from "@/lib/onboarding/session";
 import { TOUR_PERIOD, stepIndex, type TourStepId } from "@/lib/onboarding/steps";
+import { clearHandoff, readHandoff } from "@/lib/onboarding/handoff";
 
 const LumeTour = dynamic(() => import("@/components/onboarding/LumeTour"), { ssr: false });
 
@@ -106,6 +108,8 @@ export function LensApp() {
   const [coordinates, setCoordinates] = useState(false);
   const [searching, setSearching] = useState(false);
   const [tourRunning, setTourRunning] = useState(false);
+  /** Where the tour opens: its last step when it comes back from About and Method. */
+  const [tourResume, setTourResume] = useState<{ index: number; from?: [number, number] } | null>(null);
   const tourGuard = useRef(false);
   useLayoutEffect(() => { if (tourRunning) return lockTourInteractions(); }, [tourRunning]);
   const tourSnapshot = useRef<WorkspaceSnapshot | null>(null);
@@ -172,14 +176,17 @@ export function LensApp() {
   const [playback, setPlayback] = useState(false);
   /** The assistant opened the time-lapse: it starts playing as soon as the months load. */
   const [autoPlay, setAutoPlay] = useState(0);
-  const [playRange, setPlayRange] = useState(() => {
+  const [chosenRange, setPlayRange] = useState(() => {
     const year = `${fireData.lastYear}`;
     const to = `${year}-12` > fireData.lastMonth ? fireData.lastMonth : `${year}-12`;
     return { from: `${year}-01`, to };
   });
   const rawPilot = area ? rawPilotFor(area) : undefined;
-  const play = usePlaybackFrames(rawPilot ? null : area, playRange.from, playRange.to, playback && !tourRunning);
-  const playing = !rawPilot && playback && !tourRunning && play.frames !== null;
+  // Each record has its own span: a country's ends earlier than Brazil's.
+  const record = rawPilot ? rawPilot.period : { start: fireData.firstMonth, end: fireData.lastMonth };
+  const playRange = fitRange(chosenRange, record.start, record.end);
+  const play = usePlaybackFrames(area, playRange.from, playRange.to, playback && !tourRunning);
+  const playing = playback && !tourRunning && play.frames !== null;
   // While a time-lapse is loaded its frames feed the map, so nothing else loads.
   const mapData = useMapCells(playing ? null : area, period);
   const shown = playing
@@ -228,7 +235,7 @@ export function LensApp() {
         const next = rawPilotArea(pilot);
         setArea(next);
         setPeriod(`${pilot.period.end.slice(0,4)}-09`);
-        setFrom(pilot.period.start); setTo(pilot.period.end); setPlayback(false);
+        setFrom(pilot.period.start); setTo(pilot.period.end);
         setFrame((n) => n + 1);
         openAnalysis(next);
         return true;
@@ -306,6 +313,11 @@ export function LensApp() {
           setFrom(entry.period.start); setTo(entry.period.end); setPlayback(false);
           if (!view.period) changePeriod(`${entry.period.end.slice(0,4)}-09`);
         }
+      }
+      else if (view.area?.kind === "preset") {
+        const id = view.area.id;
+        const preset = presets.find((p) => p.id === id);
+        if (preset) next = presetArea(preset);
       }
       else if (view.area?.kind === "state") {
         const id = view.area.id;
@@ -458,6 +470,7 @@ export function LensApp() {
     playTimelapse(from, to) {
       assertAssistantAvailable();
       setSearching(false);
+      setFlight(null);
       setPlayRange({ from, to });
       changePeriod(from);
       setPlayback(true);
@@ -483,12 +496,12 @@ export function LensApp() {
     if (pilot) {
       const next = rawPilotArea(pilot);
       tools.clear(); setArea(next); setFrame((n) => n+1); openAnalysis(next); setCoordinates(false);
-      setPeriod(`${pilot.period.end.slice(0,4)}-09`); setFrom(pilot.period.start); setTo(pilot.period.end); setPlayback(false);
+      setPeriod(`${pilot.period.end.slice(0,4)}-09`); setFrom(pilot.period.start); setTo(pilot.period.end);
       return next;
     }
     const preset = presets.find((p) => p.id === id);
     if (!preset) throw new Error("The example study region is unavailable.");
-    const next = rectangleArea(preset.bbox, preset.name);
+    const next = presetArea(preset);
     tools.clear();
     setArea(next);
     setFrame((n) => n + 1);
@@ -542,7 +555,7 @@ export function LensApp() {
     setSearching(false);
     setPlayback(false);
     setAnalysis(false);
-    setArea(rectangleArea(preset.bbox, preset.name));
+    setArea(presetArea(preset));
     setFrame((n) => n + 1);
     changePeriod(FLIGHT_PERIOD);
   }
@@ -553,6 +566,25 @@ export function LensApp() {
     setFlight(null); setColumnsChosen(false);
     tourGuard.current = true; setTourRunning(true);
   };
+  // Back from the tour's visit to About and Method: finish it here, or, if it
+  // was left on those pages, put the workspace back as it was before it.
+  const restoreWorkspace = useRef<(saved: WorkspaceSnapshot) => void>(() => {});
+  /** The tour came back from About and Method: its last step sets the example up again. */
+  const tourResumed = useRef(false);
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      const back = readHandoff(["complete", "restore"]);
+      if (!back) return;
+      clearHandoff();
+      if (back.phase === "restore") { restoreWorkspace.current(back.saved); return; }
+      tourSnapshot.current = back.saved;
+      tourGuard.current = true;
+      tourResumed.current = true;
+      setTourResume({ index: stepIndex("complete"), from: back.from });
+      setTourRunning(true);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, []);
   const tourWorkspace: TourWorkspace = {
     capture: () => tourSnapshot.current ?? ({ area, analyzed, analysis, expanded, drawing, coordinates, searching,
       period, from, to, sensors: [...sensors], monthOpen, cardOpen, analyticsTab,
@@ -572,15 +604,20 @@ export function LensApp() {
       setCardOpen(id === "sensors" || id === "period");
       if (index < stepIndex("history")) setAnalysis(false);
       if (id === "welcome") window.scrollTo({ top: 0, behavior: "instant" });
-      if (index >= stepIndex("pantanal") && id !== "complete") {
+      // The last step keeps the example; coming back from About and Method, it is set up again.
+      // Resumed, this render's area may be stale (the workspace was put back
+      // under it), so the example is applied regardless.
+      const resumed = id === "complete" && tourResumed.current;
+      const pantanalId = presets.find((p) => p.id === "pantanal")?.id;
+      if (index >= stepIndex("pantanal") && (id !== "complete" || resumed || area?.id !== `preset:${pantanalId}`)) {
         const preset = presets.find((p) => p.id === "pantanal");
         if (!preset || TOUR_PERIOD < fireData.firstMonth || TOUR_PERIOD > fireData.lastMonth)
           throw new Error("The Pantanal example or September 2023 record is unavailable.");
-        const example = rectangleArea(preset.bbox, preset.name);
-        if (area?.id !== example.id) selectPreset("pantanal");
+        const example = presetArea(preset);
+        if (resumed || area?.id !== example.id) selectPreset("pantanal");
         changePeriod(TOUR_PERIOD);
         if (index >= stepIndex("history")) {
-          if (!analysis || analyzed?.id !== example.id) analyze(example);
+          if (resumed || !analysis || analyzed?.id !== example.id) analyze(example);
           setMonthOpen(id === "month");
           setAnalyticsTab(id === "forecast" ? "forecast" : "history");
         }
@@ -588,7 +625,7 @@ export function LensApp() {
       if (id === "range") { setFrom("2023-01"); setTo("2023-12"); }
       await afterPaint(signal);
       if (signal.aborted) return;
-      if (index >= stepIndex("report") && id !== "complete") showReport();
+      if (index >= stepIndex("report") && id !== "complete" && id !== "pages") showReport();
       else window.scrollTo({ top: 0, behavior: "instant" });
       await afterPaint(signal);
     },
@@ -618,10 +655,12 @@ export function LensApp() {
     },
     keep() { controller?.stopNavigation(); restoreUi.current = null; cancelAnimationFrame(analysisFrame.current); setFlight(null); setPlayback(false); setSearching(false); setCoordinates(false); setDrawing(false); setCardOpen(false); setAnalyticsTab("history"); },
   };
+  useEffect(() => { restoreWorkspace.current = tourWorkspace.restore; });
   return (
     <main id="main" inert={tourRunning} className="lens-workspace" data-tour-active={tourRunning}>
       <AutoStartTour onStart={startTour} />
-      {tourRunning && <LumeTour workspace={tourWorkspace} onExit={() => { tourGuard.current = false; tourSnapshot.current = null; setTourRunning(false); }} />}
+      {tourRunning && <LumeTour workspace={tourWorkspace} startAt={tourResume?.index} from={tourResume?.from}
+        onExit={() => { tourGuard.current = false; tourResumed.current = false; tourSnapshot.current = null; setTourResume(null); setTourRunning(false); }} />}
       <div
         className="workspace-body"
         data-analysis={analysis}
@@ -705,8 +744,7 @@ export function LensApp() {
               <button
                 type="button"
                 className="layer-chip play-chip"
-                disabled={!!rawPilot}
-                title={rawPilot ? "Country maps support individual months" : "Play monthly detections"}
+                title="Play monthly detections"
                 aria-pressed={playback}
                 onClick={() => {
                   // Opening starts the map at the first month of the range.
@@ -924,10 +962,12 @@ export function LensApp() {
               </section>
             )}
           <div className="map-bottom">
-            {playback && !rawPilot && !tourRunning && (
+            {playback && !tourRunning && (
               <PlaybackBar
                 key={autoPlay}
                 autoPlay={autoPlay > 0}
+                first={record.start}
+                last={record.end}
                 from={playRange.from}
                 to={playRange.to}
                 onRange={(from, to) => {
@@ -1052,6 +1092,16 @@ export function LensApp() {
       )}
     </main>
   );
+}
+
+/** A time-lapse range moved inside a record: cut at its ends, or its last year when nothing overlaps. */
+function fitRange(range: { from: string; to: string }, first: string, last: string) {
+  let { from, to } = range;
+  if (to > last) to = last;
+  if (from < first) from = first;
+  if (from > to) from = `${to.slice(0, 4)}-01` < first ? first : `${to.slice(0, 4)}-01`;
+  if (to < from) to = from;
+  return from === range.from && to === range.to ? range : { from, to };
 }
 
 function reducedMotion() {

@@ -5,6 +5,7 @@ import { LensHero } from "@/components/landing/LensHero";
 import { TwoSensors } from "@/components/landing/TwoSensors";
 import { SiteFooter } from "@/components/ui/SiteFooter";
 import { SiteHeader } from "@/components/ui/SiteHeader";
+import { PageTour } from "@/components/onboarding/PageTour";
 
 export default function Home() {
   return (
@@ -18,6 +19,7 @@ export default function Home() {
         <DataCredits />
       </main>
       <SiteFooter />
+      <PageTour page="about" />
     </>
   );
 }

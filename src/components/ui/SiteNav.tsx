@@ -26,7 +26,7 @@ export function SiteNav({
     <header className={`site-card map-surface ${className}`}>
       <Brand />
       <span className="site-card-rule" aria-hidden="true" />
-      <nav aria-label="Main" className="site-card-links">
+      <nav aria-label="Main" className="site-card-links" data-tour="site-links">
         {links.map((l) => (
           <Link key={l.href} href={l.href} aria-current={current === l.href ? "page" : undefined}>
             {l.label}

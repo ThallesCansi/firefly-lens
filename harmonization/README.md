@@ -14,6 +14,11 @@ A etapa 9 precisa das pastas `data/` e `output/` de uma execução completa do p
 uv run python -I pipeline/09_app_data.py            # escreve em ../public/data/brazil/
 ```
 
+Os contornos das regiões prontas (`presets` em `meta.json`) vêm de `pipeline/presets.geojson`, versionado e
+gerado por `uv run python pipeline/build_presets.py` (biomas IBGE 2019 e delimitação MATOPIBA da Embrapa/GITE
+via geobr). Depois de mudá-los, regenere `public/analytics/` (`analytics/integration/export_site.py`) e as
+entradas das regiões prontas em `public/data/weather/snapshots.json` (`analytics/export_weather.py`).
+
 **O que está versionado:** o código, a documentação e as saídas compactas de `output/` (cerca de 25 MB).
 **O que não está:** `data/` (downloads e intermediários, ~1 GB) e `output/points/` (focos para download,
 187 MB). Os dois são regenerados pelo pipeline.

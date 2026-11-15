@@ -2,8 +2,10 @@
 
 import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
+import { useRouter } from "next/navigation";
 import type { Driver } from "driver.js";
-import { Lume } from "@/components/firefly/Lume";
+import { TourFirefly } from "./TourFirefly";
+import { writeHandoff } from "@/lib/onboarding/handoff";
 import { TourSession, type TourWorkspace } from "@/lib/onboarding/session";
 import { createTourDriver } from "@/lib/onboarding/driver-adapter";
 import { TOUR_STEPS } from "@/lib/onboarding/steps";
@@ -11,7 +13,16 @@ import { readTourOptOut, saveTourOptOut, saveTourOutcome } from "@/lib/onboardin
 import "driver.js/dist/driver.css";
 import "./LumeTour.css";
 
-export default function LumeTour({ workspace, onExit }: { workspace: TourWorkspace; onExit: () => void }) {
+export default function LumeTour({ workspace, onExit, startAt = 0, from }: {
+  workspace: TourWorkspace;
+  onExit: () => void;
+  /** Step to open on: the last one, when the tour comes back from About and Method. */
+  startAt?: number;
+  /** Where the firefly was on the previous page. */
+  from?: [number, number];
+}) {
+  const router = useRouter();
+  const flier = useRef<[number, number] | undefined>(from);
   const [session] = useState(() => new TourSession(workspace));
   useLayoutEffect(() => { session.setWorkspace(workspace); }, [session, workspace]);
   const state = useSyncExternalStore(session.subscribe, session.snapshot, session.snapshot);
@@ -22,11 +33,27 @@ export default function LumeTour({ workspace, onExit }: { workspace: TourWorkspa
   const finished = useRef(false);
   const exitCallback = useRef(onExit);
   useLayoutEffect(() => { exitCallback.current = onExit; });
+  const begin = useRef(startAt);
+  // Next on "pages": the saved workspace and the firefly travel on to About.
+  const leave = useRef(() => {});
+  useLayoutEffect(() => {
+    leave.current = () => {
+      const saved = session.detach();
+      if (!saved) return;
+      finished.current = true;
+      writeHandoff({ phase: "about", saved, from: flier.current });
+      // The Lens may stay mounted (hidden) while away: its tour ends here, so
+      // coming back resumes from the hand-off instead of a stale session.
+      exitCallback.current();
+      router.push("/about");
+    };
+  });
   useEffect(() => {
     finished.current = false;
     let closing = false;
     const instance = createTourDriver(session, {
       close: () => { if (!closing && !finished.current) exit.current(false, false); },
+      leave: () => leave.current(),
       render: (popover) => {
         const mount = document.createElement("div");
         mount.className = "lume-tour-react";
@@ -45,7 +72,7 @@ export default function LumeTour({ workspace, onExit }: { workspace: TourWorkspa
       exitCallback.current();
     };
     setEngine(instance);
-    void session.start();
+    void session.start(begin.current);
     const refresh = () => instance.refresh();
     window.visualViewport?.addEventListener("resize", refresh);
     const motion = matchMedia("(prefers-reduced-motion: reduce)");
@@ -77,8 +104,10 @@ export default function LumeTour({ workspace, onExit }: { workspace: TourWorkspa
   }, [engine, state.phase, state.index, state.error]);
   useLayoutEffect(() => { if (slot) engine?.refresh(); }, [engine, slot, state.phase]);
   const done = state.index === TOUR_STEPS.length - 1;
-  return slot && createPortal(<>
-    <div className="lume-tour-mascot"><Lume size={72} mood={state.phase === "error" ? "alert" : "idle"} /></div>
+  return <>
+    <TourFirefly mood={state.phase === "error" ? "alert" : "idle"} from={from} onPosition={(at) => { flier.current = at; }} />
+    {slot && createPortal(<>
+    <div className="lume-tour-mascot" aria-hidden="true" />
     <span className="lume-tour-signature">FIREFLIGHTER · YOUR GUIDE</span>
     <label className="lume-tour-opt-out"><input type="checkbox" checked={optOut} onChange={(event) => {
       const disabled = event.target.checked;
@@ -96,5 +125,6 @@ export default function LumeTour({ workspace, onExit }: { workspace: TourWorkspa
       </> : null}
       {!done && <button type="button" className="lume-tour-skip" onClick={() => exit.current(false, false)}>Skip tour</button>}
     </div>
-  </>, slot);
+  </>, slot)}
+  </>;
 }

@@ -1,5 +1,6 @@
 import { COVERAGE, SENSORS, editableVertices, type AnalysisArea, type Sensor } from "./data/types";
 import { rawPilotFor, rawPilots } from "./data/coverage";
+import { meta } from "./data/meta";
 
 /**
  * A view of the Lens as a link: the area of interest, the period and the
@@ -8,7 +9,7 @@ import { rawPilotFor, rawPilots } from "./data/coverage";
  * the record is dropped, and the rest still applies.
  */
 export interface SharedView {
-  area: { kind: "drawn"; vertices: [number, number][]; name?: string } | { kind: "state"; id: string } | { kind: "municipality"; id: string } | { kind: "country"; code: string } | null;
+  area: { kind: "drawn"; vertices: [number, number][]; name?: string } | { kind: "state"; id: string } | { kind: "municipality"; id: string } | { kind: "country"; code: string } | { kind: "preset"; id: string } | null;
   /** YYYY-MM or YYYY-MM-DD. */
   period: string | null;
   sensors: Sensor[] | null;
@@ -24,7 +25,7 @@ export function shareQuery(view: { area: AnalysisArea | null; period: string; se
   const vertices = editableVertices(view.area);
   const country = view.area ? rawPilotFor(view.area) : undefined;
   if (country) query.set("area", `country:${country.country_code}`);
-  else if (view.area?.kind === "state") query.set("area", view.area.id);
+  else if (view.area?.kind === "state" || view.area?.kind === "preset") query.set("area", view.area.id);
   else if (view.area && vertices) {
     query.set("area", `poly:${vertices.map(([x, y]) => `${round(x)},${round(y)}`).join(";")}`);
     if (view.area.name !== "Custom area") query.set("name", view.area.name);
@@ -39,6 +40,10 @@ function parseArea(value: string | null, name: string | null): SharedView["area"
   if (value.startsWith("country:")) {
     const entry = rawPilots.find((country) => `country:${country.country_code}` === value);
     return entry ? { kind: "country", code: entry.country_code } : null;
+  }
+  if (value.startsWith("preset:")) {
+    const id = value.slice(7);
+    return meta.presets.some((preset) => preset.id === id) ? { kind: "preset", id } : null;
   }
   if (/^state:[\w:-]{1,20}$/.test(value)) return { kind: "state", id: value.slice(6) };
   if (/^municipality:\d{7}$/.test(value)) return { kind: "municipality", id: value.slice(13) };

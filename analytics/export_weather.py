@@ -17,8 +17,7 @@ def export():
             regions.append({'id':entry['country_code'],'geometry':entry['geometry']})
     meta=json.loads((ROOT/'public/data/brazil/meta.json').read_text())
     for preset in meta['presets']:
-        w,s,e,n=preset['bbox']
-        regions.append({'id':preset['id'],'geometry':{'type':'Polygon','coordinates':[[[w,s],[e,s],[e,n],[w,n],[w,s]]]}})
+        regions.append({'id':preset['id'],'geometry':preset['geometry']})
     for region in regions:
         region['data']=query_fire_weather(region['id'],region['geometry'])
         print(json.dumps({'region':region['id'],'status':region['data']['status'],'validities':len(region['data']['forecasts'])}),flush=True)

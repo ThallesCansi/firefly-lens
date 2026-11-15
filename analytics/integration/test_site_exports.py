@@ -40,8 +40,9 @@ class SiteExports(unittest.TestCase):
             bundle = json.loads(raw)
             assert_finite(bundle)
             preset = next(r for r in meta["presets"] if r["id"] == region["id"])
-            w, s, e, n = preset["bbox"]
-            self.assertEqual(bundle["geometry"], {"type": "Polygon", "coordinates": [[[w, s], [e, s], [e, n], [w, n], [w, s]]]})
+            self.assertEqual(bundle["geometry"], preset["geometry"])
+            self.assertEqual(region["geometry"], preset["geometry"])
+            self.assertEqual(region.get("representative_point"), preset["representative_point"])
             for section, payload in bundle["sections"].items():
                 validate(payload)
                 self.assertEqual(payload["section"], section)

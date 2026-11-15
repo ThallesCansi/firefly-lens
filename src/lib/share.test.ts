@@ -1,11 +1,21 @@
 import { describe, expect, it } from "vitest";
-import { drawnArea, rectangleArea, type AnalysisArea } from "./data/types";
+import { drawnArea, presetArea, rectangleArea, type AnalysisArea } from "./data/types";
+import { meta } from "./data/meta";
 import { parseShare, shareQuery } from "./share";
 import { rawPilots, rawPilotArea } from "./data/coverage";
 
 const read = (query: string) => parseShare(query, "2002-07", "2026-11");
 
 describe("share links", () => {
+  it("names a prepared study region by its id, not by its outline", () => {
+    for (const preset of meta.presets) {
+      const query = shareQuery({ area: presetArea(preset), period: "2023-09", sensors: ["MODIS", "VIIRS"] });
+      expect(query).toContain(`area=preset%3A${preset.id}`);
+      expect(read(query).area).toEqual({ kind: "preset", id: preset.id });
+    }
+    expect(read("area=preset:nowhere").area).toBeNull();
+  });
+
   it("preserves each country's identity and its own monthly coverage", () => {
     for (const entry of rawPilots) {
       const query = shareQuery({ area:rawPilotArea(entry), period:"2025-09", sensors:["VIIRS"] });

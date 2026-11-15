@@ -622,7 +622,7 @@ export function HotspotMap({
         styled.current = true;
         setOffline(fellBack.current);
         addLayers();
-        addCoverageMask(instance);
+        addCoverageMask(instance, appliedTheme.current);
         try {
           instance.setSky(
             skyFor(appliedTheme.current) as Parameters<

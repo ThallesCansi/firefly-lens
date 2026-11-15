@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import { cellDays, type CellCount } from "./data/area";
 import type { AnalysisArea } from "./data/types";
+import { rawPilotFor } from "./data/coverage";
+import { rawPilotMonths } from "./data/raw-pilot";
 
 /** Months from `from` to `to` inclusive, as YYYY-MM. */
 export function monthsBetween(from: string, to: string): string[] {
@@ -38,6 +40,28 @@ export function usePlaybackFrames(area: AnalysisArea | null, from: string, to: s
     if (!area || !enabled) return;
     let live = true;
     const key = `${area.id}|${from}|${to}`;
+    const controller = new AbortController();
+    const done = (frames: PlaybackFrames) => { if (live) setState({ key, frames, error: false }); };
+    const fail = () => { if (live) setState({ key, frames: null, error: true }); };
+    // A country: its raw detections, one daily partition per month.
+    if (rawPilotFor(area)) {
+      rawPilotMonths(area, monthsBetween(from, to), controller.signal)
+        .then((months) => {
+          let modis = 1;
+          let viirs = 1;
+          for (const cells of months.values())
+            for (const cell of cells) {
+              if (cell.modis > modis) modis = cell.modis;
+              if (cell.viirs > viirs) viirs = cell.viirs;
+            }
+          done({ months, top: { modis, viirs } });
+        })
+        .catch(fail);
+      return () => {
+        live = false;
+        controller.abort();
+      };
+    }
     const last = new Date(Date.UTC(Number(to.slice(0, 4)), Number(to.slice(5, 7)), 0)).getUTCDate();
     cellDays(area, `${from}-01`, `${to}-${last}`)
       .then((rows) => {
@@ -59,11 +83,9 @@ export function usePlaybackFrames(area: AnalysisArea | null, from: string, to: s
           months: new Map([...months].map(([m, cells]) => [m, [...cells.values()]])),
           top: { modis, viirs },
         };
-        if (live) setState({ key, frames, error: false });
+        done(frames);
       })
-      .catch(() => {
-        if (live) setState({ key, frames: null, error: true });
-      });
+      .catch(fail);
     return () => {
       live = false;
     };

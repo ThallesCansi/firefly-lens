@@ -1,15 +1,18 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { fireData } from "@/lib/data/source";
 import { MONTHS } from "@/lib/format";
 import { monthsBetween } from "@/lib/usePlayback";
 import { Picker } from "@/components/ui/Picker";
 
-const YEARS = Array.from({ length: fireData.lastYear - fireData.firstYear + 1 }, (_, i) => {
-  const y = String(fireData.lastYear - i);
-  return { value: y, label: y };
-});
+/** The years from `first` to `last`, newest first, as picker options. */
+function yearsBetween(first: string, last: string) {
+  const top = Number(last.slice(0, 4));
+  return Array.from({ length: top - Number(first.slice(0, 4)) + 1 }, (_, i) => {
+    const y = String(top - i);
+    return { value: y, label: y };
+  });
+}
 
 /** Time a month stays on screen at 1×. */
 const FRAME_MS = 900;
@@ -24,11 +27,11 @@ function back(month: string, n: number) {
   return `${Math.floor(i / 12)}-${String((i % 12) + 1).padStart(2, "0")}`;
 }
 
-const last = fireData.lastMonth;
-const PRESETS = [
+/** Quick ranges, all ending at the record's last month. */
+const presetsFor = (first: string, last: string) => [
   { label: "Last 12 months", from: back(last, 11) },
   { label: "Last 3 years", from: back(last, 35) },
-  { label: "Since 2002", from: fireData.firstMonth },
+  { label: `Since ${first.slice(0, 4)}`, from: first },
 ];
 
 function MonthYear({
@@ -37,12 +40,14 @@ function MonthYear({
   name,
   min,
   max,
+  years,
 }: {
   value: string;
   onChange: (value: string) => void;
   name: string;
   min: string;
   max: string;
+  years: { value: string; label: string }[];
 }) {
   const clamp = (v: string) => (v < min ? min : v > max ? max : v);
   return (
@@ -59,7 +64,7 @@ function MonthYear({
         placement="up"
         className="field num"
         value={value.slice(0, 4)}
-        options={YEARS}
+        options={years}
         onChange={(v) => onChange(clamp(`${v}-${value.slice(5, 7)}`))}
       />
     </span>
@@ -73,6 +78,8 @@ function MonthYear({
  * the progress reads as one movement rather than a series of jumps.
  */
 export function PlaybackBar({
+  first,
+  last,
   from,
   to,
   onRange,
@@ -87,6 +94,9 @@ export function PlaybackBar({
 }: {
   /** Start playing once every month is loaded, without a press. */
   autoPlay?: boolean;
+  /** The months the selected record covers: Brazil's, or a country's. */
+  first: string;
+  last: string;
   from: string;
   to: string;
   onRange: (from: string, to: string) => void;
@@ -102,6 +112,8 @@ export function PlaybackBar({
   onClose: () => void;
 }) {
   const months = useMemo(() => monthsBetween(from, to), [from, to]);
+  const yearOptions = useMemo(() => yearsBetween(first, last), [first, last]);
+  const presets = useMemo(() => presetsFor(first, last), [first, last]);
   const [playing, setPlaying] = useState(autoPlay);
   const [speed, setSpeed] = useState(1);
   const current = period.slice(0, 7);
@@ -270,8 +282,9 @@ export function PlaybackBar({
           <MonthYear
             name="Start"
             value={from}
-            min={fireData.firstMonth}
+            min={first}
             max={to}
+            years={yearOptions}
             onChange={(v) => {
               setPlaying(false);
               onRange(v, to);
@@ -284,7 +297,8 @@ export function PlaybackBar({
             name="End"
             value={to}
             min={from}
-            max={fireData.lastMonth}
+            max={last}
+            years={yearOptions}
             onChange={(v) => {
               setPlaying(false);
               onRange(from, v);
@@ -292,7 +306,7 @@ export function PlaybackBar({
           />
         </span>
         <span className="playback-presets" role="group" aria-label="Quick ranges">
-          {PRESETS.map((p) => (
+          {presets.map((p) => (
             <button
               key={p.label}
               type="button"

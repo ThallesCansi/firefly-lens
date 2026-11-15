@@ -232,9 +232,12 @@ function MonthDetail({
   const prev = shift(-1);
   const next = shift(1);
   const sentence = cell ? againstMedian(cell) : null;
+  // Rows of the month grid, weeks starting on Monday: it sizes the squares to the panel.
+  const lead = (new Date(Date.UTC(year, m, 1)).getUTCDay() + 6) % 7;
+  const weeks = Math.ceil((lead + new Date(Date.UTC(year, m + 1, 0)).getUTCDate()) / 7);
 
   return (
-    <div data-tour="month" data-tour-ready={ready} className="flex flex-col gap-5">
+    <div data-tour="month" data-tour-ready={ready} className="month-detail flex flex-col gap-5">
       <div className="flex items-center justify-between gap-3">
         <button type="button" className="btn btn-text -ml-2" onClick={onBack}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -290,15 +293,18 @@ function MonthDetail({
           has no VIIRS detections.
         </p>
       )}
-      <FireCalendar
-        summary={summary}
-        mode={mode}
-        selected={selected}
-        onSelect={onSelect}
-        months={[m]}
-        gridClassName="grid-cols-1"
-        detailed
-      />
+      {/* Sized to the room left in the panel, so the whole month fits without scrolling. */}
+      <div className="month-calendar" style={{ "--weeks": weeks } as React.CSSProperties}>
+        <FireCalendar
+          summary={summary}
+          mode={mode}
+          selected={selected}
+          onSelect={onSelect}
+          months={[m]}
+          gridClassName="grid-cols-1"
+          detailed
+        />
+      </div>
       <CalendarLegend />
       {day ? (
         <DayDetail day={day} />
