@@ -416,3 +416,73 @@
   .evidence-chart { min-width: 620px; }
   .chart-scroll-hint { display: block; font-size: .75rem; margin-bottom: 12px; }
 }
+
+/* Native harmonization charts. Sensor hues follow the app's identity tokens; the harmonized
+   series takes a flame step validated against both chart surfaces (dark L 0.48–0.67). */
+.method-page {
+  --chart-aqua: var(--color-modis);
+  --chart-raw: var(--color-viirs);
+  --chart-l2: #ee6418;
+  --chart-l1: var(--color-dim);
+}
+:root[data-theme="light"] .method-page { --chart-l2: #ea580c; }
+.hchart { position: relative; margin-block: 12px 8px; }
+.hchart-focus { position: relative; border-radius: 8px; }
+.hchart-focus:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 4px; }
+.hchart-svg { display: block; max-width: 100%; height: auto; overflow: visible; touch-action: pan-y; }
+.hchart-svg text { fill: var(--color-dim); font-size: 12px; font-family: var(--font-mono); }
+.hchart-svg .hchart-unit { fill: var(--color-dim); }
+.hchart-svg .hchart-note { fill: var(--color-ink); font-size: 11px; }
+.hchart-svg .hchart-panel-title { fill: var(--color-ink); font-family: var(--font-sans); font-size: 13px; font-weight: 600; }
+.chart-zero { stroke: var(--color-faint); stroke-width: 1; }
+.hchart-line { fill: none; stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round; }
+.hchart-line.swatch-l2 { stroke-width: 2; }
+.hchart-line.swatch-l1 { stroke-dasharray: 5 3; }
+.hchart-line.swatch-aqua, .hchart-dot.swatch-aqua { stroke: var(--chart-aqua); fill: none; }
+.hchart-line.swatch-raw { stroke: var(--chart-raw); }
+.hchart-line.swatch-l2, .hchart-dot.swatch-l2 { stroke: var(--chart-l2); }
+.hchart-line.swatch-l1 { stroke: var(--chart-l1); }
+.hchart-dot { stroke-width: 1.5; fill: none; }
+.hchart-band { fill: var(--chart-l2); opacity: .3; }
+.hchart-ring { fill: none; stroke: var(--color-ink); stroke-width: 1.5; }
+.hchart-crosshair { stroke: var(--color-faint); stroke-width: 1; }
+.hchart-focus-dot { stroke: var(--color-canopy); stroke-width: 2; }
+.hchart-focus-dot.swatch-aqua { fill: var(--chart-aqua); }
+.hchart-focus-dot.swatch-raw { fill: var(--chart-raw); }
+.hchart-focus-dot.swatch-l2 { fill: var(--chart-l2); }
+.hchart-focus-dot.swatch-l1 { fill: var(--chart-l1); }
+.hchart-diagonal { stroke: var(--color-faint); stroke-width: 1; }
+.hchart-point { stroke: var(--color-canopy); stroke-width: 1; opacity: .9; }
+.hchart-point.swatch-loyo { fill: var(--chart-aqua); }
+.hchart-point.swatch-later { fill: var(--chart-l2); }
+.hchart-grid { display: grid; justify-content: start; }
+.hchart-axes-note { font-size: .75rem; margin-top: 6px; }
+.hchart-legend { margin-top: 14px; }
+.hchart-legend .hchart-swatch, .hchart-tooltip .hchart-swatch { display: inline-block; flex-shrink: 0; width: 16px; height: 0; border-top: 2px solid; }
+.hchart-swatch.swatch-aqua { border-color: var(--chart-aqua); }
+.hchart-swatch.swatch-raw { border-color: var(--chart-raw); }
+.hchart-swatch.swatch-l2 { border-color: var(--chart-l2); }
+.hchart-swatch.swatch-l1 { border-top-style: dashed; border-color: var(--chart-l1); }
+.hchart-legend .hchart-swatch.swatch-band, .hchart-tooltip .hchart-swatch.swatch-band { height: 10px; border: 0; background: var(--chart-l2); opacity: .4; }
+.hchart-legend .hchart-swatch.swatch-ring { width: 12px; height: 12px; border: 1.5px solid var(--color-ink); border-radius: 50%; }
+.hchart-legend .hchart-swatch.swatch-loyo { width: 8px; height: 8px; border: 0; border-radius: 50%; background: var(--chart-aqua); }
+.hchart-legend .hchart-swatch.swatch-later { width: 7px; height: 7px; border: 0; margin-inline: 1px; transform: rotate(45deg); background: var(--chart-l2); }
+.hchart-legend .hchart-swatch.swatch-diagonal { width: 14px; border-top: 1px solid var(--color-faint); transform: rotate(-35deg); }
+.hchart-tooltip {
+  position: absolute;
+  top: 26px;
+  z-index: 2;
+  display: grid;
+  gap: 4px;
+  min-width: 190px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--surface-floating);
+  box-shadow: var(--surface-shadow);
+  font-size: .75rem;
+  line-height: 1.4;
+  pointer-events: none;
+}
+.hchart-tooltip strong { color: var(--color-ink); font-size: .8125rem; }
+.hchart-tooltip span { display: flex; align-items: center; gap: 8px; color: var(--color-dim); }
+.hchart-tooltip b { margin-left: auto; padding-left: 12px; white-space: nowrap; color: var(--color-ink); font-family: var(--font-mono); font-weight: 400; }

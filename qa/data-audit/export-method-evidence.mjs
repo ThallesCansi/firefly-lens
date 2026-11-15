@@ -2,7 +2,7 @@
 // Run at the repository root: node qa/data-audit/export-method-evidence.mjs
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { readFileSync, writeFileSync, mkdirSync, copyFileSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, resolve, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -88,9 +88,10 @@ const evidence = {
 };
 const directory = join(root, "public/method/evidence");
 mkdirSync(directory, { recursive: true });
+// The Method page redraws these pipeline figures as SVG from harmonization-charts.json
+// (harmonization/pipeline/export_method_charts.py); their hashes stay as provenance.
 for (const name of ["before_after_brazil.png", "before_after_brazil_zoom.png", "scatter_by_biome.png", "residuals_time.png"]) {
   const source = `harmonization/output/figures/${name}`;
-  copyFileSync(join(root, source), join(directory, name));
   evidence.sources.push({ path: source, sha256: hash(read(source)) });
 }
 writeFileSync(join(directory, "evidence.json"), JSON.stringify(evidence, null, 2) + "\n");

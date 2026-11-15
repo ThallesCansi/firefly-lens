@@ -1,5 +1,6 @@
-import Image from "next/image";
+import type { ReactNode } from "react";
 import evidence from "../../../public/method/evidence/evidence.json";
+import { BiomeScatterChart, BrazilSeriesChart, BrazilZoomChart, ResidualsChart } from "./HarmonizationCharts";
 
 const number = (value: number, digits = 0) =>
   value.toLocaleString("en-US", { maximumFractionDigits: digits, minimumFractionDigits: digits });
@@ -14,15 +15,10 @@ function SourceNote() {
   );
 }
 
-function PipelineFigure({ name, title, description, width, height }: {
-  name: string; title: string; description: string; width: number; height: number;
-}) {
+function ChartFigure({ title, description, children }: { title: string; description: string; children: ReactNode }) {
   return (
     <figure className="evidence-figure">
-      <a href={`/method/evidence/${name}.png`} aria-label={`Open full-resolution figure: ${title}`}>
-        <Image src={`/method/evidence/${name}.png`} width={width} height={height}
-          alt={description} unoptimized className="evidence-pipeline-image" />
-      </a>
+      {children}
       <figcaption><strong>{title}</strong><p>{description}</p></figcaption>
     </figure>
   );
@@ -61,20 +57,24 @@ export function ValidationEvidence() {
         The 2018 overlap starts in April. Later comparisons mix model error
         and changes in Aqua’s reference.
       </p>
-      <PipelineFigure name="before_after_brazil" title="From two count scales to a shared monthly scale"
-        width={1615} height={665}
-        description="Brazil, 2003–2026, on a logarithmic count axis. Raw NOAA-20 counts are much higher than Aqua; harmonized predictions lie closer. The shaded band is the original predictive simulation interval, before the common-error adjustment used by the app." />
+      <ChartFigure title="From two count scales to a shared monthly scale"
+        description="Brazil, 2003–2026, on a logarithmic count axis. Raw NOAA-20 counts are much higher than Aqua; harmonized predictions lie closer. The shaded band is the original predictive simulation interval, before the common-error adjustment used by the app.">
+        <BrazilSeriesChart />
+      </ChartFigure>
       <details className="evidence-details"><summary>Inspect the overlapping record on a linear axis</summary>
-        <PipelineFigure name="before_after_brazil_zoom" title="Aqua and harmonized VIIRS, 2018–2026"
-          width={1643} height={665}
-          description="The dashed line marks the end of calibration. These held-out pipeline predictions are distinct from the app’s observed-through-2025 continuous series. The simulation band shown here does not include the app’s common-error coefficient." />
+        <ChartFigure title="Aqua and harmonized VIIRS, 2018–2026"
+          description="The dashed line marks the end of calibration. These held-out pipeline predictions are distinct from the app’s observed-through-2025 continuous series. The simulation band shown here does not include the app’s common-error coefficient.">
+          <BrazilZoomChart />
+        </ChartFigure>
       </details>
-      <PipelineFigure name="scatter_by_biome" title="Agreement varies across biomes"
-        width={1789} height={1170}
-        description="Observed versus predicted biome-month totals, with log(count + 1) axes. Blue marks identify calibration-period LOYO evaluations; orange marks identify later comparisons. Distance from the diagonal shows disagreement; national agreement does not guarantee local accuracy." />
-      <PipelineFigure name="residuals_time" title="Where the monthly predictions depart from Aqua"
-        width={1621} height={619}
-        description="Brazil-wide residuals are predicted / observed − 1, in percent, for L1 and L2. Negative residuals after 2023 are consistent with a changing Aqua reference, but do not isolate orbital drift from model error. Outage-month residuals are shown here although those months are excluded from calibration metrics." />
+      <ChartFigure title="Agreement varies across biomes"
+        description="Observed versus predicted biome-month totals, with log(count + 1) axes. Blue circles identify calibration-period LOYO evaluations; orange diamonds identify later comparisons. Distance from the diagonal shows disagreement; national agreement does not guarantee local accuracy.">
+        <BiomeScatterChart />
+      </ChartFigure>
+      <ChartFigure title="Where the monthly predictions depart from Aqua"
+        description="Brazil-wide residuals are predicted / observed − 1, in percent, for L1 and L2. Negative residuals after 2023 are consistent with a changing Aqua reference, but do not isolate orbital drift from model error. Outage-month residuals are shown here although those months are excluded from calibration metrics.">
+        <ResidualsChart />
+      </ChartFigure>
       <div className="method-callout">
         <strong>Two distinctions that matter</strong>
         <p>
@@ -93,13 +93,15 @@ export function ValidationEvidence() {
         </p>
       </div>
       <p className="evidence-source">
-        Existing pipeline figures are reproduced without editing, with their original
-        Portuguese labels. Open each image for full resolution. Sources:{" "}
+        Charts redraw the values plotted by the pipeline’s validation stage{" "}
+        (<a href="/method/evidence/harmonization-charts.json" download>chart values, JSON</a>). Sources:{" "}
         <a href={`${sourceRoot}harmonization/output/validation_metrics.csv`}>metrics</a>,{" "}
         <a href={`${sourceRoot}harmonization/output/validation_rankings.csv`}>rankings</a>,{" "}
         <a href={`${sourceRoot}harmonization/docs/METHODOLOGY.md`}>methodology</a>.
-        Tables and figures are published pipeline outputs; the audit checked file
-        consistency and did not rerun the model fits or validate fire events.
+        Tables are published pipeline outputs. Chart values come from the
+        validation code rerun with its fixed seed on the published monthly grid;
+        the recomputed metrics match the published table. The audit checked file
+        consistency and did not validate fire events.
       </p>
     </>
   );

@@ -5,6 +5,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import evidence from "../../../public/method/evidence/evidence.json";
+import charts from "../../../public/method/evidence/harmonization-charts.json";
 import { loadArea } from "../../lib/data/area";
 import { buildRecord, type FireRecord } from "../../lib/harmonize";
 import { rectangleArea, type BBox } from "../../lib/data/types";
@@ -25,15 +26,26 @@ describe("Methods evidence provenance and calculations", () => {
       expect(html).not.toContain("<title></title>");
     }
   });
-  it("keeps every evidence source and original figure unchanged", () => {
-    for (const source of evidence.sources) {
+  it("keeps every evidence source unchanged", () => {
+    for (const source of [...evidence.sources, ...charts.sources]) {
       const raw = readFileSync(join(root, source.path));
-      const canonical = /\.(?:ts|csv|json|geojson)$/.test(source.path) ? raw.toString("utf8").replace(/\r\n/g, "\n") : raw;
+      const canonical = /\.(?:ts|csv|json|geojson|py|yaml)$/.test(source.path) ? raw.toString("utf8").replace(/\r\n/g, "\n") : raw;
       expect(createHash("sha256").update(canonical).digest("hex"), source.path).toBe(source.sha256);
-      if (source.path.endsWith(".png")) {
-        expect(readFileSync(join(root, "public/method/evidence", source.path.split("/").at(-1)!))).toEqual(raw);
-      }
     }
+  });
+
+  it("charts the same held-out predictions that produced the published national L2 metrics", () => {
+    const h = charts.harmonized;
+    for (const metric of evidence.metrics) {
+      const rows = h.month.map((m, i) => ({ m, i })).filter(({ m, i }) => metric.period.startsWith("LOYO") ? h.loyo[i] : !h.loyo[i] && m.startsWith(metric.period));
+      expect(rows, metric.period).toHaveLength(metric.months);
+      const sum = (values: number[]) => rows.reduce((total, { i }) => total + values[i], 0);
+      // Exported counts are rounded to whole hot spots, so the bias agrees to 0.01 percentage points.
+      expect(100 * (sum(h.l2) / sum(h.aqua) - 1), metric.period).toBeCloseTo(metric.bias, 2);
+    }
+    for (const [i, m] of h.month.entries()) expect(h.lo[i] <= h.hi[i], m).toBe(true);
+    expect(charts.biomes.map((b) => b.biome)).toEqual(["Amazon", "Cerrado", "Caatinga", "Atlantic Forest", "Pantanal", "Pampa"]);
+    expect(charts.residuals.month).toEqual(expect.arrayContaining(charts.outageMonths));
   });
 
   it("reproduces the full same-month distribution and median with the application", () => {

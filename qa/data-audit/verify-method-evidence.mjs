@@ -18,11 +18,10 @@ try {
     await page.getByText("Published L2 metrics", { exact: false }).waitFor();
     assert.ok(await page.evaluate(() => !getComputedStyle(document.body).fontFamily.includes("Times New Roman")), "Expected the app's compiled font styles");
     assert.equal(await page.locator("#validation .evidence-figure").count(), 4);
-    for (const name of ["before_after_brazil", "before_after_brazil_zoom", "scatter_by_biome", "residuals_time"]) {
-      const response = await page.request.get(`${base}/method/evidence/${name}.png`);
-      assert.equal(response.status(), 200);
-      assert.match(response.headers()["content-type"], /image\/png/);
-    }
+    // Three always-visible chart figures (one SVG each, the biome figure six) plus the collapsed zoom chart.
+    assert.equal(await page.locator("#validation .evidence-figure svg.hchart-svg").count(), 9);
+    const response = await page.request.get(`${base}/method/evidence/harmonization-charts.json`);
+    assert.equal(response.status(), 200);
     await page.locator("#validation").scrollIntoViewIfNeeded();
     await page.screenshot({ path: `${output}/${label}-validation.png` });
     const firstTab = page.getByRole("tab", { name: "Harmonization", exact: true });
