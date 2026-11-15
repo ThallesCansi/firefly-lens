@@ -5,8 +5,8 @@
 @media (min-width: 1100px) {
   .workspace-body:not([data-analysis="true"]) .workspace-map:not(:has(.playback-bar)) .lume-replay { bottom: 40px; }
 }
-.camera-control { position: relative; font-size: 12px; }
-.camera-trigger { cursor: pointer; display: grid; place-items: center; width: 38px; height: 38px; color: var(--color-dim); }
+.camera-control { position: relative; font-size: 12px; align-self:stretch; }
+.camera-trigger { cursor: pointer; display: grid; place-items: center; width: 100%; min-width:44px; height: 44px; color: var(--color-dim); }
 .camera-trigger:hover:not(:disabled) { color: var(--color-ink); }
 .camera-trigger:focus-visible, .camera-menu :focus-visible { outline: 2px solid var(--color-lume); outline-offset: 2px; }
 .camera-menu { position: fixed; inset: auto; margin: 0; box-sizing: border-box; width: min(280px, calc(100vw - 96px)); overflow-y: auto; padding: 10px; border: 1px solid var(--color-line); border-radius: 14px; background: var(--color-night); color: var(--color-ink); box-shadow: var(--surface-shadow); font-size: 12px; }
@@ -258,6 +258,7 @@
     align-items:flex-end;
   }
   .lens-workspace .workspace-body[data-analysis="true"] .map-view-controls > .map-projection { display:none; }
+  .lens-workspace .workspace-body[data-analysis="true"] .camera-control { align-self:flex-end; }
 }
 @keyframes card-in {
   from {
@@ -458,7 +459,7 @@
   width: auto;
   padding: 8px;
 }
-.selection-card[data-compact="true"] > :not(.selection-actions) {
+.selection-card[data-compact="true"] .selection-card-body > :not(.selection-actions) {
   display: none;
 }
 /* Beside the tool column, as a strip of icons: nothing of the map under it is covered. */
@@ -1425,7 +1426,7 @@
 }
 /* Where the row would reach the site card, it folds into a chip that opens
    on click. */
-@container map (max-width: 760px) {
+@container map (max-width: 900px) {
   .map-settings-row { flex-direction: column; align-items: stretch; }
   .map-highlights-heading { flex-wrap: wrap; gap: 4px; }
   /* Under the site card, right of the slim tool column. */
@@ -1687,3 +1688,57 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Responsive disclosures follow the available map width, including split views. */
+.selection-card-chip, .map-key-chip { display:none; }
+.selection-card-body, .map-key-body { min-width:0; }
+@container map (max-width: 900px) {
+  .selection-card, .selection-card:not([data-compact="true"]), .selection-card[data-compact="true"] {
+    left:12px; right:auto; top:auto; bottom:100px; width:min(320px,calc(100% - 98px)); padding:0;
+    display:block; max-height:calc(100% - 190px); overflow:auto;
+  }
+  .selection-card-chip, .map-key-chip {
+    display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%;
+    min-height:44px; padding:10px 12px; text-align:left; font-size:12px; color:var(--color-ink); cursor:pointer;
+  }
+  .selection-card-chip > span { min-width:0; }
+  .selection-card-chip strong { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:600; }
+  .selection-card-chip svg, .map-key-chip svg { flex:none; }
+  [data-open="true"] > :is(.selection-card-chip,.map-key-chip) svg { rotate:180deg; }
+  .selection-card-body, .map-key-body { display:none; }
+  .selection-card[data-open="true"] .selection-card-body { display:block; padding:12px; }
+  .selection-card[data-compact="true"] .selection-card-body > :not(.selection-actions) { display:block; }
+  .selection-card[data-compact="true"] .selection-actions { flex-direction:row; flex-wrap:wrap; }
+  .selection-card[data-compact="true"] .selection-label { position:static; width:auto; height:auto; clip-path:none; white-space:normal; }
+  .selection-card[data-compact="true"] .btn { width:auto; height:auto; min-height:40px; padding:8px; }
+  .selection-card[data-compact="true"] [role="status"]:not(:empty) { position:static; translate:none; white-space:normal; }
+  .selection-card .selection-icon { display:none; }
+  .map-key { width:auto; max-width:min(300px,calc(100% - 96px)); padding:0; bottom:170px; }
+  .map-key[data-open="true"] { z-index:28; max-height:calc(100% - 260px); overflow:auto; }
+  .map-key[data-open="true"] .map-key-body { display:block; padding:0 12px 12px; }
+  .map-key-rows { flex-direction:column; align-items:flex-start; }
+  .map-key-detail { display:block; }
+  .workspace-map:has(.selection-card) .map-key { display:block; bottom:170px; }
+  .workspace-map:has(.selection-card[data-open="true"]) .map-key { display:none; }
+  .workspace-body[data-analysis="true"] .selection-card { bottom:12px; max-height:calc(100% - 24px); }
+}
+@media (max-width:700px) {
+  .workspace-map:has(.selection-card) .map-view-controls { bottom:150px; }
+  .workspace-map:has(.selection-card) .lume-replay { bottom:220px; }
+  .selection-card, .selection-card:not([data-compact="true"]) { bottom:112px; }
+  .workspace-map:has(.selection-card) .map-key { bottom:184px; }
+  .map-key { bottom:120px; }
+}
+@media (max-height:540px) {
+  .map-style-controls { display:none; }
+  .map-view-controls { bottom:20px; gap:4px; }
+  @container map (max-width:900px) {
+    .map-key { left:188px; bottom:100px; }
+    .selection-card, .selection-card:not([data-compact="true"]), .selection-card[data-compact="true"] { left:188px; }
+  }
+  @container map (max-width:760px) {
+    .map-key, .selection-card, .selection-card:not([data-compact="true"]), .selection-card[data-compact="true"] { left:86px; width:min(300px,calc(100% - 160px)); }
+  }
+}
+/* Every target of the guided tour remains available while the workspace is inert. */
+.lens-workspace[data-tour-active="true"] :is(.selection-card-body,.map-key-body) { display:block; }

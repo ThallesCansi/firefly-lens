@@ -24,7 +24,7 @@ export function AdministrativeSelectionCard({
       aria-busy={state.phase === "loading"}
     >
       <p className="eyebrow">COUNTRY / STATE</p>
-      <p role={state.phase === "error" ? "alert" : "status"}>{state.message}</p>
+      <p role={state.phase === "error" ? "alert" : "status"}>{state.phase === "idle" ? "Tap the map to identify a region. Drag to keep exploring." : state.message}</p>
       {candidate && (
         <>
           {state.candidates.length > 1 && (
@@ -47,6 +47,7 @@ export function AdministrativeSelectionCard({
             </label>
           )}
           <h2>{candidate.feature.properties.name}</h2>
+          <details className="ff-boundary-details"><summary>Boundary details</summary>
           <p className={"ff-interaction-muted"}>
             {candidate.feature.properties.level} /{" "}
             {candidate.feature.properties.sourceId} /{" "}
@@ -77,6 +78,7 @@ export function AdministrativeSelectionCard({
             Simplified boundaries for identification. Coastlines, small islands
             and disputed borders may be generalized.
           </p>
+          </details>
           <button
             type="button"
             className="btn btn-primary"

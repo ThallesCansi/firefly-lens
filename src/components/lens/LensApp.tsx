@@ -17,6 +17,7 @@ import {
 } from "@/lib/data/types";
 import type { AdministrativeCandidate } from "@/lib/interactions/administrative";
 import type { Vertex } from "@/lib/interactions/polygon-editor";
+import { MapDisclosure } from "./MapDisclosure";
 import { AreaForm } from "./AreaForm";
 import { AnalysisCalendar, AnalysisReport } from "./AnalysisContent";
 import { HotspotMap } from "./HotspotMap";
@@ -898,10 +899,12 @@ export function LensApp() {
             !coordinates &&
             !drawing &&
             !tools.administrativeActive && (
-              <section
+              <MapDisclosure
+                kind="selection-card"
+                summary={<>Area of interest <strong>{area.name}</strong></>}
+                key={area.id}
                 data-tour="selection"
                 data-compact={analysis}
-                className="selection-card map-surface"
                 aria-label="Selected area"
               >
                 <p className="eyebrow">AREA OF INTEREST</p>
@@ -969,7 +972,7 @@ export function LensApp() {
                     {shared === "copied" ? "Link copied" : shared === "address" ? "Link is in the address bar" : shared === "failed" ? "Download failed, try again" : ""}
                   </span>
                 </div>
-              </section>
+              </MapDisclosure>
             )}
           <div className="map-bottom">
             {playback && !tourRunning && (

@@ -13,6 +13,7 @@
   border: 1px solid transparent;
   border-radius: var(--radius-card);
   box-shadow: var(--surface-shadow);
+  height: fit-content;
 }
 /* Beside the slim column on a narrow map. */
 @container map (max-width: 760px) {
@@ -73,9 +74,27 @@
   /* Under the folded map chip on a phone. */
   .ff-workspace-tools-card {
     top: 122px;
-    max-height: calc(100% - 250px);
+    max-height: min(34dvh, 280px);
   }
   .lens-workspace .ff-interaction-panel {
     height: 58%;
   }
+}
+.ff-workspace-tools-card .ff-boundary-details summary { cursor:pointer; text-decoration:underline; }
+.ff-selection-level { padding:10px 12px 0; }
+.ff-selection-level legend { padding-top:10px; font-size:12px; }
+.ff-selection-level [role="group"] { display:flex; gap:6px; }
+.ff-selection-level button { min-height:44px; flex:1; padding:8px; font-size:12px; border:1px solid var(--color-line); border-radius:8px; cursor:pointer; }
+.ff-selection-level button[aria-pressed="true"] { background:var(--color-button); color:var(--color-button-ink); }
+.ff-workspace-tools-card .ff-boundary-details > :not(summary) { margin-top:8px; }
+@container map (max-width:900px) {
+  .ff-workspace-tools-card { top:122px; max-height:min(36dvh,280px); }
+  .ff-workspace-tools-card > label { padding:8px 12px; gap:4px; }
+  .ff-workspace-tools-card .ff-interaction-card { padding:10px 12px; gap:8px; }
+  .ff-workspace-tools-card .eyebrow { display:none; }
+}
+@media (max-height:540px) {
+  .ff-workspace-tools-card { top:70px; max-height:126px; display:grid; grid-template-columns:1fr 1fr; }
+  .ff-workspace-tools-card .ff-interaction-card { font-size:11px; padding:8px; gap:4px; }
+  .ff-selection-level { padding:8px; }
 }

@@ -17,6 +17,7 @@ import { cellIdAt, cellRing, placeReadout } from "@/lib/map/readout";
 import { DEFAULT_CAMERA_PROFILE, HOME } from "@/lib/map/camera";
 import { presetRequest, type CameraAction } from "@/lib/map/camera-presets";
 import { fireData } from "@/lib/data/source";
+import { MapDisclosure } from "./MapDisclosure";
 import { CameraControls } from "./map/CameraControls";
 import { addCoverageMask,continentCenter,MIN_CONTINENT_ZOOM } from "@/lib/map/south-america";
 import { GLOW, glowAt } from "@/lib/map/glow";
@@ -1092,7 +1093,7 @@ export function HotspotMap({
         </p>
       )}
       {/* The map key: what the marks mean, and what is on screen now. */}
-      <section className="map-key map-surface" aria-label="Map key">
+      <MapDisclosure kind="map-key" summary="Legend" aria-label="Map key">
         <ul className="map-key-rows">
           <li>
             <span
@@ -1187,7 +1188,7 @@ export function HotspotMap({
         {globeUnavailable && (
           <p className="map-key-note">Globe unavailable here: flat map shown</p>
         )}
-      </section>
+      </MapDisclosure>
       {signalMarkers}
       {/* One column of view controls: projection, zoom, reset. */}
       {ready && (
@@ -1202,7 +1203,7 @@ export function HotspotMap({
               onChange={(next) => control.current?.setProjection(next)}
             />
           )}
-          <div className="map-projection map-surface">
+          <div className="map-projection map-style-controls map-surface">
             <button
               type="button"
               aria-pressed={basemap === "satellite"}
