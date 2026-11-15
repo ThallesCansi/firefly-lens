@@ -1026,6 +1026,35 @@
   gap: 8px;
   color: var(--color-ink);
 }
+/* The sensor lens: VIIRS as recorded, or converted to the MODIS Aqua scale. */
+.map-key-lens {
+  display: flex;
+  width: 100%;
+  padding: 2px;
+  gap: 2px;
+  border: 1px solid var(--color-line);
+  border-radius: 8px;
+}
+.map-key-lens button {
+  flex: 1;
+  padding: 3px 6px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-dim);
+  cursor: pointer;
+  transition: background-color 150ms ease-out, color 150ms ease-out;
+}
+.map-key-lens button[aria-pressed="true"] {
+  background: var(--color-button);
+  color: var(--color-button-ink);
+}
+@media (hover: hover) {
+  .map-key-lens button:not([aria-pressed="true"]):hover {
+    background: var(--color-bark);
+    color: var(--color-ink);
+  }
+}
 /* The key row that also switches the glow on and off. */
 .map-key-toggle {
   display: flex;

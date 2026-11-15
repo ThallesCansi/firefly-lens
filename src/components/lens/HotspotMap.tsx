@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type {
   GeoJSONSource,
   Map as MapLibreMap,
@@ -289,6 +289,8 @@ export function HotspotMap({
     basemap: DEFAULT_BASEMAP as BasemapKind,
     unusual,
     showUnusual: true,
+    drawn: cells,
+    drawnScale: scale,
   });
   const appliedTheme = useRef(theme);
   const styled = useRef(false);
@@ -309,6 +311,24 @@ export function HotspotMap({
   const [showUnusual, setShowUnusual] = useState(true);
   /** The cell under the pointer, whose numbers the readout shows. */
   const [hovered, setHovered] = useState<CellCount | null>(null);
+  /**
+   * The sensor lens: VIIRS drawn as recorded, or as the model converts it to
+   * the MODIS Aqua scale. Only a month from April 2018 has converted values.
+   */
+  const [lens, setLens] = useState<"recorded" | "harmonized">("recorded");
+  const converted = lens === "harmonized" && !!harmonized;
+  const drawn = useMemo(
+    () =>
+      converted && cells
+        ? cells.map((c) => ({ ...c, viirs: harmonized(c.id) ?? 0 }))
+        : cells,
+    [cells, converted, harmonized],
+  );
+  // Converted VIIRS lives on the MODIS scale, so a time-lapse measures it against the MODIS peak.
+  const drawnScale = useMemo(
+    () => (converted && scale ? { modis: scale.modis, viirs: scale.modis } : scale),
+    [converted, scale],
+  );
   const readout = useRef<HTMLDivElement>(null);
   const pointer = useRef<[number, number]>([0, 0]);
 
@@ -326,8 +346,12 @@ export function HotspotMap({
       basemap,
       unusual,
       showUnusual,
+      drawn,
+      drawnScale,
     };
   }, [
+    drawn,
+    drawnScale,
     cells,
     scale,
     area,
@@ -403,7 +427,7 @@ export function HotspotMap({
         });
         m.addSource("hotspots", {
           type: "geojson",
-          data: points(latest.current.cells ?? [], latest.current.scale),
+          data: points(latest.current.drawn ?? [], latest.current.drawnScale),
         });
         m.addSource("columns", {
           type: "geojson",
@@ -535,7 +559,7 @@ export function HotspotMap({
         columnMotion.reset();
         if (latest.current.inColumns)
           columnMotion.show(
-            columns(latest.current.cells ?? [], latest.current.sensors, latest.current.scale),
+            columns(latest.current.drawn ?? [], latest.current.sensors, latest.current.drawnScale),
             0,
           );
         showMarks(m, latest.current.sensors, latest.current.inColumns);
@@ -633,9 +657,9 @@ export function HotspotMap({
   useEffect(() => {
     if (!ready) return;
     (map.current?.getSource("hotspots") as GeoJSONSource | undefined)?.setData(
-      points(cells ?? [], scale),
+      points(drawn ?? [], drawnScale),
     );
-  }, [cells, scale, ready]);
+  }, [drawn, drawnScale, ready]);
 
   // The columns are built only while the 3D view is on. A change of month,
   // sensor or time-lapse frame moves each column to its new height instead of
@@ -643,10 +667,10 @@ export function HotspotMap({
   useEffect(() => {
     if (!ready) return;
     motion.current?.show(
-      inColumns ? columns(cells ?? [], sensors, scale) : [],
+      inColumns ? columns(drawn ?? [], sensors, drawnScale) : [],
       inColumns && !prefersReducedMotion() ? COLUMN_MOTION_MS : 0,
     );
-  }, [cells, scale, sensors, inColumns, ready]);
+  }, [drawn, drawnScale, sensors, inColumns, ready]);
 
   useEffect(() => {
     if (ready && map.current) showMarks(map.current, sensors, inColumns);
@@ -1009,8 +1033,33 @@ export function HotspotMap({
               aria-hidden="true"
               className={inColumns ? "sensor-column sensor-column-viirs" : "sensor-dot"}
             />
-            VIIRS NOAA-20 <span className="text-faint">· per cell</span>
+            VIIRS NOAA-20{" "}
+            <span className="text-faint">
+              · {converted ? "MODIS scale" : "per cell"}
+            </span>
           </li>
+          {harmonized && (
+            <li>
+              <div className="map-key-lens" role="group" aria-label="How VIIRS is drawn">
+                <button
+                  type="button"
+                  aria-pressed={lens === "recorded"}
+                  title="VIIRS detections as the sensor recorded them"
+                  onClick={() => setLens("recorded")}
+                >
+                  As recorded
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={lens === "harmonized"}
+                  title="VIIRS converted by the model to the MODIS Aqua scale"
+                  onClick={() => setLens("harmonized")}
+                >
+                  MODIS scale
+                </button>
+              </div>
+            </li>
+          )}
           {unusual && (
             <li>
               <button
@@ -1052,7 +1101,7 @@ export function HotspotMap({
           <p className="map-key-note map-key-detail">
             Height = detections, one scale for both sensors; tallest:{" "}
             <span className="text-ink">
-              {columnTop(cells ?? [], sensors, scale).toLocaleString("en-GB")}
+              {Math.round(columnTop(drawn ?? [], sensors, drawnScale)).toLocaleString("en-GB")}
             </span>
             {scale ? " (time-lapse peak)" : ""}. Right-drag to orbit.
           </p>
