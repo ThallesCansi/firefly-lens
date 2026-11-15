@@ -298,6 +298,14 @@ export function AnomaliesGuide() {
           </p>
         </figure>
       </MethodSection>
+      <MethodSection id="historical-radar" title="Historical Anomaly Radar">
+        <p>The radar screens the five predefined study rectangles for unusually high monthly totals using the existing harmonized series. Its main reference is 2003–2023, excluding the evaluated year; 2003–2025 is available for comparison. This is retrospective: later years can inform a past month’s reference.</p>
+        <p>The initial configurable filters require at least 15 eligible reference years, a ratio of at least 2, at least 100 Aqua-equivalent hot spots, an excess of at least 50, and a value at or above the reference 90th percentile. These are provisional descriptive filters, not significance tests. A zero median has no defined ratio and does not qualify.</p>
+        <p>July 2002, metadata-flagged partial months and months affected by known Aqua gaps (August/September 2020 and March/April 2022) are excluded from references, candidates and ranks. They remain available in Explore Period and the historical analysis. An absence of detections is not automatically interpreted as missing observations.</p>
+        <p>Rank is one plus the number of eligible same-calendar-month values strictly greater than the target, across the full archive including modeled months. Ties share rank. Highlights are ordered by relative historical standing, then ratio and absolute excess. This ordering is not a probability.</p>
+        <p>Using 2003–2023 reduces potential influence of the 2024–2025 Aqua orbital drift on the reference, but does not fully correct comparability. Those years remain observed, with drift; from 2026 the series changes to harmonized VIIRS. Modeled ranges are nominal 95% predictive intervals, without a claim of validated coverage for arbitrary study regions. VIIRS inputs from August 2026 use near-real-time processing.</p>
+        <p>The historical grid retains its existing 2003–2025 climatology and daily flags retain their local median/MAD rule. Radar values are historical descriptions of detected thermal pixels, not independent fires, forecasts or indicators of future fire risk.</p>
+      </MethodSection>
       <MethodSection id="interpretation" title="Scientific interpretation">
         <ul>
           <li>

@@ -42,6 +42,27 @@ In the map workspace a user can:
 
 ## Run it
 
+### Historical Anomaly Radar
+
+Open **Historical Anomaly Radar** in the map toolbar. **Historical Highlights** orders unusual positive monthly activity across the five preset study rectangles; **Explore Period** shows every region for a chosen month, including months excluded from comparison. Opening a card selects its region, sets the month, frames the map and opens the existing analysis.
+
+The radar uses a configurable **2003–2023** same-month reference, excluding the evaluated year, with 2003–2025 available for comparison. This reduces potential influence of the 2024–2025 Aqua drift on the reference; it does not fully correct comparability. Existing global indicators, the historical grid's fixed 2003–2025 medians and the scientific harmonization pipeline are unchanged. A contextual card explains why radar comparisons can differ from the grid below.
+
+Initial filters in `src/lib/anomalies.ts`: at least 15 reference years, ratio ≥ 2, count ≥ 100 MODIS Aqua equivalents, excess ≥ 50 and value ≥ reference P90. These parameters are provisional descriptive filters. The target year and quality-excluded months are absent from the reference. Rank uses all eligible same-calendar-month records in the archive (including modeled values); ties share rank. Results are ordered by relative historical standing, then ratio and excess. This is retrospective analysis, not a probability, prediction or indicator of future fire risk.
+
+Independent quality rules in `src/lib/data/month-quality.ts` exclude July 2002, metadata/coverage partial months, and the full months touched by documented Aqua outages: August/September 2020 and March/April 2022. Excluded months remain available for exploration, without a radar ratio or rank. Zero medians have no defined ratio. Modeled ranges are **nominal 95% predictive intervals**, without a claim of validated coverage for arbitrary study regions. The 2026 source transition and near-real-time inputs remain limitations.
+
+`public/data/brazil/historical-radar.json` is derived locally by the actual `loadArea()` → `buildRecord()` functions, not a second harmonization implementation. The browser fetches only this monthly summary when the radar opens; geographic tiles load for a selected area's detailed analysis. Its schema, coverage, policy and source hashes are recorded. Text fingerprints normalize line endings for Windows/Linux reproducibility.
+
+```bash
+pnpm radar:generate  # regenerate the real summary and threshold report after relevant changes
+pnpm radar:check     # recompute and reject stale inputs, JSON content or report
+```
+
+`dev` and `build` verify freshness before starting. The generated [threshold report](docs/historical-radar-report.md) gives counts for every region, floor diagnostics and the alternative reference-window comparison. Updating input data or scientific/quality/generator modules requires regenerating both artifacts. The main algorithm does not modify `harmonize.ts`, `AnalysisContent.tsx` or the Python pipeline.
+
+Optional browser checks: run the production server on port 3104 and `pnpm radar:qa`. Reuse an existing Playwright installation by setting `PLAYWRIGHT_MODULE` to its absolute `index.mjs` path; `QA_BASE_URL` can override the server URL. The check uses the installed Chrome, keeps screenshots in the system temporary directory and adds no project dependency. See [implementation validation](docs/historical-radar-validation.md).
+
 Requires Node 20.9 or newer and [pnpm](https://pnpm.io).
 
 ```bash

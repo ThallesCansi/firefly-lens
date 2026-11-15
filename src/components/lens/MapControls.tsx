@@ -12,6 +12,8 @@ export function MapToolbar({
   administrativeActive = false,
   onSearch,
   searchActive = false,
+  onRadar,
+  radarActive = false,
 }: {
   tool: SpatialTool;
   onTool: (tool: SpatialTool) => void;
@@ -20,6 +22,8 @@ export function MapToolbar({
   /** Opens place search; shown first, since finding a place comes before selecting it. */
   onSearch?: () => void;
   searchActive?: boolean;
+  onRadar?: () => void;
+  radarActive?: boolean;
 }) {
   // Two groups: find a place, then choose how to select an area.
   // Clearing lives on the selection card and resetting the view in the map controls.
@@ -72,6 +76,9 @@ export function MapToolbar({
           onTool(tool === "coordinates" ? "navigate" : "coordinates")
         }
       />
+      {onRadar && <><span className="map-toolbar-rule" aria-hidden="true" /><Tool
+        label="Historical Anomaly Radar" icon="radar" active={radarActive} onClick={onRadar}
+      /></>}
     </div>
   );
 }
@@ -158,6 +165,7 @@ function Tool({
   onClick: () => void;
 }) {
   const paths: Record<string, ReactNode> = {
+    radar: <><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5" /><path d="M12 12 19 5" /><circle cx="9" cy="15" r="1" /></>,
     search: (
       <>
         <circle cx="11" cy="11" r="6.5" />

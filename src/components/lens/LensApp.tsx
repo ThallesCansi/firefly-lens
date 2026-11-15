@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { fireData } from "@/lib/data/source";
 import {
@@ -30,6 +31,12 @@ import { ResizableAnalysisPanel } from "@/components/interactions/ResizableAnaly
 import type { MapController } from "@/lib/map/map-contract";
 import "@/components/interactions/WorkspaceTools.css";
 import { ScientificInfo } from "@/components/ui/ScientificInfo";
+import type { RadarConfig, RadarResult } from "@/lib/anomalies";
+import { AnomalyCard } from "./AnomalyCard";
+
+const HistoricalAnomalyRadar = dynamic(() => import("./HistoricalAnomalyRadar"), {
+  loading: () => <p role="status">Opening historical radar…</p>,
+});
 
 type Area = AnalysisArea;
 const presets = fireData.presets();
@@ -74,6 +81,8 @@ export function LensApp() {
   const [area, setArea] = useState<Area | null>(null);
   const [analyzed, setAnalyzed] = useState<Area | null>(null);
   const [analysis, setAnalysis] = useState(false);
+  const [radar, setRadar] = useState(false);
+  const [radarContext, setRadarContext] = useState<{ result: RadarResult; config: RadarConfig; areaId: string } | null>(null);
   const [expanded, setExpanded] = useState(false);
   const [drawing, setDrawing] = useState(false);
   const [coordinates, setCoordinates] = useState(false);
@@ -132,7 +141,7 @@ export function LensApp() {
     [],
   );
   // Corner handles show as soon as a drawn area exists, unless another tool is in use.
-  const editable = area && !analysis && !drawing && !coordinates ? area : null;
+  const editable = area && !analysis && !radar && !drawing && !coordinates ? area : null;
   const tools = useWorkspaceTools(
     controller,
     editable,
@@ -159,6 +168,29 @@ export function LensApp() {
     setExpanded(false);
     requestAnimationFrame(() => analyzeButton.current?.focus());
   };
+  const closeRadar = () => {
+    setRadar(false);
+    requestAnimationFrame(() => document.querySelector<HTMLButtonElement>('.map-toolbar button[aria-label="Historical Anomaly Radar"]')?.focus());
+  };
+  const openRadarResult = (result: RadarResult, config: RadarConfig) => {
+    // Commit the same explicit shape to selection and analysis. Do not read the
+    // previous `area` after setArea, or schedule navigation with an old result.
+    const nextArea = rectangleArea(result.region.bbox, result.region.name);
+    tools.clear();
+    setDrawing(false);
+    setCoordinates(false);
+    setSearching(false);
+    setDestination(null);
+    setArea(nextArea);
+    setAnalyzed(nextArea);
+    setRadarContext({ result, config, areaId: nextArea.id });
+    setFrame((n) => n + 1);
+    changePeriod(`${result.cell.year}-${String(result.cell.month + 1).padStart(2, "0")}`);
+    setExpanded(false);
+    setAnalysis(true);
+    setRadar(false);
+    requestAnimationFrame(() => closeButton.current?.focus());
+  };
   useEffect(() => {
     const cancel = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -174,6 +206,7 @@ export function LensApp() {
         setCoordinates(false);
         setDrawing(false);
         setSearching(true);
+        setRadar(false);
       }
     };
     window.addEventListener("keydown", cancel);
@@ -210,6 +243,7 @@ export function LensApp() {
   ) : null;
   function analyze() {
     if (!area) return;
+    setRadar(false);
     setAnalyzed(area);
     setAnalysis(true);
     setCoordinates(false);
@@ -227,8 +261,8 @@ export function LensApp() {
     <main id="main" className="lens-workspace">
       <div
         className="workspace-body"
-        data-analysis={analysis}
-        data-expanded={expanded && analysis}
+        data-analysis={analysis || radar}
+        data-expanded={expanded && analysis && !radar}
       >
         <section className="workspace-map" aria-label="Earth exploration">
           <HotspotMap
@@ -258,7 +292,17 @@ export function LensApp() {
           />
           <SiteNav current="/lens" className="map-site-card" />
           <MapToolbar
+            onRadar={() => {
+              if (radar) { closeRadar(); return; }
+              tools.clear();
+              setDrawing(false);
+              setCoordinates(false);
+              setSearching(false);
+              setRadar(true);
+            }}
+            radarActive={radar}
             onSearch={() => {
+              setRadar(false);
               tools.stop();
               setDrawing(false);
               setCoordinates(false);
@@ -267,6 +311,7 @@ export function LensApp() {
             searchActive={searching}
             tool={drawing ? "draw" : coordinates ? "coordinates" : "navigate"}
             onSelectAdministrative={() => {
+              setRadar(false);
               setDrawing(false);
               setCoordinates(false);
               setAnalysis(false);
@@ -274,6 +319,7 @@ export function LensApp() {
             }}
             administrativeActive={tools.administrativeActive}
             onTool={(tool) => {
+              setRadar(false);
               tools.stop();
               setSearching(false);
               setDrawing(tool === "draw");
@@ -364,6 +410,7 @@ export function LensApp() {
             </section>
           )}
           {!area &&
+            !radar &&
             !introDone &&
             !drawing &&
             !coordinates &&
@@ -395,6 +442,7 @@ export function LensApp() {
               </div>
             )}
           {area &&
+            !radar &&
             !analysis &&
             !coordinates &&
             !drawing &&
@@ -445,9 +493,14 @@ export function LensApp() {
             )}
           <AssistantDock />
         </section>
+        {radar && <ResizableAnalysisPanel storageKey="firefly-lens-radar-width" onKeyDown={(e) => {
+          if (e.key === "Escape" && !e.defaultPrevented) closeRadar();
+        }}>
+          <HistoricalAnomalyRadar period={period} onSelect={openRadarResult} onClose={closeRadar} />
+        </ResizableAnalysisPanel>}
         {analyzed && (
           <ResizableAnalysisPanel
-            hidden={!analysis}
+            hidden={!analysis || radar}
             expanded={expanded}
             onKeyDown={(e) => {
               if (e.key === "Escape") close();
@@ -470,6 +523,14 @@ export function LensApp() {
               </div>
             </div>
             <div className="analysis-scroll">
+              {radarContext && radarContext.areaId === analyzed.id &&
+                period.slice(0, 7) === `${radarContext.result.cell.year}-${String(radarContext.result.cell.month + 1).padStart(2, "0")}` && (
+                <section className="radar-context" aria-label="Selected radar comparison">
+                  <p className="eyebrow">RADAR COMPARISON · TARGET YEAR EXCLUDED</p>
+                  <AnomalyCard result={radarContext.result} config={radarContext.config} />
+                  <p className="radar-note">The historical grid below retains its existing 2003–2025 reference, including the target year when in that window. Its median and rank can differ from the radar. Daily peaks use a separate local rule.</p>
+                </section>
+              )}
               <p className="mb-5 text-xs text-dim">
                 Real detections, harmonized to the MODIS Aqua scale. Hot spots
                 are detected pixels, not independent fires.{" "}

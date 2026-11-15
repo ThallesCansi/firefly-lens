@@ -3,11 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "node scripts/copy-maplibre-worker.mjs && next dev",
-    "build": "node scripts/copy-maplibre-worker.mjs && next build",
+    "dev": "node scripts/generate-historical-radar.mjs --check && node scripts/copy-maplibre-worker.mjs && next dev",
+    "build": "node scripts/generate-historical-radar.mjs --check && node scripts/copy-maplibre-worker.mjs && next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "radar:generate": "node scripts/generate-historical-radar.mjs",
+    "radar:check": "node scripts/generate-historical-radar.mjs --check",
+    "radar:qa": "node scripts/qa-historical-radar.mjs"
   },
   "dependencies": {
     "d3-array": "^3.2.5",

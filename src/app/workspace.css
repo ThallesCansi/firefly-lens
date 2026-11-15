@@ -1,3 +1,34 @@
+/* Monthly radar uses existing theme tokens and the shared resizable panel. */
+.historical-radar { display: flex; flex-direction: column; gap: 20px; min-width: 0; padding: 24px; }
+.radar-heading, .radar-result-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.radar-heading h2 { font-size: clamp(1.25rem, 2vw, 1.6rem); line-height: 1.2; }
+.radar-heading .icon-btn { flex-shrink: 0; }
+.radar-intro { font-size: 0.875rem; color: var(--color-dim); line-height: 1.65; }
+.radar-filters { display: flex; flex-direction: column; gap: 12px; }
+.radar-filters label { display: flex; flex-direction: column; gap: 6px; min-width: 0; font-size: 0.8125rem; color: var(--color-dim); }
+.radar-filters select { max-width: 100%; }
+.radar-period { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+.radar-method { font-size: 0.8125rem; line-height: 1.65; color: var(--color-dim); }
+.radar-method summary { cursor: pointer; color: var(--color-ink); }
+.radar-method p { margin-top: 10px; }
+.radar-results { display: grid; gap: 16px; }
+.radar-result { border: 1px solid var(--color-line); border-radius: var(--radius-card); background: var(--color-bark); padding: 16px; min-width: 0; }
+.radar-result[data-highlight="true"] { border-left: 3px solid var(--color-lume); }
+.radar-result h3 { font-family: var(--font-funnel-display), sans-serif; font-size: 1.125rem; }
+.radar-result-heading p { font-size: 0.875rem; }
+.radar-source { font-size: 0.6875rem; color: var(--color-dim); border: 1px solid var(--color-line); border-radius: 20px; padding: 4px 8px; flex-shrink: 0; }
+.radar-status { color: var(--color-ink); font-size: 0.75rem; margin-top: 12px; }
+.radar-metrics { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; margin: 16px 0; }
+.radar-metrics dt { font-size: 0.6875rem; color: var(--color-dim); }
+.radar-metrics dd { font-family: var(--font-dm-mono), monospace; font-size: 1.0625rem; margin-top: 4px; }
+.radar-note { font-size: 0.75rem; color: var(--color-dim); line-height: 1.6; overflow-wrap: anywhere; }
+.radar-result .radar-note + .radar-note { margin-top: 8px; }
+.radar-result .btn { margin-top: 16px; }
+.radar-context { margin-bottom: 24px; }
+.radar-context > .radar-note { margin-top: 10px; }
+@media (max-width: 700px) { .historical-radar { padding: 16px; } }
+@media (max-width: 400px) { .radar-result-heading { flex-wrap: wrap; } .radar-result { padding: 12px; } }
+
 /* The map remains mounted while a separately scrolling analysis pane opens. */
 .lens-workspace {
   height: 100dvh;

@@ -3,6 +3,11 @@
 import { useId, useRef } from "react";
 
 const concepts = {
+  radar: {
+    title: "Historical Anomaly Radar",
+    body: "Positive monthly departures from the same region’s 2003–2023 same-month reference, excluding the target year and incomplete/gap months. Initial ratio, percentile and absolute-count filters are exploratory. Modeled ranges are nominal 95% predictive intervals; regional coverage is not established. Historical activity does not predict future fire risk.",
+    anchor: "historical-radar",
+  },
   activity: {
     title: "Harmonized activity",
     body: "A relative daily index of observed or modeled activity on the MODIS Aqua scale, displayed from 0 to 100. It is not fire count, burned area, severity or probability.",
