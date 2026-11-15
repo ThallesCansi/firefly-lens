@@ -55,6 +55,13 @@ desktop/mobile placement, centered tabs, real custom-polygon weather, tab change
 and honest unavailable states. CI builds the actual Docker image with weather
 dependencies and checks it under 512 MB.
 
+The initial verification passed 250 frontend tests, 68 Python unit tests and
+8 real-data integration tests, along with TypeScript, ESLint and production
+build. Actual image smoke checks passed History, numeric NASA weather and a
+subsequent History request under 512 MB. Post-request container usage was
+106.2 MiB; this is not a peak-memory or Render throughput benchmark.
+Browser screenshots and checks are in [weather-first-qa](weather-first-qa/).
+
 After merging, Render must deploy the new main image. Existing Vercel URL/token
 settings remain valid. Dispatch **Refresh official NASA weather** once, inspect
 its successful run and the `weather-data` release asset, then verify production

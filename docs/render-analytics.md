@@ -62,5 +62,5 @@ Sources: [Render Free](https://render.com/docs/free),
 Remove the two Vercel variables and redeploy to restore static-only fallback;
 or revert the service's last deployment in Render. Preserve matching map/service
 metadata. The existing API rejects mismatched data versions rather than mixing
-scientific releases. To add weather later, deploy its verified data/dependencies
-and refresh pipeline separately if choosing a different provider.
+scientific releases. To switch weather providers, deploy matching verified
+data, dependencies and a refresh pipeline for that provider.
