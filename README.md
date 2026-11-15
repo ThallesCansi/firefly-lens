@@ -43,6 +43,10 @@ In the map workspace a user can:
 
 ## Run it
 
+### Camera navigation
+
+The workspace **Camera** menu offers Earth, Brazil, Pantanal and selected-area framing, North up, Top-down and Stop flight. **Cinematic** is the default, without an initial flight or change to the opening framing. Selecting either profile changes future navigation without immediately moving the camera. Standard restores traditional animation and north-up/top-down arrival on subsequent navigation, while preserving explicit camera poses and enabled 3D column tilt. Presets change only the view. Gestures interrupt flights, and drawing and Lume take priority. The tour restores the complete camera pose, columns and regional-flight state. No terrain or scientific calculations are added. See [camera implementation and verification](docs/cinematic-camera-validation.md).
+
 ### Tour with Lume
 
 The workspace automatically opens Lume’s welcome on each new visit or reload. **Don't show again** is an explicit browser preference: only checking it disables future automatic welcomes. Completing, skipping or closing the tour does not opt out. A single welcome is presented per browser document, including across Strict Mode effect replay and client-side navigation. The **Tour with Lume** launcher, beside the original animated mascot, remains available after opt-out.

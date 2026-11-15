@@ -14,7 +14,10 @@ import type { CellCount } from "@/lib/data/area";
 import { normalizeBBox, type AnalysisArea, type BBox, type Sensor } from "@/lib/data/types";
 import type { UnusualMonth } from "@/lib/unusual";
 import { cellIdAt, cellRing, placeReadout } from "@/lib/map/readout";
-import { HOME } from "@/lib/map/camera";
+import { DEFAULT_CAMERA_PROFILE, HOME } from "@/lib/map/camera";
+import { presetRequest, type CameraAction } from "@/lib/map/camera-presets";
+import { fireData } from "@/lib/data/source";
+import { CameraControls } from "./map/CameraControls";
 import { GLOW, glowAt } from "@/lib/map/glow";
 import {
   COLUMN_MOTION_MS,
@@ -24,6 +27,7 @@ import {
 import { COLUMN_HEIGHT, COLUMN_OPACITY, columnTop, columns } from "@/lib/map/columns";
 import {
   createController,
+  cameraPadding,
   prefersReducedMotion,
   type EngineController,
 } from "@/lib/map/controller";
@@ -33,6 +37,7 @@ import type {
   MapInteractionMode,
   MapNavigationRequest,
   ProjectionMode,
+  CameraProfile,
 } from "@/lib/map/map-contract";
 import {
   DEFAULT_PROJECTION,
@@ -232,6 +237,9 @@ export function HotspotMap({
   unusualMonth,
   harmonized,
   forceColumns = false,
+  columnsChosen: controlledColumns,
+  onColumnsChange,
+  tourActive = false,
   signals = NO_SIGNALS,
   onSignalSelect,
 }: {
@@ -277,6 +285,9 @@ export function HotspotMap({
   harmonized?: (cellId: number) => number | null;
   /** Holds the 3D columns on, for a guided flight; the switch is then disabled. */
   forceColumns?: boolean;
+  columnsChosen?: boolean;
+  onColumnsChange?: (on: boolean) => void;
+  tourActive?: boolean;
   signals?: FireflySignal[];
   onSignalSelect?: (area: AnalysisArea) => void;
 }) {
@@ -294,6 +305,8 @@ export function HotspotMap({
     onDraw,
     sensors,
     theme,
+    tourActive,
+    cameraProfile: DEFAULT_CAMERA_PROFILE,
     onReady,
     onProjectionChange,
     inColumns: false,
@@ -315,7 +328,11 @@ export function HotspotMap({
   );
   const [globeUnavailable, setGlobeUnavailable] = useState(false);
   /** The 3D view: detections as columns, seen from a tilted camera. */
-  const [columnsChosen, setInColumns] = useState(false);
+  const [localColumns, setLocalColumns] = useState(false);
+  const columnsChosen = controlledColumns ?? localColumns;
+  const setInColumns = (on: boolean) => { setLocalColumns(on); onColumnsChange?.(on); };
+  const [cameraProfile, setCameraProfile] = useState<CameraProfile>(DEFAULT_CAMERA_PROFILE);
+  const [cameraMoving, setCameraMoving] = useState(false);
   // A regional flight shows every stop in 3D, whatever was chosen before it.
   const inColumns = forceColumns || columnsChosen;
   /** NASA's satellite picture under the data, or the drawn map alone. */
@@ -355,6 +372,8 @@ export function HotspotMap({
       onDraw,
       sensors,
       theme,
+      tourActive,
+      cameraProfile,
       onReady,
       onProjectionChange,
       inColumns,
@@ -373,6 +392,8 @@ export function HotspotMap({
     onDraw,
     sensors,
     theme,
+    tourActive,
+    cameraProfile,
     onReady,
     onProjectionChange,
     inColumns,
@@ -389,6 +410,9 @@ export function HotspotMap({
     // inside MapLibre left the map stuck, unable to load the fallback.
     Promise.all([import("maplibre-gl"), loadBasemap()]).then(([maplibregl, base]) => {
       if (dead || !el.current) return;
+      // React may retain local state while tearing down effects on route exit.
+      setReady(false);
+      setCameraMoving(false);
       maplibregl.setWorkerUrl("/maplibre/maplibre-gl-worker.mjs");
       let instance: MapLibreMap;
       const initial = projection ?? readProjection();
@@ -419,6 +443,7 @@ export function HotspotMap({
       const columnMotion = createColumnMotion(() => (dead ? null : instance), "columns");
       motion.current = columnMotion;
       const controller = createController(instance, maplibregl.Point, initial, {
+        onFlightChange(running) { if (!dead) setCameraMoving(running); },
         onProjection(next, unavailable) {
           if (dead) return;
           setMode(next);
@@ -426,6 +451,7 @@ export function HotspotMap({
           latest.current.onProjectionChange?.(next);
         },
       });
+      controller.setCameraProfile(latest.current.cameraProfile);
       control.current = controller;
 
       const addLayers = () => {
@@ -658,6 +684,8 @@ export function HotspotMap({
   }, [area, ready]);
 
   // Frame a new selection; reshaping the current one leaves the camera alone.
+  useEffect(() => { control.current?.setTutorialActive(tourActive); }, [tourActive, ready]);
+  useEffect(() => { control.current?.setCameraProfile(cameraProfile); }, [cameraProfile, ready]);
   const framed = useRef(bbox);
   useEffect(() => {
     framed.current = bbox;
@@ -669,6 +697,7 @@ export function HotspotMap({
         id: `area-${frame}`,
         bounds: box,
         animation: "ease",
+        source: latest.current.tourActive ? "tutorial" : "user",
       });
   }, [frame, ready]);
 
@@ -980,6 +1009,19 @@ export function HotspotMap({
     };
   }, [isDrawing, ready]);
 
+  const cameraAction = (action: CameraAction) => {
+    const c = control.current;
+    const container = el.current;
+    const pantanal = fireData.presets().find((p) => p.id === "pantanal");
+    if (!c || !container || !pantanal || tourActive || isDrawing) return;
+    if (action === "earth") c.setProjection("globe");
+    const padding = map.current ? cameraPadding(map.current) : { left: 24, right: 24, top: 70, bottom: 70 };
+    const request = presetRequest(action, c.getCameraPose(), container.clientWidth - padding.left - padding.right,
+      container.clientHeight - padding.top - padding.bottom, pantanal.bbox, bbox);
+    if (request && action === "earth") request.padding = padding;
+    if (request) c.navigate(request);
+  };
+
   return (
     <div
       className={`hotspot-map map-space relative h-full overflow-hidden ${isDrawing ? "ring-2 ring-[var(--color-selected)] ring-inset" : ""}`}
@@ -1136,6 +1178,9 @@ export function HotspotMap({
       {/* One column of view controls: projection, zoom, reset. */}
       {ready && (
         <div data-tour="map-controls" className="map-view-controls">
+          <CameraControls profile={cameraProfile} onProfile={(next) => { control.current?.setCameraProfile(next); setCameraProfile(next); }} onAction={cameraAction}
+            onStop={() => control.current?.stopNavigation()} running={cameraMoving} disabled={isDrawing || tourActive}
+            hasSelection={!!bbox} globeAvailable={!globeUnavailable && (!projection || projection === "globe")} />
           {showProjectionToggle && !projection && (
             <ProjectionToggle
               value={mode}
@@ -1168,16 +1213,16 @@ export function HotspotMap({
               aria-label="3D columns"
               title={inColumns ? "Back to the flat marks" : "Show detections as 3D columns"}
               disabled={forceColumns}
-              onClick={() => setInColumns((on) => !on)}
+              onClick={() => setInColumns(!columnsChosen)}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 20v-6M10 20V9M15 20v-9M20 20V4" /></svg>
             </button>
           </div>
           <div className="map-zoom map-surface" role="group" aria-label="Zoom">
-            <button type="button" aria-label="Zoom in" title="Zoom in" disabled={isDrawing} onClick={() => map.current?.zoomIn()}>
+            <button type="button" aria-label="Zoom in" title="Zoom in" disabled={isDrawing} onClick={() => { control.current?.stopNavigation(); map.current?.zoomIn(); }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
             </button>
-            <button type="button" aria-label="Zoom out" title="Zoom out" disabled={isDrawing} onClick={() => map.current?.zoomOut()}>
+            <button type="button" aria-label="Zoom out" title="Zoom out" disabled={isDrawing} onClick={() => { control.current?.stopNavigation(); map.current?.zoomOut(); }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M5 12h14" /></svg>
             </button>
             <button

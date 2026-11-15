@@ -8,6 +8,8 @@ const saved: WorkspaceSnapshot = {
   coordinates: true, searching: false, period: "2020-08-16", from: "2019-01", to: "2021-12",
   sensors: ["MODIS"], monthOpen: true, cardOpen: true, analyticsTab: "forecast",
   bounds: [-60, -20, -50, -10], projection: "mercator",
+  camera: { center: [-55, -15], zoom: 6.2, bearing: -25, pitch: 42, projection: "mercator" },
+  flight: 2, columnsChosen: true,
 };
 function fixture(prepare: TourWorkspace["prepare"] = async () => {}) {
   const workspace = { capture: vi.fn(() => structuredClone(saved)), prepare: vi.fn(prepare), restore: vi.fn(), keep: vi.fn() };

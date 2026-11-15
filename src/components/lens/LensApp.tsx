@@ -157,6 +157,7 @@ export function LensApp() {
   const [frame, setFrame] = useState(0);
   /** The regional flight: the stop being shown, or null when it is not running. */
   const [flight, setFlight] = useState<number | null>(null);
+  const [columnsChosen, setColumnsChosen] = useState(false);
   /** Feedback after "Share": whether the link reached the clipboard. */
   const [shared, setShared] = useState<"copied" | "address" | "failed" | null>(null);
   const analyzeButton = useRef<HTMLButtonElement>(null);
@@ -478,12 +479,16 @@ export function LensApp() {
   }
   const startTour = () => {
     if (tourGuard.current) return;
-    restoredView.current?.abort(); tourSnapshot.current = tourWorkspace.capture(); tourGuard.current = true; setTourRunning(true);
+    restoredView.current?.abort(); tourSnapshot.current = tourWorkspace.capture();
+    controller?.stopNavigation(); controller?.setTutorialActive(true);
+    setFlight(null); setColumnsChosen(false);
+    tourGuard.current = true; setTourRunning(true);
   };
   const tourWorkspace: TourWorkspace = {
     capture: () => tourSnapshot.current ?? ({ area, analyzed, analysis, expanded, drawing, coordinates, searching,
       period, from, to, sensors: [...sensors], monthOpen, cardOpen, analyticsTab,
       bounds: controller?.getBounds(), projection: controller?.getProjection(), scrollY: window.scrollY,
+      camera: controller?.getCameraPose(), columnsChosen, flight,
       panelScrollTop: document.querySelector<HTMLElement>('[data-tour-scroll="analysis-panel"]')?.scrollTop ?? 0 }),
     async prepare(id: TourStepId, signal: AbortSignal) {
       if (signal.aborted) return;
@@ -529,17 +534,20 @@ export function LensApp() {
       setExpanded(saved.expanded); setDrawing(saved.drawing); setCoordinates(saved.coordinates); setSearching(saved.searching);
       setPeriod(saved.period); setFrom(saved.from); setTo(saved.to); setSensors([...saved.sensors]);
       setMonthOpen(saved.monthOpen); setCardOpen(saved.cardOpen); setAnalyticsTab(saved.analyticsTab);
+      controller?.stopNavigation();
+      setColumnsChosen(saved.columnsChosen ?? false); setFlight(saved.flight ?? null);
       setDestination(null);
       restoredView.current?.abort();
       const view = new AbortController();
       restoredView.current = view;
       void afterPaint(view.signal).then(() => {
+        if (saved.camera) { controller?.restoreCamera(saved.camera); return; }
         if (saved.projection) controller?.setProjection(saved.projection);
-        if (saved.bounds) controller?.navigate({ id: `tour-restore-${Date.now()}`, bounds: saved.bounds, animation: "jump" });
+        if (saved.bounds) controller?.navigate({ id: `tour-restore-${Date.now()}`, bounds: saved.bounds, animation: "jump", source: "restore" });
         else controller?.resetView();
       }).catch(() => { /* A newer tour/navigation superseded restoration. */ });
     },
-    keep() { restoreUi.current = null; cancelAnimationFrame(analysisFrame.current); setPlayback(false); setSearching(false); setCoordinates(false); setDrawing(false); setCardOpen(false); setAnalyticsTab("history"); },
+    keep() { controller?.stopNavigation(); restoreUi.current = null; cancelAnimationFrame(analysisFrame.current); setFlight(null); setPlayback(false); setSearching(false); setCoordinates(false); setDrawing(false); setCardOpen(false); setAnalyticsTab("history"); },
   };
   return (
     <main id="main" inert={tourRunning} className="lens-workspace" data-tour-active={tourRunning}>
@@ -583,6 +591,9 @@ export function LensApp() {
             onViewChange={tools.editor ? tools.updateView : undefined}
             status={detectionStatus}
             forceColumns={flight !== null}
+            columnsChosen={columnsChosen}
+            onColumnsChange={setColumnsChosen}
+            tourActive={tourRunning}
             unusual={shown.cells ? (insight?.unusual ?? null) : null}
             harmonized={insight?.harmonized}
             unusualMonth={MONTHS[Number(period.slice(5, 7)) - 1]}
