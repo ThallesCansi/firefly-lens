@@ -8,7 +8,7 @@ import { rawPilotFor, rawPilots } from "./data/coverage";
  * the record is dropped, and the rest still applies.
  */
 export interface SharedView {
-  area: { kind: "drawn"; vertices: [number, number][]; name?: string } | { kind: "state"; id: string } | { kind: "country"; code: string } | null;
+  area: { kind: "drawn"; vertices: [number, number][]; name?: string } | { kind: "state"; id: string } | { kind: "municipality"; id: string } | { kind: "country"; code: string } | null;
   /** YYYY-MM or YYYY-MM-DD. */
   period: string | null;
   sensors: Sensor[] | null;
