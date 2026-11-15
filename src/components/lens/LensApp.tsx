@@ -169,6 +169,8 @@ export function LensApp() {
   const closeButton = useRef<HTMLButtonElement>(null);
   // The time-lapse: a range of months played on the map, all loaded at once.
   const [playback, setPlayback] = useState(false);
+  /** The assistant opened the time-lapse: it starts playing as soon as the months load. */
+  const [autoPlay, setAutoPlay] = useState(0);
   const [playRange, setPlayRange] = useState(() => {
     const year = `${fireData.lastYear}`;
     const to = `${year}-12` > fireData.lastMonth ? fireData.lastMonth : `${year}-12`;
@@ -452,6 +454,15 @@ export function LensApp() {
       changePeriod(next);
       assistantHost.current!.period = next;
     },
+    playTimelapse(from, to) {
+      assertAssistantAvailable();
+      setSearching(false);
+      setPlayRange({ from, to });
+      changePeriod(from);
+      setPlayback(true);
+      setAutoPlay((n) => n + 1);
+      assistantHost.current!.period = from;
+    },
     setSensors(next) {
       assertAssistantAvailable();
       setSensors(next);
@@ -690,6 +701,7 @@ export function LensApp() {
                   // Opening starts the map at the first month of the range.
                   if (!playback) changePeriod(playRange.from);
                   setPlayback(!playback);
+                  setAutoPlay(0);
                 }}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -903,6 +915,8 @@ export function LensApp() {
           <div className="map-bottom">
             {playback && !rawPilot && !tourRunning && (
               <PlaybackBar
+                key={autoPlay}
+                autoPlay={autoPlay > 0}
                 from={playRange.from}
                 to={playRange.to}
                 onRange={(from, to) => {
@@ -920,7 +934,10 @@ export function LensApp() {
                 }}
                 ready={playing}
                 error={play.error}
-                onClose={() => setPlayback(false)}
+                onClose={() => {
+                  setPlayback(false);
+                  setAutoPlay(0);
+                }}
               />
             )}
             <AssistantDock host={assistantHost} />
