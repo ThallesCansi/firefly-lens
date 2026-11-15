@@ -10,7 +10,10 @@ export function placeCameraPopover(anchor: ScreenRect, size: { width: number; he
     ...obstacles.flatMap((r) => [r.left - width - gap, r.right + gap])].map(clampX);
   const candidates: { left: number; top: number; width: number; maxHeight: number; score: number }[] = [];
   for (const x of new Set(xs)) {
-    const blocked = obstacles.filter((r) => r.right + gap > x && r.left - gap < x + width && r.bottom > top && r.top < bottom)
+    // Edge clamping can leave slightly less than `gap` beside a narrow mobile
+    // toolbar. That space is still usable: reject actual horizontal overlap,
+    // rather than falling back to a full-height menu over the workspace.
+    const blocked = obstacles.filter((r) => r.right > x && r.left < x + width && r.bottom > top && r.top < bottom)
       .map((r) => [Math.max(top, r.top - gap), Math.min(bottom, r.bottom + gap)])
       .sort((a, b) => a[0] - b[0]);
     let start = top;

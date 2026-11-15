@@ -1,12 +1,13 @@
 "use client";
-import { useId, useLayoutEffect, useRef, useState } from "react";
+import { useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import type { CameraProfile } from "@/lib/map/map-contract";
 import type { CameraAction } from "@/lib/map/camera-presets";
 import { placeCameraPopover } from "@/lib/map/camera-popover";
 
-export function CameraControls({ profile, onProfile, onAction, onStop, running, disabled, hasSelection, globeAvailable }: {
+export function CameraControls({ profile, onProfile, onAction, onStop, running, disabled, hasSelection, globeAvailable, terrainControl }: {
   profile: CameraProfile; onProfile(profile: CameraProfile): void; onAction(action: CameraAction): void;
   onStop(): void; running: boolean; disabled: boolean; hasSelection: boolean; globeAvailable: boolean;
+  terrainControl?: ReactNode;
 }) {
   const id = useId();
   const trigger = useRef<HTMLButtonElement>(null);
@@ -22,7 +23,7 @@ export function CameraControls({ profile, onProfile, onAction, onStop, running, 
       const left = view?.offsetLeft ?? 0, top = view?.offsetTop ?? 0;
       element.style.maxHeight = "none";
       const root = trigger.current.closest(".lens-workspace") ?? document;
-      const obstacles = [...root.querySelectorAll<HTMLElement>(".map-card, .map-highlights, .selection-card, .explore-hint, .map-toolbar, .map-site-card, .map-key, .map-bottom, .map-view-controls, .analysis-drawer, [data-tour=search], .coordinates-panel, .ff-workspace-tools-card")]
+      const obstacles = [...root.querySelectorAll<HTMLElement>(".map-card, .map-highlights, .selection-card, .explore-hint, .map-toolbar, .map-site-card, .map-key, .map-bottom, .map-view-controls, .analysis-drawer, .ff-interaction-panel, .lume-replay, [data-tour=search], .coordinates-panel, .ff-workspace-tools-card")]
         .filter((e) => getComputedStyle(e).visibility !== "hidden").map((e) => e.getBoundingClientRect()).filter((r) => r.width && r.height);
       const placed = placeCameraPopover(trigger.current.getBoundingClientRect(),
         { width: Math.min(280, Math.max(188, (view?.width ?? innerWidth) - 96)), height: element.scrollHeight },
@@ -62,6 +63,7 @@ export function CameraControls({ profile, onProfile, onAction, onStop, running, 
         <button type="button" disabled={disabled} onClick={() => onAction("north")}>North up</button>
         <button type="button" disabled={disabled} onClick={() => onAction("top")}>Top-down</button>
       </div></fieldset>
+      {terrainControl}
       <button className="camera-stop" type="button" disabled={disabled || !running} onClick={onStop}>Stop flight</button>
       <span role="status" aria-live="polite">{running ? "Camera moving. Gestures stop the flight." : "Camera ready"}</span>
     </div>

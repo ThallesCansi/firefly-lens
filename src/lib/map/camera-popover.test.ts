@@ -23,4 +23,22 @@ describe("camera popup free-space placement", () => {
       { left: 0, top: 0, right: 320, bottom: 600 }, [{ left: 0, right: 320, top: 0, bottom: 200 }, { left: 0, right: 320, top: 500, bottom: 600 }]);
     expect(p.top).toBeGreaterThanOrEqual(208); expect(p.top + p.maxHeight).toBeLessThanOrEqual(492);
   });
+  it("fits the longer terrain menu above an open mobile calendar", () => {
+    const obstacles = [{ left: 0, right: 320, top: 374, bottom: 900 },
+      { left: 12, right: 78, top: 12, bottom: 290 }, { left: 100, right: 252, top: 250, bottom: 290 }];
+    const p = placeCameraPopover({ left: 252, right: 308, top: 325, bottom: 365 }, { width: 224, height: 490 },
+      { left: 0, top: 0, right: 320, bottom: 900 }, obstacles);
+    const rect = { left: p.left, top: p.top, right: p.left + p.width, bottom: p.top + p.maxHeight };
+    expect(obstacles.some((o) => intersects(o, rect))).toBe(false);
+    expect(rect.bottom).toBeLessThan(374);
+  });
+  it("uses a six-pixel side gap when mobile edge clamping cannot leave eight", () => {
+    const obstacles = [{ left: 12, right: 264, top: 12, bottom: 60 }, { left: 12, right: 78, top: 69, bottom: 310 },
+      { left: 151, right: 308, top: 69, bottom: 112 }, { left: 176, right: 308, top: 300, bottom: 366 },
+      { left: 0, right: 320, top: 248, bottom: 292 }, { left: 0, right: 320, top: 374, bottom: 900 }];
+    const p = placeCameraPopover({ left: 252, right: 308, top: 325, bottom: 365 }, { width: 224, height: 490 },
+      { left: 0, top: 0, right: 320, bottom: 900 }, obstacles);
+    expect(obstacles.some((o) => intersects(o, { left: p.left, top: p.top, right: p.left + p.width, bottom: p.top + p.maxHeight }))).toBe(false);
+    expect(p.maxHeight).toBeGreaterThan(100);
+  });
 });

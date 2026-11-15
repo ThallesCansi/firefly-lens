@@ -191,7 +191,7 @@ export function createController(map: MapLibreMap, Point: PointCtor, initial: Pr
      * the right button (or two fingers) orbit; false brings it back to straight
      * down, north up, where rotating adds nothing.
      */
-    setTilt(on: boolean): void;
+    setTilt(on: boolean, options?: { preservePose?: boolean }): void;
   } = {
     navigate(request: MapNavigationRequest) {
       if (tutorial && request.source !== "tutorial" && request.source !== "restore") return;
@@ -299,12 +299,12 @@ export function createController(map: MapLibreMap, Point: PointCtor, initial: Pr
       if (!framed || pending || active || locked || tutorial) return;
       controller.navigate({ id: "resize-fit", bounds: framed, bearing: map.getBearing(), pitch: map.getPitch(), source: "layout", animation: "jump" });
     },
-    setTilt(on: boolean) {
+    setTilt(on: boolean, options) {
       if (tilted === on) return;
-      if (on) beforeTilt = { pitch: map.getPitch(), bearing: map.getBearing() };
+      if (on && !options?.preservePose) beforeTilt = { pitch: map.getPitch(), bearing: map.getBearing() };
       tilted = on;
       applyLocks();
-      if (locked || tutorial || pending?.source === "restore") return;
+      if (options?.preservePose || locked || tutorial || pending?.source === "restore") return;
       const attitude = on ? { pitch: TILT_PITCH, bearing: map.getBearing() }
         : profile === "cinematic" ? beforeTilt ?? { pitch: 0, bearing: 0 } : { pitch: 0, bearing: 0 };
       const c = map.getCenter();

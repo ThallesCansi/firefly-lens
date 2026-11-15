@@ -1,0 +1,2029 @@
+{
+  "engine": "6.18.0",
+  "cases": [
+    {
+      "name": "andes",
+      "projection": "mercator",
+      "before": {
+        "center": [
+          -70.01,
+          -32.68
+        ],
+        "zoom": 9.6,
+        "pitch": 60,
+        "bearing": 0,
+        "centerElevation": 0
+      },
+      "after": {
+        "center": [
+          -70.01,
+          -32.68
+        ],
+        "zoom": 9.6,
+        "pitch": 60,
+        "bearing": 0,
+        "centerElevation": 4522.2350126246965
+      },
+      "flatCenterPixel": [
+        599.9999999999883,
+        425
+      ],
+      "terrain": {
+        "source": "mapterhorn-terrain",
+        "exaggeration": 1
+      },
+      "samples": [
+        {
+          "lngLat": [
+            -70.01,
+            -32.68
+          ],
+          "elevation": 4522.2350126246965,
+          "pixel": [
+            599.999999999997,
+            425.0000000000292
+          ],
+          "roundtripDegrees": 4.316949157094763e-12
+        },
+        {
+          "lngLat": [
+            -70.05000000000001,
+            -32.68
+          ],
+          "elevation": 4394.492875510342,
+          "pixel": [
+            555.8776206384096,
+            426.3038306874611
+          ],
+          "roundtripDegrees": 2.835982483955251e-12
+        },
+        {
+          "lngLat": [
+            -69.97,
+            -32.68
+          ],
+          "elevation": 4202.1031372421985,
+          "pixel": [
+            644.0831807183082,
+            428.2645997112655
+          ],
+          "roundtripDegrees": 1.4924104034958783e-12
+        },
+        {
+          "lngLat": [
+            -70.01,
+            -32.72
+          ],
+          "elevation": 4123.024185254329,
+          "pixel": [
+            599.9999999999902,
+            456.3686129942041
+          ],
+          "roundtripDegrees": 1.9131948672901813e-12
+        },
+        {
+          "lngLat": [
+            -70.01,
+            -32.64
+          ],
+          "elevation": 5914.341797169705,
+          "pixel": [
+            599.9999999999844,
+            385.70936524311435
+          ],
+          "roundtripDegrees": 0.014166867149519646
+        }
+      ],
+      "centerPixel": [
+        599.999999999997,
+        425.0000000000292
+      ],
+      "events": 2
+    },
+    {
+      "name": "serra-do-mar",
+      "projection": "mercator",
+      "before": {
+        "center": [
+          -43.04,
+          -22.46
+        ],
+        "zoom": 10,
+        "pitch": 60,
+        "bearing": 0,
+        "centerElevation": 0
+      },
+      "after": {
+        "center": [
+          -43.04,
+          -22.46
+        ],
+        "zoom": 10,
+        "pitch": 60,
+        "bearing": 0,
+        "centerElevation": 2094.843266066254
+      },
+      "flatCenterPixel": [
+        599.9999999999766,
+        425.00000000002336
+      ],
+      "terrain": {
+        "source": "mapterhorn-terrain",
+        "exaggeration": 1
+      },
+      "samples": [
+        {
+          "lngLat": [
+            -43.04,
+            -22.46
+          ],
+          "elevation": 2094.843266066254,
+          "pixel": [
+            599.9999999999766,
+            425.0000000000117
+          ],
+          "roundtripDegrees": 2.127764089401477e-12
+        },
+        {
+          "lngLat": [
+            -43.08,
+            -22.46
+          ],
+          "elevation": 1477.0416943334749,
+          "pixel": [
+            541.9451151053765,
+            432.55669746891243
+          ],
+          "roundtripDegrees": 1.0318815139122535e-11
+        },
+        {
+          "lngLat": [
+            -43,
+            -22.46
+          ],
+          "elevation": 1206.710785520193,
+          "pixel": [
+            657.9680894551499,
+            435.84703392962183
+          ],
+          "roundtripDegrees": 1.922737045523321e-12
+        },
+        {
+          "lngLat": [
+            -43.04,
+            -22.5
+          ],
+          "elevation": 1007.164911616054,
+          "pixel": [
+            599.999999999983,
+            471.58540382138375
+          ],
+          "roundtripDegrees": 1.92667170934957e-12
+        },
+        {
+          "lngLat": [
+            -43.04,
+            -22.42
+          ],
+          "elevation": 1522.216640154836,
+          "pixel": [
+            599.9999999999848,
+            401.59149318323495
+          ],
+          "roundtripDegrees": 1.8873921071333297e-11
+        }
+      ],
+      "centerPixel": [
+        599.9999999999766,
+        425.0000000000117
+      ],
+      "events": 4
+    },
+    {
+      "name": "pantanal",
+      "projection": "mercator",
+      "before": {
+        "center": [
+          -56.5,
+          -19
+        ],
+        "zoom": 9.4,
+        "pitch": 60,
+        "bearing": 0,
+        "centerElevation": 0
+      },
+      "after": {
+        "center": [
+          -56.5,
+          -19
+        ],
+        "zoom": 9.4,
+        "pitch": 60,
+        "bearing": 0,
+        "centerElevation": 105.4100231783115
+      },
+      "flatCenterPixel": [
+        600,
+        425.0000000000117
+      ],
+      "terrain": {
+        "source": "mapterhorn-terrain",
+        "exaggeration": 1
+      },
+      "samples": [
+        {
+          "lngLat": [
+            -56.5,
+            -19
+          ],
+          "elevation": 105.4100231783115,
+          "pixel": [
+            599.9999999999942,
+            425.00000000000585
+          ],
+          "roundtripDegrees": 1.7709484813706672e-12
+        },
+        {
+          "lngLat": [
+            -56.54,
+            -19
+          ],
+          "elevation": 107.32671214520035,
+          "pixel": [
+            561.5662824625969,
+            424.9848302284998
+          ],
+          "roundtripDegrees": 1.0200434310973183e-12
+        },
+        {
+          "lngLat": [
+            -56.46,
+            -19
+          ],
+          "elevation": 109.03482388370438,
+          "pixel": [
+            638.433952818978,
+            424.9713110807209
+          ],
+          "roundtripDegrees": 1.012691670912861e-12
+        },
+        {
+          "lngLat": [
+            -56.5,
+            -19.04
+          ],
+          "elevation": 106.01688339378299,
+          "pixel": [
+            599.9999999999908,
+            445.8987706242961
+          ],
+          "roundtripDegrees": 1.742279186379282e-12
+        },
+        {
+          "lngLat": [
+            -56.5,
+            -18.96
+          ],
+          "elevation": 106.82822231600663,
+          "pixel": [
+            599.9999999999854,
+            405.21334383090687
+          ],
+          "roundtripDegrees": 1.6829666310427714e-12
+        }
+      ],
+      "centerPixel": [
+        599.9999999999942,
+        425.00000000000585
+      ],
+      "events": 6
+    },
+    {
+      "name": "andes",
+      "projection": "globe",
+      "before": {
+        "center": [
+          -70.00999999999999,
+          -32.68
+        ],
+        "zoom": 9.6,
+        "pitch": 60,
+        "bearing": 0,
+        "centerElevation": 0
+      },
+      "after": {
+        "center": [
+          -70.00999999999999,
+          -32.68
+        ],
+        "zoom": 9.6,
+        "pitch": 60,
+        "bearing": 0,
+        "centerElevation": 4522.2350126246965
+      },
+      "flatCenterPixel": [
+        599.9999999999966,
+        424.9999999999903
+      ],
+      "terrain": {
+        "source": "mapterhorn-terrain",
+        "exaggeration": 1
+      },
+      "samples": [
+        {
+          "lngLat": [
+            -70.01,
+            -32.68
+          ],
+          "elevation": 4522.2350126246965,
+          "pixel": [
+            600,
+            377.82894896204897
+          ],
+          "roundtripDegrees": 7.179147605893757e-11
+        },
+        {
+          "lngLat": [
+            -70.05000000000001,
+            -32.68
+          ],
+          "elevation": 4394.492875510342,
+          "pixel": [
+            554.9046212641662,
+            379.2047550685849
+          ],
+          "roundtripDegrees": 6.786843704399256e-12
+        },
+        {
+          "lngLat": [
+            -69.97,
+            -32.68
+          ],
+          "elevation": 4202.1031372421985,
+          "pixel": [
+            645.0531015838146,
+            381.2500795167474
+          ],
+          "roundtripDegrees": 1.2134979935230109e-11
+        },
+        {
+          "lngLat": [
+            -70.01,
+            -32.72
+          ],
+          "elevation": 4123.024185254329,
+          "pixel": [
+            599.9999999999964,
+            408.2338466486927
+          ],
+          "roundtripDegrees": 6.276329000907041e-12
+        },
+        {
+          "lngLat": [
+            -70.01,
+            -32.64
+          ],
+          "elevation": 5914.341797169705,
+          "pixel": [
+            600.0000000000033,
+            339.07845014822044
+          ],
+          "roundtripDegrees": 0.014654831097665522
+        }
+      ],
+      "centerPixel": [
+        600,
+        377.82894896204897
+      ],
+      "events": 8
+    },
+    {
+      "name": "serra-do-mar",
+      "projection": "globe",
+      "before": {
+        "center": [
+          -43.039999999999964,
+          -22.46
+        ],
+        "zoom": 10,
+        "pitch": 60,
+        "bearing": 0,
+        "centerElevation": 0
+      },
+      "after": {
+        "center": [
+          -43.039999999999964,
+          -22.46
+        ],
+        "zoom": 10,
+        "pitch": 60,
+        "bearing": 0,
+        "centerElevation": 2094.8432660662597
+      },
+      "flatCenterPixel": [
+        599.9999999999452,
+        425.0000000000097
+      ],
+      "terrain": {
+        "source": "mapterhorn-terrain",
+        "exaggeration": 1
+      },
+      "samples": [
+        {
+          "lngLat": [
+            -43.04,
+            -22.46
+          ],
+          "elevation": 2094.843266066254,
+          "pixel": [
+            599.9999999999377,
+            398.985875648337
+          ],
+          "roundtripDegrees": 1.3148400857176325e-11
+        },
+        {
+          "lngLat": [
+            -43.08,
+            -22.46
+          ],
+          "elevation": 1477.0416943334749,
+          "pixel": [
+            541.2501184465804,
+            406.7417117127839
+          ],
+          "roundtripDegrees": 4.0354717167513726e-11
+        },
+        {
+          "lngLat": [
+            -43,
+            -22.46
+          ],
+          "elevation": 1206.710785520193,
+          "pixel": [
+            658.6585292206062,
+            410.1096544426949
+          ],
+          "roundtripDegrees": 1.5795646289919244e-11
+        },
+        {
+          "lngLat": [
+            -43.04,
+            -22.5
+          ],
+          "elevation": 1007.164911616054,
+          "pixel": [
+            599.9999999999352,
+            445.15615551547774
+          ],
+          "roundtripDegrees": 1.2452814357829548e-11
+        },
+        {
+          "lngLat": [
+            -43.04,
+            -22.42
+          ],
+          "elevation": 1522.216640154836,
+          "pixel": [
+            599.9999999999536,
+            376.47853213563553
+          ],
+          "roundtripDegrees": 2.111071744977683e-10
+        }
+      ],
+      "centerPixel": [
+        599.9999999999377,
+        398.985875648337
+      ],
+      "events": 10
+    },
+    {
+      "name": "pantanal",
+      "projection": "globe",
+      "before": {
+        "center": [
+          -56.5,
+          -19
+        ],
+        "zoom": 9.4,
+        "pitch": 60,
+        "bearing": 0,
+        "centerElevation": 0
+      },
+      "after": {
+        "center": [
+          -56.5,
+          -19
+        ],
+        "zoom": 9.4,
+        "pitch": 60,
+        "bearing": 0,
+        "centerElevation": 105.4100231783115
+      },
+      "flatCenterPixel": [
+        600,
+        424.9999999999903
+      ],
+      "terrain": {
+        "source": "mapterhorn-terrain",
+        "exaggeration": 1
+      },
+      "samples": [
+        {
+          "lngLat": [
+            -56.5,
+            -19
+          ],
+          "elevation": 105.4100231783115,
+          "pixel": [
+            600,
+            424.1654152985487
+          ],
+          "roundtripDegrees": 5.623600795335474e-11
+        },
+        {
+          "lngLat": [
+            -56.54,
+            -19
+          ],
+          "elevation": 107.32671214520035,
+          "pixel": [
+            561.5511901470346,
+            424.1634103481311
+          ],
+          "roundtripDegrees": 2.7857183858901316e-11
+        },
+        {
+          "lngLat": [
+            -56.46,
+            -19
+          ],
+          "elevation": 109.03482388370438,
+          "pixel": [
+            638.4490556236628,
+            424.14988109140563
+          ],
+          "roundtripDegrees": 3.085767339173659e-11
+        },
+        {
+          "lngLat": [
+            -56.5,
+            -19.04
+          ],
+          "elevation": 106.01688339378299,
+          "pixel": [
+            600.0000000000034,
+            445.05889654796266
+          ],
+          "roundtripDegrees": 2.591099574018073e-11
+        },
+        {
+          "lngLat": [
+            -56.5,
+            -18.96
+          ],
+          "elevation": 106.82822231600663,
+          "pixel": [
+            599.9999999999967,
+            404.40335082329904
+          ],
+          "roundtripDegrees": 4.5973172019939667e-11
+        }
+      ],
+      "centerPixel": [
+        600,
+        424.1654152985487
+      ],
+      "events": 12
+    }
+  ],
+  "frameTimes": [
+    {
+      "enabled": false,
+      "frameCount": 249,
+      "medianMs": 6.099999999998545,
+      "p95Ms": 6.299999999999272,
+      "over50Ms": 0,
+      "renderCount": 201,
+      "renderMedianMs": 6.099999997764826,
+      "renderP95Ms": 6.600000001490116
+    },
+    {
+      "enabled": true,
+      "frameCount": 249,
+      "medianMs": 6.099999999998545,
+      "p95Ms": 6.299999999999272,
+      "over50Ms": 0,
+      "renderCount": 225,
+      "renderMedianMs": 6.099999997764826,
+      "renderP95Ms": 6.899999998509884
+    }
+  ],
+  "network": [
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/151/79.jpeg",
+      "status": 200,
+      "bytes": 12677,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/151/78.jpeg",
+      "status": 200,
+      "bytes": 18845,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/152/78.jpeg",
+      "status": 200,
+      "bytes": 22147,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/151/77.jpeg",
+      "status": 200,
+      "bytes": 18238,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/152/77.jpeg",
+      "status": 200,
+      "bytes": 16255,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/77/152.webp",
+      "status": 200,
+      "bytes": 224184,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/156/305.webp",
+      "status": 200,
+      "bytes": 250326,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/5/9/19.webp",
+      "status": 200,
+      "bytes": 128004,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/157/304.webp",
+      "status": 200,
+      "bytes": 181046,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/6/19/37.webp",
+      "status": 200,
+      "bytes": 200858,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/78/152.webp",
+      "status": 200,
+      "bytes": 269454,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/157/305.webp",
+      "status": 200,
+      "bytes": 221936,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/7/38/75.webp",
+      "status": 200,
+      "bytes": 130308,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/7/38/76.webp",
+      "status": 200,
+      "bytes": 128686,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/5/9/18.webp",
+      "status": 200,
+      "bytes": 93944,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/156/304.webp",
+      "status": 200,
+      "bytes": 241620,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/7/39/75.webp",
+      "status": 200,
+      "bytes": 233914,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/143/97.jpeg",
+      "status": 200,
+      "bytes": 13046,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/143/96.jpeg",
+      "status": 200,
+      "bytes": 11964,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/143/98.jpeg",
+      "status": 200,
+      "bytes": 13163,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/144/97.jpeg",
+      "status": 200,
+      "bytes": 12355,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/144/96.jpeg",
+      "status": 200,
+      "bytes": 13543,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/194/288.webp",
+      "status": 200,
+      "bytes": 235558,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/193/288.webp",
+      "status": 200,
+      "bytes": 229838,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/7/49/71.webp",
+      "status": 200,
+      "bytes": 155356,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/195/289.webp",
+      "status": 200,
+      "bytes": 89770,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/195/288.webp",
+      "status": 200,
+      "bytes": 237666,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/7/48/71.webp",
+      "status": 200,
+      "bytes": 252210,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/10/388/578.webp",
+      "status": 200,
+      "bytes": 132984,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/10/389/578.webp",
+      "status": 200,
+      "bytes": 94544,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/5/12/18.webp",
+      "status": 200,
+      "bytes": 9688,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/97/144.webp",
+      "status": 200,
+      "bytes": 187968,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/96/144.webp",
+      "status": 200,
+      "bytes": 221344,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/5/12/17.webp",
+      "status": 200,
+      "bytes": 132398,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/6/24/35.webp",
+      "status": 200,
+      "bytes": 229582,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/194/289.webp",
+      "status": 200,
+      "bytes": 96060,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/141/87.jpeg",
+      "status": 200,
+      "bytes": 9556,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/141/88.jpeg",
+      "status": 200,
+      "bytes": 9880,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/140/87.jpeg",
+      "status": 200,
+      "bytes": 9111,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/140/88.jpeg",
+      "status": 200,
+      "bytes": 9861,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/140/86.jpeg",
+      "status": 200,
+      "bytes": 7723,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/142/88.jpeg",
+      "status": 200,
+      "bytes": 11491,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/142/87.jpeg",
+      "status": 200,
+      "bytes": 9777,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/87/140.webp",
+      "status": 200,
+      "bytes": 84464,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/88/140.webp",
+      "status": 200,
+      "bytes": 89076,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/86/140.webp",
+      "status": 200,
+      "bytes": 91326,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/87/141.webp",
+      "status": 200,
+      "bytes": 88696,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/5/10/17.webp",
+      "status": 200,
+      "bytes": 189650,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/7/43/70.webp",
+      "status": 200,
+      "bytes": 106254,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/176/284.webp",
+      "status": 200,
+      "bytes": 81526,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/174/284.webp",
+      "status": 200,
+      "bytes": 76712,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/7/44/70.webp",
+      "status": 200,
+      "bytes": 146402,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/87/142.webp",
+      "status": 200,
+      "bytes": 108834,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/88/142.webp",
+      "status": 200,
+      "bytes": 136564,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/5/11/17.webp",
+      "status": 200,
+      "bytes": 221222,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/88/141.webp",
+      "status": 200,
+      "bytes": 89016,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/175/284.webp",
+      "status": 200,
+      "bytes": 82780,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/88/140.webp",
+      "status": 200,
+      "bytes": 89076,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/87/141.webp",
+      "status": 200,
+      "bytes": 88696,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/87/140.webp",
+      "status": 200,
+      "bytes": 84464,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/86/140.webp",
+      "status": 200,
+      "bytes": 91326,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/88/141.webp",
+      "status": 200,
+      "bytes": 89016,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/175/284.webp",
+      "status": 200,
+      "bytes": 82780,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/176/284.webp",
+      "status": 200,
+      "bytes": 81526,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/7/43/70.webp",
+      "status": 200,
+      "bytes": 106254,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/174/284.webp",
+      "status": 200,
+      "bytes": 76712,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/141/88.jpeg",
+      "status": 200,
+      "bytes": 9880,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/142/88.jpeg",
+      "status": 200,
+      "bytes": 11491,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/140/86.jpeg",
+      "status": 200,
+      "bytes": 7723,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/140/88.jpeg",
+      "status": 200,
+      "bytes": 9861,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/140/87.jpeg",
+      "status": 200,
+      "bytes": 9111,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/141/87.jpeg",
+      "status": 200,
+      "bytes": 9556,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/142/87.jpeg",
+      "status": 200,
+      "bytes": 9777,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/151/78.jpeg",
+      "status": 200,
+      "bytes": 18845,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/152/77.jpeg",
+      "status": 200,
+      "bytes": 16255,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/152/78.jpeg",
+      "status": 200,
+      "bytes": 22147,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/151/79.jpeg",
+      "status": 200,
+      "bytes": 12677,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/151/77.jpeg",
+      "status": 200,
+      "bytes": 18238,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/150/76.jpeg",
+      "status": 200,
+      "bytes": 2737,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/7/38/75.webp",
+      "status": 200,
+      "bytes": 130308,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/7/39/75.webp",
+      "status": 200,
+      "bytes": 233914,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/157/304.webp",
+      "status": 200,
+      "bytes": 181046,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/156/305.webp",
+      "status": 200,
+      "bytes": 250326,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/155/304.webp",
+      "status": 200,
+      "bytes": 230620,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/156/304.webp",
+      "status": 200,
+      "bytes": 241620,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/155/305.webp",
+      "status": 200,
+      "bytes": 211214,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/157/305.webp",
+      "status": 200,
+      "bytes": 221936,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/6/19/37.webp",
+      "status": 200,
+      "bytes": 200858,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/5/9/18.webp",
+      "status": 200,
+      "bytes": 93944,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/77/152.webp",
+      "status": 200,
+      "bytes": 224184,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/5/9/19.webp",
+      "status": 200,
+      "bytes": 128004,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/78/152.webp",
+      "status": 200,
+      "bytes": 269454,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/155/306.webp",
+      "status": 200,
+      "bytes": 172154,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/77/153.webp",
+      "status": 200,
+      "bytes": 217840,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/156/306.webp",
+      "status": 200,
+      "bytes": 244058,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/78/153.webp",
+      "status": 200,
+      "bytes": 247682,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/153/77.jpeg",
+      "status": 200,
+      "bytes": 14577,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/153/78.jpeg",
+      "status": 200,
+      "bytes": 21997,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/144/96.jpeg",
+      "status": 200,
+      "bytes": 13543,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/143/96.jpeg",
+      "status": 200,
+      "bytes": 11964,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/143/98.jpeg",
+      "status": 200,
+      "bytes": 13163,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/144/97.jpeg",
+      "status": 200,
+      "bytes": 12355,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/143/97.jpeg",
+      "status": 200,
+      "bytes": 13046,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/195/289.webp",
+      "status": 200,
+      "bytes": 89770,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/97/144.webp",
+      "status": 200,
+      "bytes": 187968,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/194/289.webp",
+      "status": 200,
+      "bytes": 96060,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/96/144.webp",
+      "status": 200,
+      "bytes": 221344,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/6/24/35.webp",
+      "status": 200,
+      "bytes": 229582,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/7/49/71.webp",
+      "status": 200,
+      "bytes": 155356,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/194/288.webp",
+      "status": 200,
+      "bytes": 235558,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/195/288.webp",
+      "status": 200,
+      "bytes": 237666,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/10/388/578.webp",
+      "status": 200,
+      "bytes": 132984,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/193/288.webp",
+      "status": 200,
+      "bytes": 229838,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/7/48/71.webp",
+      "status": 200,
+      "bytes": 252210,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/10/389/578.webp",
+      "status": 200,
+      "bytes": 94544,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/5/12/18.webp",
+      "status": 200,
+      "bytes": 9688,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/5/12/17.webp",
+      "status": 200,
+      "bytes": 132398,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/139/89.jpeg",
+      "status": 200,
+      "bytes": 12730,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/139/86.jpeg",
+      "status": 200,
+      "bytes": 11797,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/87/140.webp",
+      "status": 200,
+      "bytes": 84464,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/87/141.webp",
+      "status": 200,
+      "bytes": 88696,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/88/140.webp",
+      "status": 200,
+      "bytes": 89076,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/7/43/70.webp",
+      "status": 200,
+      "bytes": 106254,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/88/141.webp",
+      "status": 200,
+      "bytes": 89016,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/175/284.webp",
+      "status": 200,
+      "bytes": 82780,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/176/284.webp",
+      "status": 200,
+      "bytes": 81526,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/86/140.webp",
+      "status": 200,
+      "bytes": 91326,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/174/284.webp",
+      "status": 200,
+      "bytes": 76712,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/6/21/34.webp",
+      "status": 200,
+      "bytes": 189996,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/6/22/34.webp",
+      "status": 200,
+      "bytes": 180074,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/5/10/17.webp",
+      "status": 200,
+      "bytes": 189650,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/7/44/70.webp",
+      "status": 200,
+      "bytes": 146402,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/87/142.webp",
+      "status": 200,
+      "bytes": 108834,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/5/11/17.webp",
+      "status": 200,
+      "bytes": 221222,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/88/142.webp",
+      "status": 200,
+      "bytes": 136564,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/152/77.jpeg",
+      "status": 200,
+      "bytes": 16255,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/152/78.jpeg",
+      "status": 200,
+      "bytes": 22147,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/151/79.jpeg",
+      "status": 200,
+      "bytes": 12677,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/151/77.jpeg",
+      "status": 200,
+      "bytes": 18238,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/151/78.jpeg",
+      "status": 200,
+      "bytes": 18845,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/153/78.jpeg",
+      "status": 200,
+      "bytes": 21997,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/152/79.jpeg",
+      "status": 200,
+      "bytes": 9698,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/77/152.webp",
+      "status": 200,
+      "bytes": 224184,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/7/38/75.webp",
+      "status": 200,
+      "bytes": 130308,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/7/39/75.webp",
+      "status": 200,
+      "bytes": 233914,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/156/304.webp",
+      "status": 200,
+      "bytes": 241620,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/157/304.webp",
+      "status": 200,
+      "bytes": 181046,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/156/305.webp",
+      "status": 200,
+      "bytes": 250326,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/157/305.webp",
+      "status": 200,
+      "bytes": 221936,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/5/9/19.webp",
+      "status": 200,
+      "bytes": 128004,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/7/38/76.webp",
+      "status": 200,
+      "bytes": 128686,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/5/9/18.webp",
+      "status": 200,
+      "bytes": 93944,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/6/19/37.webp",
+      "status": 200,
+      "bytes": 200858,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/78/152.webp",
+      "status": 200,
+      "bytes": 269454,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/155/304.webp",
+      "status": 200,
+      "bytes": 230620,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/155/305.webp",
+      "status": 200,
+      "bytes": 211214,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/156/306.webp",
+      "status": 200,
+      "bytes": 244058,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/78/153.webp",
+      "status": 200,
+      "bytes": 247682,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/7/39/76.webp",
+      "status": 200,
+      "bytes": 191186,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/79/152.webp",
+      "status": 200,
+      "bytes": 82630,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/150/77.jpeg",
+      "status": 200,
+      "bytes": 16916,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/7/39/75.webp",
+      "status": 200,
+      "bytes": 233914,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/79/152.webp",
+      "status": 200,
+      "bytes": 82630,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/7/38/75.webp",
+      "status": 200,
+      "bytes": 130308,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/155/304.webp",
+      "status": 200,
+      "bytes": 230620,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/156/304.webp",
+      "status": 200,
+      "bytes": 241620,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/155/305.webp",
+      "status": 200,
+      "bytes": 211214,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/157/304.webp",
+      "status": 200,
+      "bytes": 181046,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/156/305.webp",
+      "status": 200,
+      "bytes": 250326,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/157/305.webp",
+      "status": 200,
+      "bytes": 221936,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/156/306.webp",
+      "status": 200,
+      "bytes": 244058,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/5/9/19.webp",
+      "status": 200,
+      "bytes": 128004,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/7/39/76.webp",
+      "status": 200,
+      "bytes": 191186,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/5/9/18.webp",
+      "status": 200,
+      "bytes": 93944,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/6/19/37.webp",
+      "status": 200,
+      "bytes": 200858,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/77/152.webp",
+      "status": 200,
+      "bytes": 224184,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/78/153.webp",
+      "status": 200,
+      "bytes": 247682,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/78/152.webp",
+      "status": 200,
+      "bytes": 269454,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/7/39/75.webp",
+      "status": 200,
+      "bytes": 233914,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/79/152.webp",
+      "status": 200,
+      "bytes": 82630,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/155/304.webp",
+      "status": 200,
+      "bytes": 230620,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/156/304.webp",
+      "status": 200,
+      "bytes": 241620,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/7/38/75.webp",
+      "status": 200,
+      "bytes": 130308,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/155/305.webp",
+      "status": 200,
+      "bytes": 211214,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/157/304.webp",
+      "status": 200,
+      "bytes": 181046,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/156/305.webp",
+      "status": 200,
+      "bytes": 250326,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/157/305.webp",
+      "status": 200,
+      "bytes": 221936,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/156/306.webp",
+      "status": 200,
+      "bytes": 244058,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/7/39/76.webp",
+      "status": 200,
+      "bytes": 191186,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/5/9/19.webp",
+      "status": 200,
+      "bytes": 128004,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/6/19/37.webp",
+      "status": 200,
+      "bytes": 200858,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/5/9/18.webp",
+      "status": 200,
+      "bytes": 93944,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/77/152.webp",
+      "status": 200,
+      "bytes": 224184,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/78/152.webp",
+      "status": 200,
+      "bytes": 269454,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/78/153.webp",
+      "status": 200,
+      "bytes": 247682,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/152/79.jpeg",
+      "status": 200,
+      "bytes": 9698,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/151/79.jpeg",
+      "status": 200,
+      "bytes": 12677,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/151/77.jpeg",
+      "status": 200,
+      "bytes": 18238,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/152/78.jpeg",
+      "status": 200,
+      "bytes": 22147,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/153/78.jpeg",
+      "status": 200,
+      "bytes": 21997,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/151/78.jpeg",
+      "status": 200,
+      "bytes": 18845,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/152/77.jpeg",
+      "status": 200,
+      "bytes": 16255,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/150/77.jpeg",
+      "status": 200,
+      "bytes": 16916,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/79/152.webp",
+      "status": 200,
+      "bytes": 82630,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/7/39/75.webp",
+      "status": 200,
+      "bytes": 233914,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/7/38/75.webp",
+      "status": 200,
+      "bytes": 130308,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/155/304.webp",
+      "status": 200,
+      "bytes": 230620,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/156/304.webp",
+      "status": 200,
+      "bytes": 241620,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/152/78.jpeg",
+      "status": 200,
+      "bytes": 22147,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/157/304.webp",
+      "status": 200,
+      "bytes": 181046,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/156/305.webp",
+      "status": 200,
+      "bytes": 250326,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/151/78.jpeg",
+      "status": 200,
+      "bytes": 18845,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/9/157/305.webp",
+      "status": 200,
+      "bytes": 221936,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/5/9/19.webp",
+      "status": 200,
+      "bytes": 128004,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/6/19/37.webp",
+      "status": 200,
+      "bytes": 200858,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/151/77.jpeg",
+      "status": 200,
+      "bytes": 18238,
+      "cors": "*"
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/8/152/77.jpeg",
+      "status": 200,
+      "bytes": 16255,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/5/9/18.webp",
+      "status": 200,
+      "bytes": 93944,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/77/152.webp",
+      "status": 200,
+      "bytes": 224184,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/8/78/152.webp",
+      "status": 200,
+      "bytes": 269454,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/10/312/611.webp",
+      "status": 200,
+      "bytes": 195738,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/10/312/610.webp",
+      "status": 200,
+      "bytes": 188380,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/10/313/610.webp",
+      "status": 200,
+      "bytes": 188250,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/10/313/611.webp",
+      "status": 200,
+      "bytes": 195706,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/11/624/1220.webp",
+      "status": 200,
+      "bytes": 124748,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/11/626/1220.webp",
+      "status": 200,
+      "bytes": 124740,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/11/625/1220.webp",
+      "status": 200,
+      "bytes": 127754,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/11/625/1221.webp",
+      "status": 200,
+      "bytes": 126460,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/11/627/1220.webp",
+      "status": 200,
+      "bytes": 122676,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/11/626/1221.webp",
+      "status": 200,
+      "bytes": 129896,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/12/1250/2442.webp",
+      "status": 200,
+      "bytes": 121954,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/12/1251/2443.webp",
+      "status": 200,
+      "bytes": 121564,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/12/1250/2443.webp",
+      "status": 200,
+      "bytes": 117730,
+      "cors": "*"
+    },
+    {
+      "url": "https://tiles.mapterhorn.com/12/1251/2442.webp",
+      "status": 200,
+      "bytes": 122594,
+      "cors": "*"
+    }
+  ],
+  "errors": [],
+  "note": "Chrome headless software WebGL; native terrain module and existing NASA basemap; no GPU/FPS generalization"
+}

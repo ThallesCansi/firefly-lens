@@ -38,6 +38,18 @@ function fixture() {
   return { controller, map, move, hooks, canvas, preference, emit, flush, arrive: () => emit("moveend", lastEvent) };
 }
 describe("camera coordination", () => {
+  it("suspends column tilt for terrain without navigating or changing the physical pose", () => {
+    const f = fixture(); f.controller.setTilt(true); f.flush(); f.arrive();
+    const pose = f.controller.getCameraPose(), count = f.move.mock.calls.length, stops = f.map.stop.mock.calls.length;
+    f.controller.setTilt(false, { preservePose: true }); f.flush();
+    expect(f.controller.getCameraPose()).toEqual(pose); expect(f.move).toHaveBeenCalledTimes(count);
+    expect(f.map.stop).toHaveBeenCalledTimes(stops);
+    f.controller.setTilt(true, { preservePose: true }); f.flush();
+    expect(f.controller.getCameraPose()).toEqual(pose); expect(f.move).toHaveBeenCalledTimes(count);
+    f.canvas.dispatchEvent(new Event("wheel")); expect(f.map.stop).toHaveBeenCalledTimes(stops);
+    f.controller.setTilt(false); f.flush();
+    expect(f.controller.getCameraPose().pitch).toBe(0);
+  });
   it("defaults to Cinematic without moving or changing initial framing", () => {
     const f = fixture(); const initial = f.controller.getCameraPose(); f.flush();
     expect(DEFAULT_CAMERA_PROFILE).toBe("cinematic"); expect(f.move).not.toHaveBeenCalled();

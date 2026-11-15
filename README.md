@@ -49,6 +49,10 @@ In the map workspace a user can:
 
 The workspace **Camera** menu offers Earth, Brazil, Pantanal and selected-area framing, North up, Top-down and Stop flight. **Cinematic** is the default, without an initial flight or change to the opening framing. Selecting either profile changes future navigation without immediately moving the camera. Standard restores traditional animation and north-up/top-down arrival on subsequent navigation, while preserving explicit camera poses and enabled 3D column tilt. Presets change only the view. Gestures interrupt flights, and drawing and Lume take priority. The tour restores the complete camera pose, columns and regional-flight state. No terrain or scientific calculations are added. See [camera implementation and verification](docs/cinematic-camera-validation.md).
 
+### Terrain 3D proof of concept
+
+Open **Camera → Terrain 3D** to enable real Mapterhorn elevation at 1×, off by default. Existing hotspot markers remain visible while scientific detection columns are temporarily paused; switching terrain off restores the saved column preference. The tutorial and regional flight temporarily suspend terrain. NASA Blue Marble and scientific data stay unchanged. See [terrain configuration, screenshots, browser measurements and limitations](docs/terrain-3d-poc-validation.md).
+
 ### Tour with FireFlighter
 
 The workspace automatically opens FireFlighter’s welcome on each new visit or reload. **Don't show again** is an explicit browser preference: only checking it disables future automatic welcomes. Completing, skipping or closing the tour does not opt out. A single welcome is presented per browser document, including across Strict Mode effect replay and client-side navigation. The **Tour with FireFlighter** launcher, beside the original animated mascot, remains available after opt-out.

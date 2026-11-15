@@ -16,6 +16,11 @@
 .camera-menu button:hover:not(:disabled) { background: var(--color-bark); }
 .camera-menu button:disabled, .camera-menu select:disabled { opacity: .45; cursor: default; }
 .camera-menu p, .camera-menu [role=status] { color: var(--color-dim); font-size: 11px; line-height: 1.45; }
+.terrain-control { border-top: 1px solid var(--color-line); padding-top: 6px; display: grid; gap: 4px; }
+.camera-menu .terrain-trigger { display: flex; align-items: center; gap: 6px; }
+.terrain-trigger[aria-pressed=true] { border-color: var(--color-lume); }
+.terrain-indicator { margin-left: auto; font-size: 10px; color: var(--color-dim); }
+.terrain-help { font-size: 11px; line-height: 1.45; color: var(--color-dim); }
 /* Driver's popover is portaled outside this inert subtree. Keep all highlighted
    descendants out of Driver's focusable-target list as well as mouse hit testing. */
 .lens-workspace[inert], .lens-workspace[inert] * { pointer-events: none !important; }

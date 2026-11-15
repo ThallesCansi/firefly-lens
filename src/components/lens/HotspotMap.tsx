@@ -18,6 +18,8 @@ import { DEFAULT_CAMERA_PROFILE, HOME } from "@/lib/map/camera";
 import { presetRequest, type CameraAction } from "@/lib/map/camera-presets";
 import { fireData } from "@/lib/data/source";
 import { CameraControls } from "./map/CameraControls";
+import { TerrainControls } from "./map/TerrainControls";
+import { createTerrain, terrainPresentation, type TerrainManager, type TerrainPhase } from "@/lib/map/terrain";
 import { addCoverageMask,continentCenter,MIN_CONTINENT_ZOOM } from "@/lib/map/south-america";
 import { GLOW, glowAt } from "@/lib/map/glow";
 import {
@@ -301,6 +303,7 @@ export function HotspotMap({
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<MapLibreMap | null>(null);
   const control = useRef<EngineController | null>(null);
+  const terrain = useRef<TerrainManager | null>(null);
   const motion = useRef<ColumnMotion | null>(null);
   const isDrawing = drawing || interactionMode === "draw-rectangle";
   const bbox = area?.bbox ?? null;
@@ -340,8 +343,12 @@ export function HotspotMap({
   const setInColumns = (on: boolean) => { setLocalColumns(on); onColumnsChange?.(on); };
   const [cameraProfile, setCameraProfile] = useState<CameraProfile>(DEFAULT_CAMERA_PROFILE);
   const [cameraMoving, setCameraMoving] = useState(false);
+  const [terrainRequested, setTerrainRequested] = useState(false);
+  const [terrainPhase, setTerrainPhase] = useState<TerrainPhase>("off");
+  const terrainSuspended = tourActive || forceColumns;
+  const terrainIntended = terrainRequested && !terrainSuspended;
   // A regional flight shows every stop in 3D, whatever was chosen before it.
-  const inColumns = forceColumns || columnsChosen;
+  const { inColumns, terrainEnabled } = terrainPresentation(terrainRequested, terrainSuspended, terrainPhase, columnsChosen, forceColumns);
   /** NASA's satellite picture under the data, or the drawn map alone. */
   const [basemap, setBasemap] = useState<BasemapKind>(DEFAULT_BASEMAP);
   /** The glow under unusually high cells; the key switches it off. */
@@ -460,6 +467,8 @@ export function HotspotMap({
       });
       controller.setCameraProfile(latest.current.cameraProfile);
       control.current = controller;
+      const terrainManager = createTerrain(instance, (phase) => { if (!dead) setTerrainPhase(phase); });
+      terrain.current = terrainManager;
 
       const addLayers = () => {
         const m = instance;
@@ -633,6 +642,7 @@ export function HotspotMap({
           // A style without sky support still draws; only the atmosphere is missing.
         }
         controller.styleLoaded();
+        terrainManager.styleLoaded();
         if (!announced) {
           announced = true;
           latest.current.onReady?.(controller);
@@ -659,6 +669,8 @@ export function HotspotMap({
       dead = true;
       motion.current?.stop();
       motion.current = null;
+      terrain.current?.dispose();
+      terrain.current = null;
       // Next may preserve the workspace state across client navigation while
       // destroying its effects. Never rebind tools to that removed engine.
       latest.current.onReady?.(null);
@@ -677,6 +689,7 @@ export function HotspotMap({
     styled.current = false;
     fellBack.current = false;
     control.current?.styleUnloading();
+    terrain.current?.styleLoading();
     // Only replace the style. style.load restores data and layer visibility; camera and handlers stay intact.
     loadBasemap().then((base) => {
       if (map.current !== m || appliedTheme.current !== theme) return;
@@ -735,10 +748,16 @@ export function HotspotMap({
     if (ready && map.current) showMarks(map.current, sensors, inColumns);
   }, [sensors, inColumns, ready]);
 
+  const previousTerrain = useRef(false);
   useEffect(() => {
     // Columns stand on an area of interest: without one there is nothing to lean over.
-    if (ready) control.current?.setTilt(inColumns && (forceColumns || hasArea));
-  }, [inColumns, forceColumns, hasArea, ready]);
+    if (ready) {
+      control.current?.setTilt(inColumns && (forceColumns || hasArea), { preservePose: previousTerrain.current !== terrainEnabled });
+      previousTerrain.current = terrainEnabled;
+    }
+  }, [inColumns, forceColumns, hasArea, ready, terrainEnabled]);
+
+  useEffect(() => { terrain.current?.setEnabled(terrainIntended); }, [terrainIntended, ready]);
 
   const glowing = showUnusual && !!unusual && unusual.ids.size > 0;
   useEffect(() => {
@@ -1040,6 +1059,8 @@ export function HotspotMap({
       className={`hotspot-map map-space relative h-full overflow-hidden ${isDrawing ? "ring-2 ring-[var(--color-selected)] ring-inset" : ""}`}
       data-map-theme={paintedTheme}
       data-projection={ready ? mode : undefined}
+      data-terrain={terrainRequested && terrainSuspended ? "suspended" : terrainPhase}
+      data-terrain-requested={terrainRequested}
     >
       <Starfield />
       {/* MapLibre's stylesheet makes its container position: relative, so it fills a positioned parent. */}
@@ -1194,7 +1215,9 @@ export function HotspotMap({
         <div data-tour="map-controls" className="map-view-controls">
           <CameraControls profile={cameraProfile} onProfile={(next) => { control.current?.setCameraProfile(next); setCameraProfile(next); }} onAction={cameraAction}
             onStop={() => control.current?.stopNavigation()} running={cameraMoving} disabled={isDrawing || tourActive}
-            hasSelection={!!bbox} globeAvailable={!globeUnavailable && (!projection || projection === "globe")} />
+            hasSelection={!!bbox} globeAvailable={!globeUnavailable && (!projection || projection === "globe")}
+            terrainControl={<TerrainControls requested={terrainRequested} phase={terrainPhase} suspended={terrainSuspended}
+              onChange={(next) => { terrain.current?.setEnabled(next && !terrainSuspended); setTerrainRequested(next); }} />} />
           {showProjectionToggle && !projection && (
             <ProjectionToggle
               value={mode}
@@ -1226,7 +1249,7 @@ export function HotspotMap({
               aria-pressed={inColumns}
               aria-label="3D columns"
               title={inColumns ? "Back to the flat marks" : "Show detections as 3D columns"}
-              disabled={forceColumns}
+              disabled={forceColumns || terrainEnabled}
               onClick={() => setInColumns(!columnsChosen)}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 20v-6M10 20V9M15 20v-9M20 20V4" /></svg>
