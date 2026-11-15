@@ -1,0 +1,666 @@
+{
+  "schema_version": "1.0.0",
+  "section": "forecast",
+  "region_id": "SYNTHETIC_frontend_demo",
+  "period": {
+    "start": "2000-01",
+    "end": "2011-12"
+  },
+  "units": "MODIS-Aqua-equivalent hotspots",
+  "source": {
+    "synthetic": true,
+    "provenance": {
+      "kind": "synthetic_fixture",
+      "seed": 42
+    }
+  },
+  "data_status": "experimental",
+  "generated_at": "2026-11-15T02:49:55.693332+00:00",
+  "method": {
+    "name": "experimental_expanding_origin_comparison",
+    "config": {
+      "horizon": 3,
+      "min_train_months": 72,
+      "min_season_years": 5,
+      "max_origins": 16,
+      "stride": 1,
+      "min_validation_origins": 4,
+      "include_drift": false,
+      "maxiter": 80,
+      "candidates": [
+        [
+          [
+            1,
+            0,
+            0
+          ],
+          [
+            1,
+            0,
+            0,
+            12
+          ]
+        ]
+      ]
+    }
+  },
+  "data": {
+    "forecast_status": "experimental",
+    "reason": null,
+    "model": "seasonal_median",
+    "forecast_origin": "2011-12",
+    "last_complete_observation_used": "2011-12",
+    "training_period": {
+      "start": "2000-01",
+      "end": "2011-12",
+      "valid_months": 144
+    },
+    "config": {
+      "horizon": 3,
+      "min_train_months": 72,
+      "min_season_years": 5,
+      "max_origins": 16,
+      "stride": 1,
+      "min_validation_origins": 4,
+      "include_drift": false,
+      "maxiter": 80,
+      "candidates": [
+        [
+          [
+            1,
+            0,
+            0
+          ],
+          [
+            1,
+            0,
+            0,
+            12
+          ]
+        ]
+      ]
+    },
+    "model_details": {},
+    "predictions": [
+      {
+        "date": "2012-01",
+        "horizon": 1,
+        "value": 6.276604274571804,
+        "lower": null,
+        "upper": null,
+        "reason": null,
+        "interval_kind": null,
+        "interval_method": null
+      },
+      {
+        "date": "2012-02",
+        "horizon": 2,
+        "value": 7.586466727013345,
+        "lower": null,
+        "upper": null,
+        "reason": null,
+        "interval_kind": null,
+        "interval_method": null
+      },
+      {
+        "date": "2012-03",
+        "horizon": 3,
+        "value": 12.596545288837923,
+        "lower": null,
+        "upper": null,
+        "reason": null,
+        "interval_kind": null,
+        "interval_method": null
+      }
+    ],
+    "backtesting": {
+      "status": "experimental_backtested",
+      "reason": "baseline_selected_on_tuning",
+      "selection_cutoff": "2011-02",
+      "selection_candidate": "seasonal_median",
+      "recommended_model": "seasonal_median",
+      "selection": {
+        "expected_cases": 21,
+        "paired_cases": 21,
+        "eligible_models": [
+          "seasonal_median",
+          "seasonal_naive",
+          "sarima"
+        ],
+        "success_fraction": {
+          "seasonal_median": 1.0,
+          "seasonal_naive": 1.0,
+          "sarima": 1.0
+        },
+        "metrics": {
+          "seasonal_median": {
+            "n": 21,
+            "origins": 8,
+            "mae": 2.1497492141543537,
+            "rmse": 2.435685032487285,
+            "mean_bias": 0.022692703275565898,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": null
+          },
+          "seasonal_naive": {
+            "n": 21,
+            "origins": 8,
+            "mae": 2.4669530024821302,
+            "rmse": 2.937386491573035,
+            "mean_bias": -0.6928528405088621,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": null
+          },
+          "sarima": {
+            "n": 21,
+            "origins": 8,
+            "mae": 3.9517988541865403,
+            "rmse": 5.8448318861635125,
+            "mean_bias": -2.9853400256437266,
+            "interval_n": 21,
+            "coverage95": 1,
+            "null_reason": null
+          }
+        }
+      },
+      "validation": {
+        "expected_cases": 24,
+        "paired_cases": 24,
+        "eligible_models": [
+          "seasonal_median",
+          "seasonal_naive",
+          "sarima"
+        ],
+        "success_fraction": {
+          "seasonal_median": 1.0,
+          "seasonal_naive": 1.0,
+          "sarima": 1.0
+        },
+        "metrics": {
+          "seasonal_median": {
+            "n": 24,
+            "origins": 8,
+            "mae": 1.3599291142534315,
+            "rmse": 1.6515312033095604,
+            "mean_bias": -0.43118551463197186,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": null
+          },
+          "seasonal_naive": {
+            "n": 24,
+            "origins": 8,
+            "mae": 2.6433942433432382,
+            "rmse": 3.0780083830097094,
+            "mean_bias": 0.20365139213213915,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": null
+          },
+          "sarima": {
+            "n": 24,
+            "origins": 8,
+            "mae": 2.7997003467686845,
+            "rmse": 3.195320240892903,
+            "mean_bias": -2.2836133812266945,
+            "interval_n": 24,
+            "coverage95": 1,
+            "null_reason": null
+          }
+        }
+      },
+      "by_horizon": {
+        "seasonal_median": {
+          "1": {
+            "n": 8,
+            "origins": 8,
+            "mae": 1.383836217933604,
+            "rmse": 1.6388590707777717,
+            "mean_bias": -0.5964241202794882,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": null
+          },
+          "2": {
+            "n": 8,
+            "origins": 8,
+            "mae": 1.2971662819944094,
+            "rmse": 1.5744126920361607,
+            "mean_bias": -0.29775693138927783,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": null
+          },
+          "3": {
+            "n": 8,
+            "origins": 8,
+            "mae": 1.398784842832281,
+            "rmse": 1.737248274657437,
+            "mean_bias": -0.3993754922271495,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": null
+          }
+        },
+        "seasonal_naive": {
+          "1": {
+            "n": 8,
+            "origins": 8,
+            "mae": 2.7689012079344666,
+            "rmse": 3.1194628676240104,
+            "mean_bias": 0.0549586190497624,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": null
+          },
+          "2": {
+            "n": 8,
+            "origins": 8,
+            "mae": 2.5936220018881255,
+            "rmse": 3.0718883932624697,
+            "mean_bias": 0.26501653783282597,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": null
+          },
+          "3": {
+            "n": 8,
+            "origins": 8,
+            "mae": 2.5676595202071226,
+            "rmse": 3.0421801285407883,
+            "mean_bias": 0.2909790195138291,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": null
+          }
+        },
+        "sarima": {
+          "1": {
+            "n": 8,
+            "origins": 8,
+            "mae": 2.88609135720551,
+            "rmse": 3.217482841735161,
+            "mean_bias": -2.4103958323555137,
+            "interval_n": 8,
+            "coverage95": 1,
+            "null_reason": null
+          },
+          "2": {
+            "n": 8,
+            "origins": 8,
+            "mae": 2.7649093662178665,
+            "rmse": 3.1898806542595346,
+            "mean_bias": -2.226273356649322,
+            "interval_n": 8,
+            "coverage95": 1,
+            "null_reason": null
+          },
+          "3": {
+            "n": 8,
+            "origins": 8,
+            "mae": 2.7481003168826774,
+            "rmse": 3.178471315003525,
+            "mean_bias": -2.2141709546752484,
+            "interval_n": 8,
+            "coverage95": 1,
+            "null_reason": null
+          }
+        }
+      },
+      "paired_by_horizon": {
+        "1": {
+          "expected_cases": 8,
+          "paired_cases": 8,
+          "eligible_models": [
+            "seasonal_median",
+            "seasonal_naive",
+            "sarima"
+          ],
+          "success_fraction": {
+            "seasonal_median": 1.0,
+            "seasonal_naive": 1.0,
+            "sarima": 1.0
+          },
+          "metrics": {
+            "seasonal_median": {
+              "n": 8,
+              "origins": 8,
+              "mae": 1.383836217933604,
+              "rmse": 1.6388590707777717,
+              "mean_bias": -0.5964241202794882,
+              "interval_n": 0,
+              "coverage95": null,
+              "null_reason": null
+            },
+            "seasonal_naive": {
+              "n": 8,
+              "origins": 8,
+              "mae": 2.7689012079344666,
+              "rmse": 3.1194628676240104,
+              "mean_bias": 0.0549586190497624,
+              "interval_n": 0,
+              "coverage95": null,
+              "null_reason": null
+            },
+            "sarima": {
+              "n": 8,
+              "origins": 8,
+              "mae": 2.88609135720551,
+              "rmse": 3.217482841735161,
+              "mean_bias": -2.4103958323555137,
+              "interval_n": 8,
+              "coverage95": 1,
+              "null_reason": null
+            }
+          }
+        },
+        "2": {
+          "expected_cases": 8,
+          "paired_cases": 8,
+          "eligible_models": [
+            "seasonal_median",
+            "seasonal_naive",
+            "sarima"
+          ],
+          "success_fraction": {
+            "seasonal_median": 1.0,
+            "seasonal_naive": 1.0,
+            "sarima": 1.0
+          },
+          "metrics": {
+            "seasonal_median": {
+              "n": 8,
+              "origins": 8,
+              "mae": 1.2971662819944094,
+              "rmse": 1.5744126920361607,
+              "mean_bias": -0.29775693138927783,
+              "interval_n": 0,
+              "coverage95": null,
+              "null_reason": null
+            },
+            "seasonal_naive": {
+              "n": 8,
+              "origins": 8,
+              "mae": 2.5936220018881255,
+              "rmse": 3.0718883932624697,
+              "mean_bias": 0.26501653783282597,
+              "interval_n": 0,
+              "coverage95": null,
+              "null_reason": null
+            },
+            "sarima": {
+              "n": 8,
+              "origins": 8,
+              "mae": 2.7649093662178665,
+              "rmse": 3.1898806542595346,
+              "mean_bias": -2.226273356649322,
+              "interval_n": 8,
+              "coverage95": 1,
+              "null_reason": null
+            }
+          }
+        },
+        "3": {
+          "expected_cases": 8,
+          "paired_cases": 8,
+          "eligible_models": [
+            "seasonal_median",
+            "seasonal_naive",
+            "sarima"
+          ],
+          "success_fraction": {
+            "seasonal_median": 1.0,
+            "seasonal_naive": 1.0,
+            "sarima": 1.0
+          },
+          "metrics": {
+            "seasonal_median": {
+              "n": 8,
+              "origins": 8,
+              "mae": 1.398784842832281,
+              "rmse": 1.737248274657437,
+              "mean_bias": -0.3993754922271495,
+              "interval_n": 0,
+              "coverage95": null,
+              "null_reason": null
+            },
+            "seasonal_naive": {
+              "n": 8,
+              "origins": 8,
+              "mae": 2.5676595202071226,
+              "rmse": 3.0421801285407883,
+              "mean_bias": 0.2909790195138291,
+              "interval_n": 0,
+              "coverage95": null,
+              "null_reason": null
+            },
+            "sarima": {
+              "n": 8,
+              "origins": 8,
+              "mae": 2.7481003168826774,
+              "rmse": 3.178471315003525,
+              "mean_bias": -2.2141709546752484,
+              "interval_n": 8,
+              "coverage95": 1,
+              "null_reason": null
+            }
+          }
+        }
+      },
+      "by_evaluation_year": {
+        "2010": {
+          "seasonal_median": {
+            "n": 15,
+            "origins": 6,
+            "mae": 1.956142704501152,
+            "rmse": 2.3393266371141617,
+            "mean_bias": -0.12113389025082016,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": null
+          },
+          "seasonal_naive": {
+            "n": 15,
+            "origins": 6,
+            "mae": 2.618705750487926,
+            "rmse": 3.122873821171423,
+            "mean_bias": -0.48666677283356513,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": null
+          },
+          "sarima": {
+            "n": 15,
+            "origins": 6,
+            "mae": 4.695233031652034,
+            "rmse": 6.765023857774889,
+            "mean_bias": -3.828071992595422,
+            "interval_n": 15,
+            "coverage95": 1,
+            "null_reason": null
+          }
+        },
+        "2011": {
+          "seasonal_median": {
+            "n": 33,
+            "origins": 12,
+            "mae": 1.629407569536697,
+            "rmse": 1.8890295670964303,
+            "mean_bias": -0.4055895561067465,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": null
+          },
+          "seasonal_naive": {
+            "n": 33,
+            "origins": 12,
+            "mae": 2.5045917834926636,
+            "rmse": 2.9129422477567024,
+            "mean_bias": -0.2741489353704735,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": null
+          },
+          "sarima": {
+            "n": 33,
+            "origins": 12,
+            "mae": 2.5849870638342227,
+            "rmse": 2.9601610085323524,
+            "mean_bias": -1.9887959430294446,
+            "interval_n": 33,
+            "coverage95": 1,
+            "null_reason": null
+          }
+        }
+      },
+      "by_stratum": {
+        "stable_observed": {
+          "seasonal_median": {
+            "n": 48,
+            "origins": 16,
+            "mae": 1.7315122992130891,
+            "rmse": 2.040450399644786,
+            "mean_bias": -0.31669716052676955,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": null
+          },
+          "seasonal_naive": {
+            "n": 48,
+            "origins": 16,
+            "mae": 2.540252398178683,
+            "rmse": 2.9801348799300764,
+            "mean_bias": -0.34056075957768966,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": null
+          },
+          "sarima": {
+            "n": 48,
+            "origins": 16,
+            "mae": 3.2444389287772886,
+            "rmse": 4.508435317145137,
+            "mean_bias": -2.5635697085188127,
+            "interval_n": 48,
+            "coverage95": 1,
+            "null_reason": null
+          }
+        },
+        "drift_observed": {
+          "seasonal_median": {
+            "n": 0,
+            "origins": 0,
+            "mae": null,
+            "rmse": null,
+            "mean_bias": null,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": "no_scored_forecasts"
+          },
+          "seasonal_naive": {
+            "n": 0,
+            "origins": 0,
+            "mae": null,
+            "rmse": null,
+            "mean_bias": null,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": "no_scored_forecasts"
+          },
+          "sarima": {
+            "n": 0,
+            "origins": 0,
+            "mae": null,
+            "rmse": null,
+            "mean_bias": null,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": "no_scored_forecasts"
+          }
+        },
+        "modeled_not_scored": {
+          "seasonal_median": {
+            "n": 0,
+            "origins": 0,
+            "mae": null,
+            "rmse": null,
+            "mean_bias": null,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": "no_scored_forecasts"
+          },
+          "seasonal_naive": {
+            "n": 0,
+            "origins": 0,
+            "mae": null,
+            "rmse": null,
+            "mean_bias": null,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": "no_scored_forecasts"
+          },
+          "sarima": {
+            "n": 0,
+            "origins": 0,
+            "mae": null,
+            "rmse": null,
+            "mean_bias": null,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": "no_scored_forecasts"
+          }
+        },
+        "excluded_truth": {
+          "seasonal_median": {
+            "n": 0,
+            "origins": 0,
+            "mae": null,
+            "rmse": null,
+            "mean_bias": null,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": "no_scored_forecasts"
+          },
+          "seasonal_naive": {
+            "n": 0,
+            "origins": 0,
+            "mae": null,
+            "rmse": null,
+            "mean_bias": null,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": "no_scored_forecasts"
+          },
+          "sarima": {
+            "n": 0,
+            "origins": 0,
+            "mae": null,
+            "rmse": null,
+            "mean_bias": null,
+            "interval_n": 0,
+            "coverage95": null,
+            "null_reason": "no_scored_forecasts"
+          }
+        }
+      },
+      "limitations": [
+        "Family selection uses earlier origins; SARIMA has a later holdout gate. A failed gate falls back to a baseline ranked on tuning, not a new validated winner.",
+        "Overlapping horizons are correlated; no significance or causal claim is made.",
+        "At least 90% successful predictions required before matched-case model comparison.",
+        "Historical availability uses final-vintage observations, not a publication-vintage archive."
+      ]
+    },
+    "limitations": [
+      "Experimental forecasts of regional activity, not independent fires or meteorological danger.",
+      "Modeled harmonized values are never used as training observations or evaluation truth.",
+      "Forecast intervals are distinct from harmonization uncertainty and do not propagate that uncertainty.",
+      "Forecasts are withheld when observations do not reach the requested origin; longer leads are not silently extrapolated."
+    ]
+  },
+  "limitations": [
+    "Explicitly synthetic test/demo series; not NASA observations."
+  ],
+  "geometry": null
+}

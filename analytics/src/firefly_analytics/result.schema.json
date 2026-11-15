@@ -1,0 +1,899 @@
+{
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "section": {
+      "enum": [
+        "history",
+        "climatology",
+        "anomalies",
+        "forecast",
+        "fire_weather"
+      ]
+    },
+    "region_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "period": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$"
+        },
+        "end": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$"
+        }
+      },
+      "required": [
+        "start",
+        "end"
+      ],
+      "additionalProperties": false
+    },
+    "units": {
+      "enum": [
+        "MODIS-Aqua-equivalent hotspots",
+        "dimensionless"
+      ]
+    },
+    "source": {
+      "type": "object",
+      "properties": {
+        "synthetic": {
+          "type": "boolean"
+        },
+        "provenance": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "synthetic",
+        "provenance"
+      ],
+      "additionalProperties": false
+    },
+    "data_status": {
+      "enum": [
+        "available",
+        "synthetic",
+        "experimental",
+        "not_validated",
+        "unavailable"
+      ]
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "method": {
+      "type": "object"
+    },
+    "data": {
+      "type": "object"
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "geometry": {
+      "type": [
+        "object",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "section",
+    "region_id",
+    "period",
+    "units",
+    "source",
+    "data_status",
+    "generated_at",
+    "method",
+    "data",
+    "limitations",
+    "geometry"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://firefly-lens.local/schemas/analytics/result-1.0.0.json",
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "section": {
+            "const": "history"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "monthly": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "date": {
+                          "type": "string",
+                          "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$"
+                        },
+                        "value": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "minimum": 0
+                        },
+                        "source": {
+                          "enum": [
+                            "observed_modis",
+                            "modeled_viirs",
+                            "missing",
+                            "mixed"
+                          ]
+                        },
+                        "complete": {
+                          "type": "boolean"
+                        },
+                        "flags": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "lower": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "minimum": 0
+                        },
+                        "upper": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "minimum": 0
+                        },
+                        "uncertainty_method": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "available_at": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "format": "date"
+                        }
+                      },
+                      "required": [
+                        "date",
+                        "value",
+                        "source",
+                        "complete"
+                      ],
+                      "additionalProperties": true
+                    }
+                  },
+                  "annual": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "year": {
+                          "type": "integer"
+                        },
+                        "total": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "minimum": 0
+                        },
+                        "complete": {
+                          "type": "boolean"
+                        },
+                        "valid_months": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 12
+                        },
+                        "yoy_percent": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "year",
+                        "total",
+                        "complete",
+                        "valid_months",
+                        "yoy_percent"
+                      ],
+                      "additionalProperties": true
+                    }
+                  },
+                  "summary": {
+                    "type": "object"
+                  },
+                  "policy": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "monthly",
+                  "annual",
+                  "summary",
+                  "policy"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "unavailable"
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "status",
+                  "reason"
+                ],
+                "additionalProperties": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "section": {
+            "const": "climatology"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "reference": {
+                    "type": "object"
+                  },
+                  "policy": {
+                    "type": "object"
+                  },
+                  "quantile_method": {
+                    "type": "string"
+                  },
+                  "months": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "month": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 12
+                        },
+                        "n_years": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "years_used": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer"
+                          }
+                        },
+                        "status": {
+                          "enum": [
+                            "available",
+                            "insufficient_history"
+                          ]
+                        },
+                        "reason": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "mean": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "median": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "std_sample": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "p10": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "p25": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "p75": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "p90": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "min": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "max": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "mad": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "month",
+                        "n_years",
+                        "years_used",
+                        "status",
+                        "reason",
+                        "mean",
+                        "median",
+                        "std_sample",
+                        "p10",
+                        "p25",
+                        "p75",
+                        "p90",
+                        "min",
+                        "max",
+                        "mad"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 12,
+                    "maxItems": 12
+                  }
+                },
+                "required": [
+                  "reference",
+                  "policy",
+                  "quantile_method",
+                  "months"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "unavailable"
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "status",
+                  "reason"
+                ],
+                "additionalProperties": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "section": {
+            "const": "anomalies"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "policy": {
+                    "type": "object"
+                  },
+                  "percentile_ties": {
+                    "type": "string"
+                  },
+                  "classification": {
+                    "type": "string"
+                  },
+                  "months": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "date": {
+                          "type": "string",
+                          "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$"
+                        },
+                        "value": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "minimum": 0
+                        },
+                        "source": {
+                          "enum": [
+                            "observed_modis",
+                            "modeled_viirs",
+                            "missing",
+                            "mixed"
+                          ]
+                        },
+                        "complete": {
+                          "type": "boolean"
+                        },
+                        "quality_flags": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "absolute": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "percent": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "z_score": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "robust_z": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "percentile": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "null_reasons": {
+                          "type": "object"
+                        },
+                        "reference": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "date",
+                        "value",
+                        "source",
+                        "complete",
+                        "quality_flags",
+                        "status",
+                        "absolute",
+                        "percent",
+                        "z_score",
+                        "robust_z",
+                        "percentile",
+                        "null_reasons",
+                        "reference"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "policy",
+                  "percentile_ties",
+                  "classification",
+                  "months"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "unavailable"
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "status",
+                  "reason"
+                ],
+                "additionalProperties": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "section": {
+            "const": "forecast"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "forecast_status": {
+                    "enum": [
+                      "experimental",
+                      "not_validated",
+                      "unavailable"
+                    ]
+                  },
+                  "reason": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "model": {
+                    "enum": [
+                      "seasonal_median",
+                      "seasonal_naive",
+                      "sarima",
+                      null
+                    ]
+                  },
+                  "forecast_origin": {
+                    "type": "string",
+                    "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$"
+                  },
+                  "last_complete_observation_used": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "training_period": {
+                    "type": "object"
+                  },
+                  "config": {
+                    "type": "object"
+                  },
+                  "model_details": {
+                    "type": "object"
+                  },
+                  "predictions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "date": {
+                          "type": "string",
+                          "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$"
+                        },
+                        "horizon": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 3
+                        },
+                        "value": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "minimum": 0
+                        },
+                        "lower": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "minimum": 0
+                        },
+                        "upper": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "minimum": 0
+                        },
+                        "reason": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "interval_kind": {
+                          "enum": [
+                            "forecast",
+                            null
+                          ]
+                        },
+                        "interval_method": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "date",
+                        "horizon",
+                        "value",
+                        "lower",
+                        "upper",
+                        "reason",
+                        "interval_kind",
+                        "interval_method"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 1,
+                    "maxItems": 3
+                  },
+                  "backtesting": {
+                    "type": "object"
+                  },
+                  "limitations": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "forecast_status",
+                  "reason",
+                  "model",
+                  "forecast_origin",
+                  "last_complete_observation_used",
+                  "training_period",
+                  "config",
+                  "model_details",
+                  "predictions",
+                  "backtesting",
+                  "limitations"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "unavailable"
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "status",
+                  "reason"
+                ],
+                "additionalProperties": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "section": {
+            "const": "fire_weather"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "enum": [
+                      "available",
+                      "unavailable",
+                      "synthetic"
+                    ]
+                  },
+                  "reason": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "index": {
+                    "const": "FWI"
+                  },
+                  "units": {
+                    "const": "dimensionless"
+                  },
+                  "forecasts": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "issued_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "valid_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "lead_hours": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "member": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "minimum": 0
+                        },
+                        "sample_count": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "valid_samples": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "null_reason": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "issued_at",
+                        "valid_at",
+                        "lead_hours",
+                        "member",
+                        "value",
+                        "sample_count",
+                        "valid_samples",
+                        "null_reason"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "status",
+                  "reason",
+                  "index",
+                  "units",
+                  "forecasts"
+                ],
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "unavailable"
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "status",
+                  "reason"
+                ],
+                "additionalProperties": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "section": {
+            "const": "fire_weather"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "units": {
+            "const": "dimensionless"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "units": {
+            "const": "MODIS-Aqua-equivalent hotspots"
+          }
+        }
+      }
+    }
+  ]
+}
