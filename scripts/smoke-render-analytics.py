@@ -52,3 +52,20 @@ for name, geometry, months in [('small Brazilian polygon',small,293), ('Brazilia
     except urllib.error.HTTPError as error:
         assert error.code == 401
     print(f'{name}: real history and authentication verified ({time.monotonic()-started:.2f}s)')
+
+# The shipped product can expire between releases; verify its exact valid dates
+# against its actual source dates, never assume a permanent "available" state.
+from datetime import datetime, timezone
+metadata=json.loads((root/'harmonization/output/fire_weather/geos5.json').read_text())
+today=datetime.now(timezone.utc).date().isoformat()
+expected=any(source['url'].split('.')[-2]>=today.replace('-','') for source in metadata['source_files'])
+body={'schema_version':'1.0.0','geometry':small,'data_version':{k:meta[k] for k in keys},'horizon':3}
+weather=call('/analytics/fire-weather',body)['data']
+assert weather['status']==('available' if expected else 'unavailable'),weather.get('reason')
+if expected:
+    assert weather['provenance']['synthetic'] is False
+    assert weather['forecasts'][0]['value'] is not None
+    assert weather['forecasts'][0]['valid_at'] is None
+    print('Numeric NASA weather: dates, provenance and custom polygon verified')
+# History still works after importing the meteorological reader under 512 MB.
+assert len(call('/analytics/history',body)['sections']['history']['data']['monthly'])==293

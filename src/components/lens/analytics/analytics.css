@@ -54,8 +54,12 @@
 }
 .analytics-tabs {
   display: flex;
+  justify-content: center;
   gap: 8px;
   border-bottom: 1px solid var(--color-line);
+}
+@media (max-width: 390px) {
+  .analytics-tabs { width: 100%; }
 }
 .analytics-tabs button {
   padding: 13px 25px;
@@ -79,6 +83,16 @@
   gap: 24px;
 }
 .analytics-insight { font-weight: 500; margin-bottom: 16px; }
+.weather-summary { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; margin: 20px 0; }
+.weather-summary > div { padding: 14px; background: var(--color-surface); border: 1px solid var(--color-line); border-radius: 12px; }
+.weather-summary span { display: block; font-size: .8rem; color: var(--color-dim); }
+.weather-summary strong { display: block; margin-top: 8px; font-size: 1.6rem; }
+@media (max-width: 500px) {
+  .weather-summary { gap: 8px; }
+  .weather-summary > div { padding: 8px; }
+  .weather-summary span { font-size: .72rem; }
+  .weather-summary strong { font-size: 1.25rem; }
+}
 .analytics-digest { overflow-wrap: anywhere; }
 .analytics-card select { max-width: 100%; }
 .analytics-card .analytics-badge { display: inline-block; max-width: 100%; white-space: normal; }

@@ -8,6 +8,9 @@
 !harmonization/output/
 !harmonization/output/grid_monthly_total.parquet
 !harmonization/output/harmonization_params.json
+!harmonization/output/fire_weather/
+!harmonization/output/fire_weather/geos5.nc
+!harmonization/output/fire_weather/geos5.json
 !public/
 !public/data/
 !public/data/brazil/

@@ -83,7 +83,8 @@ def import_product(days=3, offline=False):
     temporary.replace(output)
     metadata={'source_id':'nasa_gfwed_geos5','synthetic':False,'sha256':hashlib.sha256(output.read_bytes()).hexdigest(),
         'licence':'Public NASA GFWED research data; preserve source attribution and notices; acknowledge Field et al. (2015)',
-        'retrieved_at':now.isoformat(),'request_id':'NASA-NCCS-'+issue,'meteorological_source':'NASA GEOS-5',
+        'retrieved_at':datetime.fromtimestamp(max(p.stat().st_mtime for p in files),timezone.utc).isoformat(),
+        'imported_at':now.isoformat(),'request_id':'NASA-NCCS-'+issue,'meteorological_source':'NASA GEOS-5',
         'system_version':'GFWED v2.0; GEOS model build not encoded in native FWI files',
         'source_files':sources,'documentation_url':README,'doi':'10.5194/nhess-15-1407-2015',
         'issuance_basis':'00 UTC GEOS forecast initialization from documented NASA product key; publication instant not supplied',

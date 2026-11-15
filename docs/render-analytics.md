@@ -1,15 +1,17 @@
 # Historical analytics on Render Free
 
 Scope: restore dynamic History for Brazilian polygons and the published whole
-South American countries. Weather collection/refresh is deferred. Forecast
+South American countries, plus verified numeric NASA meteorological assessments.
+Weather now leads the full report, above the centered History/Forecast tabs. Forecast
 quality gates and national-only calibration remain unchanged.
 
 `render.yaml` defines one **Free web service**, with no database or paid disk.
 It builds `analytics/Dockerfile.render` from the repository root. Data are
 immutable files shipped in the image, so restarting or sleeping loses only the
 bounded in-memory response cache. The Docker ignore allowlist excludes secrets,
-worktrees, native detection archives and browser tiles. Weather dependencies
-and rasters are intentionally absent from this history-focused image.
+worktrees, native detection archives and browser tiles. The image includes weather
+dependencies and the small normalized NASA subset as a fallback. See
+[weather delivery](weather-first-report.md) for the independent refresh pipeline.
 
 The entry point requires a nonempty `ANALYTICS_API_TOKEN`, binds Render's `PORT`
 and runs one worker. Numerical libraries use one thread; DuckDB working memory
@@ -61,4 +63,4 @@ Remove the two Vercel variables and redeploy to restore static-only fallback;
 or revert the service's last deployment in Render. Preserve matching map/service
 metadata. The existing API rejects mismatched data versions rather than mixing
 scientific releases. To add weather later, deploy its verified data/dependencies
-and refresh pipeline separately; this deployment does not claim to resolve FWI.
+and refresh pipeline separately if choosing a different provider.

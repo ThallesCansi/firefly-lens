@@ -15,7 +15,7 @@ jobs:
         env:
           ANALYTICS_API_TOKEN: ci-container-test-only
         run: |
-          docker run -d --name analytics --memory=512m --memory-swap=512m -p 10000:10000 -e ANALYTICS_API_TOKEN firefly-render
+          docker run -d --name analytics --memory=512m --memory-swap=512m -p 10000:10000 -e ANALYTICS_API_TOKEN -e FIREFLY_FWI_REFRESH_URL= firefly-render
           python scripts/smoke-render-analytics.py http://localhost:10000
           docker stats --no-stream analytics
       - name: Container diagnostics
