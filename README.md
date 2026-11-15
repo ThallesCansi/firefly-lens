@@ -38,6 +38,7 @@ In the map workspace a user can:
 - **Choose a date range**, by month, from July 2002 to November 2026.
 - **Read the history grid**: every month of every year in MODIS-Aqua-equivalent hot spots, with months at least twice their 2003–2025 median ringed, months estimated from VIIRS dotted, and each year's total set against the median year. The headline compares the selected month with its median and rank, with a 95% range when it is estimated.
 - **Open any year** as a daily calendar with the typical fire season and unusual days marked, switch between the harmonized series, MODIS Aqua and harmonized VIIRS, and inspect any day in figures per sensor and on the map.
+- **Ask the assistant** at the bottom of the map, in any language: "Show Santa Catarina in 2006", "Which month burned most in the Pantanal?", "Compare Mato Grosso in 2020 and 2024". It selects states, regions and boxes, moves the map, sets the period and layers, opens the analysis, and answers questions from the area's own record.
 - **Download** detections per grid cell and day (CSV, up to 36 months), the daily harmonized series (CSV), the monthly table with medians, ranks and ranges (CSV), and the history grid (SVG).
 
 ## Run it
@@ -57,6 +58,15 @@ pnpm lint
 pnpm build && pnpm start
 ```
 
+The map assistant calls Google Gemini through `/api/assistant`, on the Gemini API's free tier. Create a key in [Google AI Studio](https://aistudio.google.com/apikey) and put it in `.env.local` (ignored by git):
+
+```bash
+GEMINI_API_KEY=...
+# GEMINI_MODEL=gemini-3.6-flash   # optional, the default
+```
+
+Without a key the rest of the app works and the assistant says it is not configured. The key never reaches the browser: the route forwards one turn at a time, while the browser keeps the conversation and runs the map actions and record lookups the model asks for. The route allows 20 requests per minute per address. On the free tier Google limits requests per project and per day, and may use what is sent to improve its products; the assistant panel says so.
+
 `pnpm dev` and `pnpm build` first copy the MapLibre worker into `public/maplibre/` (see [`scripts/copy-maplibre-worker.mjs`](scripts/copy-maplibre-worker.mjs)); the map needs it.
 
 ## Themes and scientific documentation
@@ -71,7 +81,7 @@ SVG downloads now include region, period, legend, data source and observed/model
 
 ## Deployment
 
-The site deploys on [Vercel](https://vercel.com) from this repository: every push to `main` goes to production and every pull request gets its own preview URL. No environment variables are needed: the data are static files in `public/data/brazil/` (about 10 MB), fetched by the browser per 4° tile.
+The site deploys on [Vercel](https://vercel.com) from this repository: every push to `main` goes to production and every pull request gets its own preview URL. The only environment variable is `GEMINI_API_KEY`, for the map assistant (set it in the Vercel project settings). The data are static files in `public/data/brazil/` (about 10 MB), fetched by the browser per 4° tile.
 
 ## Project layout
 

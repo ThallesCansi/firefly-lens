@@ -490,11 +490,69 @@
     border-color: var(--color-dim);
   }
 }
+.assistant-privacy {
+  margin-top: 12px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--color-dim);
+}
 .assistant-thread {
   display: flex;
   flex-direction: column;
   gap: 8px;
   margin-top: 12px;
+  max-height: min(46vh, 420px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.assistant-reset {
+  margin-left: auto;
+  padding: 2px 4px;
+  font-size: 12px;
+  color: var(--color-dim);
+  cursor: pointer;
+  transition: color 160ms;
+}
+@media (hover: hover) {
+  .assistant-reset:hover {
+    color: var(--color-ink);
+  }
+}
+.assistant-action {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--color-dim);
+}
+.assistant-action::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-lume);
+  flex: none;
+}
+.assistant-bubble-error {
+  color: var(--color-dim);
+  font-style: italic;
+}
+.assistant-pending {
+  color: var(--color-dim);
+  animation: assistant-pulse 1.4s ease-in-out infinite;
+}
+@keyframes assistant-pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .assistant-pending {
+    animation: none;
+  }
+}
+.assistant-bubble {
+  white-space: pre-wrap;
 }
 .assistant-bubble {
   max-width: 88%;
