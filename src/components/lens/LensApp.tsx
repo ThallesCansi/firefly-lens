@@ -30,6 +30,8 @@ import { usePlaybackFrames } from "@/lib/usePlayback";
 import { PlaybackBar } from "./PlaybackBar";
 import { RegionFlight } from "./RegionFlight";
 import { parseShare, shareQuery } from "@/lib/share";
+import { cellDays } from "@/lib/data/area";
+import { areaSlug, cellDaysCsv, download } from "@/lib/export";
 import { BoundaryRepository, geometryBounds } from "@/lib/interactions/administrative";
 import { useWorkspaceTools } from "@/components/interactions/useWorkspaceTools";
 import { WorkspaceSelectionTools } from "@/components/interactions/WorkspaceSelectionTools";
@@ -149,7 +151,7 @@ export function LensApp() {
   /** The regional flight: the stop being shown, or null when it is not running. */
   const [flight, setFlight] = useState<number | null>(null);
   /** Feedback after "Share": whether the link reached the clipboard. */
-  const [shared, setShared] = useState<"copied" | "address" | null>(null);
+  const [shared, setShared] = useState<"copied" | "address" | "failed" | null>(null);
   const analyzeButton = useRef<HTMLButtonElement>(null);
   const closeButton = useRef<HTMLButtonElement>(null);
   // The time-lapse: a range of months played on the map, all loaded at once.
@@ -423,6 +425,19 @@ export function LensApp() {
     openAnalysis(next);
     setCoordinates(false);
     return next;
+  }
+  // "CSV" on the area card: what the map shows, one row per grid cell and day of the period.
+  async function downloadMapCsv() {
+    if (!area) return;
+    const last = new Date(Date.UTC(Number(period.slice(0, 4)), Number(period.slice(5, 7)), 0)).getUTCDate();
+    const [first, end] = period.length === 10 ? [period, period] : [`${period}-01`, `${period}-${last}`];
+    try {
+      const rows = await cellDays(area, first, end);
+      download(`firefly-lens_${areaSlug(area)}_${period}_cell_days.csv`, cellDaysCsv(rows), "text/csv");
+    } catch {
+      setShared("failed");
+      window.setTimeout(() => setShared(null), 2600);
+    }
   }
   // "Share": the view goes into the address bar and, where the browser allows, the clipboard.
   async function share() {
@@ -786,8 +801,15 @@ export function LensApp() {
                   >
                     Share
                   </button>
+                  <button
+                    className="btn btn-text"
+                    title="Download the cells on the map for this period as a CSV file"
+                    onClick={downloadMapCsv}
+                  >
+                    CSV
+                  </button>
                   <span role="status" className="text-xs text-dim">
-                    {shared === "copied" ? "Link copied" : shared === "address" ? "Link is in the address bar" : ""}
+                    {shared === "copied" ? "Link copied" : shared === "address" ? "Link is in the address bar" : shared === "failed" ? "Download failed, try again" : ""}
                   </span>
                 </div>
               </section>

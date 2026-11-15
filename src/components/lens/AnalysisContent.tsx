@@ -166,12 +166,37 @@ export function AnalysisCalendar({
           </div>
         )
       )}
-      <button data-tour="open-report" type="button" className="btn btn-primary report-jump self-start" onClick={onReport}>
-        Full report below
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <path d="M12 5v14M6 13l6 6 6-6" />
-        </svg>
-      </button>
+      <div className="flex flex-wrap items-center gap-2">
+        <button data-tour="open-report" type="button" className="btn btn-primary report-jump" onClick={onReport}>
+          Full report below
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M12 5v14M6 13l6 6 6-6" />
+          </svg>
+        </button>
+        {/* The calendar's own numbers, one press away: the daily series of the area for the range. */}
+        <button
+          type="button"
+          className="btn btn-quiet"
+          disabled={!record}
+          title={`Daily series of ${area.name}, ${from} to ${to}, as a CSV file`}
+          onClick={() =>
+            record &&
+            download(
+              `firefly-lens_${areaSlug(area)}_${from}_${to}_daily.csv`,
+              dailyCsv(record.days.filter((d) => d.date.slice(0, 7) >= from && d.date.slice(0, 7) <= to)),
+              "text/csv",
+            )
+          }
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M12 4v11M7 11l5 5 5-5M5 20h14" />
+          </svg>
+          Download CSV
+        </button>
+      </div>
+      <p className="-mt-3 text-[0.8125rem] text-faint">
+        The CSV holds one row per day, {from} to {to}. Grid-cell and monthly files are in the full report.
+      </p>
     </div>
   );
 }
