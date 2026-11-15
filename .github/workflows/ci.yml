@@ -6,6 +6,21 @@ on:
   pull_request:
 
 jobs:
+  render-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -f analytics/Dockerfile.render -t firefly-render .
+      - name: Verify real history under the free instance memory limit
+        env:
+          ANALYTICS_API_TOKEN: ci-container-test-only
+        run: |
+          docker run -d --name analytics --memory=512m --memory-swap=512m -p 10000:10000 -e ANALYTICS_API_TOKEN firefly-render
+          python scripts/smoke-render-analytics.py http://localhost:10000
+          docker stats --no-stream analytics
+      - name: Container diagnostics
+        if: always()
+        run: docker logs analytics || true
   check:
     runs-on: ubuntu-latest
     steps:

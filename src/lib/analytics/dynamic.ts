@@ -26,20 +26,22 @@ export async function loadDynamicAnalytics(
 ): Promise<Bundle> {
   geometryKey(geometry);
   let response: Response;
+  let raw;
   for (let attempt = 0; ; attempt++) {
     response = await fetch(`/api/analytics/${section}`, {
       method: "POST", headers: { "Content-Type": "application/json" }, signal,
       body: JSON.stringify({ schema_version: "1.0.0", geometry, data_version: dataVersion, horizon: 3 }),
     });
-    if (response.status !== 429 || attempt >= 3) break;
-    await response.body?.cancel();
+    raw = await response.json();
+    const warming = response.status === 503 && raw?.detail === "analytics_service_starting";
+    if (!((response.status === 429 && attempt < 3) || (warming && attempt < 2))) break;
     await retryDelay(signal);
   }
-  const raw = await response.json();
   if (!response.ok) throw new AnalyticsError(response.status,
     raw?.detail === "region_outside_coverage" ? "Region outside Brazilian data coverage. Move or redraw the polygon."
       : raw?.detail === "analytics_data_version_mismatch" ? "The analysis service and map have different data versions."
       : raw?.detail === "analytics_busy_retry" ? "The analysis service is busy. Please retry."
+      : raw?.detail === "analytics_service_starting" ? "The analysis service is starting or temporarily unavailable. Please retry shortly."
       : typeof raw?.detail === "string" ? raw.detail : "analytics_processing_error");
   return validateBundle(raw, {
     id: raw.region_id, name: "Selected polygon", geometry,

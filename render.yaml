@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: firefly-analytics
+    runtime: docker
+    plan: free
+    region: virginia
+    branch: main
+    dockerfilePath: ./analytics/Dockerfile.render
+    dockerContext: .
+    healthCheckPath: /health
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: ANALYTICS_API_TOKEN
+        generateValue: true
+      - key: FIREFLY_DATA_ROOT
+        value: /data
+      - key: ANALYTICS_ENABLE_SARIMA
+        value: "0"
+      - key: OPENBLAS_NUM_THREADS
+        value: "1"
+      - key: OMP_NUM_THREADS
+        value: "1"
+      - key: MKL_NUM_THREADS
+        value: "1"

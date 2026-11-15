@@ -82,7 +82,8 @@ def from_parquet(repo: str | Path, region_id: str, geometry: dict, *, start=None
     meta = json.loads(meta_file.read_text(encoding="utf-8"))
     if not math.isfinite(params["common_error_c"]) or params["common_error_c"] < 0:
         raise ValueError("Invalid common-error coefficient")
-    with duckdb.connect(":memory:") as con:
+    # Bound working memory on the 512 MB host; the SQL and weights are unchanged.
+    with duckdb.connect(":memory:", config={"memory_limit": "128MB"}) as con:
         con.read_parquet(str(grid)).create_view("grid")
         required = {"cell_id", "lat", "lon", "year", "month", "n_harmonized", "var_harmonized", "source_flag", "is_partial"}
         cols = {r[0] for r in con.execute("DESCRIBE grid").fetchall()}

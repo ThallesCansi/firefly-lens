@@ -1,0 +1,18 @@
+# Explicit allowlist: no credentials, native archives, worktrees or node_modules.
+**
+!analytics/
+!analytics/pyproject.toml
+!analytics/src/
+!analytics/src/**
+!harmonization/
+!harmonization/output/
+!harmonization/output/grid_monthly_total.parquet
+!harmonization/output/harmonization_params.json
+!public/
+!public/data/
+!public/data/brazil/
+!public/data/brazil/meta.json
+!public/data/coverage.json
+!public/data/continental/
+!public/data/continental/*/
+!public/data/continental/*/national.json
