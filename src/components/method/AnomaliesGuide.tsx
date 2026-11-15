@@ -2,6 +2,12 @@ import { Equation } from "./Equation";
 import { MethodSection } from "./MethodSection";
 import { References } from "./References";
 import { MonthlyEvidence, DailyEvidence } from "./MethodEvidence";
+import { meta } from "@/lib/data/meta";
+import {
+  UNUSUAL_FLOOR,
+  UNUSUAL_PROBABILITY,
+  UNUSUAL_SHARE,
+} from "@/lib/unusual";
 
 export function AnomaliesGuide() {
   return (
@@ -247,6 +253,116 @@ export function AnomaliesGuide() {
           ranks.
         </p>
       </MethodSection>
+      <MethodSection
+        id="unusual-cells"
+        title="Unusually high cells on the map"
+        status="HELD-OUT SAME-MONTH RANK PER CELL · IMPLEMENTED"
+      >
+        <p>
+          On the map, a 0.25° cell glows when its month is unusually high for
+          that cell and that calendar month. The glow is a screening aid: it
+          shows where to look, not a detected event.
+        </p>
+        <Equation
+          id="unusual-cells-equation"
+          title="Rank of a cell-month among the other reference years"
+          expression={String.raw`U_{c,y,m}=\Big[\,\tilde X_{c,y,m}\ge ${UNUSUAL_FLOOR}\ \wedge\ \#\{\,r\in R\setminus\{y\}:X_{c,r,m}<\tilde X_{c,y,m}\}\ \ge\ ${UNUSUAL_SHARE}\,\lvert R\setminus\{y\}\rvert\,\Big]`}
+          variables={[
+            {
+              symbol: "Xc,r,ₘ",
+              meaning:
+                "MODIS Aqua hot spots observed in cell c, reference year r, calendar month m.",
+            },
+            {
+              symbol: "R",
+              meaning: `The reference years, ${meta.climatologyBase[0]}–${meta.climatologyBase[1]}. The year being judged is left out, so 22 years remain for a year inside the reference and 23 for a year outside it.`,
+            },
+            {
+              symbol: "X̃c,y,ₘ",
+              meaning: `The value judged. Through ${meta.observedUntil} it is the observed MODIS Aqua total. After that the count is not observed; see the modeled months below.`,
+            },
+            {
+              symbol: "Uc,y,ₘ",
+              meaning:
+                "True when the cell glows: the value reaches the floor and is strictly higher than at least 90% of the other reference years.",
+            },
+          ]}
+        >
+          <p>
+            In practice a cell glows when at most two of the other reference
+            years reached its value. This is an ordinal rank with a stated
+            threshold; it is not an estimate of a 90th percentile, which a
+            record of 23 years cannot resolve precisely.
+          </p>
+        </Equation>
+        <ul>
+          <li>
+            <strong>The judged year is held out.</strong> A year compared with
+            a threshold it helped to set exceeds it less often than a year
+            outside the reference, which would make {meta.climatologyBase[0]}–
+            {meta.climatologyBase[1]} and later years incomparable.
+          </li>
+          <li>
+            <strong>A rank, not a fitted distribution.</strong> Counts per cell
+            are skewed and often zero, so a mean and a standard deviation would
+            mislead. Ties do not count as higher.
+          </li>
+          <li>
+            <strong>A floor of {UNUSUAL_FLOOR} hot spots.</strong> In a cell
+            that rarely burns, one or two detections outrank every other year.
+            The floor removes such faint signals. It is a judgement threshold,
+            not a statistical one.
+          </li>
+          <li>
+            <strong>Modeled months are judged by probability.</strong> After{" "}
+            {meta.observedUntil} the count MODIS Aqua would have recorded in a
+            cell is not observed. The harmonization gives its distribution: a
+            negative binomial with the stored mean and variance of that cell
+            and month. From it comes the probability that the count would pass
+            the test above. A cell glows when that probability is at least{" "}
+            {UNUSUAL_PROBABILITY * 100}%. The symmetric 95% range shown for an
+            area is not used here: in a single cell the distribution is so
+            skewed that the low end of that range is zero.
+          </li>
+          <li>
+            <strong>Many cells are judged at once.</strong> Even in an ordinary
+            year a cell passes the rank test about one time in eight (three
+            ranks out of 23 or 24), before the floor. The map key therefore
+            gives the number of unusual cells next to the number that is
+            typical for that calendar month: the median, over the reference
+            years, of the count obtained with this same rule. For a modeled
+            month the number is the expected one, the sum of the cells’
+            probabilities. A lone glowing cell means little; a count far above
+            the typical one, or a cluster, means more.
+          </li>
+        </ul>
+        <p>
+          <strong>Check of the modeled rule.</strong> From April 2018 the
+          files hold both the observed MODIS Aqua count and the harmonized
+          value, so the modeled rule can be tried on months where the answer
+          is known. Over every cell of Brazil, for February, May, August,
+          September, October and November of 2019–2023, MODIS Aqua recorded
+          12,485 unusual cell-months and the rule expected 12,519. Of the
+          cells that would have glowed, 77% were unusual; they are 43% of all
+          the unusual ones. The expected number is therefore reliable, while
+          the glow marks the likeliest cells and misses the others. This check
+          rebuilds the variance from the mean, because the per-cell variance is
+          shipped for modeled months only, and it uses years the harmonization
+          was fitted on. It runs with the project’s tests
+          (<code>src/lib/unusual.validation.test.ts</code>).
+        </p>
+        <p>
+          Limits: the reference is fixed, so a place where fire has been
+          increasing glows more often in recent years; neighbouring cells are
+          not independent, so clusters are expected; a month in progress is
+          compared with complete months and can only be under-flagged; single
+          days are not judged. Clouds and Aqua outages lower some reference
+          values. Aqua’s overpass time has been drifting: its observed
+          counts of 2024 and 2025 run about 15% above the nominal scale, so
+          those two years glow somewhat more easily than earlier ones, and the
+          modeled months that follow are back on the nominal scale.
+        </p>
+      </MethodSection>
       <MethodSection id="example" title="Interpreting results">
         <figure className="method-example">
           <figcaption>
@@ -318,7 +434,7 @@ export function AnomaliesGuide() {
           </li>
         </ul>
       </MethodSection>
-      <References ids={["scale", "outliers", "mad"]} />
+      <References ids={["scale", "outliers", "mad", "heldout"]} />
     </>
   );
 }

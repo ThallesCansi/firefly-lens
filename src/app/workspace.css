@@ -343,6 +343,20 @@
   background: var(--color-viirs);
   border-radius: 50%;
 }
+/* The same two sensors in the 3D view: a short MODIS column, a taller VIIRS one. */
+.sensor-column {
+  width: 10px;
+  height: 10px;
+  background: linear-gradient(currentColor, currentColor) bottom center / 5px var(--column-height) no-repeat;
+}
+.sensor-column-modis {
+  --column-height: 6px;
+  color: var(--color-modis);
+}
+.sensor-column-viirs {
+  --column-height: 10px;
+  color: var(--color-viirs);
+}
 .eyebrow {
   color: var(--color-lume);
   font-size: 10px;
@@ -366,6 +380,25 @@
 }
 .selection-card .btn {
   padding-inline: 0.875rem;
+}
+/* The regional flight's card is kept short, clear of the map key below it. */
+.region-flight {
+  padding: 16px 18px;
+}
+/* With the analysis open beside the map, its heading already names the area:
+   the card shrinks to its actions, so it does not cover the selection. */
+.selection-card[data-compact="true"] {
+  width: auto;
+  padding: 8px;
+}
+.selection-card[data-compact="true"] > :not(.selection-actions) {
+  display: none;
+}
+/* On a phone the analysis takes the lower screen; the map keeps only the area. */
+@media (max-width: 700px) {
+  .selection-card[data-compact="true"] {
+    display: none;
+  }
 }
 /* Tool panels open beside the column, next to the tool that opened them. */
 .coordinates-panel {
@@ -966,6 +999,153 @@
   border-radius: 1px;
   background: var(--color-selected);
 }
+/* The way down to the full report: the arrow nods, so it reads as "more below". */
+@media (prefers-reduced-motion: no-preference) {
+  .report-jump svg {
+    animation: report-nod 1800ms ease-in-out infinite;
+  }
+}
+@keyframes report-nod {
+  0%,
+  60%,
+  100% {
+    translate: 0 0;
+  }
+  30% {
+    translate: 0 3px;
+  }
+}
+/* The numbers of the cell under the pointer. It never takes the pointer itself. */
+.cell-readout {
+  position: absolute;
+  top: 0;
+  left: 0;
+  /* Over the area's editing handles (17), under the panels (20 and up). */
+  z-index: 18;
+  width: max-content;
+  max-width: 280px;
+  padding: 10px 12px;
+  font-size: 12.5px;
+  color: var(--color-dim);
+  pointer-events: none;
+  will-change: transform;
+}
+.cell-readout-place {
+  color: var(--color-ink);
+  font-weight: 500;
+}
+.cell-readout-values {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cell-readout-values > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 18px;
+}
+.cell-readout-values dt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cell-readout-values dd {
+  color: var(--color-ink);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.cell-readout-values .sensor-dot {
+  margin-inline: 1.5px;
+}
+/* The model's value is set apart from what the sensors recorded. */
+.cell-readout-model {
+  margin-top: 3px;
+  padding-top: 6px;
+  border-top: 1px solid var(--color-line);
+}
+.cell-readout-unusual {
+  margin-top: 7px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-ink);
+}
+/* The sensor lens: VIIRS as recorded, or converted to the MODIS Aqua scale. */
+.map-key-lens {
+  display: flex;
+  width: 100%;
+  padding: 2px;
+  gap: 2px;
+  border: 1px solid var(--color-line);
+  border-radius: 8px;
+}
+.map-key-lens button {
+  flex: 1;
+  padding: 3px 6px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-dim);
+  cursor: pointer;
+  transition: background-color 150ms ease-out, color 150ms ease-out;
+}
+.map-key-lens button[aria-pressed="true"] {
+  background: var(--color-button);
+  color: var(--color-button-ink);
+}
+@media (hover: hover) {
+  .map-key-lens button:not([aria-pressed="true"]):hover {
+    background: var(--color-bark);
+    color: var(--color-ink);
+  }
+}
+/* The key row that also switches the glow on and off. */
+.map-key-toggle {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: -3px -6px;
+  padding: 3px 6px;
+  border-radius: 6px;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 150ms ease-out;
+}
+.map-key-toggle[aria-pressed="false"] {
+  color: var(--color-faint);
+}
+.map-key-toggle[aria-pressed="false"] .unusual-glow {
+  opacity: 0.3;
+  animation: none;
+}
+@media (hover: hover) {
+  .map-key-toggle:hover {
+    background: var(--color-bark);
+  }
+}
+.unusual-glow {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--color-lume) 20%, transparent 72%);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .unusual-glow {
+    animation: unusual-breath 2600ms ease-in-out infinite;
+  }
+}
+@keyframes unusual-breath {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
 .map-key-status {
   margin-top: 8px;
   padding-top: 8px;
@@ -1281,6 +1461,10 @@
     gap: 4px 12px;
   }
   .map-key-rows .text-faint {
+    display: none;
+  }
+  /* On a phone the key keeps its rows; the explanations would cover the map. */
+  .map-key-detail {
     display: none;
   }
   .map-view-controls {
