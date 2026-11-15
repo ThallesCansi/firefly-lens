@@ -11,6 +11,17 @@ const regions = index.regions.map((region) => ({ region,
   bundle: validateBundle(JSON.parse(readFileSync(`public${region.url}`, "utf8")), region) }));
 
 describe("Firefly Signals seasonal classification", () => {
+  it("rejects synthetic, raw and unvalidated coverage even with a high seasonal score", () => {
+    for (const change of ["synthetic", "raw", "status", "reference"]) {
+      const bundle = structuredClone(regions[0].bundle);
+      const payload = bundle.sections.anomalies;
+      if (change === "synthetic") payload.source.synthetic = true;
+      if (change === "raw") payload.source.provenance.kind = "real_raw_detections";
+      if (change === "status") payload.data_status = "not_validated";
+      if (change === "reference" && !isFailure(payload.data)) payload.data.months.forEach((r) => { r.reference.n_years = 1; });
+      expect(fireflySignals([{ region: regions[0].region, bundle }], "2024-06")).toEqual([]);
+    }
+  });
   it("includes either threshold at the boundary without treating null as zero", () => {
     const row = seasonalAnomaly(regions[0].bundle, "2024-03")!;
     const score = (percentile: number | null, z_score: number | null) =>

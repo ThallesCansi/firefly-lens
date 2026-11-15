@@ -1,11 +1,14 @@
-import { fireData } from "@/lib/data/source";
-import { meta } from "@/lib/data/meta";
-import { loadArea } from "@/lib/data/area";
-import { normalizeBBox, rectangleArea, SENSORS, type AnalysisArea, type BBox, type Sensor } from "@/lib/data/types";
-import { buildRecord, type FireRecord } from "@/lib/harmonize";
-import { BoundaryRepository, geometryBounds } from "@/lib/interactions/administrative";
-import { navigationForSearch, type SearchSuggestion } from "@/lib/interactions/navigation";
-import { MONTHS } from "@/lib/format";
+import { fireData } from "../data/source";
+import { meta } from "../data/meta";
+import { loadArea } from "../data/area";
+import { normalizeBBox, rectangleArea, SENSORS, type AnalysisArea, type BBox, type Sensor } from "../data/types";
+import { buildRecord, type FireRecord } from "../harmonize";
+import { BoundaryRepository, geometryBounds } from "../interactions/administrative";
+import { navigationForSearch, type SearchSuggestion } from "../interactions/navigation";
+import { MONTHS } from "../format";
+import { rawPilotFor } from "../data/coverage";
+import { loadRawPilot, loadNationalAnalytics } from "../data/raw-pilot";
+import { isFailure } from "../analytics/contracts";
 import type { MapDestination } from "@/components/lens/LocationSearch";
 
 /** What the assistant can read and change in the workspace. */
@@ -41,7 +44,7 @@ export function describeHost(host: AssistantHost): string {
   const area = host.area ? `${host.area.name} (${host.area.kind === "state" ? "state" : host.area.kind === "preset" ? "prepared study region" : "drawn area"})` : "none";
   return `<map_state>area of interest: ${area}; period shown: ${host.period}; layers: ${
     host.sensors.join(", ") || "none"
-  }; analysis panel: ${host.analysisOpen ? "open" : "closed"}</map_state>`;
+  }; analysis panel: ${host.analysisOpen ? "open" : "closed"}; data kind: ${host.area && rawPilotFor(host.area) ? (rawPilotFor(host.area)?.national_url ? "real whole-country harmonization; local ecosystem skill and current activity forecast are not validated" : "real raw country detections; no validated harmonized history, anomaly or activity forecast") : "Brazilian harmonized grid only where covered"}</map_state>`;
 }
 
 async function findState(query: string): Promise<AnalysisArea | null> {
@@ -84,9 +87,13 @@ const round = (x: number) => Math.round(x);
 const monthName = (m: number) => MONTHS[m];
 
 function recordOf(area: AnalysisArea): Promise<FireRecord> {
+  if (rawPilotFor(area)) return Promise.reject(new Error("The raw country pilot has no validated harmonized record."));
   let record = records.get(area.id);
   if (!record) {
-    record = loadArea(area).then(buildRecord);
+    record = loadArea(area).then((data) => {
+      if (data.cells === 0) throw new Error("No harmonized historical coverage for this area. Missing coverage is not zero fire activity.");
+      return buildRecord(data);
+    });
     records.set(area.id, record);
     record.catch(() => records.delete(area.id));
   }
@@ -102,6 +109,14 @@ const periodLabel = (period: string) =>
  */
 async function applyPeriod(host: AssistantHost, raw: string): Promise<ToolOutcome> {
   let period = raw.trim();
+  const pilot = host.area ? rawPilotFor(host.area) : undefined;
+  if (pilot) {
+    if (/^\d{4}$/.test(period)) period = `${period}-09`;
+    if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(period) || period < pilot.period.start || period > pilot.period.end)
+      return { ok: false, result: `The country record supports monthly maps from ${pilot.period.start} to ${pilot.period.end}. Daily country maps and dates outside this coverage are unavailable.` };
+    host.setPeriod(period);
+    return { ok: true, result: `Showing ${period} raw detections. Sensors remain separate; harmonization is not validated.`, note: `Showing ${period}` };
+  }
   let why = "";
   if (/^\d{4}$/.test(period)) {
     const year = Number(period);
@@ -139,6 +154,26 @@ async function choose(host: AssistantHost, area: AnalysisArea, input: Record<str
 }
 
 async function history(area: AnalysisArea, fromYear: number, toYear: number): Promise<string> {
+  if (rawPilotFor(area)) {
+    if (rawPilotFor(area)?.national_url) {
+      const bundle = await loadNationalAnalytics(area);
+      const history = bundle.sections.history.data;
+      if (isFailure(history)) return JSON.stringify(history);
+      const end = Math.max(fromYear,toYear), start = Math.max(Math.min(fromYear,toYear),end-4);
+      const months = history.monthly.filter((r) => r.year>=start && r.year<=end);
+      return JSON.stringify({ data_kind:"real_harmonized_data",scope:"entire_country_only", units:"MODIS-Aqua-equivalent hotspots",
+        coverage:bundle.sections.history.period,availability:months.length ? "available_country_only" : "outside_country_coverage",monthly:months,
+        limitations:bundle.sections.history.limitations, current_activity_forecast:"unavailable",subnational_calibration:"not_validated" });
+    }
+    const data = await loadRawPilot(area);
+    const start = Math.min(fromYear, toYear), end = Math.max(fromYear, toYear);
+    const months = data.monthly.filter((r) => Number(r.date.slice(0,4)) >= start && Number(r.date.slice(0,4)) <= end);
+    return JSON.stringify({ data_kind: data.data_kind, country: data.name, coverage: data.period,
+      units: "raw satellite detections; MODIS and VIIRS must remain separate", monthly: months,
+      availability: months.length ? "available_raw_only" : "outside_raw_coverage",
+      harmonized_activity: "unavailable", seasonal_anomaly: "unavailable", activity_forecast: "unavailable",
+      limitations: data.limitations });
+  }
   const r = await recordOf(area);
   let from = Math.max(fireData.firstYear, Math.min(fromYear, toYear));
   const to = Math.min(fireData.lastYear, Math.max(fromYear, toYear));

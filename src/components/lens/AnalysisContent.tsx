@@ -28,6 +28,9 @@ import { DayDetail } from "./DayDetail";
 import { HistoryHeatmap, againstMedian } from "./HistoryHeatmap";
 import { SensorCompare } from "./SensorCompare";
 import { AnalyticsReport } from "./analytics/AnalyticsReport";
+import { CountryReport } from "./analytics/CountryReport";
+import { BrowserHistoryChart } from "./analytics/BrowserHistoryChart";
+import { rawPilotFor } from "@/lib/data/coverage";
 
 const MODES: { value: CalendarMode; label: string }[] = [
   { value: "harmonized", label: "Harmonized" },
@@ -89,7 +92,11 @@ function RecordStatus({
  * The side panel: every month on record as one heatmap. Selecting a month
  * opens its days; everything else lives in the report below the map.
  */
-export function AnalysisCalendar({
+export function AnalysisCalendar(props: Parameters<typeof HarmonizedAnalysisCalendar>[0]) {
+  return rawPilotFor(props.area) ? <CountryReport area={props.area} period={props.period} onPeriod={props.onPeriod} compact onReport={props.onReport} /> : <HarmonizedAnalysisCalendar {...props} />;
+}
+
+function HarmonizedAnalysisCalendar({
   area,
   period,
   onPeriod,
@@ -139,6 +146,7 @@ export function AnalysisCalendar({
           className={`flex flex-col gap-4 transition-opacity duration-200 ${loading ? "opacity-50" : ""}`}
           aria-busy={loading}
         >
+          <BrowserHistoryChart record={record} />
           <p className="text-[0.875rem] text-dim">
             Each square is one month of hot spots on the MODIS Aqua scale.
             Select a month to open its days.

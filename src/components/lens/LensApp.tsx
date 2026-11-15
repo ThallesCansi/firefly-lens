@@ -4,6 +4,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { fireData } from "@/lib/data/source";
+import { rawPilots, rawPilotArea, rawPilotFor } from "@/lib/data/coverage";
 import {
   drawnArea,
   normalizeBBox,
@@ -47,6 +48,7 @@ const presets = fireData.presets();
 const deg = (n: number) => Math.round(n * 100) / 100;
 /** One line that says what the area is. */
 function describe(area: Area): string {
+  if (rawPilotFor(area)) return "Real raw detections · country pilot · harmonization not validated";
   if (area.kind === "preset") return "Study region · Prepared seasonal analytics";
   if (area.kind === "state") return "Brazilian state · IBGE outline";
   const corners = area.geometry.type === "Polygon" ? area.geometry.coordinates[0].length - 1 : 0;
@@ -153,8 +155,9 @@ export function LensApp() {
     const to = `${year}-12` > fireData.lastMonth ? fireData.lastMonth : `${year}-12`;
     return { from: `${year}-01`, to };
   });
-  const play = usePlaybackFrames(area, playRange.from, playRange.to, playback);
-  const playing = playback && play.frames !== null;
+  const rawPilot = area ? rawPilotFor(area) : undefined;
+  const play = usePlaybackFrames(rawPilot ? null : area, playRange.from, playRange.to, playback);
+  const playing = !rawPilot && playback && play.frames !== null;
   // While a time-lapse is loaded its frames feed the map, so nothing else loads.
   const mapData = useMapCells(playing ? null : area, period);
   const shown = playing
@@ -181,6 +184,14 @@ export function LensApp() {
         return false;
       }
       const { id, name } = candidate.feature.properties;
+      const pilot = rawPilots.find((entry) => entry.country_code === candidate.feature.properties.countryCode);
+      if (pilot) {
+        setArea(rawPilotArea(pilot));
+        setPeriod(`${pilot.period.end.slice(0,4)}-09`);
+        setFrom(pilot.period.start); setTo(pilot.period.end); setPlayback(false);
+        setFrame((n) => n + 1);
+        return true;
+      }
       setArea({
         id: `state:${id}`,
         name,
@@ -259,6 +270,7 @@ export function LensApp() {
   const detectionStatus = area ? (
     <p role="status">
       <ScientificInfo concept="hotspot" />
+      {rawPilot && "Real raw detections · harmonization not validated · "}
       {shown.error ||
         (shown.cells === null
           ? "Loading detections…"
@@ -353,6 +365,13 @@ export function LensApp() {
     assistantHost.current = host;
   });
   function selectPreset(id: string) {
+    const pilot = rawPilots.find((entry) => `raw:${entry.country_code}` === id);
+    if (pilot) {
+      const next = rawPilotArea(pilot);
+      tools.clear(); setArea(next); setFrame((n) => n+1); setAnalysis(false); setCoordinates(false);
+      setPeriod(`${pilot.period.end.slice(0,4)}-09`); setFrom(pilot.period.start); setTo(pilot.period.end); setPlayback(false);
+      return next;
+    }
     const preset = presets.find((p) => p.id === id);
     if (!preset) throw new Error("The example study region is unavailable.");
     const next = rectangleArea(preset.bbox, preset.name);
@@ -503,6 +522,8 @@ export function LensApp() {
               <button
                 type="button"
                 className="layer-chip play-chip"
+                disabled={!!rawPilot}
+                title={rawPilot ? "The raw pilot supports individual monthly maps" : "Play monthly detections"}
                 aria-pressed={playback}
                 onClick={() => {
                   // Opening starts the map at the first month of the range.
@@ -576,6 +597,7 @@ export function LensApp() {
                       {p.name} · {p.place}
                     </option>
                   ))}
+                  {rawPilots.map((entry) => <option key={entry.country_code} value={`raw:${entry.country_code}`}>{entry.name} · real raw pilot ({entry.period.start}–{entry.period.end})</option>)}
                 </select>
               </label>
               <AreaForm
@@ -675,7 +697,7 @@ export function LensApp() {
               </section>
             )}
           <div className="map-bottom">
-            {playback && (
+            {playback && !rawPilot && (
               <PlaybackBar
                 from={playRange.from}
                 to={playRange.to}
@@ -758,7 +780,7 @@ export function LensApp() {
               </h2>
               <p className="num text-xs text-dim">{describe(analyzed)}</p>
               <p className="mt-3 max-w-[70ch] text-[0.9375rem] text-dim">
-                Real detections, harmonized to the MODIS Aqua scale. Hot spots
+                {rawPilotFor(analyzed) ? (rawPilotFor(analyzed)?.national_url ? "Real country-wide harmonization. Local ecosystem and subnational calibration are not validated." : "Real raw sensor detections. Harmonization is not validated for this country.") : "Real detections on Brazil’s MODIS Aqua scale. Selected areas aggregate only covered Brazilian grid cells."} Hot spots
                 are detected pixels, not independent fires.{" "}
                 <Link href="/method">Read the methodology and limitations.</Link>
               </p>

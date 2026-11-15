@@ -1,0 +1,56 @@
+{
+  "transport": "Next HTTP proxy → authenticated FastAPI → real Brazilian Parquet",
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [
+          -57.47,
+          -18.47
+        ],
+        [
+          -56.57,
+          -18.43
+        ],
+        [
+          -56.83,
+          -17.67
+        ],
+        [
+          -57.47,
+          -18.47
+        ]
+      ]
+    ]
+  },
+  "generated_at": "2026-11-15T16:13:41.318Z",
+  "measurements": [
+    {
+      "section": "history",
+      "seconds": 2.465,
+      "http_status": 200,
+      "monthly_rows": 293
+    },
+    {
+      "section": "history",
+      "seconds": 0.148,
+      "http_status": 200,
+      "monthly_rows": 293
+    },
+    {
+      "section": "forecast",
+      "seconds": 0.35,
+      "http_status": 200,
+      "monthly_rows": 293,
+      "forecast_status": "unavailable",
+      "reason": "latest_eligible_observation_does_not_reach_forecast_origin"
+    },
+    {
+      "section": "fire-weather",
+      "seconds": 3.556,
+      "http_status": 200,
+      "monthly_rows": null,
+      "reason": null
+    }
+  ]
+}

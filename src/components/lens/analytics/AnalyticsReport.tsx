@@ -1,10 +1,10 @@
 "use client";
 
 import { useId, useState, type ReactNode } from "react";
-import type { AnalysisArea } from "@/lib/data/types";
-import { meta } from "@/lib/data/meta";
-import { useFireRecord } from "@/lib/useFireRecord";
-import { useAnalytics } from "@/lib/analytics/useAnalytics";
+import type { AnalysisArea } from "../../../lib/data/types";
+import { meta } from "../../../lib/data/meta";
+import { useFireRecord } from "../../../lib/useFireRecord";
+import { useAnalytics } from "../../../lib/analytics/useAnalytics";
 import {
   isFailure,
   type Bundle,
@@ -12,8 +12,13 @@ import {
   type ForecastData,
   type Metric,
   type Model,
-} from "@/lib/analytics/contracts";
+} from "../../../lib/analytics/contracts";
 import { ScientificChart, numeric, type PlotSeries } from "./ScientificChart";
+import { describeMonth, describeForecastLimit } from "../../../lib/analytics/interpretation";
+import { FireDangerAssessment } from "./FireDangerAssessment";
+import { CountryReport } from "./CountryReport";
+import { RetrospectiveForecast } from "./RetrospectiveForecast";
+import { rawPilotFor } from "../../../lib/data/coverage";
 import "./analytics.css";
 
 const MONTHS = [
@@ -63,7 +68,7 @@ function historicalSeries(rows: MonthlyRow[]): PlotSeries[] {
   }));
 }
 
-function History({
+export function History({
   bundle,
   from,
   to,
@@ -75,6 +80,7 @@ function History({
   period: string;
 }) {
   const [resolution, setResolution] = useState("monthly");
+  const [scope, setScope] = useState("record");
   const [metric, setMetric] = useState<
     "absolute" | "percent" | "z_score" | "robust_z" | "percentile"
   >("absolute");
@@ -87,7 +93,9 @@ function History({
         History unavailable: {reason(history.reason)}
       </p>
     );
-  const rows = history.monthly.filter((r) => r.date >= from && r.date <= to);
+  const start = scope === "record" ? history.monthly[0]?.date ?? from : from;
+  const end = scope === "record" ? history.monthly.at(-1)?.date ?? to : to;
+  const rows = history.monthly.filter((r) => r.date >= start && r.date <= end);
   const selected = history.monthly.find((r) => r.date === period.slice(0, 7));
   const selectedAnomaly = !isFailure(anomalies)
     ? anomalies.months.find((r) => r.date === period.slice(0, 7))
@@ -105,6 +113,68 @@ function History({
   };
   return (
     <div className="analytics-stack">
+      <section className="analytics-card">
+        <div className="analytics-card-heading">
+          <div>
+            <span className="analytics-eyebrow">01 / Historical record</span>
+            <h3>Historical fire activity, over time</h3>
+          </div>
+          <label>
+            Time span{" "}
+            <select className="field" value={scope} onChange={(e) => setScope(e.target.value)}>
+              <option value="record">Full record</option>
+              <option value="selection">Selected date range</option>
+            </select>
+          </label>
+          <label>
+            Resolution{" "}
+            <select
+              className="field"
+              value={resolution}
+              onChange={(e) => setResolution(e.target.value)}
+            >
+              <option value="monthly">Monthly</option>
+              <option value="annual">Annual</option>
+            </select>
+          </label>
+        </div>
+        <p className="analytics-insight">{describeMonth(selected, selectedAnomaly)}</p>
+        {resolution === "monthly" ? (
+          <ScientificChart
+            title="Monthly activity"
+            description="MODIS observations and harmonized VIIRS estimates are separate series. Shading is harmonization uncertainty, not a forecast interval."
+            unit={unit}
+            series={historicalSeries(rows)}
+          />
+        ) : (
+          <ScientificChart
+            title="Annual activity"
+            description="Only complete, policy-eligible years have totals. Partial or excluded years remain gaps; no annualization is applied."
+            unit={unit}
+            series={[
+              {
+                label: "Eligible annual totals",
+                points: history.annual
+                  .filter(
+                    (r) =>
+                      r.year >= Number(start.slice(0, 4)) &&
+                      r.year <= Number(end.slice(0, 4)),
+                  )
+                  .map((r) => ({
+                    label: String(r.year),
+                    value: r.total,
+                    note: `${r.valid_months} eligible months; full calendar-year total`,
+                  })),
+              },
+            ]}
+          />
+        )}
+        <p className="analytics-footnote">
+          {start}–{end} · NASA FIRMS, MODIS Aqua / VIIRS NOAA-20 · 0.25° grid.
+          Annual totals require complete, eligible years.{" "}
+          <a href="/method#monthly-evidence">How to read the record ↗</a>
+        </p>
+      </section>
       <div className="analytics-stats">
         <div>
           <span>{selected?.date ?? "Selected month"}</span>
@@ -150,62 +220,6 @@ function History({
         Spatial resolution: 0.25°. Small polygons represent fractions of grid cells.
       </p>
       <section className="analytics-card">
-        <div className="analytics-card-heading">
-          <div>
-            <span className="analytics-eyebrow">01 / Historical record</span>
-            <h3>The record, over time</h3>
-          </div>
-          <label>
-            Resolution{" "}
-            <select
-              className="field"
-              value={resolution}
-              onChange={(e) => setResolution(e.target.value)}
-            >
-              <option value="monthly">Monthly</option>
-              <option value="annual">Annual</option>
-            </select>
-          </label>
-        </div>
-        {resolution === "monthly" ? (
-          <ScientificChart
-            title="Monthly activity"
-            description="MODIS observations and harmonized VIIRS estimates are separate series. Shading is harmonization uncertainty, not a forecast interval."
-            unit={unit}
-            series={historicalSeries(rows)}
-          />
-        ) : (
-          <ScientificChart
-            title="Annual activity"
-            description="Only complete, policy-eligible years have totals. Partial or excluded years remain gaps; no annualization is applied."
-            unit={unit}
-            series={[
-              {
-                label: "Eligible annual totals",
-                points: history.annual
-                  .filter(
-                    (r) =>
-                      r.year >= Number(from.slice(0, 4)) &&
-                      r.year <= Number(to.slice(0, 4)),
-                  )
-                  .map((r) => ({
-                    label: String(r.year),
-                    value: r.total,
-                    note: `${r.valid_months} eligible months; full calendar-year total`,
-                  })),
-              },
-            ]}
-          />
-        )}
-        <p className="analytics-footnote">
-          {from}–{to}. Annual points use full calendar years within the selected
-          years. Descriptive annual trend across the full record:{" "}
-          {numeric(history.summary.trend.slope_per_year)} hot spots/year (
-          {history.summary.trend.n_years} eligible years); this is neither a
-          significance test nor a forecast.
-        </p>
-      </section>
-      <section className="analytics-card">
         <span className="analytics-eyebrow">02 / Seasonal reference</span>
         <h3>What is typical for each month?</h3>
         {isFailure(climate) ? (
@@ -230,7 +244,7 @@ function History({
                 },
                 {
                   label: `${year} activity`,
-                  kind: year > meta.observedUntil ? "estimated" : "observed",
+                  kind: history.monthly.some((r) => r.year === year && r.source === "modeled_viirs") ? "estimated" : "observed",
                   points: climate.months.map((r) => {
                     const value = history.monthly.find(
                       (p) => p.year === year && p.month === r.month,
@@ -248,9 +262,10 @@ function History({
               ]}
             />
             <p className="analytics-footnote">
-              The fixed seasonal reference and the operational anomaly reference
-              serve different purposes. Anomalies use eligible years strictly
-              before each target year.
+              {selected?.complete && selected.value != null && selectedClimate?.median != null
+                ? `${selected.date} activity (${numeric(selected.value)}) was ${selected.value > selectedClimate.median ? "above" : selected.value < selectedClimate.median ? "below" : "equal to"} the fixed same-month median (${numeric(selectedClimate.median)}).`
+                : "The selected month does not support a complete comparison with the fixed seasonal median."}{" "}
+              Anomalies below use eligible years strictly before each target year.
             </p>
             <details>
               <summary>Regional seasonal statistics</summary>
@@ -274,7 +289,7 @@ function History({
             <span className="analytics-eyebrow">
               03 / Departures from the reference
             </span>
-            <h3>How unusual was the month?</h3>
+            <h3>Seasonal Fire Anomaly</h3>
           </div>
           <label>
             Measure{" "}
@@ -294,6 +309,8 @@ function History({
         {isFailure(anomalies) ? (
           <p className="analytics-notice">{reason(anomalies.reason)}</p>
         ) : (
+          <>
+          <p className="analytics-insight">{describeMonth(selected, selectedAnomaly)}</p>
           <ScientificChart
             title={metrics[metric]}
             description="Values come directly from Python. Partial months and insufficient references remain unavailable. A modeled anomaly describes an estimate, not observed truth."
@@ -325,6 +342,7 @@ function History({
               },
             ]}
           />
+          </>
         )}
       </section>
     </div>
@@ -385,8 +403,7 @@ function Metrics({
 
 function Forecast({ bundle }: { bundle: Bundle }) {
   const forecast = bundle.sections.forecast.data,
-    history = bundle.sections.history.data,
-    weather = bundle.sections.fire_weather.data;
+    history = bundle.sections.history.data;
   if (isFailure(forecast))
     return (
       <p className="analytics-notice">
@@ -439,7 +456,7 @@ function Forecast({ bundle }: { bundle: Bundle }) {
           <div className="analytics-notice">
             <strong>No current numeric forecast</strong>
             <p>
-              {reason(f.reason)}. The latest eligible observation is{" "}
+              {describeForecastLimit(f.reason)} The latest eligible observation is{" "}
               {f.last_complete_observation_used ?? "unavailable"}; the requested
               origin is {f.forecast_origin}. Historical validation does not
               establish current forecast availability.
@@ -530,30 +547,18 @@ function Forecast({ bundle }: { bundle: Bundle }) {
           )}
         </details>
       </section>
-      <section className="analytics-card">
-        <span className="analytics-eyebrow">03 / Meteorological context</span>
-        <h3>Fire Weather Index</h3>
-        <p>
-          FWI describes meteorological fire danger. Its dimensionless values are
-          separate from predicted hot spot counts.
-        </p>
-        <div className="analytics-notice">
-          <strong>
-            {isFailure(weather) || weather.status === "unavailable"
-              ? "Weather outlook unavailable"
-              : "Weather data require a provider-specific display"}
-          </strong>
-          <p>
-            {reason(weather.reason)}. No operational FWI provider is configured
-            for this release.
-          </p>
-        </div>
-      </section>
+      <RetrospectiveForecast bundle={bundle} />
     </div>
   );
 }
 
-export function AnalyticsReport({
+export function AnalyticsReport(props: Parameters<typeof HarmonizedAnalyticsReport>[0]) {
+  return rawPilotFor(props.area) ? <CountryReport area={props.area} period={props.period}
+    renderHistory={(bundle) => <History bundle={bundle} from={props.from} to={props.to} period={props.period} />}
+    renderForecast={(bundle) => <Forecast bundle={bundle} />} /> : <HarmonizedAnalyticsReport {...props} />;
+}
+
+function HarmonizedAnalyticsReport({
   area,
   from,
   to,
@@ -699,8 +704,7 @@ export function AnalyticsReport({
                       flags: [],
                       valid_for_reference: false,
                       uncertainty_method: null,
-                    }))
-                    .filter((r) => r.date >= from && r.date <= to),
+                    })),
                 )}
               />
             </section>
@@ -735,7 +739,7 @@ export function AnalyticsReport({
         hidden={tab !== "forecast"}
       >
         <div className="analytics-panel-intro">
-          <h3>Fire Activity Forecast</h3>
+          <h3>Statistical Activity Forecast</h3>
           <p>
             Explore experimental forecasts, uncertainty and model performance.
           </p>
@@ -756,6 +760,7 @@ export function AnalyticsReport({
           )
         )}
       </div>
+      <FireDangerAssessment area={area} />
       {bundle && (
         <details className="analytics-provenance">
           <summary>Methods, provenance & limitations</summary>

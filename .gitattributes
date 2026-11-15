@@ -1,2 +1,7 @@
 # Analytics integrity hashes cover exact UTF-8 bytes, including line endings.
 public/analytics/*.json text eol=lf
+public/data/coverage.json text eol=lf
+public/data/continental/**/*.json text eol=lf
+public/data/weather/*.json text eol=lf
+harmonization/output/fire_weather/*.json text eol=lf
+harmonization/output/fire_weather/*.nc binary

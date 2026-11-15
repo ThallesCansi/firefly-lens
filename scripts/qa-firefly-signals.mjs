@@ -9,7 +9,9 @@ const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
 page.setDefaultTimeout(30000);
 page.on("pageerror", (error) => errors.push(error.message));
 const index = JSON.parse(readFileSync("public/analytics/manifest.json", "utf8"));
-const expected = (period) => index.regions.filter((region) => {
+const coverage = JSON.parse(readFileSync("public/data/coverage.json", "utf8"));
+const assessed = [...index.regions, ...coverage.datasets.filter((d) => d.signals_eligible && d.national_url).map((d) => ({ url:d.national_url }))];
+const expected = (period) => assessed.filter((region) => {
   const row = JSON.parse(readFileSync(`public${region.url}`, "utf8"))
     .sections.anomalies.data.months.find((r) => r.date === period);
   return row?.complete && ["available", "partially_available"].includes(row.status) &&
@@ -66,7 +68,7 @@ try {
   if (process.env.QA_SCREENSHOT) await page.screenshot({ path: process.env.QA_SCREENSHOT });
   await period("2026", "11");
   await count(0);
-  assert.match(await page.locator("#signal-status").innerText(), /0\/5 regions assessed/);
+  assert.match(await page.locator("#signal-status").innerText(), new RegExp(`0/${assessed.length} regions assessed`));
   // Rapid period changes must end with the exact final month's signals.
   await period("2024", "03");
   await period("2024", "06");
