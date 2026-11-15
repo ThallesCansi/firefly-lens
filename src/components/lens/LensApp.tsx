@@ -514,7 +514,6 @@ export function LensApp() {
               </p>
             </header>
             <AnalysisReport
-              key={analyzed.id}
               area={analyzed}
               period={period}
               onPeriod={changePeriod}

@@ -1,0 +1,220 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-11-15T03:08:19.252143+00:00",
+  "data_meta": {
+    "version": 1,
+    "firstDay": "2002-07-04",
+    "lastDay": "2026-11-14",
+    "seriesEnd": "2026-10",
+    "partialMonth": "2026-11",
+    "observedUntil": 2025,
+    "climatologyBase": [
+      2003,
+      2025
+    ],
+    "cellDeg": 0.25,
+    "commonErrorC": 0.213
+  },
+  "sources": [
+    {
+      "path": "harmonization/output/grid_monthly_total.parquet",
+      "sha256_lf": "9c0d842197ba6355e094709ed19a5ad25faa843342c8df99c349f14cb4b836e1"
+    },
+    {
+      "path": "harmonization/output/harmonization_params.json",
+      "sha256_lf": "79f1f4834d3d1a46860dbef771652b689e24c8cba53db0bcf8887ea9e1acd026"
+    },
+    {
+      "path": "public/data/brazil/meta.json",
+      "sha256_lf": "0d1a8abb141c946eef34179c982883435ea3b2ad937dab6f198c45205a589cd3"
+    }
+  ],
+  "engine_sources": {
+    "__init__.py": "2af97d57039656638fdf2017e2515bbe375b769234d27321e5a2cfda509a7d9c",
+    "__main__.py": "79ee6f134c5c5193377cf9b189cbdcc3e2095e49ba9cec310114441c15a917c4",
+    "anomalies.py": "727bd696739c18c1ff632187fa3a8278316a238ef9a1dda926a49568a4b7b26e",
+    "cli.py": "f56b36380d019da8090ff6f66868ece6749972b6c92a8f6925004199fc99f377",
+    "climatology.py": "1e58f0711cd46e39a30835584a9039269bc2445a65f5db875068b798cca22926",
+    "data_adapter.py": "a17f71740ae943d70febf6f48d60b81d7163b152f84d879cc9c57d8dbe625013",
+    "engine.py": "e9ddf207c83def7e24101658fe35114ff4f44128ff1b295342ec94dccdf4b7c2",
+    "export.py": "27bacc8a2ea1e2432b0f177fd9064a87e3240ea02e2ac0f73af98288470912e9",
+    "fire_weather.py": "99e915eb02ac09dbfdaa9ff5faf4fba9cf72b282719a968205c7659e979f4da2",
+    "forecasting.py": "d5fa91f821ac20a5256897a7243f3c28a6fd33c4053ce3139bfdecd6241bf37a",
+    "history.py": "1e1ae80aa05f6a0fc71eb6aa41a4dd197f7f7850d8717294e968b6f2fa97624e",
+    "models.py": "b141d9dc42bed36165f9fc019abc3ab56d40b58a93dbb060ce674cc38485a95d",
+    "validation.py": "7a68f45a5fdc45b64103697b8aa6fc786ddc86f778e0e7418932ba8cbfc466e3"
+  },
+  "regions": [
+    {
+      "id": "amazon",
+      "name": "Southern Amazon",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -62,
+              -13
+            ],
+            [
+              -50,
+              -13
+            ],
+            [
+              -50,
+              -5
+            ],
+            [
+              -62,
+              -5
+            ],
+            [
+              -62,
+              -13
+            ]
+          ]
+        ]
+      },
+      "url": "/analytics/amazon.json",
+      "sha256": "6d7822fdf06566cae715f08a56117b39d339a0427b9512196cb21f71c5fbc964",
+      "forecast_status": "unavailable"
+    },
+    {
+      "id": "matopiba",
+      "name": "Matopiba",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -50,
+              -14
+            ],
+            [
+              -42,
+              -14
+            ],
+            [
+              -42,
+              -6
+            ],
+            [
+              -50,
+              -6
+            ],
+            [
+              -50,
+              -14
+            ]
+          ]
+        ]
+      },
+      "url": "/analytics/matopiba.json",
+      "sha256": "e2fc6a5c21f093cea7ee2c5272642c529bb96ed7a595bd5a54d2186b8894d5ea",
+      "forecast_status": "unavailable"
+    },
+    {
+      "id": "pantanal",
+      "name": "Pantanal",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -58.5,
+              -22
+            ],
+            [
+              -54.5,
+              -22
+            ],
+            [
+              -54.5,
+              -16
+            ],
+            [
+              -58.5,
+              -16
+            ],
+            [
+              -58.5,
+              -22
+            ]
+          ]
+        ]
+      },
+      "url": "/analytics/pantanal.json",
+      "sha256": "bd0100ccc290f1234e0b2d16264e210df9070149685eb8ed3c0cb7079a8e49b4",
+      "forecast_status": "unavailable"
+    },
+    {
+      "id": "caatinga",
+      "name": "Sertão",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -42,
+              -11
+            ],
+            [
+              -36,
+              -11
+            ],
+            [
+              -36,
+              -5
+            ],
+            [
+              -42,
+              -5
+            ],
+            [
+              -42,
+              -11
+            ]
+          ]
+        ]
+      },
+      "url": "/analytics/caatinga.json",
+      "sha256": "14a07b9d449e1ce855c510cccdd2edc9009315ae8159d3946081ab5c7b51b0ca",
+      "forecast_status": "unavailable"
+    },
+    {
+      "id": "pampa",
+      "name": "Pampa",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -57.5,
+              -33.5
+            ],
+            [
+              -50,
+              -33.5
+            ],
+            [
+              -50,
+              -28
+            ],
+            [
+              -57.5,
+              -28
+            ],
+            [
+              -57.5,
+              -33.5
+            ]
+          ]
+        ]
+      },
+      "url": "/analytics/pampa.json",
+      "sha256": "4efb0a2be9c4d8da9ac1366e89210c34683668ed4858fe8e9fa0a58572423b69",
+      "forecast_status": "unavailable"
+    }
+  ],
+  "coverage": "Exact preprocessed geometries only; arbitrary selections require on-demand Python processing"
+}

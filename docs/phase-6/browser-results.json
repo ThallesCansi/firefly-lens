@@ -1,0 +1,14 @@
+{
+  "generated_at": "2026-11-15T03:33:28.893Z",
+  "checks": [
+    "Real Amazon history, scientific tabs, SARIMA validation metrics and unavailable current forecast/FWI",
+    "Daily selection persists across tabs, keyboard tab navigation works, and side-panel monthly calendar still opens and returns",
+    "Monthly/annual resolution, anomaly measures and period filters",
+    "Rapid region changes preserve selected tab and suppress stale scientific responses",
+    "Original globe/2D projection controls remain functional",
+    "Arbitrary polygon keeps its own browser history, calendar and exports; advanced statistics and forecast explicitly unsupported",
+    "Processing error is explicit; retry loads the correct regional bundle",
+    "Light/dark and mobile widths 390px/320px without page overflow"
+  ],
+  "errors": []
+}

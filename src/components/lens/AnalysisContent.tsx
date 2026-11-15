@@ -26,6 +26,7 @@ import {
 import { DayDetail } from "./DayDetail";
 import { HistoryHeatmap, againstMedian } from "./HistoryHeatmap";
 import { SensorCompare } from "./SensorCompare";
+import { AnalyticsReport } from "./analytics/AnalyticsReport";
 
 const MODES: { value: CalendarMode; label: string }[] = [
   { value: "harmonized", label: "Harmonized" },
@@ -284,14 +285,44 @@ function MonthDetail({
  * The full report under the map: the range, the year's calendar, the selected
  * day, the two sensors side by side and the downloads.
  */
-export function AnalysisReport({
+type ReportProps = {
+  area: AnalysisArea;
+  period: string;
+  onPeriod: (period: string) => void;
+  from: string;
+  to: string;
+  onFrom: (value: string) => void;
+  onTo: (value: string) => void;
+};
+
+export function AnalysisReport(props: ReportProps) {
+  return (
+    <AnalyticsReport
+      area={props.area}
+      period={props.period}
+      from={props.from}
+      to={props.to}
+      controls={
+        <div role="group" aria-label="Date range" className="flex flex-wrap items-end gap-x-5 gap-y-3">
+          <MonthPicker label="From" value={props.from} min={fireData.firstMonth} max={props.to} onChange={props.onFrom} />
+          <MonthPicker label="To" value={props.to} min={props.from} max={fireData.lastMonth} onChange={props.onTo} />
+          <p className="pb-2 text-[0.8125rem] text-faint">
+            History, calendar and downloads use this range. Forecast uses the latest complete origin.
+          </p>
+        </div>
+      }
+    >
+      <SensorAndCalendarReport {...props} />
+    </AnalyticsReport>
+  );
+}
+
+function SensorAndCalendarReport({
   area,
   period,
   onPeriod,
   from,
   to,
-  onFrom,
-  onTo,
 }: {
   area: AnalysisArea;
   period: string;
@@ -350,18 +381,6 @@ export function AnalysisReport({
 
   return (
     <div className="analysis-content flex flex-col gap-12">
-      <div
-        role="group"
-        aria-label="Date range"
-        className="flex flex-wrap items-end gap-x-5 gap-y-3"
-      >
-        <MonthPicker label="From" value={from} min={fireData.firstMonth} max={to} onChange={onFrom} />
-        <MonthPicker label="To" value={to} min={from} max={fireData.lastMonth} onChange={onTo} />
-        <p className="pb-2 text-[0.8125rem] text-faint">
-          The range applies to the heatmap, the calendar and the downloads.
-        </p>
-      </div>
-
       {exportError && (
         <p role="alert" className="text-sm text-ember-4">
           {exportError}
