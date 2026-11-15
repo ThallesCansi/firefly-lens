@@ -560,6 +560,8 @@ export function AnalyticsReport({
   period,
   controls,
   children,
+  tab: controlledTab,
+  onTabChange,
 }: {
   area: AnalysisArea;
   from: string;
@@ -567,8 +569,12 @@ export function AnalyticsReport({
   period: string;
   controls: ReactNode;
   children: ReactNode;
+  tab?: "history" | "forecast";
+  onTabChange?: (tab: "history" | "forecast") => void;
 }) {
-  const [tab, setTab] = useState("history");
+  const [localTab, setLocalTab] = useState<"history" | "forecast">("history");
+  const tab = controlledTab ?? localTab;
+  const setTab = onTabChange ?? setLocalTab;
   const id = useId();
   const { loading, bundle, error, retry, forecastLoading, forecastError, dynamic } = useAnalytics(area);
   const {
@@ -579,7 +585,7 @@ export function AnalyticsReport({
   } = useFireRecord(area);
   const currentRecord = recordArea?.id === area.id ? record : null;
   return (
-    <div className="analytics-report">
+    <div data-tour="analytics" data-tour-ready={!loading && !error && !!result} data-tour-area={area.id} data-tour-error={error ?? undefined} className="analytics-report">
       <div className="analytics-report-heading">
         <div>
           <span className="analytics-eyebrow">Scientific analytics</span>
@@ -597,11 +603,12 @@ export function AnalyticsReport({
         aria-label="Analysis report"
         className="analytics-tabs"
       >
-        {["history", "forecast"].map((value, i) => (
+        {(["history", "forecast"] as const).map((value, i) => (
           <button
             key={value}
             type="button"
             role="tab"
+            data-tour={`tab-${value}`}
             id={`${id}-${value}-tab`}
             aria-controls={`${id}-${value}`}
             aria-selected={tab === value}
@@ -647,6 +654,8 @@ export function AnalyticsReport({
       <div
         role="tabpanel"
         id={`${id}-history`}
+        data-tour="analytics-history"
+        data-tour-ready={!loading && !error && !!result}
         aria-labelledby={`${id}-history-tab`}
         hidden={tab !== "history"}
       >
@@ -720,6 +729,8 @@ export function AnalyticsReport({
       <div
         role="tabpanel"
         id={`${id}-forecast`}
+        data-tour="analytics-forecast"
+        data-tour-ready={!loading && !error && !!result}
         aria-labelledby={`${id}-forecast-tab`}
         hidden={tab !== "forecast"}
       >

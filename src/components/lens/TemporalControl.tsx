@@ -11,7 +11,7 @@ export function TemporalControl({
 }) {
   const day = period.length === 10 ? Number(period.slice(8, 10)) : null;
   return (
-    <div className="temporal-control" role="group" aria-label="Map period, UTC">
+    <div data-tour="period" className="temporal-control" role="group" aria-label="Map period, UTC">
       <svg
         className="temporal-icon"
         width="16"

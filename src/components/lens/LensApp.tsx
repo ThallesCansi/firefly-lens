@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { fireData } from "@/lib/data/source";
 import {
@@ -33,6 +34,11 @@ import { ResizableAnalysisPanel } from "@/components/interactions/ResizableAnaly
 import type { MapController } from "@/lib/map/map-contract";
 import "@/components/interactions/WorkspaceTools.css";
 import { ScientificInfo } from "@/components/ui/ScientificInfo";
+import { TourInvitation } from "@/components/onboarding/TourInvitation";
+import { afterPaint, type TourWorkspace, type WorkspaceSnapshot } from "@/lib/onboarding/session";
+import { TOUR_PERIOD, stepIndex, type TourStepId } from "@/lib/onboarding/steps";
+
+const LumeTour = dynamic(() => import("@/components/onboarding/LumeTour"), { ssr: false });
 
 type Area = AnalysisArea;
 const presets = fireData.presets();
@@ -81,6 +87,42 @@ export function LensApp() {
   const [drawing, setDrawing] = useState(false);
   const [coordinates, setCoordinates] = useState(false);
   const [searching, setSearching] = useState(false);
+  const [tourRunning, setTourRunning] = useState(false);
+  const tourGuard = useRef(false);
+  const tourSnapshot = useRef<WorkspaceSnapshot | null>(null);
+  const analysisFrame = useRef(0);
+  const restoredView = useRef<AbortController | null>(null);
+  const workspaceAlive = useRef(true);
+  const tourLauncher = useRef<HTMLButtonElement>(null);
+  const wasTourRunning = useRef(false);
+  const restoreUi = useRef<{ scrollY: number; panelScrollTop: number } | null>(null);
+  useEffect(() => {
+    workspaceAlive.current = true;
+    return () => { workspaceAlive.current = false; cancelAnimationFrame(analysisFrame.current); restoredView.current?.abort(); };
+  }, []);
+  // Focus and scroll restoration belong to the owner of the committed layout,
+  // after Driver and any example report have actually unmounted.
+  useEffect(() => {
+    const ended = wasTourRunning.current && !tourRunning;
+    wasTourRunning.current = tourRunning;
+    if (!ended) return;
+    const frame = requestAnimationFrame(() => {
+      if (tourGuard.current) return;
+      const ui = restoreUi.current;
+      restoreUi.current = null;
+      if (ui) {
+        window.scrollTo({ top: ui.scrollY, behavior: "instant" });
+        const panel = document.querySelector<HTMLElement>('[data-tour-scroll="analysis-panel"]');
+        if (panel) panel.scrollTop = ui.panelScrollTop;
+      }
+      tourLauncher.current?.focus({ preventScroll: true });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [tourRunning]);
+  const [cardOpen, setCardOpen] = useState(false);
+  const [monthOpen, setMonthOpen] = useState(false);
+  const [analyticsTab, setAnalyticsTab] = useState<"history" | "forecast">("history");
+  const [tourAttempt, setTourAttempt] = useState(0);
   // First-run guidance: closed by its ×, or for good once an area is chosen.
   const introSeen = useSyncExternalStore(subscribeStorage, readIntroSeen, () => true);
   const [introClosed, setIntroClosed] = useState(false);
@@ -148,7 +190,7 @@ export function LensApp() {
     [],
   );
   // Corner handles show as soon as a drawn area exists, unless another tool is in use.
-  const editable = area && !analysis && !drawing && !coordinates ? area : null;
+  const editable = area && !analysis && !tourRunning && !drawing && !coordinates ? area : null;
   const tools = useWorkspaceTools(
     controller,
     editable,
@@ -172,8 +214,8 @@ export function LensApp() {
   }, []);
   const report = useRef<HTMLElement>(null);
   const showReport = () => {
-    report.current?.scrollIntoView({ behavior: reducedMotion() ? "auto" : "smooth" });
-    report.current?.focus({ preventScroll: true });
+    report.current?.scrollIntoView({ behavior: tourRunning || reducedMotion() ? "auto" : "smooth" });
+    if (!tourRunning) report.current?.focus({ preventScroll: true });
   };
   const close = () => {
     window.scrollTo({ top: 0 });
@@ -183,6 +225,7 @@ export function LensApp() {
   };
   useEffect(() => {
     const cancel = (e: KeyboardEvent) => {
+      if (tourRunning) return;
       if (e.key === "Escape") {
         setDrawing(false);
         setCoordinates(false);
@@ -200,15 +243,15 @@ export function LensApp() {
     };
     window.addEventListener("keydown", cancel);
     return () => window.removeEventListener("keydown", cancel);
-  }, [stopTools]);
+  }, [stopTools, tourRunning]);
   // Focus the search field as soon as the panel opens.
   useEffect(() => {
-    if (searching) searchPanel.current?.querySelector("input")?.focus();
-  }, [searching]);
+    if (searching && !tourRunning) searchPanel.current?.querySelector("input")?.focus();
+  }, [searching, tourRunning]);
   // Remember that the guidance did its job; this only writes to storage.
   useEffect(() => {
-    if (area) rememberIntro();
-  }, [area]);
+    if (area && !tourRunning) rememberIntro();
+  }, [area, tourRunning]);
   const detectionStatus = area ? (
     <p role="status">
       <ScientificInfo concept="hotspot" />
@@ -235,12 +278,14 @@ export function LensApp() {
   );
   function analyze(target: Area | null = area) {
     if (!target) return;
+    if (analyzed?.id !== target.id) setMonthOpen(false);
     setAnalyzed(target);
     setAnalysis(true);
     setCoordinates(false);
     tools.stop();
-    requestAnimationFrame(() => {
-      closeButton.current?.focus();
+    cancelAnimationFrame(analysisFrame.current);
+    analysisFrame.current = requestAnimationFrame(() => {
+      if (!tourGuard.current) closeButton.current?.focus();
       controller?.navigate({
         id: Date.now(),
         bounds: target.bbox,
@@ -251,12 +296,16 @@ export function LensApp() {
   // The assistant acts between renders: its host is kept current here and by
   // each of its own actions, so a later step of the same answer sees an earlier one.
   const assistantHost = useRef<AssistantHost | null>(null);
+  const assertAssistantAvailable = () => {
+    if (tourGuard.current) throw new Error("Workspace actions are paused during the Lume tour. Finish or skip the tour to continue.");
+  };
   const host: AssistantHost = {
     area,
     period,
     sensors,
     analysisOpen: analysis,
     chooseArea(next) {
+      assertAssistantAvailable();
       stopTools();
       clearAdministrative();
       setDrawing(false);
@@ -268,25 +317,30 @@ export function LensApp() {
       Object.assign(assistantHost.current!, { area: next, analysisOpen: false });
     },
     clearArea() {
+      assertAssistantAvailable();
       tools.clear();
       setArea(null);
       setAnalysis(false);
       Object.assign(assistantHost.current!, { area: null, analysisOpen: false });
     },
     navigate(place) {
+      assertAssistantAvailable();
       stopTools();
       setDrawing(false);
       setDestination(place);
     },
     setPeriod(next) {
+      assertAssistantAvailable();
       changePeriod(next);
       assistantHost.current!.period = next;
     },
     setSensors(next) {
+      assertAssistantAvailable();
       setSensors(next);
       assistantHost.current!.sensors = next;
     },
     openAnalysis(target) {
+      assertAssistantAvailable();
       analyze(target);
       assistantHost.current!.analysisOpen = true;
     },
@@ -294,8 +348,82 @@ export function LensApp() {
   useEffect(() => {
     assistantHost.current = host;
   });
+  function selectPreset(id: string) {
+    const preset = presets.find((p) => p.id === id);
+    if (!preset) throw new Error("The example study region is unavailable.");
+    const next = rectangleArea(preset.bbox, preset.name);
+    tools.clear();
+    setArea(next);
+    setFrame((n) => n + 1);
+    setAnalysis(false);
+    setCoordinates(false);
+    return next;
+  }
+  const startTour = () => { restoredView.current?.abort(); tourSnapshot.current = tourWorkspace.capture(); tourGuard.current = true; setTourRunning(true); };
+  const tourWorkspace: TourWorkspace = {
+    capture: () => tourSnapshot.current ?? ({ area, analyzed, analysis, expanded, drawing, coordinates, searching,
+      period, from, to, sensors: [...sensors], monthOpen, cardOpen, analyticsTab,
+      bounds: controller?.getBounds(), projection: controller?.getProjection(), scrollY: window.scrollY,
+      panelScrollTop: document.querySelector<HTMLElement>('[data-tour-scroll="analysis-panel"]')?.scrollTop ?? 0 }),
+    async prepare(id: TourStepId, signal: AbortSignal) {
+      if (signal.aborted) return;
+      cancelAnimationFrame(analysisFrame.current);
+      const index = stepIndex(id);
+      tools.stop();
+      setDrawing(false);
+      setSearching(id === "search");
+      setCoordinates(id === "region");
+      setDestination(null);
+      setExpanded(false);
+      setCardOpen(id === "sensors" || id === "period");
+      if (index < stepIndex("history")) setAnalysis(false);
+      if (id === "welcome") window.scrollTo({ top: 0, behavior: "instant" });
+      if (index >= stepIndex("pantanal") && id !== "complete") {
+        const preset = presets.find((p) => p.id === "pantanal");
+        if (!preset || TOUR_PERIOD < fireData.firstMonth || TOUR_PERIOD > fireData.lastMonth)
+          throw new Error("The Pantanal example or September 2023 record is unavailable.");
+        const example = rectangleArea(preset.bbox, preset.name);
+        if (area?.id !== example.id) selectPreset("pantanal");
+        changePeriod(TOUR_PERIOD);
+        if (index >= stepIndex("history")) {
+          if (!analysis || analyzed?.id !== example.id) analyze(example);
+          setMonthOpen(id === "month");
+          setAnalyticsTab(id === "forecast" ? "forecast" : "history");
+        }
+      }
+      if (id === "range") { setFrom("2023-01"); setTo("2023-12"); }
+      await afterPaint(signal);
+      if (signal.aborted) return;
+      if (index >= stepIndex("report") && id !== "complete") showReport();
+      else window.scrollTo({ top: 0, behavior: "instant" });
+      await afterPaint(signal);
+    },
+    // Remount only on explicit retry. Existing hooks evict failed cache entries.
+    retry() { setTourAttempt((n) => n + 1); },
+    restore(saved) {
+      if (!workspaceAlive.current) return;
+      restoreUi.current = { scrollY: saved.scrollY ?? 0, panelScrollTop: saved.panelScrollTop ?? 0 };
+      cancelAnimationFrame(analysisFrame.current);
+      tools.clear();
+      setArea(saved.area); setAnalyzed(saved.analyzed); setAnalysis(saved.analysis);
+      setExpanded(saved.expanded); setDrawing(saved.drawing); setCoordinates(saved.coordinates); setSearching(saved.searching);
+      setPeriod(saved.period); setFrom(saved.from); setTo(saved.to); setSensors([...saved.sensors]);
+      setMonthOpen(saved.monthOpen); setCardOpen(saved.cardOpen); setAnalyticsTab(saved.analyticsTab);
+      setDestination(null);
+      restoredView.current?.abort();
+      const view = new AbortController();
+      restoredView.current = view;
+      void afterPaint(view.signal).then(() => {
+        if (saved.projection) controller?.setProjection(saved.projection);
+        if (saved.bounds) controller?.navigate({ id: `tour-restore-${Date.now()}`, bounds: saved.bounds, animation: "jump" });
+      }).catch(() => { /* A newer tour/navigation superseded restoration. */ });
+    },
+    keep() { restoreUi.current = null; cancelAnimationFrame(analysisFrame.current); setSearching(false); setCoordinates(false); setDrawing(false); setCardOpen(false); setAnalyticsTab("history"); },
+  };
   return (
-    <main id="main" className="lens-workspace">
+    <main id="main" className="lens-workspace" data-tour-active={tourRunning}>
+      <button ref={tourLauncher} data-tour="replay" type="button" className="lume-replay map-surface" onClick={startTour} disabled={tourRunning}>Tour with Lume</button>
+      {tourRunning && <LumeTour workspace={tourWorkspace} onExit={() => { tourGuard.current = false; tourSnapshot.current = null; setTourRunning(false); }} />}
       <div
         className="workspace-body"
         data-analysis={analysis}
@@ -353,6 +481,8 @@ export function LensApp() {
             }}
           />
           <MapCard
+            open={cardOpen}
+            onOpenChange={setCardOpen}
             summary={periodSummary(period, sensors.length)}
           >
             <TemporalControl period={period} onChange={changePeriod} />
@@ -376,6 +506,7 @@ export function LensApp() {
           {searching && (
             <section
               ref={searchPanel}
+              data-tour="search"
               className="map-search-panel map-surface"
               aria-label="Search places"
             >
@@ -414,17 +545,11 @@ export function LensApp() {
               <label className="mb-3 block text-sm">
                 Study region
                 <select
+                  data-tour="presets"
                   className="field mt-1 w-full"
                   value=""
                   onChange={(e) => {
-                    const p = presets.find((p) => p.id === e.target.value);
-                    if (p) {
-                      tools.clear();
-                      setArea(rectangleArea(p.bbox, p.name));
-                      setFrame((n) => n + 1);
-                      setAnalysis(false);
-                      setCoordinates(false);
-                    }
+                    selectPreset(e.target.value);
                   }}
                 >
                   <option value="" disabled>
@@ -450,6 +575,7 @@ export function LensApp() {
             </section>
           )}
           {!area &&
+            !tourRunning &&
             !introDone &&
             !drawing &&
             !coordinates &&
@@ -472,6 +598,7 @@ export function LensApp() {
                   area anywhere in Brazil, or pick a state, to investigate its
                   fire activity.
                 </p>
+                <TourInvitation onStart={startTour} />
                 <button
                   className="btn btn-primary mt-4"
                   onClick={() => setDrawing(true)}
@@ -486,6 +613,7 @@ export function LensApp() {
             !drawing &&
             !tools.administrativeActive && (
               <section
+                data-tour="selection"
                 className="selection-card map-surface"
                 aria-label="Selected area"
               >
@@ -503,6 +631,7 @@ export function LensApp() {
                 <div className="flex flex-wrap items-center gap-2">
                   <button
                     ref={analyzeButton}
+                    data-tour="analyze"
                     className="btn btn-primary"
                     onClick={() => analyze()}
                   >
@@ -554,7 +683,7 @@ export function LensApp() {
             hidden={!analysis}
             expanded={expanded}
             onKeyDown={(e) => {
-              if (e.key === "Escape") close();
+              if (e.key === "Escape" && !tourRunning) close();
             }}
           >
             <div className="analysis-heading">
@@ -575,7 +704,10 @@ export function LensApp() {
             </div>
             <div className="analysis-scroll">
               <AnalysisCalendar
-                key={analyzed.id}
+                key={`${analyzed.id}:${tourAttempt}`}
+                monthOpen={monthOpen}
+                onMonthOpen={setMonthOpen}
+                tourActive={tourRunning}
                 area={analyzed}
                 period={period}
                 onPeriod={changePeriod}
@@ -597,7 +729,7 @@ export function LensApp() {
           hidden={!analysis}
         >
           <div className="analysis-report-inner">
-            <header className="analysis-report-head">
+            <header data-tour="report-heading" className="analysis-report-head">
               <p className="eyebrow">AREA REPORT</p>
               <h2 id="report-title" className="text-3xl md:text-4xl">
                 {analyzed.name}
@@ -610,6 +742,9 @@ export function LensApp() {
               </p>
             </header>
             <AnalysisReport
+              key={`${analyzed.id}:${tourAttempt}`}
+              analyticsTab={analyticsTab}
+              onAnalyticsTab={setAnalyticsTab}
               area={analyzed}
               period={period}
               onPeriod={changePeriod}

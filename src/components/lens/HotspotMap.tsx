@@ -637,6 +637,7 @@ export function HotspotMap({
           className="size-full"
           role="application"
           aria-label={`Map of detections in ${areaName}`}
+          data-tour="map-canvas"
         />
       </div>
       {!ready && !failed && (
@@ -687,7 +688,7 @@ export function HotspotMap({
       </section>
       {/* One column of view controls: projection, zoom, reset. */}
       {ready && (
-        <div className="map-view-controls">
+        <div data-tour="map-controls" className="map-view-controls">
           {showProjectionToggle && !projection && (
             <ProjectionToggle
               value={mode}
