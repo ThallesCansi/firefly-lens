@@ -92,7 +92,7 @@ export function polygonProblem(vertices: Vertex[], limitSize = true): string | n
   const ys = vertices.map((v) => v[1]);
   const [w, e, s, n] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
   if (w < COVERAGE[0] - 1e-9 || e > COVERAGE[2] + 1e-9 || s < COVERAGE[1] - 1e-9 || n > COVERAGE[3] + 1e-9)
-    return "The area must stay inside Brazil's data coverage.";
+    return "The area must stay inside the South American navigation region.";
   if (limitSize && (e - w > MAX_AREA_SIDE + 1e-9 || n - s > MAX_AREA_SIDE + 1e-9))
     return `The area can span at most ${MAX_AREA_SIDE}° in each direction.`;
   if (selfIntersects(vertices)) return "Edges cannot cross each other.";

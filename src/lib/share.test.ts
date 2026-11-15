@@ -11,7 +11,9 @@ describe("share links", () => {
       const query = shareQuery({ area:rawPilotArea(entry), period:"2025-09", sensors:["VIIRS"] });
       expect(read(query)).toEqual({ area:{ kind:"country",code:entry.country_code },period:"2025-09",sensors:["VIIRS"] });
       expect(read(`area=country:${entry.country_code}&period=2026-09`).period).toBeNull();
-      expect(read(`area=country:${entry.country_code}&period=2025-09-01`).period).toBeNull();
+      expect(read(`area=country:${entry.country_code}&period=2025-09-01`).period).toBe("2025-09-01");
+      expect(read(`area=country:${entry.country_code}&period=2003-09`).period).toBe("2003-09");
+      expect(read(`area=country:${entry.country_code}&period=2002-07-01`).period).toBeNull();
     }
     expect(read("area=country:ZZZ&period=2025-09").area).toBeNull();
   });

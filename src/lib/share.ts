@@ -79,7 +79,7 @@ export function parseShare(search: string, first: string, last: string): SharedV
   const period = parsePeriod(query.get("period"), country?.period.start ?? first, country?.period.end ?? last);
   return {
     area,
-    period: country && period?.length !== 7 ? null : period,
+    period: country && period?.length===10 && period<'2002-07-04' ? null : period,
     sensors: parseSensors(query.get("sensors")),
   };
 }

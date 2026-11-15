@@ -144,7 +144,8 @@ describe("polygon areas", () => {
 
 describe("areas", () => {
   it("stay inside the covered box and within 12 degrees", () => {
-    expect(normalizeBBox([-100, -50, -80, -40])[0]).toBeGreaterThanOrEqual(-74);
+    expect(normalizeBBox([-100, -50, -80, -40])[0]).toBeGreaterThanOrEqual(-85);
+    expect(normalizeBBox([-72,-50,-68,-45])).toEqual([-72,-50,-68,-45]);
     const big = normalizeBBox([-70, -30, -40, 0]);
     expect(big[2] - big[0]).toBeLessThanOrEqual(12);
     expect(big[3] - big[1]).toBeLessThanOrEqual(12);

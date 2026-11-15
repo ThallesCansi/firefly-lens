@@ -3,12 +3,15 @@ import type { PolygonGeometry } from "../data/types";
 import { geometryKey, validateBundle } from "./client";
 import type { Bundle } from "./contracts";
 import { dataVersion, retryDelay } from "./dynamic";
+import { rawPilots } from "../data/coverage";
 
 export function validateRetrospective(raw: Bundle, geometry: PolygonGeometry, origin: string): Bundle {
+  const country=rawPilots.find((entry)=>entry.geometry && geometryKey(entry.geometry)===geometryKey(geometry));
+  const period=country?.national_period;
   const result = validateBundle(raw, { id: raw.region_id, name: "Retrospective selected polygon", geometry, url: "", sha256: "", forecast_status: "" },
-    { start: meta.firstDay.slice(0,7), end: meta.lastDay.slice(0,7), forecastOrigin: origin });
+    { start: period?.start ?? meta.firstDay.slice(0,7), end: period?.end ?? meta.lastDay.slice(0,7), forecastOrigin: origin });
   const forecast = result.sections.forecast.data;
-  if ("predictions" in forecast && forecast.predictions.some((p) => p.date > meta.seriesEnd)) throw new Error("Retrospective targets must be past completed months");
+  if ("predictions" in forecast && forecast.predictions.some((p) => p.date > (period?.end ?? meta.seriesEnd))) throw new Error("Retrospective targets must be past completed months");
   return result;
 }
 

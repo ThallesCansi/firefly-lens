@@ -3,7 +3,7 @@ import type { AnomalyRow, MonthlyRow } from "./contracts";
 /** Wording only: all reference statistics and quality gates come from Python. */
 export function describeMonth(month?: MonthlyRow, anomaly?: AnomalyRow): string {
   if (!month || month.value === null) return "No activity value is available for this month.";
-  if (!month.complete) return "This month is incomplete. Wait for the complete record before comparing it with past years.";
+  if (!month.complete) return "This month is incomplete and is excluded from complete-month comparisons.";
   const subject = month.source === "modeled_viirs" ? "Estimated fire activity" : "Fire activity";
   if (!anomaly || !["available", "partially_available"].includes(anomaly.status))
     return `${subject} is available, but there is not enough eligible history for a seasonal comparison.`;

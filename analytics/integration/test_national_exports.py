@@ -29,7 +29,11 @@ class NationalExports(unittest.TestCase):
                     validate(section)
                     self.assertFalse(section['source']['synthetic'])
                 rows=bundle['sections']['history']['data']['monthly']
-                self.assertEqual(len(rows),93)
+                self.assertEqual(len(rows),282)
+                self.assertEqual(rows[0]['date'],'2002-07')
+                self.assertFalse(rows[0]['complete'])
+                self.assertEqual(bundle['sections']['climatology']['data']['reference']['start_year'],2003)
+                self.assertGreater(bundle['sections']['history']['data']['summary']['trend']['n_years'],15)
                 self.assertTrue(all(r['source']=='modeled_viirs' and not r['valid_for_reference'] for r in rows if r['year']>=2024))
                 self.assertTrue(all(all(y<int(row['date'][:4]) for y in row['reference']['years_used'])
                                     for row in bundle['sections']['anomalies']['data']['months']))

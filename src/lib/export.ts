@@ -76,7 +76,7 @@ export function dailyCsv(days: DaySummary[]): string {
   );
 }
 
-export function monthlyCsv(months: MonthCell[]): string {
+export function monthlyCsv(months: MonthCell[], reference:readonly number[] = [2003,2025]): string {
   return toCsv(
     [
       "year",
@@ -86,7 +86,7 @@ export function monthlyCsv(months: MonthCell[]): string {
       "lo95",
       "hi95",
       "partial_month",
-      "median_for_month_2003_2025",
+      `median_for_month_${reference[0]}_${reference[1]}`,
       "ratio_to_median",
       "rank_for_month",
       "months_ranked",
@@ -107,7 +107,7 @@ export function monthlyCsv(months: MonthCell[]): string {
       m.rank,
       m.rankOf,
       r1(m.detections.MODIS),
-      r1(m.detections.VIIRS),
+      m.year*12+m.month < 2018*12+3 ? null : r1(m.detections.VIIRS),
       m.viirsHarmonized === null ? null : r1(m.viirsHarmonized),
     ]),
   );

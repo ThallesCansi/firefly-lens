@@ -6,6 +6,8 @@ FireFly Lens is a NASA Space Apps Challenge 2026 project for the challenge *Harm
 
 > **Coverage: spatial harmonization for Brazil; national harmonization for the other 11 South American countries.** The map-first interface runs on the real NASA FIRMS records for Brazil, July 2002 to November 2026: MODIS Aqua and VIIRS NOAA-20, harmonized into one series on the MODIS Aqua scale and validated year by year. This project is not endorsed by NASA.
 
+The other eleven countries now have real national histories from **July 2002 to December 2025**, the same month/year and daily calendar interface, and History/Forecast report tabs. The sidebar fits its calendar to the available height; analyses stay below the map. Navigation is bounded to South America with dimming outside the published footprint. See [historical coverage and calendar update](docs/south-america-history-calendar.md) for scientific scope, daily allocation, deployment and verification.
+
 ## Why the two records need harmonizing
 
 A hot spot is a pixel that looked hot, not a fire. MODIS reports fire in 1 km pixels; VIIRS in 375 m pixels, and over Brazil it reports about six times as many. Adding the two counts would measure pixel size, not burning, and MODIS Aqua, the longest record, is near its end.

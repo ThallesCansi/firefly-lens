@@ -10,7 +10,7 @@ is documented in [the PR validation record](main-integration-qa/README.md).
 
 Brazil retains its original spatial/biome calibration and July 2002–November
 2026 record. The other **11 sovereign South American countries** now have
-separate **whole-country harmonized reports for April 2018–December 2025**:
+separate **whole-country harmonized reports for July 2002–December 2025**:
 Paraguay, Argentina, Bolivia, Chile, Colombia, Ecuador, Guyana, Peru, Suriname,
 Uruguay and Venezuela. Choose a country under Coordinates or administrative
 selection. Monthly and annual views reuse the existing Python report charts.
@@ -82,7 +82,7 @@ error and the short overlap remain visible; passing gates does not imply equal
 performance across countries.
 
 Climatology and past-only anomalies use the existing Python engine, reference
-2018–2023 and minimum five eligible years. The short reference and exclusions
+2003–2023 and minimum five eligible years. The historical start and exclusions
 remain explicit; some months therefore have insufficient reference history.
 Annual totals keep the established complete/eligible-year policy. Country
 Signals require real evaluated data, complete targets and sufficient past
@@ -150,9 +150,9 @@ retrospective experiment, not certification of past real-time operations.
 **Current activity forecasts remain withheld.** The Brazilian eligible observation
 tail still ends in 2023. Converted VIIRS is not relabeled as observed truth, and
 no new method for propagating calibration uncertainty into forecast training has
-been validated. National records also have fewer than the unchanged 96 required
-eligible training months. There is no FIRMS MAP key configured for obtaining a
-new authoritative 2026 country record. Retrospective numeric forecasts and real
+been validated. The expanded national histories now support past-origin
+experiments, but their eligible observation tail still ends in 2023 and their
+published activity record ends in 2025. Retrospective numeric forecasts and real
 FWI are separate from an unsupported current hotspot-activity forecast.
 
 ## Reproduce and deploy
@@ -186,7 +186,10 @@ can override the bundled NASA file for an operator-supplied product. Weather
 refresh is an offline operator/CI job; it is not an automatic browser download.
 Production hosting/credentials were not changed.
 
-The 176 real country archives were obtained successfully. Exported maps have
+The initial 176 real country archives were obtained successfully. The newer
+[long-history update](south-america-history-calendar.md) adds 176 older MODIS
+archives and supersedes the original pilot measurements and local test counts
+below. Initially exported maps had
 10,257 month/spatial blocks totaling **2,980,130 bytes**; private yearly cell
 Parquet totals **2,615,157 bytes**. Re-export across eleven countries took about
 242 seconds on this Windows machine. The normalized three-date weather file is

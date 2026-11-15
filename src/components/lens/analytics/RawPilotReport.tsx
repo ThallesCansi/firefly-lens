@@ -40,12 +40,12 @@ export function RawPilotReport({ area, period, onPeriod, compact = false, onRepo
         <ScientificChart title={`${sensor === "modis" ? "MODIS Aqua" : "VIIRS NOAA-20"} monthly detections`}
           description="Real FIRMS country archives, filtered offline. Each point is an observed raw count; no sensor conversion or weather forecast is applied."
           unit="raw satellite detections" series={[{ label: sensor === "modis" ? "Observed MODIS Aqua" : "Observed VIIRS NOAA-20",
-            kind: "observed", points: data.monthly.map((r) => ({ label: r.date, value: r[sensor], note: "Standard processing · country archive · uncalibrated" })) }]} />
+            kind: "observed", points: data.monthly.map((r) => ({ label: r.date, value: sensor==="viirs" && r.date<'2018-04' ? null : r[sensor], note: "Standard processing · country archive · uncalibrated" })) }]} />
         <p className="analytics-insight">{row ? `${row.date}: ${numeric(row[sensor])} retained detections from this sensor in the country archive.` : "The selected month is outside this pilot’s historical coverage. Choose a month between " + data.period.start + " and " + data.period.end + "."}</p>
         <p className="analytics-footnote">{data.period.start}–{data.period.end} · {data.source} · 0.25° map cells. The country outline is generalized; detections follow FIRMS country membership.</p>
         {!compact && <details><summary>Sensor comparability and provenance</summary>
           <p>Brazil’s biome calibration has not been transferred. These descriptive sensor ratios do not validate harmonization.</p>
-          <div className="analytics-table-scroll"><table><caption>Raw sensor counts by year · 2018 begins in April</caption>
+          <div className="analytics-table-scroll"><table><caption>Raw sensor counts by year · Aqua starts July 2002; NOAA-20 starts April 2018</caption>
             <thead><tr><th>Year</th><th>Aqua</th><th>NOAA-20</th><th>Raw ratio</th></tr></thead>
             <tbody>{data.annual.map((r) => <tr key={r.year}><th>{r.year}</th><td>{numeric(r.modis)}</td><td>{numeric(r.viirs)}</td><td>{numeric(r.raw_viirs_to_modis)}</td></tr>)}</tbody>
           </table></div><p>Processed {data.generated_at}. Archive and map-tile checksums are recorded in the coverage manifest.</p>

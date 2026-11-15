@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { loadArea } from "./data/area";
 import type { AnalysisArea } from "./data/types";
 import { buildRecord, type FireRecord } from "./harmonize";
+import { rawPilotFor } from "./data/coverage";
+import { loadCountryRecord } from "./data/raw-pilot";
 
 /** No Brazilian land in the area: there is nothing to read. */
 const OUTSIDE = Symbol("outside");
@@ -15,7 +17,7 @@ const records = new Map<string, Promise<FireRecord | typeof OUTSIDE>>();
 function recordFor(area: AnalysisArea) {
   let hit = records.get(area.id);
   if (!hit) {
-    hit = loadArea(area).then((data) => (data.cells === 0 ? OUTSIDE : buildRecord(data)));
+    hit = rawPilotFor(area) ? loadCountryRecord(area) : loadArea(area).then((data) => (data.cells === 0 ? OUTSIDE : buildRecord(data)));
     hit.catch(() => records.delete(area.id));
     records.set(area.id, hit);
     if (records.size > 8) records.delete(records.keys().next().value!);
