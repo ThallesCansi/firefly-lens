@@ -80,14 +80,20 @@ pnpm lint
 pnpm build && pnpm start
 ```
 
-The map assistant calls Google Gemini through `/api/assistant`, on the Gemini API's free tier. Create a key in [Google AI Studio](https://aistudio.google.com/apikey) and put it in `.env.local` (ignored by git):
+The map assistant calls an AI model through `/api/assistant`: [Groq](https://console.groq.com/keys) by default, or Google Gemini. Both have a free tier. Put the key in `.env.local` (ignored by git):
 
 ```bash
-GEMINI_API_KEY=...
-# GEMINI_MODEL=gemini-3.6-flash   # optional, the default
+GROQ_API_KEY=...
+# GROQ_MODELS=openai/gpt-oss-120b,openai/gpt-oss-20b   # optional, the default, tried in order
+# or, for Gemini:
+# GEMINI_API_KEY=...
+# GEMINI_MODEL=gemini-3.6-flash
+# ASSISTANT_PROVIDER=groq   # or gemini; without it, the first provider with a key
 ```
 
-Without a key the rest of the app works and the assistant says it is not configured. The key never reaches the browser: the route forwards one turn at a time, while the browser keeps the conversation and runs the map actions and record lookups the model asks for. The route allows 20 requests per minute per address. On the free tier Google limits requests per project and per day, and may use what is sent to improve its products; the assistant panel says so.
+Without a key the rest of the app works and the assistant says it is not configured. The key never reaches the browser: the route forwards one turn at a time, while the browser keeps the conversation (in a provider-neutral format, `src/lib/assistant/protocol.ts`) and runs the map actions and record lookups the model asks for. Each provider is one adapter in `src/lib/assistant/providers/`. The route allows 20 requests per minute per address.
+
+Free tiers are small. On Groq each model allows about 1,000 requests a day and 8,000 tokens a minute, and a question takes 2 to 4 requests and a few thousand tokens, so the route moves to the next model in `GROQ_MODELS` when one runs out. Gemini's free tier allowed only 20 requests a day per model (November 2026).
 
 `pnpm dev` and `pnpm build` first copy the MapLibre worker into `public/maplibre/` (see [`scripts/copy-maplibre-worker.mjs`](scripts/copy-maplibre-worker.mjs)); the map needs it.
 
@@ -103,7 +109,9 @@ SVG downloads now include region, period, legend, data source and observed/model
 
 ## Deployment
 
-The site deploys on [Vercel](https://vercel.com) from this repository: every push to `main` goes to production and every pull request gets its own preview URL. The only environment variable is `GEMINI_API_KEY`, for the map assistant (set it in the Vercel project settings). The data are static files in `public/data/brazil/` (about 10 MB), fetched by the browser per 4° tile.
+Dynamic History and experimental Forecast for arbitrary selected polygons now use an optional separate Python API. See [diagnosis, contracts, local setup and deployment](docs/dynamic-polygon-analytics.md). Without that service, exact prepared regions and the existing browser calendars remain available. Current numeric forecasts may be scientifically unavailable when eligible observations do not reach the requested origin.
+
+The site deploys on [Vercel](https://vercel.com) from this repository: every push to `main` goes to production and every pull request gets its own preview URL. For the map assistant, configure `GROQ_API_KEY` (or `GEMINI_API_KEY`) in the Vercel project settings. The data are static files in `public/data/brazil/` (about 10 MB), fetched by the browser per 4° tile.
 
 ## Project layout
 

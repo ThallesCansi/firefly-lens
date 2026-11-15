@@ -16,6 +16,8 @@ const eslintConfig = defineConfig([
     ".taste-skill/**",
     "public/maplibre/**",
     ".pnpm-store/**",
+    ".worktrees/**",
+    "**/.venv/**",
   ]),
 ]);
 

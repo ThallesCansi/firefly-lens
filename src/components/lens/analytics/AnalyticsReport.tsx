@@ -144,6 +144,11 @@ function History({
         {selectedClimate?.n_years ?? 0} eligible years. The anomaly above uses
         its own past-only mean reference.
       </p>
+      <p className="analytics-footnote">
+        Full-record eligible monthly mean: {numeric(history.summary.mean_of_valid_monthly_totals)};{" "}
+        median: {numeric(history.summary.median_of_valid_monthly_totals)} {unit}.
+        Spatial resolution: 0.25°. Small polygons represent fractions of grid cells.
+      </p>
       <section className="analytics-card">
         <div className="analytics-card-heading">
           <div>
@@ -247,6 +252,19 @@ function History({
               serve different purposes. Anomalies use eligible years strictly
               before each target year.
             </p>
+            <details>
+              <summary>Regional seasonal statistics</summary>
+              <div className="analytics-table-scroll">
+                <table>
+                  <caption>Statistics of aggregated regional monthly totals · {unit}</caption>
+                  <thead><tr><th>Month</th><th>Years</th><th>Mean</th><th>Median</th><th>Sample SD</th><th>P10</th><th>P25</th><th>P75</th><th>P90</th></tr></thead>
+                  <tbody>{climate.months.map((row) => <tr key={row.month}>
+                    <th>{MONTHS[row.month - 1]}</th><td>{row.n_years}</td>
+                    {[row.mean, row.median, row.std_sample, row.p10, row.p25, row.p75, row.p90].map((value, i) => <td key={i}>{numeric(value)}</td>)}
+                  </tr>)}</tbody>
+                </table>
+              </div>
+            </details>
           </>
         )}
       </section>
@@ -558,14 +576,13 @@ export function AnalyticsReport({
   const tab = controlledTab ?? localTab;
   const setTab = onTabChange ?? setLocalTab;
   const id = useId();
-  const { loading, result, error, retry } = useAnalytics(area);
+  const { loading, bundle, error, retry, forecastLoading, forecastError, dynamic } = useAnalytics(area);
   const {
     record,
     recordArea,
     loading: historyLoading,
     error: historyError,
   } = useFireRecord(area);
-  const bundle = result?.status === "available" ? result.bundle : undefined;
   const currentRecord = recordArea?.id === area.id ? record : null;
   return (
     <div data-tour="analytics" data-tour-ready={!loading && !error && !!result} data-tour-area={area.id} data-tour-error={error ?? undefined} className="analytics-report">
@@ -578,7 +595,7 @@ export function AnalyticsReport({
           </p>
         </div>
         <span className="analytics-badge">
-          {bundle ? "Python · preprocessed" : "Regional analysis"}
+          {bundle ? (dynamic ? "Python · selected polygon" : "Python · preprocessed") : "Regional analysis"}
         </span>
       </div>
       <div
@@ -633,19 +650,6 @@ export function AnalyticsReport({
             </button>
           </div>
         )}
-        {result?.status === "unsupported" && (
-          <div className="analytics-notice">
-            <strong>This exact geometry needs Python processing</strong>
-            <p>
-              The calendar, sensor comparisons, downloads and browser history
-              remain available. Climatology, anomalies and forecasts require a
-              new offline export or an on-demand Python service for this
-              polygon. Prepared study regions:{" "}
-              {result.regions.map((r) => r.name).join(", ")}. Choose their exact
-              preset in the map tools to view prepared results.
-            </p>
-          </div>
-        )}
       </div>
       <div
         role="tabpanel"
@@ -665,7 +669,6 @@ export function AnalyticsReport({
         {bundle ? (
           <History bundle={bundle} from={from} to={to} period={period} />
         ) : (
-          !loading &&
           currentRecord && (
             <section className="analytics-card">
               <h3>Browser historical series</h3>
@@ -737,10 +740,12 @@ export function AnalyticsReport({
             Explore experimental forecasts, uncertainty and model performance.
           </p>
         </div>
-        {bundle ? (
+        {forecastLoading && <p className="analytics-notice" role="status">Processing experimental forecast for {area.name}… History is available.</p>}
+        {forecastError && <div className="analytics-notice" role="alert">Forecast processing failed: {reason(forecastError)}. History remains available. <button type="button" className="btn btn-quiet" onClick={retry}>Retry analysis</button></div>}
+        {bundle && !forecastLoading && !forecastError ? (
           <Forecast bundle={bundle} />
         ) : (
-          !loading && (
+          !loading && !forecastLoading && !forecastError && (
             <div className="analytics-card">
               <h3>Forecast unavailable for this selection</h3>
               <p>

@@ -1,4 +1,5 @@
 import { fireData } from "@/lib/data/source";
+import { meta } from "@/lib/data/meta";
 import { loadArea } from "@/lib/data/area";
 import { normalizeBBox, rectangleArea, SENSORS, type AnalysisArea, type BBox, type Sensor } from "@/lib/data/types";
 import { buildRecord, type FireRecord } from "@/lib/harmonize";
@@ -66,7 +67,7 @@ async function findState(query: string): Promise<AnalysisArea | null> {
 }
 
 function validPeriod(period: string): string | null {
-  if (!/^\d{4}-\d{2}(-\d{2})?$/.test(period)) return "Use YYYY-MM or YYYY-MM-DD.";
+  if (!/^\d{4}-\d{2}(-\d{2})?$/.test(period)) return "Use YYYY, YYYY-MM or YYYY-MM-DD.";
   const month = Number(period.slice(5, 7));
   if (month < 1 || month > 12) return "No such month.";
   if (period.length === 10) {
@@ -82,44 +83,93 @@ function validPeriod(period: string): string | null {
 const round = (x: number) => Math.round(x);
 const monthName = (m: number) => MONTHS[m];
 
-async function history(area: AnalysisArea, fromYear: number, toYear: number): Promise<string> {
+function recordOf(area: AnalysisArea): Promise<FireRecord> {
   let record = records.get(area.id);
   if (!record) {
     record = loadArea(area).then(buildRecord);
     records.set(area.id, record);
     record.catch(() => records.delete(area.id));
   }
-  const r = await record;
+  return record;
+}
+
+const periodLabel = (period: string) =>
+  `${period.length === 10 ? `${Number(period.slice(8))} ` : ""}${monthName(Number(period.slice(5, 7)) - 1)} ${period.slice(0, 4)}`;
+
+/**
+ * Sets the map's period. A bare year shows that year's busiest month in the
+ * area of interest (September without one), so "show X in 2006" lands on fire.
+ */
+async function applyPeriod(host: AssistantHost, raw: string): Promise<ToolOutcome> {
+  let period = raw.trim();
+  let why = "";
+  if (/^\d{4}$/.test(period)) {
+    const year = Number(period);
+    if (year < fireData.firstYear || year > fireData.lastYear)
+      return { ok: false, result: `The record runs from ${fireData.firstDay} to ${fireData.lastDay}.` };
+    const busiest = host.area
+      ? (await recordOf(host.area)).months
+          .filter((m) => m.year === year)
+          .reduce<FireRecord["months"][number] | null>((best, m) => (!best || m.value > best.value ? m : best), null)
+      : null;
+    if (busiest) {
+      period = `${year}-${String(busiest.month + 1).padStart(2, "0")}`;
+      why = `, the busiest month of ${year} in ${host.area!.name} (${round(busiest.value)} hot spots)`;
+    } else period = `${year}-09`;
+    if (period < fireData.firstMonth) period = fireData.firstMonth;
+    if (period > fireData.lastMonth) period = fireData.lastMonth;
+  }
+  const problem = validPeriod(period);
+  if (problem) return { ok: false, result: problem };
+  host.setPeriod(period);
+  return { ok: true, result: `The map shows ${periodLabel(period)}${why}.`, note: `Showing ${periodLabel(period)}` };
+}
+
+/** Selects an area, then sets the period when the call names one. */
+async function choose(host: AssistantHost, area: AnalysisArea, input: Record<string, unknown>, detail = ""): Promise<ToolOutcome> {
+  host.chooseArea(area);
+  const selected: ToolOutcome = { ok: true, result: `Selected ${area.name}${detail}.`, note: `Selected ${area.name}` };
+  if (typeof input.period !== "string" || !input.period.trim()) return selected;
+  const period = await applyPeriod(host, input.period);
+  return {
+    ok: period.ok,
+    result: `${selected.result} ${period.ok ? "" : "The period was not changed: "}${period.result}`,
+    note: period.note ? `${selected.note} · ${period.note}` : selected.note,
+  };
+}
+
+async function history(area: AnalysisArea, fromYear: number, toYear: number): Promise<string> {
+  const r = await recordOf(area);
   let from = Math.max(fireData.firstYear, Math.min(fromYear, toYear));
   const to = Math.min(fireData.lastYear, Math.max(fromYear, toYear));
-  if (to - from > 9) from = to - 9;
+  if (to - from > 4) from = to - 4;
+  // One short line per row: free models are limited in tokens per minute.
   const months = r.months
     .filter((m) => m.year >= from && m.year <= to)
-    .map((m) => ({
-      month: `${monthName(m.month)} ${m.year}`,
-      hotSpots: round(m.value),
-      typical: round(m.median),
-      rank: `${m.rank} of ${m.rankOf} for this month`,
-      ...(m.source === "modeled" && m.lo !== null && m.hi !== null
-        ? { modeled: `95% interval ${round(m.lo)}–${round(m.hi)}` }
-        : {}),
-      ...(m.partial ? { partial: true } : {}),
-    }));
-  return JSON.stringify({
-    area: area.name,
-    unit: "harmonized hot spots, MODIS Aqua scale",
-    biomes: r.biomes.map((b) => `${b.name} ${Math.round(b.share * 100)}%`),
-    typicalSeason: r.season
-      ? `day ${r.season.startDay} to day ${r.season.endDay} of the year (${r.season.days} days)`
-      : null,
-    yearTotals: r.yearTotals.map((y) => ({
-      year: y.year,
-      hotSpots: round(y.value),
-      typical: round(y.median),
-      ...(y.complete ? {} : { incomplete: true }),
-    })),
-    months,
-  });
+    .map(
+      (m) =>
+        `${monthName(m.month).slice(0, 3)} ${m.year}: ${round(m.value)} (median ${round(m.median)}, rank ${m.rank}/${m.rankOf}${
+          m.source === "modeled" && m.lo !== null && m.hi !== null ? `, modeled ${round(m.lo)}–${round(m.hi)}` : ""
+        }${m.partial ? ", partial" : ""})`,
+    );
+  const years = r.yearTotals.map(
+    (y) => `${y.year}: ${round(y.value)} (median ${round(y.median)}${y.complete ? "" : ", incomplete"})`,
+  );
+  return [
+    `Area: ${area.name}. Unit: harmonized hot spots, MODIS Aqua scale. "median" is the median of that calendar month (or year) over ${meta.climatologyBase[0]}–${meta.climatologyBase[1]}; rank 1 is the highest.`,
+    `Biomes: ${r.biomes.map((b) => `${b.name} ${Math.round(b.share * 100)}%`).join(", ")}.`,
+    r.season ? `Typical fire season: day ${r.season.startDay} to day ${r.season.endDay} of the year.` : "",
+    `Year totals: ${years.join("; ")}.`,
+    `Busiest months on record: ${[...r.months]
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 5)
+      .map((m) => `${monthName(m.month).slice(0, 3)} ${m.year} ${round(m.value)}`)
+      .join("; ")}.`,
+    `Months ${from}–${to}:`,
+    ...months,
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 /** Runs one tool call against the workspace. Never throws. */
@@ -129,27 +179,24 @@ export async function runTool(host: AssistantHost, name: string, input: Record<s
       case "select_state": {
         const area = await findState(String(input.state ?? ""));
         if (!area) return { ok: false, result: `No Brazilian state matches "${input.state}".` };
-        host.chooseArea(area);
-        return { ok: true, result: `Selected ${area.name}.`, note: `Selected ${area.name}` };
+        return await choose(host, area, input);
       }
       case "select_region": {
         const preset = fireData.presets().find((p) => p.id === input.region);
         if (!preset) return { ok: false, result: `Unknown region "${input.region}".` };
-        const area = rectangleArea(preset.bbox, preset.name);
-        host.chooseArea(area);
-        return { ok: true, result: `Selected ${preset.name}.`, note: `Selected ${preset.name}` };
+        return await choose(host, rectangleArea(preset.bbox, preset.name), input);
       }
       case "select_box": {
         const box = [input.west, input.south, input.east, input.north].map(Number) as BBox;
         if (box.some((x) => !Number.isFinite(x))) return { ok: false, result: "The corners must be numbers." };
         const bbox = normalizeBBox(box);
         const label = String(input.name || "Custom area").slice(0, 60);
-        host.chooseArea(rectangleArea(bbox, label));
-        return {
-          ok: true,
-          result: `Selected ${label}: W ${bbox[0]}, S ${bbox[1]}, E ${bbox[2]}, N ${bbox[3]} (kept inside Brazil and 12° a side).`,
-          note: `Selected ${label}`,
-        };
+        return await choose(
+          host,
+          rectangleArea(bbox, label),
+          input,
+          `: W ${bbox[0]}, S ${bbox[1]}, E ${bbox[2]}, N ${bbox[3]} (kept inside Brazil and 12° a side)`,
+        );
       }
       case "go_to_place": {
         const query = String(input.query ?? "").trim().slice(0, 160);
@@ -167,16 +214,8 @@ export async function runTool(host: AssistantHost, name: string, input: Record<s
           note: `Moved to ${place.label}`,
         };
       }
-      case "set_period": {
-        const period = String(input.period ?? "");
-        const problem = validPeriod(period);
-        if (problem) return { ok: false, result: problem };
-        host.setPeriod(period);
-        const label = `${period.length === 10 ? `${Number(period.slice(8))} ` : ""}${monthName(
-          Number(period.slice(5, 7)) - 1,
-        )} ${period.slice(0, 4)}`;
-        return { ok: true, result: `The map shows ${label}.`, note: `Showing ${label}` };
-      }
+      case "set_period":
+        return await applyPeriod(host, String(input.period ?? ""));
       case "set_layers": {
         const sensors = SENSORS.filter((s) => Array.isArray(input.sensors) && input.sensors.includes(s));
         if (!sensors.length) return { ok: false, result: "Choose MODIS, VIIRS or both." };

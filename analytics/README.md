@@ -1,6 +1,6 @@
 # FireFly Scientific Analytics
 
-Motor Python independente do Next.js para atividade histórica, climatologia, anomalias e previsões estatísticas experimentais de **focos MODIS-Aqua-equivalentes**. Não estima incêndios independentes, área queimada ou causalidade. Todos os arquivos desta entrega ficam em `analytics/`; a aplicação e o pipeline são acessados somente para leitura.
+Motor Python independente do Next.js para atividade histórica, climatologia, anomalias e previsões estatísticas experimentais de **focos MODIS-Aqua-equivalentes**. Não estima incêndios independentes, área queimada ou causalidade. A API dinâmica e sua integração com a aplicação estão documentadas em [Dynamic polygon analytics](../docs/dynamic-polygon-analytics.md); o pipeline de harmonização permanece inalterado.
 
 ## Executar
 
@@ -42,7 +42,7 @@ results = analyze(regional, reference=Reference(2003, 2023, min_years=5))
 write_results(results, "analytics/output/my-region")
 ```
 
-`analyze` não grava arquivos nem consulta serviços. O adaptador lê e agrega os Parquet; o exportador valida e serializa; um futuro processo de API poderá chamar essas mesmas funções. Não foi criado FastAPI, endpoint Next.js nem painel visual. Um exemplo estático não atende automaticamente consultas a qualquer região: para outra geometria é necessário executar novamente o adaptador e o motor.
+`analyze` não grava arquivos nem consulta serviços. O adaptador lê e agrega os Parquet; o exportador valida e serializa. `firefly_analytics.service` expõe essas funções por FastAPI em `/analytics/history` e `/analytics/forecast`, com cache e validação da geometria e versão dos dados. Instale `-e 'analytics[api]'` para executar a API e seus testes. A aplicação Next.js acessa o serviço por proxies; exemplos estáticos continuam sendo apenas resultados das regiões que os geraram.
 
 ## Contratos e exemplos
 

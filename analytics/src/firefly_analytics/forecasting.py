@@ -28,6 +28,7 @@ class ForecastConfig:
     stride: int = 1
     min_validation_origins: int = 12
     include_drift: bool = False
+    enable_sarima: bool = True
     maxiter: int = 60
     candidates: tuple = (((1, 0, 0), (1, 0, 0, 12)), ((0, 1, 1), (0, 1, 1, 12)))
 
@@ -115,7 +116,12 @@ def sarima(train, horizon, config):
 def predictions(train, targets, config):
     fits = {"seasonal_median": seasonal_median(train, targets, config.min_season_years),
             "seasonal_naive": seasonal_naive(train, targets)}
-    fits["sarima"], diagnostic = sarima(train, len(targets), config)
+    if config.enable_sarima:
+        fits["sarima"], diagnostic = sarima(train, len(targets), config)
+    else:
+        fits["sarima"] = [{"value": None, "lower": None, "upper": None,
+                           "reason": "sarima_disabled_by_budget"} for _ in targets]
+        diagnostic = {"reason": "sarima_disabled_by_budget"}
     return fits, diagnostic
 
 
@@ -155,15 +161,22 @@ def backtest(series: RegionalSeries, config=ForecastConfig(), *, as_of=None):
                                 "training_count": count, "training_end": train[-1][0],
                                 "interval_method": diagnostic.get("interval_method") if model == "sarima" else None})
     return {"config": asdict(config), "as_of": as_of, "engine_sources": engine_fingerprints(),
+            "series_identity": series_identity(series),
             "origins": used, "records": records, "fit_diagnostics": diagnostics,
             "comparison": evaluate(records, used, min_origins=config.min_validation_origins),
             "training_sources": ["observed_modis"], "modeled_truth_scored": False}
+
+
+def series_identity(series):
+    """Bind reusable backtests to the exact regional input, not just the model."""
+    return hashlib.sha256(json.dumps(asdict(series), sort_keys=True, allow_nan=False).encode()).hexdigest()
 
 
 def forecast(series: RegionalSeries, config=ForecastConfig(), *, as_of=None, evaluation=None):
     as_of = as_of or series.provenance.get("series_end") or max(r.date for r in series.months if r.complete)
     month_id(as_of)
     if (evaluation is None or evaluation.get("as_of") != as_of
+            or evaluation.get("series_identity") != series_identity(series)
             or evaluation.get("engine_sources") != engine_fingerprints()
             or json.dumps(evaluation.get("config"), sort_keys=True) != json.dumps(asdict(config), sort_keys=True)):
         evaluation = backtest(series, config, as_of=as_of)

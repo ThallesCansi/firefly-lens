@@ -1,6 +1,6 @@
 "use client";
 
-import type { Content, Part } from "@google/genai";
+import type { AssistantResponse, AssistantTurn, ChatTurn, ToolResult } from "@/lib/assistant/protocol";
 import { useEffect, useId, useRef, useState, type RefObject } from "react";
 import { describeHost, runTool, type AssistantHost } from "@/lib/assistant/execute";
 
@@ -10,20 +10,23 @@ const EXAMPLES = [
   "Compare Mato Grosso in 2020 and 2024",
 ];
 
+/** The panel shows plain text: drop the Markdown emphasis some models add anyway. */
+const plain = (text: string) => text.replace(/\*\*(.+?)\*\*|__(.+?)__/g, "$1$2").replace(/^#+\s*/gm, "");
+
 /** Model round trips allowed for one question. */
 const MAX_STEPS = 8;
 
 type Line = { kind: "user" | "assistant" | "action" | "error"; text: string };
 
-async function step(contents: Content[]): Promise<Content> {
+async function step(turns: ChatTurn[]): Promise<AssistantTurn> {
   const response = await fetch("/api/assistant", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ contents }),
+    body: JSON.stringify({ turns }),
   });
-  const data = (await response.json().catch(() => ({}))) as { content?: Content; error?: string };
-  if (!response.ok || !data.content) throw new Error(data.error || "The assistant is unavailable right now.");
-  return data.content;
+  const data = (await response.json().catch(() => ({}))) as Partial<AssistantResponse>;
+  if (response.ok && "turn" in data && data.turn) return data.turn;
+  throw new Error(("error" in data && data.error) || "The assistant is unavailable right now.");
 }
 
 /**
@@ -35,7 +38,7 @@ export function AssistantDock({ host }: { host: RefObject<AssistantHost | null> 
   const [text, setText] = useState("");
   const [lines, setLines] = useState<Line[]>([]);
   const [busy, setBusy] = useState(false);
-  const conversation = useRef<Content[]>([]);
+  const conversation = useRef<ChatTurn[]>([]);
   const root = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLInputElement>(null);
   const thread = useRef<HTMLDivElement>(null);
@@ -61,35 +64,27 @@ export function AssistantDock({ host }: { host: RefObject<AssistantHost | null> 
     if (!workspace) return;
     setBusy(true);
     say({ kind: "user", text: question });
-    const contents: Content[] = [
+    const turns: ChatTurn[] = [
       ...conversation.current,
-      { role: "user", parts: [{ text: `${describeHost(workspace)}\n\n${question}` }] },
+      { role: "user", text: `${describeHost(workspace)}\n\n${question}` },
     ];
     try {
       for (let n = 0; n < MAX_STEPS; n++) {
-        // The model's turn is kept whole, thought signatures included.
-        const turn = await step(contents);
-        contents.push(turn);
-        const parts = turn.parts ?? [];
-        for (const part of parts)
-          if (part.text?.trim() && !part.thought) say({ kind: "assistant", text: part.text.trim() });
-        const calls = parts.flatMap((p) => (p.functionCall?.name ? [p.functionCall] : []));
-        if (!calls.length) break;
-        const results: Part[] = [];
-        for (const call of calls) {
-          const outcome = await runTool(host.current ?? workspace, call.name!, call.args ?? {});
+        // The model's turn is kept whole, so the server can replay it unchanged.
+        const turn = await step(turns);
+        turns.push(turn);
+        if (turn.text) say({ kind: "assistant", text: plain(turn.text) });
+        if (!turn.calls.length) break;
+        const results: ToolResult[] = [];
+        // In order: a later call (read the record) may depend on an earlier one (select the state).
+        for (const call of turn.calls) {
+          const outcome = await runTool(host.current ?? workspace, call.name, call.args);
           if (outcome.note) say({ kind: "action", text: outcome.note });
-          results.push({
-            functionResponse: {
-              id: call.id,
-              name: call.name,
-              response: outcome.ok ? { output: outcome.result } : { error: outcome.result },
-            },
-          });
+          results.push({ id: call.id, name: call.name, output: outcome.result, ok: outcome.ok });
         }
-        contents.push({ role: "user", parts: results });
+        turns.push({ role: "tool", results });
       }
-      conversation.current = contents;
+      conversation.current = turns;
     } catch (error) {
       say({ kind: "error", text: error instanceof Error ? error.message : "Something went wrong." });
     } finally {
@@ -180,8 +175,8 @@ export function AssistantDock({ host }: { host: RefObject<AssistantHost | null> 
                 ))}
               </div>
               <p className="assistant-privacy">
-                Answers come from Google Gemini. Questions are sent to Google and may be used to improve its products;
-                don’t include personal details.
+                Answers come from an AI model on a free service; questions are sent to that service. Don’t include
+                personal details.
               </p>
             </>
           )}

@@ -3,6 +3,7 @@ import hashlib
 import json
 from pathlib import Path
 import sys
+import subprocess
 import unittest
 
 REPO = Path(__file__).resolve().parents[2]
@@ -15,7 +16,21 @@ class SiteExports(unittest.TestCase):
     def test_exports_match_engine_schema_source_version_and_exact_regions(self):
         meta = json.loads((REPO / "public/data/brazil/meta.json").read_text())
         manifest = json.loads((REPO / "public/analytics/manifest.json").read_text(encoding="utf-8"))
-        self.assertEqual(manifest["engine_sources"], engine_fingerprints())
+        # Archived results retain the exact engine that generated them. Verify
+        # those immutable Git sources instead of relabeling them as the live API.
+        commit = manifest.get("engine_commit")
+        if commit:
+            self.assertRegex(commit, r"^[a-f0-9]{40}$")
+            files = subprocess.run(["git", "-C", str(REPO), "ls-tree", "--name-only", f"{commit}:analytics/src/firefly_analytics"],
+                                   capture_output=True, check=True).stdout.decode().splitlines()
+            hashes = {}
+            for name in sorted(f for f in files if f.endswith(".py")):
+                raw = subprocess.run(["git", "-C", str(REPO), "show", f"{commit}:analytics/src/firefly_analytics/{name}"],
+                                     capture_output=True, check=True).stdout
+                hashes[name] = hashlib.sha256(raw.replace(b"\r\n", b"\n")).hexdigest()
+            self.assertEqual(manifest["engine_sources"], hashes)
+        else:
+            self.assertEqual(manifest["engine_sources"], engine_fingerprints())
         self.assertEqual({r["id"] for r in manifest["regions"]}, {r["id"] for r in meta["presets"]})
         for key, value in manifest["data_meta"].items():
             self.assertEqual(value, meta[key])
