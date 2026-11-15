@@ -95,6 +95,9 @@ export function AnalysisCalendar({
   from,
   to,
   onReport,
+  monthOpen,
+  onMonthOpen,
+  tourActive = false,
 }: {
   area: AnalysisArea;
   period: string;
@@ -103,15 +106,19 @@ export function AnalysisCalendar({
   to: string;
   /** Scrolls to the full report under the map. */
   onReport: () => void;
+  monthOpen: boolean;
+  onMonthOpen: (open: boolean) => void;
+  tourActive?: boolean;
 }) {
-  const { record, loading, error } = useFireRecord(area);
+  const { record, recordArea, loading, error } = useFireRecord(area);
   const years = useYears(from, to);
-  const [monthOpen, setMonthOpen] = useState(false);
+  const setMonthOpen = onMonthOpen;
+  const ready = !loading && !error && recordArea?.id === area.id;
   const year = Number(period.slice(0, 4));
   const shownYear = Math.min(Number(to.slice(0, 4)), Math.max(Number(from.slice(0, 4)), year));
 
   return (
-    <div className="analysis-content flex flex-col gap-6">
+    <div data-tour="analysis-status" data-tour-ready={ready} data-tour-error={error ?? undefined} className="analysis-content flex flex-col gap-6">
       <RecordStatus areaName={area.name} loading={loading} error={error} />
       {record && monthOpen ? (
         <MonthDetail
@@ -121,9 +128,13 @@ export function AnalysisCalendar({
           onSelect={onPeriod}
           onMonth={onPeriod}
           onBack={() => setMonthOpen(false)}
+          tourActive={tourActive}
+          ready={ready}
         />
       ) : record ? (
         <div
+          data-tour="history"
+          data-tour-ready={ready}
           className={`flex flex-col gap-4 transition-opacity duration-200 ${loading ? "opacity-50" : ""}`}
           aria-busy={loading}
         >
@@ -154,7 +165,7 @@ export function AnalysisCalendar({
           </div>
         )
       )}
-      <button type="button" className="btn btn-quiet self-start" onClick={onReport}>
+      <button data-tour="open-report" type="button" className="btn btn-quiet self-start" onClick={onReport}>
         Full report below
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M12 5v14M6 13l6 6 6-6" />
@@ -177,6 +188,8 @@ function MonthDetail({
   onSelect,
   onMonth,
   onBack,
+  tourActive,
+  ready,
 }: {
   record: FireRecord;
   /** YYYY-MM */
@@ -185,6 +198,8 @@ function MonthDetail({
   onSelect: (date: string) => void;
   onMonth: (month: string) => void;
   onBack: () => void;
+  tourActive: boolean;
+  ready: boolean;
 }) {
   const year = Number(month.slice(0, 4));
   const m = Number(month.slice(5, 7)) - 1;
@@ -193,7 +208,7 @@ function MonthDetail({
   const cell = record.months.find((c) => c.year === year && c.month === m);
   const day = summary.days.find((d) => d.date === selected);
   const title = useRef<HTMLHeadingElement>(null);
-  useEffect(() => title.current?.focus(), []);
+  useEffect(() => { if (!tourActive) title.current?.focus(); }, [tourActive]);
 
   const shift = (step: number) => {
     const d = new Date(Date.UTC(year, m + step, 1));
@@ -204,7 +219,7 @@ function MonthDetail({
   const sentence = cell ? againstMedian(cell) : null;
 
   return (
-    <div className="flex flex-col gap-5">
+    <div data-tour="month" data-tour-ready={ready} className="flex flex-col gap-5">
       <div className="flex items-center justify-between gap-3">
         <button type="button" className="btn btn-text -ml-2" onClick={onBack}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -293,17 +308,21 @@ type ReportProps = {
   to: string;
   onFrom: (value: string) => void;
   onTo: (value: string) => void;
+  analyticsTab?: "history" | "forecast";
+  onAnalyticsTab?: (tab: "history" | "forecast") => void;
 };
 
 export function AnalysisReport(props: ReportProps) {
   return (
     <AnalyticsReport
+      tab={props.analyticsTab}
+      onTabChange={props.onAnalyticsTab}
       area={props.area}
       period={props.period}
       from={props.from}
       to={props.to}
       controls={
-        <div role="group" aria-label="Date range" className="flex flex-wrap items-end gap-x-5 gap-y-3">
+        <div data-tour="range" role="group" aria-label="Date range" className="flex flex-wrap items-end gap-x-5 gap-y-3">
           <MonthPicker label="From" value={props.from} min={fireData.firstMonth} max={props.to} onChange={props.onFrom} />
           <MonthPicker label="To" value={props.to} min={props.from} max={fireData.lastMonth} onChange={props.onTo} />
           <p className="pb-2 text-[0.8125rem] text-faint">
@@ -531,7 +550,7 @@ function SensorAndCalendarReport({
         </div>
       )}
 
-      <section aria-labelledby="export-title" className="flex flex-col gap-3 border-t border-line pt-8">
+      <section data-tour="exports" data-tour-ready={!loading && !error && !!record} aria-labelledby="export-title" className="flex flex-col gap-3 border-t border-line pt-8">
         <h3 id="export-title" className="text-lg">
           Download for this area and range
         </h3>
