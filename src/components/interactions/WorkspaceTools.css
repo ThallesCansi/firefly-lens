@@ -1,16 +1,25 @@
+/* The state picker opens beside the tool column, like search and
+   coordinates, and above it (the column sits at z-index 27). */
 .ff-workspace-tools-card {
   position: absolute;
-  left: 88px;
-  top: 82px;
-  width: min(365px, calc(100% - 108px));
-  max-height: calc(100% - 190px);
+  left: 188px;
+  top: 84px;
+  width: min(365px, calc(100% - 208px));
+  max-height: calc(100% - 200px);
   overflow: auto;
   overscroll-behavior: contain;
-  z-index: 16;
+  z-index: 28;
   background: var(--color-canopy);
-  border: 1px solid var(--color-line);
-  border-radius: 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-card);
   box-shadow: var(--surface-shadow);
+}
+/* Beside the slim column on a narrow map. */
+@container map (max-width: 760px) {
+  .ff-workspace-tools-card {
+    left: 86px;
+    width: calc(100% - 98px);
+  }
 }
 .ff-workspace-tools-card > label {
   display: grid;
@@ -54,24 +63,12 @@
   padding: 0;
 }
 @media (max-width: 700px) {
+  /* Under the folded map chip on a phone. */
   .ff-workspace-tools-card {
-    left: 74px;
-    top: 60px;
-    width: calc(100% - 86px);
-    max-height: calc(100% - 160px);
+    top: 122px;
+    max-height: calc(100% - 250px);
   }
   .lens-workspace .ff-interaction-panel {
     height: 58%;
-  }
-  .lens-workspace .workspace-body[data-analysis="true"] .map-toolbar {
-    flex-wrap: wrap;
-    max-width: calc(100% - 24px);
-  }
-  .lens-workspace .workspace-body[data-analysis="true"] .map-toolbar button {
-    width: 36px;
-    height: 40px;
-  }
-  .lens-workspace .workspace-body[data-analysis="true"] .map-layers {
-    top: 108px;
   }
 }
