@@ -196,7 +196,7 @@ export function HotspotMap({
   /** Clicks on the map, with geography (null when off the Earth). */
   onMapClick?: MapClickHandler;
   /** Receives the map controller once the map has loaded. */
-  onReady?: (controller: MapController) => void;
+  onReady?: (controller: MapController | null) => void;
   /** Reproject external editing handles after map frames change. */
   onViewChange?: () => void;
   /** Shows the 3D globe / 2D map switch inside the map. */
@@ -415,6 +415,9 @@ export function HotspotMap({
 
     return () => {
       dead = true;
+      // Next may preserve the workspace state across client navigation while
+      // destroying its effects. Never rebind tools to that removed engine.
+      latest.current.onReady?.(null);
       map.current = null;
       control.current = null;
       created?.remove();

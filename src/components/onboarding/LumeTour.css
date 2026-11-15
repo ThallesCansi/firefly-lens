@@ -30,6 +30,8 @@
 .lume-tour-mascot { position: absolute; top: -6px; left: 8px; pointer-events: none; }
 .lume-tour-signature { position: absolute; top: 19px; left: 86px; font: 10px var(--font-dm-mono), monospace; letter-spacing: .08em; color: var(--color-dim); }
 .lume-tour-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.lume-tour-opt-out { display: flex; align-items: center; gap: 9px; margin-top: 14px; font-size: 13px; color: var(--color-dim); cursor: pointer; }
+.lume-tour-opt-out input { width: 18px; height: 18px; margin: 0; accent-color: var(--color-lume); flex-shrink: 0; cursor: pointer; }
 .lume-tour-actions p { font-size: 13px; line-height: 1.5; color: var(--color-dim); }
 .lume-tour-card .lume-tour-actions .lume-tour-skip { padding: 4px 0; border: 0; background: transparent; color: var(--color-dim); text-decoration: underline; }
 .lume-tour-card .driver-popover-arrow { border-color: transparent; }
