@@ -216,6 +216,10 @@ async function manifest(): Promise<Manifest> {
 export type AnalyticsResult =
   | { status: "available"; bundle: Bundle; region: RegionEntry }
   | { status: "unsupported"; regions: RegionEntry[] };
+/** Discover the prepared catalog through the same version checks as analysis. */
+export async function loadAnalyticsRegions(): Promise<RegionEntry[]> {
+  return (await manifest()).regions;
+}
 export async function loadAnalytics(
   geometry: PolygonGeometry,
 ): Promise<AnalyticsResult> {

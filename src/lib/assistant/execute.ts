@@ -38,7 +38,7 @@ const fold = (s: string) =>
 
 /** The map's state, prefixed to every question. */
 export function describeHost(host: AssistantHost): string {
-  const area = host.area ? `${host.area.name} (${host.area.kind === "state" ? "state" : "drawn area"})` : "none";
+  const area = host.area ? `${host.area.name} (${host.area.kind === "state" ? "state" : host.area.kind === "preset" ? "prepared study region" : "drawn area"})` : "none";
   return `<map_state>area of interest: ${area}; period shown: ${host.period}; layers: ${
     host.sensors.join(", ") || "none"
   }; analysis panel: ${host.analysisOpen ? "open" : "closed"}</map_state>`;

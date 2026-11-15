@@ -20,7 +20,8 @@ import { LocationSearch, type MapDestination } from "./LocationSearch";
 import { AssistantDock } from "./AssistantDock";
 import type { AssistantHost } from "@/lib/assistant/execute";
 import { SiteNav } from "@/components/ui/SiteNav";
-import { MapCard, MapToolbar, MapLayerControl } from "./MapControls";
+import { MapCard, MapToolbar, MapLayerControl, MapHighlightsControl } from "./MapControls";
+import { useFireflySignals } from "@/lib/analytics/useFireflySignals";
 import { MONTHS } from "@/lib/format";
 import { TemporalControl } from "./TemporalControl";
 import { useMapCells } from "@/lib/useMapHotspots";
@@ -38,6 +39,7 @@ const presets = fireData.presets();
 const deg = (n: number) => Math.round(n * 100) / 100;
 /** One line that says what the area is. */
 function describe(area: Area): string {
+  if (area.kind === "preset") return "Study region · Prepared seasonal analytics";
   if (area.kind === "state") return "Brazilian state · IBGE outline";
   const corners = area.geometry.type === "Polygon" ? area.geometry.coordinates[0].length - 1 : 0;
   const [w, s, e, n] = area.bbox;
@@ -89,6 +91,8 @@ export function LensApp() {
   }, []);
   const searchPanel = useRef<HTMLElement>(null);
   const [period, setPeriod] = useState(`${fireData.lastYear}-09`);
+  const [signalsEnabled, setSignalsEnabled] = useState(true);
+  const signals = useFireflySignals(signalsEnabled, period);
   const [from, setFrom] = useState(fireData.firstMonth);
   const [to, setTo] = useState(fireData.lastMonth);
   const [sensors, setSensors] = useState<Sensor[]>(["MODIS", "VIIRS"]);
@@ -292,6 +296,15 @@ export function LensApp() {
             frame={area ? frame : null}
             areaName={area?.name ?? "Earth"}
             cells={mapData.cells}
+            signals={signals.signals}
+            onSignalSelect={(target) => {
+              tools.clear();
+              setDrawing(false);
+              setCoordinates(false);
+              setSearching(false);
+              setArea(target);
+              analyze(target);
+            }}
             drawing={drawing}
             onDraw={selectArea}
             sensors={sensors}
@@ -337,10 +350,13 @@ export function LensApp() {
             }}
           />
           <MapCard
-            summary={periodSummary(period, sensors.length)}
+            summary={`${periodSummary(period, sensors.length)} · Signals ${signalsEnabled ? "on" : "off"}`}
           >
-            <TemporalControl period={period} onChange={changePeriod} />
-            <MapLayerControl sensors={sensors} onChange={setSensors} />
+            <div className="map-settings-row">
+              <TemporalControl period={period} onChange={changePeriod} />
+              <MapLayerControl sensors={sensors} onChange={setSensors} />
+            </div>
+            <MapHighlightsControl enabled={signalsEnabled} onChange={setSignalsEnabled} status={signals.status} />
           </MapCard>
           {searching && (
             <section

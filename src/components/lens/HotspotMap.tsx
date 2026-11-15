@@ -29,6 +29,10 @@ import type { MapDestination } from "./LocationSearch";
 import { ProjectionToggle } from "./map/ProjectionToggle";
 import { useTheme } from "@/components/ui/ThemeProvider";
 import { BASEMAP_ATTRIBUTION, basemapFor, loadBasemap } from "@/lib/map/basemap";
+import type { FireflySignal } from "@/lib/analytics/signals";
+import { useSignalMarkers } from "./map/useSignalMarkers";
+
+const NO_SIGNALS: FireflySignal[] = [];
 
 function mapColors() {
   const css = getComputedStyle(document.documentElement);
@@ -167,6 +171,8 @@ export function HotspotMap({
   showProjectionToggle = true,
   status,
   onResetView,
+  signals = NO_SIGNALS,
+  onSignalSelect,
 }: {
   /** The area of interest, outlined on the map. */
   area: AnalysisArea | null;
@@ -200,6 +206,8 @@ export function HotspotMap({
   status?: ReactNode;
   /** Called when the person presses "Reset view" in the map controls. */
   onResetView?: () => void;
+  signals?: FireflySignal[];
+  onSignalSelect?: (area: AnalysisArea) => void;
 }) {
   const { theme } = useTheme();
   const el = useRef<HTMLDivElement>(null);
@@ -227,6 +235,8 @@ export function HotspotMap({
     projection ?? DEFAULT_PROJECTION,
   );
   const [globeUnavailable, setGlobeUnavailable] = useState(false);
+  const signalMarkers = useSignalMarkers(map, ready, signals,
+    isDrawing || interactionMode === "pick-administrative", onSignalSelect);
 
   useEffect(() => {
     latest.current = {
@@ -677,6 +687,7 @@ export function HotspotMap({
           <p className="map-key-note">Globe unavailable here: flat map shown</p>
         )}
       </section>
+      {signalMarkers}
       {/* One column of view controls: projection, zoom, reset. */}
       {ready && (
         <div className="map-view-controls">

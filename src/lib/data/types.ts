@@ -29,14 +29,14 @@ export type PolygonGeometry =
   | { type: "MultiPolygon"; coordinates: number[][][][] };
 
 /**
- * The area the analysis runs on: a drawn shape or a state's outline. The data
+ * The area the analysis runs on: a drawn shape, prepared region or state's outline. The data
  * cells count by the share of them inside `geometry`; `bbox` is its envelope.
  */
 export interface AnalysisArea {
   /** Changes whenever the shape changes, so it can key loaded records. */
   id: string;
   name: string;
-  kind: "drawn" | "state";
+  kind: "drawn" | "state" | "preset";
   geometry: PolygonGeometry;
   bbox: BBox;
 }
