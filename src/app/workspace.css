@@ -339,6 +339,21 @@
 .selection-card .btn {
   padding-inline: 0.875rem;
 }
+/* With the analysis open beside the map, its heading already names the area:
+   the card shrinks to its actions, so it does not cover the selection. */
+.selection-card[data-compact="true"] {
+  width: auto;
+  padding: 8px;
+}
+.selection-card[data-compact="true"] > :not(.selection-actions) {
+  display: none;
+}
+/* On a phone the analysis takes the lower screen; the map keeps only the area. */
+@media (max-width: 700px) {
+  .selection-card[data-compact="true"] {
+    display: none;
+  }
+}
 /* Tool panels open beside the column, next to the tool that opened them. */
 .coordinates-panel {
   position: absolute;
@@ -937,6 +952,22 @@
   height: 2px;
   border-radius: 1px;
   background: var(--color-selected);
+}
+/* The way down to the full report: the arrow nods, so it reads as "more below". */
+@media (prefers-reduced-motion: no-preference) {
+  .report-jump svg {
+    animation: report-nod 1800ms ease-in-out infinite;
+  }
+}
+@keyframes report-nod {
+  0%,
+  60%,
+  100% {
+    translate: 0 0;
+  }
+  30% {
+    translate: 0 3px;
+  }
 }
 /* The numbers of the cell under the pointer. It never takes the pointer itself. */
 .cell-readout {

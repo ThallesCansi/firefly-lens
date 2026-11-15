@@ -853,8 +853,9 @@ export function HotspotMap({
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
         const m = map.current;
-        // Resize preserves the camera; framing follows explicit selection/analysis.
         m?.resize();
+        // An area framed before the map changed size is framed again in the new space.
+        control.current?.refit();
       });
     });
     observer.observe(el.current);

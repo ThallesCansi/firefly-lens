@@ -159,41 +159,58 @@ export function LensApp() {
     : mapData;
   // Unusually high cells and harmonized values exist per calendar month; a single day has neither.
   const insight = useMonthInsight(area, period.length === 7 ? period : null);
+  // Selecting an area analyzes it at once: the history opens beside the map
+  // with no further step. The Lume tour keeps it closed, to open it as a step.
+  const openAnalysis = useCallback((next: Area) => {
+    if (tourGuard.current) {
+      setAnalysis(false);
+      return;
+    }
+    setMonthOpen(false);
+    setAnalyzed(next);
+    setAnalysis(true);
+  }, []);
   const commitRectangle = useCallback((bbox: BBox) => {
-    setArea(rectangleArea(normalizeBBox(bbox)));
+    const next = rectangleArea(normalizeBBox(bbox));
+    setArea(next);
     setFrame((n) => n + 1);
     setDrawing(false);
     setCoordinates(false);
-    setAnalysis(false);
-  }, []);
-  // A finished corner edit: the shape changes, the camera stays.
+    openAnalysis(next);
+  }, [openAnalysis]);
+  // A finished corner edit: the shape changes, the camera stays, and an open
+  // analysis follows the new shape.
   const commitShape = useCallback((vertices: Vertex[]) => {
-    setArea((current) => drawnArea(vertices, current?.name));
-  }, []);
+    const next = drawnArea(vertices, area?.name);
+    setArea(next);
+    setAnalyzed((current) => (current ? next : current));
+  }, [area]);
   const commitAdministrative = useCallback(
     (candidate: AdministrativeCandidate) => {
-      setAnalysis(false);
       setDrawing(false);
       setCoordinates(false);
       if (candidate.analysis !== "available") {
+        setAnalysis(false);
         setArea(null);
         return false;
       }
       const { id, name } = candidate.feature.properties;
-      setArea({
+      const next: Area = {
         id: `state:${id}`,
         name,
         kind: "state",
         geometry: candidate.feature.geometry,
         bbox: candidate.bounds,
-      });
+      };
+      setArea(next);
       setFrame((n) => n + 1);
+      openAnalysis(next);
       return true;
     },
-    [],
+    [openAnalysis],
   );
   // Corner handles show as soon as a drawn area exists, unless another tool is in use.
-  const editable = area && !analysis && !tourRunning && !drawing && !coordinates ? area : null;
+  const editable = area && !tourRunning && !drawing && !coordinates ? area : null;
   const tools = useWorkspaceTools(
     controller,
     editable,
@@ -314,10 +331,10 @@ export function LensApp() {
       setDrawing(false);
       setCoordinates(false);
       setSearching(false);
-      setAnalysis(false);
       setArea(next);
       setFrame((n) => n + 1);
-      Object.assign(assistantHost.current!, { area: next, analysisOpen: false });
+      openAnalysis(next);
+      Object.assign(assistantHost.current!, { area: next, analysisOpen: true });
     },
     clearArea() {
       assertAssistantAvailable();
@@ -358,7 +375,7 @@ export function LensApp() {
     tools.clear();
     setArea(next);
     setFrame((n) => n + 1);
-    setAnalysis(false);
+    openAnalysis(next);
     setCoordinates(false);
     return next;
   }
@@ -614,12 +631,12 @@ export function LensApp() {
               </div>
             )}
           {area &&
-            !analysis &&
             !coordinates &&
             !drawing &&
             !tools.administrativeActive && (
               <section
                 data-tour="selection"
+                data-compact={analysis}
                 className="selection-card map-surface"
                 aria-label="Selected area"
               >
@@ -627,22 +644,20 @@ export function LensApp() {
                 <h2 className="text-xl">{area.name}</h2>
                 <p className="num my-2 text-xs text-dim">{describe(area)}</p>
                 <div className="mb-3 flex flex-col gap-1">
-                  {analyzed && analyzed.id !== area.id && (
-                    <p className="text-xs text-dim">
-                      Area changed. Analyze to recalculate the history.
-                    </p>
-                  )}
                   {tools.editor && <PolygonEditStatus editor={tools.editor} />}
                 </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    ref={analyzeButton}
-                    data-tour="analyze"
-                    className="btn btn-primary"
-                    onClick={() => analyze()}
-                  >
-                    Analyze area
-                  </button>
+                <div className="selection-actions flex flex-wrap items-center gap-2">
+                  {/* The analysis opens by itself; this brings it back after it was closed. */}
+                  {!analysis && (
+                    <button
+                      ref={analyzeButton}
+                      data-tour="analyze"
+                      className="btn btn-primary"
+                      onClick={() => analyze()}
+                    >
+                      Show analysis
+                    </button>
+                  )}
                   <button
                     className="btn btn-quiet"
                     onClick={() => {
@@ -657,6 +672,7 @@ export function LensApp() {
                     onClick={() => {
                       tools.clear();
                       setArea(null);
+                      setAnalysis(false);
                     }}
                   >
                     Clear

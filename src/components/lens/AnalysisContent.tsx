@@ -166,7 +166,7 @@ export function AnalysisCalendar({
           </div>
         )
       )}
-      <button data-tour="open-report" type="button" className="btn btn-quiet self-start" onClick={onReport}>
+      <button data-tour="open-report" type="button" className="btn btn-primary report-jump self-start" onClick={onReport}>
         Full report below
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M12 5v14M6 13l6 6 6-6" />
