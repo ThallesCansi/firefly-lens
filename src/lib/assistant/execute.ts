@@ -4,6 +4,7 @@ import { loadArea } from "../data/area";
 import { normalizeBBox, rectangleArea, SENSORS, type AnalysisArea, type BBox, type Sensor } from "../data/types";
 import { buildRecord, type FireRecord } from "../harmonize";
 import { BoundaryRepository, geometryBounds } from "../interactions/administrative";
+import { municipalities, municipalityLabel, searchMunicipalities } from "../interactions/municipalities";
 import { navigationForSearch, type SearchSuggestion } from "../interactions/navigation";
 import { MONTHS } from "../format";
 import { rawPilotFor } from "../data/coverage";
