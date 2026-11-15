@@ -29,6 +29,8 @@ import { useMonthInsight } from "@/lib/useUnusual";
 import { usePlaybackFrames } from "@/lib/usePlayback";
 import { PlaybackBar } from "./PlaybackBar";
 import { RegionFlight } from "./RegionFlight";
+import { parseShare, shareQuery } from "@/lib/share";
+import { BoundaryRepository, geometryBounds } from "@/lib/interactions/administrative";
 import { useWorkspaceTools } from "@/components/interactions/useWorkspaceTools";
 import { WorkspaceSelectionTools } from "@/components/interactions/WorkspaceSelectionTools";
 import { PolygonEditStatus } from "@/components/interactions/PolygonEditOverlay";
@@ -146,6 +148,8 @@ export function LensApp() {
   const [frame, setFrame] = useState(0);
   /** The regional flight: the stop being shown, or null when it is not running. */
   const [flight, setFlight] = useState<number | null>(null);
+  /** Feedback after "Share": whether the link reached the clipboard. */
+  const [shared, setShared] = useState<"copied" | "address" | null>(null);
   const analyzeButton = useRef<HTMLButtonElement>(null);
   const closeButton = useRef<HTMLButtonElement>(null);
   // The time-lapse: a range of months played on the map, all loaded at once.
@@ -237,6 +241,42 @@ export function LensApp() {
     setFrom((f) => (month < f ? month : f));
     setTo((t) => (month > t ? month : t));
   }, []);
+  // A shared link: the area, period and sensors it names are applied once, on
+  // arrival. Each part is validated on its own, so a damaged link still opens.
+  const arrived = useRef(false);
+  useEffect(() => {
+    if (arrived.current) return;
+    arrived.current = true;
+    const view = parseShare(window.location.search, fireData.firstMonth, fireData.lastMonth);
+    if (!view.area && !view.period && !view.sensors) return;
+    // Runs once per page (the ref above), so nothing here is cancelled on cleanup.
+    void (async () => {
+      let next: Area | null = null;
+      if (view.area?.kind === "drawn") next = drawnArea(view.area.vertices, view.area.name);
+      else if (view.area?.kind === "state") {
+        const id = view.area.id;
+        const state = await new BoundaryRepository()
+          .load("state")
+          .then((features) => features.find((f) => String(f.properties.id) === id))
+          .catch(() => undefined);
+        if (state)
+          next = {
+            id: `state:${id}`,
+            name: state.properties.name,
+            kind: "state",
+            geometry: state.geometry,
+            bbox: geometryBounds(state.geometry),
+          };
+      }
+      if (view.period) changePeriod(view.period);
+      if (view.sensors?.length) setSensors(view.sensors);
+      if (next) {
+        setArea(next);
+        setFrame((n) => n + 1);
+        openAnalysis(next);
+      }
+    })();
+  }, [changePeriod, openAnalysis]);
   const report = useRef<HTMLElement>(null);
   const showReport = () => {
     report.current?.scrollIntoView({ behavior: tourRunning || reducedMotion() ? "auto" : "smooth" });
@@ -383,6 +423,20 @@ export function LensApp() {
     openAnalysis(next);
     setCoordinates(false);
     return next;
+  }
+  // "Share": the view goes into the address bar and, where the browser allows, the clipboard.
+  async function share() {
+    const url = `${window.location.origin}${window.location.pathname}?${shareQuery({ area, period, sensors })}`;
+    window.history.replaceState(null, "", url);
+    let copied = false;
+    try {
+      await navigator.clipboard.writeText(url);
+      copied = true;
+    } catch {
+      // No clipboard access: the link is still in the address bar.
+    }
+    setShared(copied ? "copied" : "address");
+    window.setTimeout(() => setShared(null), 2600);
   }
   // The regional flight: one study region after another, each framed in 3D for
   // the same month. It only selects and frames; the analysis stays one press away.
@@ -725,6 +779,16 @@ export function LensApp() {
                   >
                     Clear
                   </button>
+                  <button
+                    className="btn btn-text"
+                    title="Copy a link to this area, period and sensors"
+                    onClick={share}
+                  >
+                    Share
+                  </button>
+                  <span role="status" className="text-xs text-dim">
+                    {shared === "copied" ? "Link copied" : shared === "address" ? "Link is in the address bar" : ""}
+                  </span>
                 </div>
               </section>
             )}
