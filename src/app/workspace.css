@@ -1,10 +1,8 @@
 /* The map remains mounted while a separately scrolling analysis pane opens. */
+/* The map and its side panel fill the first screen; the area report, when
+   there is one, continues below it as an ordinary page section. */
 .lens-workspace {
-  height: 100dvh;
-  min-height: 420px;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+  min-height: 100dvh;
 }
 .location-search {
   position: relative;
@@ -33,10 +31,11 @@
   }
 }
 .workspace-body {
-  flex: 1;
-  min-height: 0;
+  height: 100dvh;
+  min-height: 420px;
   display: flex;
   position: relative;
+  overflow: hidden;
 }
 .workspace-map {
   container: map / inline-size;
@@ -99,52 +98,53 @@
   position: absolute;
   top: 84px;
   left: 20px;
-  /* Above the cards beside it, so its tooltips are never covered. */
   z-index: 27;
   display: flex;
   flex-direction: column;
+  width: 156px;
   padding: 5px;
   gap: 3px;
 }
-/* Inner radius = card radius (14) − padding (5) − border (1). */
+/* Each tool names itself: icon, then label, left-aligned in the column.
+   Inner radius = card radius (14) − padding (5) − border (1). */
 .map-toolbar button {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 38px;
+  padding: 0 10px;
   border-radius: 8px;
   cursor: pointer;
   color: var(--color-dim);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  text-align: left;
   transition-property: background-color, color, scale;
   transition-duration: 150ms;
   transition-timing-function: ease-out;
+}
+.map-toolbar button svg {
+  flex: none;
+}
+.map-tool-label {
+  flex: 1;
+}
+.map-toolbar kbd {
+  padding: 0 5px;
+  border-radius: 4px;
+  background: var(--color-bark);
+  color: var(--color-faint);
+  font: 500 11px/18px var(--font-mono, monospace);
+}
+.map-toolbar button[aria-pressed="true"] kbd {
+  background: #00000024;
+  color: inherit;
 }
 .map-toolbar-rule {
   height: 1px;
   margin: 3px 6px;
   background: var(--color-line);
-}
-/* The tool's name, next to it, on hover or keyboard focus. */
-.map-toolbar button::after {
-  content: attr(data-tip);
-  position: absolute;
-  left: calc(100% + 12px);
-  top: 50%;
-  translate: 0 -50%;
-  padding: 6px 10px;
-  border-radius: 8px;
-  background: var(--color-ink);
-  color: var(--color-night);
-  font-size: 12.5px;
-  font-weight: 500;
-  white-space: pre;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 120ms ease-out;
-}
-.map-toolbar button:focus-visible::after {
-  opacity: 1;
 }
 .map-toolbar button[aria-pressed="true"] {
   background: var(--color-button);
@@ -158,10 +158,6 @@
   .map-toolbar button:hover {
     background: var(--color-bark);
     color: var(--color-ink);
-  }
-  .map-toolbar button:hover::after {
-    opacity: 1;
-    transition-delay: 300ms;
   }
   .map-toolbar button[aria-pressed="true"]:hover {
     background: var(--color-button-hover);
@@ -215,50 +211,49 @@
     opacity: 0;
   }
 }
-/* Top-right: one map card, period and sensors together. */
+/* Top-right: the map card, one compact row as tall as the site card
+   (38px controls + 6px padding + 1px border, twice = 52px). */
 .map-card {
   position: absolute;
   top: 16px;
   right: 20px;
   z-index: 15;
-  width: 268px;
-  padding: 12px;
+  padding: 6px;
 }
 .map-card-chip {
   display: none;
 }
 .map-card-body {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.map-card-hint {
-  font-size: 12px;
-  color: var(--color-dim);
-}
-.map-layers {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  align-items: center;
   gap: 6px;
 }
+.map-layers {
+  display: flex;
+  gap: 4px;
+  padding-left: 6px;
+  border-left: 1px solid var(--color-line);
+}
+/* Inner radius = card radius (14) − padding (6) − border (1). */
 .layer-chip {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  min-height: 36px;
-  border: 1px solid var(--color-line);
-  border-radius: 8px;
+  gap: 7px;
+  height: 38px;
+  padding: 0 11px;
+  border: 1px solid transparent;
+  border-radius: 7px;
   font-size: 13px;
   font-weight: 500;
-  color: var(--color-dim);
+  color: var(--color-faint);
   cursor: pointer;
   transition-property: background-color, border-color, color, scale;
   transition-duration: 150ms;
   transition-timing-function: ease-out;
 }
 .layer-chip[aria-pressed="true"] {
-  border-color: var(--color-faint);
+  border-color: var(--color-line);
   background: var(--color-bark);
   color: var(--color-ink);
 }
@@ -284,63 +279,80 @@
   letter-spacing: 0.16em;
   margin-bottom: 8px;
 }
+/* Area cards sit under the tool column, so the left edge reads top to bottom:
+   site, tools, then the card. */
 .explore-hint,
 .selection-card {
   position: absolute;
-  left: 92px;
-  top: 150px;
-  width: min(350px, calc(100% - 112px));
+  left: 20px;
+  top: 326px;
+  width: min(372px, calc(100% - 40px));
   padding: 22px;
 }
 /* Above the shape's edit handles; actions stay on one row. */
 .selection-card {
   z-index: 26;
-  width: min(372px, calc(100% - 112px));
 }
 .selection-card .btn {
   padding-inline: 0.875rem;
 }
+/* Tool panels open beside the column, next to the tool that opened them. */
 .coordinates-panel {
   position: absolute;
   top: 84px;
-  left: 86px;
-  width: min(490px, calc(100% - 105px));
+  left: 188px;
+  width: min(490px, calc(100% - 208px));
   padding: 16px;
-  max-height: calc(100% - 180px);
+  max-height: calc(100% - 200px);
   overflow-y: auto;
   overscroll-behavior: contain;
 }
 .temporal-control {
-  display: grid;
-  grid-template-columns: 1fr 1.4fr;
-  align-items: center;
-  gap: 6px;
-}
-.temporal-head {
-  grid-column: 1 / -1;
   display: flex;
-  justify-content: space-between;
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  align-items: center;
+  gap: 4px;
+}
+.temporal-icon {
+  flex: none;
+  margin: 0 4px 0 6px;
   color: var(--color-dim);
 }
 .temporal-control .field {
-  width: 100%;
   height: 38px;
+  padding: 0 8px;
+  border-radius: 7px;
+  font-size: 14px;
 }
-.temporal-control .btn {
-  grid-column: 1 / -1;
-  min-height: 34px;
-  font-size: 12px;
+.day-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 10px;
+  border-radius: 7px;
+  background: var(--color-button);
+  color: var(--color-button-ink);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition-property: background-color, scale;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+}
+.day-chip:active {
+  scale: 0.96;
+}
+@media (hover: hover) {
+  .day-chip:hover {
+    background: var(--color-button-hover);
+  }
 }
 /* Place search, opened from the magnifier, next to the tools. */
 .map-search-panel {
   position: absolute;
   top: 84px;
-  left: 86px;
-  width: min(440px, calc(100% - 105px));
+  left: 188px;
+  width: min(440px, calc(100% - 208px));
   padding: 14px;
   z-index: 26;
 }
@@ -605,12 +617,61 @@
   padding: 20px 24px;
   border-bottom: 1px solid var(--color-line);
 }
+/* Scrolling past the panel's end carries on to the report below, so this
+   scroller deliberately does not contain overscroll. */
 .analysis-scroll {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  overscroll-behavior: contain;
   padding: 24px;
+}
+.analysis-report {
+  border-top: 1px solid var(--color-line);
+  background: var(--color-night);
+  /* Cancels the page's 5rem scroll padding, so the report lands flush at the top. */
+  scroll-margin-top: -5rem;
+}
+.analysis-report:focus {
+  outline: none;
+}
+.analysis-report-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 56px 32px 72px;
+}
+.analysis-report-head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+/* Year calendar beside the selected day; the day stays in view while the
+   calendar scrolls. */
+.analysis-report-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 40px;
+  align-items: start;
+}
+.analysis-report-day {
+  position: sticky;
+  top: 24px;
+}
+@media (max-width: 1000px) {
+  .analysis-report-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .analysis-report-day {
+    position: static;
+  }
+}
+@media (max-width: 700px) {
+  .analysis-report-inner {
+    gap: 36px;
+    padding: 36px 16px 56px;
+  }
 }
 .analysis-content .btn {
   font-size: 13px;
@@ -647,6 +708,78 @@
     width: max(280px, calc(100% - 600px));
   }
 }
+/* Where the row would reach the site card, it folds into a chip that opens
+   on click. */
+@container map (max-width: 760px) {
+  /* Under the site card, right of the slim tool column. */
+  .map-card {
+    top: 84px;
+    right: 12px;
+    max-width: calc(100% - 98px);
+    padding: 0;
+  }
+  .map-card[data-open="true"] {
+    z-index: 28;
+  }
+  .map-card-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 0 12px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-ink);
+    cursor: pointer;
+  }
+  .map-card-body {
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    width: 236px;
+    padding: 0 10px 10px;
+  }
+  .map-card[data-open="true"] .map-card-body {
+    display: flex;
+  }
+  .temporal-icon {
+    display: none;
+  }
+  .temporal-control .field {
+    flex: 1;
+  }
+  .map-layers {
+    padding-left: 0;
+    border-left: 0;
+  }
+  .layer-chip {
+    flex: 1;
+    border-color: var(--color-line);
+  }
+}
+/* On a narrow map the column slims down: each label sits under its icon. */
+@container map (max-width: 760px) {
+  .map-toolbar {
+    left: 12px;
+    width: 66px;
+    padding: 4px;
+  }
+  .map-toolbar button {
+    flex-direction: column;
+    justify-content: center;
+    gap: 3px;
+    height: 52px;
+    padding: 0 2px;
+    font-size: 10px;
+    text-align: center;
+  }
+  .map-tool-label {
+    flex: none;
+  }
+  .map-toolbar kbd {
+    display: none;
+  }
+}
 @container map (max-width: 900px) {
   .map-key {
     bottom: 100px;
@@ -662,46 +795,22 @@
   }
   .map-toolbar {
     top: 70px;
-    left: 12px;
   }
-  /* The map card folds into a chip under the site card, opening on tap. */
+  /* The folded map card sits right of the tools; cards open beside the
+     slim tool column, under the chip. */
   .map-card {
     top: 70px;
     right: 12px;
-    width: auto;
-    padding: 0;
-  }
-  .map-card-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    min-height: 40px;
-    padding: 0 12px;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--color-ink);
-    cursor: pointer;
-  }
-  .map-card-body {
-    display: none;
-    width: 240px;
-    padding: 0 12px 12px;
-  }
-  .map-card[data-open="true"] .map-card-body {
-    display: flex;
-  }
-  .temporal-head {
-    display: none;
   }
   .map-search-panel {
-    top: 70px;
-    left: 70px;
-    width: calc(100% - 82px);
+    top: 122px;
+    left: 86px;
+    width: calc(100% - 98px);
   }
   .explore-hint {
-    left: 70px;
+    left: 86px;
     top: 122px;
-    width: calc(100% - 82px);
+    width: calc(100% - 98px);
     padding: 16px;
   }
   .explore-hint h1 {
@@ -769,9 +878,9 @@
     bottom: 250px;
   }
   .coordinates-panel {
-    left: 70px;
-    top: 70px;
-    width: calc(100% - 82px);
+    left: 86px;
+    top: 122px;
+    width: calc(100% - 98px);
   }
   .analysis-drawer {
     position: absolute;
@@ -799,15 +908,9 @@
   }
   .workspace-body[data-analysis="true"] .map-toolbar {
     top: 12px;
-    flex-direction: row;
-  }
-  .workspace-body[data-analysis="true"] .map-toolbar-rule {
-    width: 1px;
-    height: auto;
-    margin: 6px 3px;
   }
   .drawing-hint {
-    margin-left: 70px;
+    margin-left: 12px;
     margin-right: 12px;
     font-size: 12px;
   }

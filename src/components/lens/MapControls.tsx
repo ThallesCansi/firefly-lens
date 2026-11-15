@@ -21,8 +21,9 @@ export function MapToolbar({
   onSearch?: () => void;
   searchActive?: boolean;
 }) {
-  // Two groups: find a place, then choose how to select an area.
-  // Clearing lives on the selection card and resetting the view in the map controls.
+  // A column of named tools in two groups: find a place, then choose how to
+  // select an area. Clearing lives on the selection card, resetting the view
+  // in the map controls.
   return (
     <div
       className="map-toolbar map-surface"
@@ -33,7 +34,7 @@ export function MapToolbar({
       {onSearch && (
         <>
           <Tool
-            label="Search places"
+            label="Search"
             hint="/"
             icon="search"
             active={searchActive}
@@ -51,7 +52,7 @@ export function MapToolbar({
         onClick={() => onTool("navigate")}
       />
       <Tool
-        label={tool === "draw" ? "Cancel drawing" : "Draw an area"}
+        label={tool === "draw" ? "Cancel drawing" : "Draw area"}
         icon="rectangle"
         active={tool === "draw"}
         onClick={() => onTool(tool === "draw" ? "navigate" : "draw")}
@@ -65,7 +66,7 @@ export function MapToolbar({
         />
       )}
       <Tool
-        label="Coordinates and regions"
+        label="Coordinates"
         icon="coordinates"
         active={tool === "coordinates"}
         onClick={() =>
@@ -112,13 +113,10 @@ export function MapLayerControl({
  */
 export function MapCard({
   summary,
-  hint,
   children,
 }: {
   /** One line for the folded chip, e.g. "Sep 2026 · 2 layers". */
   summary: string;
-  /** Shown under the controls, e.g. "Select an area to load detections". */
-  hint?: string;
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
@@ -135,7 +133,6 @@ export function MapCard({
       </button>
       <div className="map-card-body">
         {children}
-        {hint && <p className="map-card-hint">{hint}</p>}
       </div>
     </section>
   );
@@ -150,7 +147,7 @@ function Tool({
   onClick,
 }: {
   label: string;
-  /** Keyboard shortcut shown in the tooltip. */
+  /** Keyboard shortcut, shown as a key cap after the label. */
   hint?: string;
   icon: string;
   active?: boolean;
@@ -186,26 +183,26 @@ function Tool({
   return (
     <button
       type="button"
-      aria-label={label}
       aria-keyshortcuts={hint}
       aria-pressed={active}
       disabled={disabled}
       onClick={onClick}
-      data-tip={hint ? `${label}  ${hint}` : label}
     >
       <svg
-        width="21"
-        height="21"
+        width="18"
+        height="18"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
-        strokeWidth="1.5"
+        strokeWidth="1.75"
         strokeLinecap="round"
         strokeLinejoin="round"
         aria-hidden="true"
       >
         {paths[icon]}
       </svg>
+      <span className="map-tool-label">{label}</span>
+      {hint && <kbd aria-hidden="true">{hint}</kbd>}
     </button>
   );
 }
