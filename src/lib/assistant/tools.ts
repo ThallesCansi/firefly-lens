@@ -40,6 +40,19 @@ export const ASSISTANT_TOOLS: ToolSpec[] = [
     ),
   },
   {
+    name: "select_municipality",
+    description:
+      "Make a Brazilian municipality (city) the area of interest, with its official IBGE outline, and frame it on the map. Use this whenever the request names a Brazilian city or town. Give the state when the request names it, since several municipalities share a name.",
+    parameters: object(
+      {
+        city: { type: "string", description: "Municipality name, e.g. 'Sorriso'." },
+        state: { type: "string", description: "Optional two-letter state code, e.g. 'MT'." },
+        period: PERIOD,
+      },
+      ["city"],
+    ),
+  },
+  {
     name: "select_region",
     description: `Make one of the ready-made study regions the area of interest: ${meta.presets
       .map((p) => `'${p.id}' (${p.name}: ${p.place})`)
@@ -49,7 +62,7 @@ export const ASSISTANT_TOOLS: ToolSpec[] = [
   {
     name: "select_box",
     description:
-      "Make a rectangle the area of interest, in degrees. Kept inside Brazil and at most 12° a side. Use it for places that are not a state or a ready-made region; find the place's coordinates with go_to_place first when you do not know them.",
+      "Make a rectangle the area of interest, in degrees. Kept inside Brazil and at most 12° a side. Use it for places that are not a state, a municipality or a ready-made region; find the place's coordinates with go_to_place first when you do not know them.",
     parameters: object(
       {
         west: { type: "number" },

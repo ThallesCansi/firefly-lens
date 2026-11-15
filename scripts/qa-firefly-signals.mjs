@@ -47,7 +47,7 @@ try {
   await page.getByRole("region", { name: "Time-lapse", exact: true }).waitFor();
   await page.getByRole("button", { name: "Close the time-lapse", exact: true }).click();
   await period("2024", "06");
-  await page.getByRole("button", { name: "Tour with Lume", exact: true }).click();
+  await page.getByRole("button", { name: "Tour with FireFlighter", exact: true }).click();
   await page.locator(".lume-tour-card:visible").waitFor();
   await page.getByRole("button", { name: "Skip tour", exact: true }).click();
   await page.waitForFunction(() => document.querySelector("#main")?.getAttribute("data-tour-active") === "false");

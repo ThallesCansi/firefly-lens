@@ -43,9 +43,9 @@ In the map workspace a user can:
 
 ## Run it
 
-### Tour with Lume
+### Tour with FireFlighter
 
-The workspace automatically opens Lume’s welcome on each new visit or reload. **Don't show again** is an explicit browser preference: only checking it disables future automatic welcomes. Completing, skipping or closing the tour does not opt out. A single welcome is presented per browser document, including across Strict Mode effect replay and client-side navigation. The **Tour with Lume** launcher, beside the original animated mascot, remains available after opt-out.
+The workspace automatically opens FireFlighter’s welcome on each new visit or reload. **Don't show again** is an explicit browser preference: only checking it disables future automatic welcomes. Completing, skipping or closing the tour does not opt out. A single welcome is presented per browser document, including across Strict Mode effect replay and client-side navigation. The **Tour with FireFlighter** launcher, beside the original animated mascot, remains available after opt-out.
 
 The read-only demonstration selects the exact Pantanal preset and September 2023, using the existing historical record and geometry-matched Python analytics. History, historical anomalies and experimental Forecast remain distinct; unavailable forecasts remain unavailable. Only the guide’s controls and opt-out checkbox are interactive. Search, map gestures, pickers, calendars, tabs, exports and the assistant remain visible but locked. Next/Back prepare them through existing React handlers; no file is downloaded and no model request is sent by the tour.
 
@@ -99,7 +99,7 @@ Free tiers are small. On Groq each model allows about 1,000 requests a day and 8
 
 ## Themes and scientific documentation
 
-Headers use the original Lume mascot plus the compact wordmark **Lens**; the institutional name remains **FireFly Lens**. The original mascot component is unchanged. The SVG browser icon is rendered directly from that component, with its original geometry and colours.
+Headers use the firefly mascot, FireFlighter, plus the compact wordmark **Lens**; the institutional name remains **FireFly Lens**. The mascot keeps its original drawing and wears a firefighter helmet. The SVG browser icon is the same drawing with its colours resolved.
 
 The header offers **Light**, **Dark** and **System**. The preference is stored locally, applied before the first paint and synchronized with operating-system changes in System mode. Theme changes update CARTO dark/Positron map styles on the existing MapLibre instance, restoring custom layers and sensor visibility without changing the camera, area or analysis period.
 
@@ -119,7 +119,7 @@ The site deploys on [Vercel](https://vercel.com) from this repository: every pus
 src/
   app/                  routes: /, /lens, /method
   components/
-    firefly/            Lume, the firefly mascot
+    firefly/            FireFlighter (component `Lume`), the firefly mascot
     landing/            sections of the landing page
     lens/               history grid, calendar, map, area form, day detail
     ui/                 header, footer, tabs, text transitions

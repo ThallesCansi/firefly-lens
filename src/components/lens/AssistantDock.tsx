@@ -122,10 +122,10 @@ export function AssistantDock({ host }: { host: RefObject<AssistantHost | null> 
       }}
     >
       {open && (
-        <section id={panelId} className="assistant-panel map-surface" aria-label="FireFly assistant">
+        <section id={panelId} className="assistant-panel map-surface" aria-label="FireFlighter assistant">
           <header className="assistant-panel-head">
             <span className="assistant-spark" aria-hidden="true" />
-            <span>FireFly assistant</span>
+            <span>FireFlighter assistant</span>
             {lines.length > 0 && !busy && (
               <button type="button" className="assistant-reset" onClick={reset}>
                 New conversation
@@ -193,7 +193,7 @@ export function AssistantDock({ host }: { host: RefObject<AssistantHost | null> 
           value={text}
           onChange={(e) => setText(e.target.value)}
           onFocus={() => setOpen(true)}
-          placeholder="Ask FireFly… “Show Santa Catarina in 2006”"
+          placeholder="Ask FireFlighter… “Show Santa Catarina in 2006”"
           aria-label="Ask the map assistant"
           aria-describedby={open ? panelId : undefined}
           autoComplete="off"

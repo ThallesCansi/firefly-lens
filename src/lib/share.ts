@@ -7,7 +7,7 @@ import { COVERAGE, SENSORS, editableVertices, type AnalysisArea, type Sensor } f
  * the record is dropped, and the rest still applies.
  */
 export interface SharedView {
-  area: { kind: "drawn"; vertices: [number, number][]; name?: string } | { kind: "state"; id: string } | null;
+  area: { kind: "drawn"; vertices: [number, number][]; name?: string } | { kind: "state"; id: string } | { kind: "municipality"; id: string } | null;
   /** YYYY-MM or YYYY-MM-DD. */
   period: string | null;
   sensors: Sensor[] | null;
@@ -21,7 +21,7 @@ const round = (n: number) => Math.round(n * 1e4) / 1e4;
 export function shareQuery(view: { area: AnalysisArea | null; period: string; sensors: Sensor[] }): string {
   const query = new URLSearchParams();
   const vertices = editableVertices(view.area);
-  if (view.area?.kind === "state") query.set("area", view.area.id);
+  if (view.area?.kind === "state" || view.area?.kind === "municipality") query.set("area", view.area.id);
   else if (view.area && vertices) {
     query.set("area", `poly:${vertices.map(([x, y]) => `${round(x)},${round(y)}`).join(";")}`);
     if (view.area.name !== "Custom area") query.set("name", view.area.name);
@@ -34,6 +34,7 @@ export function shareQuery(view: { area: AnalysisArea | null; period: string; se
 function parseArea(value: string | null, name: string | null): SharedView["area"] {
   if (!value) return null;
   if (/^state:[\w:-]{1,20}$/.test(value)) return { kind: "state", id: value.slice(6) };
+  if (/^municipality:\d{7}$/.test(value)) return { kind: "municipality", id: value.slice(13) };
   if (!value.startsWith("poly:")) return null;
   const [w, s, e, n] = COVERAGE;
   const vertices: [number, number][] = [];

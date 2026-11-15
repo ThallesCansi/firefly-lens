@@ -136,7 +136,7 @@ export function download(filename: string, text: string, mime: string): void {
 
 /** A short file-name part for an area: a named region, or the drawn shape's envelope. */
 export function areaSlug(area: AnalysisArea): string {
-  if (area.kind === "state" || area.kind === "preset")
+  if (area.kind !== "drawn")
     return area.name
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")

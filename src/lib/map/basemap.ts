@@ -15,9 +15,11 @@ export const BASEMAP_ATTRIBUTION = '<a href="https://www.naturalearthdata.com/" 
 /** What covers the land and the sea: NASA's satellite picture, or the drawn map alone. */
 export type BasemapKind = "satellite" | "map";
 
-export const DEFAULT_BASEMAP: BasemapKind = "map";
+/** The satellite picture shows first; the drawn map is one press away. */
+export const DEFAULT_BASEMAP: BasemapKind = "satellite";
 
-const KIND_KEY = "firefly-lens-basemap";
+// The key changed when the default did, so an old stored "map" does not hide the new default.
+const KIND_KEY = "firefly-lens-basemap-2";
 
 /** The basemap the person chose last time, or the default. Storage may be unavailable. */
 export function readBasemap(): BasemapKind {

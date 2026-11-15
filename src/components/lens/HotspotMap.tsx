@@ -287,6 +287,7 @@ export function HotspotMap({
   const motion = useRef<ColumnMotion | null>(null);
   const isDrawing = drawing || interactionMode === "draw-rectangle";
   const bbox = area?.bbox ?? null;
+  const hasArea = area !== null;
   const latest = useRef({
     cells,
     scale,
@@ -315,7 +316,7 @@ export function HotspotMap({
   );
   const [globeUnavailable, setGlobeUnavailable] = useState(false);
   /** The 3D view: detections as columns, seen from a tilted camera. */
-  const [columnsChosen, setInColumns] = useState(false);
+  const [columnsChosen, setInColumns] = useState(true);
   // A regional flight shows every stop in 3D, whatever was chosen before it.
   const inColumns = forceColumns || columnsChosen;
   /** NASA's satellite picture under the data, or the drawn map alone. */
@@ -695,8 +696,9 @@ export function HotspotMap({
   }, [sensors, inColumns, ready]);
 
   useEffect(() => {
-    if (ready) control.current?.setTilt(inColumns);
-  }, [inColumns, ready]);
+    // Columns stand on an area of interest: without one there is nothing to lean over.
+    if (ready) control.current?.setTilt(inColumns && (forceColumns || hasArea));
+  }, [inColumns, forceColumns, hasArea, ready]);
 
   const glowing = showUnusual && !!unusual && unusual.ids.size > 0;
   useEffect(() => {
