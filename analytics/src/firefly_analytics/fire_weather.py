@@ -44,6 +44,9 @@ def _numeric_grid(path, metadata_path, file_version, geometry_json, minute):
 
 def query_fire_weather(region_id, geometry=None):
     default = Path(os.environ.get("FIREFLY_DATA_ROOT", Path(__file__).resolve().parents[3])) / "harmonization/output/fire_weather/geos5.nc"
+    if not os.environ.get('FIREFLY_FWI_NETCDF') and os.environ.get('FIREFLY_FWI_REFRESH_URL'):
+        from .weather_store import current_product
+        default, _ = current_product(default)
     path = os.environ.get("FIREFLY_FWI_NETCDF") or (str(default) if default.exists() else None)
     if not path or geometry is None:
         return {**unavailable(), "region_id": region_id}

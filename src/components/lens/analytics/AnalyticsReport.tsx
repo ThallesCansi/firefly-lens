@@ -604,6 +604,7 @@ function HarmonizedAnalyticsReport({
           {bundle ? (dynamic ? "Python · selected polygon" : "Python · preprocessed") : "Regional analysis"}
         </span>
       </div>
+      <FireDangerAssessment area={area} />
       <div
         role="tablist"
         aria-label="Analysis report"
@@ -761,7 +762,6 @@ function HarmonizedAnalyticsReport({
           )
         )}
       </div>
-      <FireDangerAssessment area={area} />
       {bundle && (
         <details className="analytics-provenance">
           <summary>Methods, provenance & limitations</summary>

@@ -38,6 +38,21 @@ function NationalReport({ area, period, compact, onPeriod, onReport, renderHisto
   const selected = rows.find((r) => r.date === period.slice(0,7));
   const metrics = rawPilotFor(area)?.calibration_metrics;
   return <div className="analytics-report">
+    {!compact && <FireDangerAssessment area={area} />}
+      {!compact && <>
+        <div role="tablist" aria-label="Analysis report" className="analytics-tabs">
+          {(["history","forecast"] as const).map((value)=><button key={value} type="button" role="tab" data-tour={`tab-${value}`}
+            id={`${id}-${value}-tab`} aria-controls={`${id}-${value}`} aria-selected={tab===value} tabIndex={tab===value?0:-1}
+            onClick={()=>setTab(value)} onKeyDown={(event)=>{
+              if (["ArrowLeft","ArrowRight","Home","End"].includes(event.key)) {
+                event.preventDefault(); const next=event.key==="Home"?"history":event.key==="End"?"forecast":value==="history"?"forecast":"history";
+                setTab(next); document.getElementById(`${id}-${next}-tab`)?.focus();
+              }
+            }}>{value==="history"?"History":"Forecast"}</button>)}
+        </div>
+        {controls}
+      </>}
+
     <section className="analytics-card">
       <span className="analytics-badge">Real harmonized data · entire country only</span>
       <h3>National fire activity · {rawPilotFor(area)?.name}</h3>
@@ -53,19 +68,6 @@ function NationalReport({ area, period, compact, onPeriod, onReport, renderHisto
         {!selected && <option value="" disabled>Choose a covered month</option>}
         {rows.map((r) => <option key={r.date} value={r.date}>{r.date}</option>)}
       </select></label>}
-      {!compact && <>
-        <div role="tablist" aria-label="Analysis report" className="analytics-tabs">
-          {(["history","forecast"] as const).map((value)=><button key={value} type="button" role="tab" data-tour={`tab-${value}`}
-            id={`${id}-${value}-tab`} aria-controls={`${id}-${value}`} aria-selected={tab===value} tabIndex={tab===value?0:-1}
-            onClick={()=>setTab(value)} onKeyDown={(event)=>{
-              if (["ArrowLeft","ArrowRight","Home","End"].includes(event.key)) {
-                event.preventDefault(); const next=event.key==="Home"?"history":event.key==="End"?"forecast":value==="history"?"forecast":"history";
-                setTab(next); document.getElementById(`${id}-${next}-tab`)?.focus();
-              }
-            }}>{value==="history"?"History":"Forecast"}</button>)}
-        </div>
-        {controls}
-      </>}
       <div role="tabpanel" id={`${id}-history`} aria-labelledby={`${id}-history-tab`} hidden={!compact && tab!=="history"}>
       {bundle && !compact && renderHistory ? renderHistory(bundle) : rows.length > 0 && <>
         <ScientificChart title="Historical Fire Activity" unit="Aqua-equivalent hot spots"
@@ -86,6 +88,5 @@ function NationalReport({ area, period, compact, onPeriod, onReport, renderHisto
       {!compact && <details><summary>Raw sensor record and provenance</summary><RawPilotReport area={area} period={period} compact /></details>}
       {onReport && <button type="button" className="btn btn-quiet" onClick={onReport}>Full report below</button>}
     </section>
-    {!compact && <FireDangerAssessment area={area} />}
   </div>;
 }

@@ -181,17 +181,18 @@ def read_netcdf(path, metadata_path, geometry, *, now=None, window_days=9):
                 values = data.isel(index).transpose(lat, lon).values.astype(float)
                 mask = np.isfinite(values) & (values >= 0) & (weights > 0)
                 valid_area = float(weights[mask].sum())
+                coverage = min(1., valid_area / selected_area)
                 total = float(np.sum(values[mask] * weights[mask]) / valid_area) if valid_area else None
                 distribution = [{"class": category,
                     "area_fraction": float(sum(weights[i, j] for i, j in zip(*np.where(mask))
-                        if classify(values[i, j]) == category) / selected_area)} for category in CLASSES]
+                        if classify(values[i, j]) == category) / valid_area * coverage) if valid_area else 0.} for category in CLASSES]
                 rows.append({"issued_at": issued.isoformat(), "valid_at": valid.isoformat() if valid else None,
                     "lead_hours": None if nasa else lead,
                     **({'valid_date':daily.isoformat(),'lead_days':lead,'validity_basis':'daily local-noon field; no single global UTC validity instant'} if nasa else {}),
                     "member": str(member), "value": total,
                     "sample_count": int((weights > 0).sum()), "valid_samples": int(mask.sum()),
                     "null_reason": None if valid_area else "all_cells_missing",
-                    "coverage_fraction": min(1., valid_area / selected_area),
+                    "coverage_fraction": coverage,
                     "danger_class": classify(total) if total is not None else None,
                     "maximum": float(values[mask].max()) if valid_area else None,
                     "distribution": distribution,
@@ -207,6 +208,7 @@ def read_netcdf(path, metadata_path, geometry, *, now=None, window_days=9):
             "classes": list(CLASSES), "thresholds": list(THRESHOLDS), "very_extreme": ">70"},
         "limitations": ["NASA GFWED/GEOS-5 experimental deterministic forecast; initialization and validity dates decoded from its documented source product keys; publication instant unavailable." if nasa else "Delayed seasonal ensemble, not the operational GWIS deterministic forecast.",
             "Class fractions use the entire selected polygon as denominator; missing area is not low danger.",
+            "Class fractions sum to bounded area coverage; ellipsoidal subdivision roundoff above 100% is normalized without changing mean FWI or maximum.",
             "Members and validity times are kept separate. The maximum is a grid-cell value, not a local measurement.",
             "Percentile and anomaly are unavailable: this adapter does not derive a provider climatology.",
             "FWI describes weather-driven fire danger, not ignition probability, fire counts or complete property risk."]}

@@ -23,6 +23,7 @@ export function RawPilotReport({ area, period, onPeriod, compact = false, onRepo
   const row = data?.monthly.find((r) => r.date === period.slice(0,7));
   const calibrated = !!rawPilotFor(area)?.national_url;
   return <div className="analytics-report">
+    {!compact && <FireDangerAssessment area={area} />}
     <section className="analytics-card">
       <span className="analytics-badge">{calibrated ? "Real raw sensor detections · original counts" : "Real raw detections · harmonization not validated"}</span>
       <h3>Historical raw detections · {data?.name ?? area.name}</h3>
@@ -56,6 +57,5 @@ export function RawPilotReport({ area, period, onPeriod, compact = false, onRepo
       <p className="analytics-footnote"><a href="/method#geographic-expansion">Geographic coverage and validation policy ↗</a></p>
       {onReport && <button type="button" className="btn btn-quiet" onClick={onReport}>Full report below</button>}
     </section>
-    {!compact && <FireDangerAssessment area={area} />}
   </div>;
 }

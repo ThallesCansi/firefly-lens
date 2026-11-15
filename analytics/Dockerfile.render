@@ -1,4 +1,4 @@
-# Historical analytics only. Build context must be the repository root.
+# Historical and numeric meteorological analytics. Repository-root build context.
 FROM python:3.13-slim AS country_reports
 COPY public/data/continental /source
 RUN python -c "from pathlib import Path; import shutil; [(Path('/national', p.parent.name).mkdir(parents=True, exist_ok=True), shutil.copyfile(p, Path('/national', p.parent.name, 'national.json'))) for p in Path('/source').glob('*/national.json')]"
@@ -8,12 +8,14 @@ ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 OPENBLAS_NUM_THREADS=1 OMP_NUM_
 WORKDIR /app
 COPY analytics/pyproject.toml /app/analytics/pyproject.toml
 COPY analytics/src /app/analytics/src
-RUN pip install --no-cache-dir '/app/analytics[api]' && useradd --create-home firefly
+RUN pip install --no-cache-dir '/app/analytics[api,weather]' && useradd --create-home firefly
 COPY harmonization/output/grid_monthly_total.parquet /data/harmonization/output/grid_monthly_total.parquet
 COPY harmonization/output/harmonization_params.json /data/harmonization/output/harmonization_params.json
 COPY public/data/brazil/meta.json /data/public/data/brazil/meta.json
 COPY public/data/coverage.json /data/public/data/coverage.json
 COPY --from=country_reports /national /data/public/data/continental
+COPY harmonization/output/fire_weather /data/harmonization/output/fire_weather
+ENV FIREFLY_FWI_REFRESH_URL=https://github.com/ThallesCansi/firefly-lens/releases/download/weather-data/weather-bundle.json
 ENV FIREFLY_DATA_ROOT=/data ANALYTICS_ENABLE_SARIMA=0
 USER firefly
 EXPOSE 10000

@@ -1,0 +1,33 @@
+{
+  "checks": [
+    "Custom Brazilian polygon: real numeric weather leads centered tabs, remains across Forecast/History, and is independent of the 2003 map month",
+    "390px: weather before centered tabs, no horizontal overflow",
+    "320px: weather before centered tabs, no horizontal overflow",
+    "Paraguay: same weather-first order with one assessment across both tabs",
+    "Unavailable weather shows no numeric placeholder and does not block real History"
+  ],
+  "errors": [],
+  "realWeather": [
+    {
+      "status": "available",
+      "source": "nasa_gfwed_geos5",
+      "rows": [
+        {
+          "valid_date": "2026-11-15",
+          "value": 0.3683036132014024,
+          "coverage": 1
+        },
+        {
+          "valid_date": "2026-11-16",
+          "value": 0.015613245848988235,
+          "coverage": 1
+        },
+        {
+          "valid_date": "2026-11-17",
+          "value": 0.5031081454917512,
+          "coverage": 1
+        }
+      ]
+    }
+  ]
+}

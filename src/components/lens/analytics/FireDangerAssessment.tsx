@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import type { AnalysisArea } from "../../../lib/data/types";
 import { geometryKey } from "../../../lib/analytics/client";
 import { loadFireDanger, type DangerData } from "../../../lib/analytics/weather";
@@ -19,13 +19,19 @@ export function DangerValues({ data }: { data: DangerData }) {
   );
   return <>
     <p className="analytics-notice"><strong>{data.product_kind === "experimental_deterministic" ? "NASA GFWED / GEOS-5 · experimental forecast" : "Delayed seasonal forecast · ECMWF SEAS5 / GEFF"}</strong><br />
-      {data.product_kind === "experimental_deterministic" ? "Official numeric NASA research product. Validity is a daily local-noon index date; no single UTC validity hour is supplied. This is not the operational Copernicus forecast." : "This product is published behind real time. It is a seasonal outlook, with separate ensemble members; it is not the operational GWIS weather forecast."}</p>
+      {data.product_kind === "experimental_deterministic" ? "Numeric research forecast · daily local-noon fields." : "Delayed seasonal outlook · separate ensemble members."}</p>
     <label>Validity and member{" "}
       <select className="field" value={selection} onChange={(e) => setSelection(Number(e.target.value))}>
         {data.forecasts.map((r, i) => <option key={`${r.issued_at}:${r.valid_date ?? r.valid_at}:${r.member}`} value={i}>{r.valid_date ?? r.valid_at} · {r.member === "deterministic" ? "deterministic" : `member ${r.member}`}</option>)}
       </select>
     </label>
-    <p className="analytics-insight">{row.value === null ? "Numeric weather coverage is missing for this validity and member." : `${row.danger_class} meteorological fire danger on the area average (FWI ${numeric(row.value)}). Local grid cells may have higher danger; inspect the distribution below.`}</p>
+    <p className="analytics-insight">{row.value === null ? "Numeric weather coverage is missing for this validity and member." : `${row.danger_class} meteorological fire danger · area average FWI ${numeric(row.value)}.`}</p>
+    <div className="weather-summary">
+      <div><span>FWI · area average</span><strong>{numeric(row.value)}</strong></div>
+      <div><span>Highest grid cell</span><strong>{numeric(row.maximum)}</strong></div>
+      <div><span>Valid area coverage</span><strong>{percent(row.coverage_fraction)}</strong></div>
+    </div>
+    <details><summary>Coverage, distribution & forecast details</summary>
     <dl className="analytics-metadata">
       <div><dt>FWI · dimensionless</dt><dd>{numeric(row.value)}</dd></div>
       <div><dt>Highest covered grid cell</dt><dd>{numeric(row.maximum)}</dd></div>
@@ -42,7 +48,9 @@ export function DangerValues({ data }: { data: DangerData }) {
       <tbody>{row.distribution.map((d) => <tr key={d.class}><th>{d.class}</th><td>{percent(d.area_fraction)}</td></tr>)}
         <tr><th>Missing numeric coverage</th><td>{percent(Math.max(0, 1-row.coverage_fraction))}</td></tr></tbody>
     </table></div>
+    </details>
     <details><summary>Weather provenance and limitations</summary>
+      <p>{data.product_kind === "experimental_deterministic" ? "Official numeric NASA research product. Validity is a daily local-noon index date; no single UTC validity hour is supplied. This is not the operational Copernicus forecast." : "This product is published behind real time. It is a seasonal outlook, with separate ensemble members; it is not the operational GWIS weather forecast."}</p>
       <p>{data.aggregation}</p><p>Source: {data.provenance?.meteorological_source} · system {data.provenance?.system_version} · retrieved {data.provenance?.retrieved_at}</p>
       <p>SHA-256: <code className="analytics-digest">{data.provenance?.sha256}</code></p>
       <ul>{data.limitations?.map((limit) => <li key={limit}>{limit}</li>)}</ul>
@@ -52,6 +60,7 @@ export function DangerValues({ data }: { data: DangerData }) {
 }
 
 export function FireDangerAssessment({ area }: { area: AnalysisArea }) {
+  const headingId = useId();
   const key = geometryKey(area.geometry);
   const [attempt, setAttempt] = useState(0);
   const [state, setState] = useState<{ key: string; attempt: number; data: DangerData } | null>(null);
@@ -65,10 +74,11 @@ export function FireDangerAssessment({ area }: { area: AnalysisArea }) {
     return () => { live = false; controller.abort(); };
   }, [area, key, attempt]);
   const current = state?.key === key && state.attempt === attempt ? state.data : null;
-  return <section className="analytics-card" aria-labelledby="fire-danger-heading">
+  return <section className="analytics-card weather-assessment" aria-labelledby={headingId} data-weather-status={current?.status ?? "loading"}>
     <span className="analytics-eyebrow">Meteorological Fire Danger</span>
-    <h3 id="fire-danger-heading">Fire Danger Assessment</h3>
-    <p>Canadian FWI describes weather conditions that can support fire intensity and spread. It does not predict ignition probability, hotspot counts or risk to people and property.</p>
+    <h3 id={headingId}>Fire Danger Assessment</h3>
+    <p className="analytics-footnote">Current weather outlook for {area.name}, independent of the historical month selected on the map.</p>
+    <p>FWI describes weather-driven potential for fire intensity and spread, rather than ignition probability or predicted fire counts.</p>
     {current ? <DangerValues key={`${key}:${attempt}`} data={current} /> : <p role="status">Checking numeric weather coverage…</p>}
     {current?.status === "unavailable" && <button type="button" className="btn btn-quiet" onClick={() => setAttempt((n) => n+1)}>Retry weather assessment</button>}
     <p className="analytics-footnote"><a href="/method#fire-danger-risk">Fire danger methods, classes and limitations ↗</a></p>

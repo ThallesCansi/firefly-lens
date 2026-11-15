@@ -10,6 +10,16 @@ ROOT=Path(__file__).resolve().parents[2]
 
 
 class OfficialWeather(unittest.TestCase):
+    def test_real_triangle_fractions_respect_coverage_without_changing_fwi(self):
+        path=ROOT/'harmonization/output/fire_weather/geos5.nc'
+        geometry={'type':'Polygon','coordinates':[[[-57.6,-18.6],[-56.4,-18.3],[-56.8,-17.4],[-57.6,-18.6]]]}
+        result=read_netcdf(path,path.with_suffix('.json'),geometry,now=datetime(2026,11,15,tzinfo=timezone.utc))
+        self.assertEqual(result['status'],'available')
+        self.assertAlmostEqual(result['forecasts'][0]['value'],0.3683036132014024)
+        for row in result['forecasts']:
+            self.assertTrue(all(0<=d['area_fraction']<=1 for d in row['distribution']))
+            self.assertAlmostEqual(sum(d['area_fraction'] for d in row['distribution']),row['coverage_fraction'],places=12)
+
     def test_original_nasa_bytes_are_traceable_and_date_granularity_is_preserved(self):
         path=ROOT/'harmonization/output/fire_weather/geos5.nc'
         meta=json.loads(path.with_suffix('.json').read_text())
