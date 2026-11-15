@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-11-15T18:57:13.795082+00:00",
+  "generated_at": "2026-11-15T20:30:34.511491+00:00",
   "data_meta": {
     "version": 1,
     "firstDay": "2002-07-04",
@@ -35,7 +35,7 @@
     "anomalies.py": "727bd696739c18c1ff632187fa3a8278316a238ef9a1dda926a49568a4b7b26e",
     "cli.py": "f56b36380d019da8090ff6f66868ece6749972b6c92a8f6925004199fc99f377",
     "climatology.py": "1e58f0711cd46e39a30835584a9039269bc2445a65f5db875068b798cca22926",
-    "data_adapter.py": "d2dffb8a7afc551d8d3d6b1794b5b1f0a1f9e18ae44eeac100100a91c1f03300",
+    "data_adapter.py": "4e14f74bca6a27f069c4dc03a06e73ff822ad84f3ce201c41ebd490e14e0184b",
     "engine.py": "cd486c6ac7f90c9f81641788a2df7b450dadca153f0dd5a9f720fb5fe06719ed",
     "export.py": "27bacc8a2ea1e2432b0f177fd9064a87e3240ea02e2ac0f73af98288470912e9",
     "fire_weather.py": "e18f87be76537a507cdf20704915db0d48c538a3a70232ef4dc3f97a35e8b47c",
@@ -44,6 +44,7 @@
     "history.py": "1e1ae80aa05f6a0fc71eb6aa41a4dd197f7f7850d8717294e968b6f2fa97624e",
     "models.py": "b141d9dc42bed36165f9fc019abc3ab56d40b58a93dbb060ce674cc38485a95d",
     "national_adapter.py": "38784c3acec9b44ea2db312ca738a5403a44298737f2f14e39c357e19e6628cc",
+    "render_start.py": "645b2bfb1f1994cd3864998d68909b0ca04a43d5955e7ce90fbfd545f8fdec01",
     "service.py": "ca4954f25ab5256e7e1141f570e71892e81f51ee5a110870127fb4f4b718a75a",
     "validation.py": "7a68f45a5fdc45b64103697b8aa6fc786ddc86f778e0e7418932ba8cbfc466e3"
   },
@@ -2063,7 +2064,7 @@
         ]
       },
       "url": "/analytics/amazon.json",
-      "sha256": "e1cff5331d9dc06c0a19bce5d484e3aaf5e22e3128bd75ded8a28b95c811116a",
+      "sha256": "0c5bc2dbbbbf72187ebac25f9f111d64f2c54f37e522a90c08826d5867526300",
       "forecast_status": "unavailable",
       "representative_point": [
         -56.0035,
@@ -4017,7 +4018,7 @@
         ]
       },
       "url": "/analytics/matopiba.json",
-      "sha256": "7d86f8f13142b820bd76d9ee7a3b30a89808315000dace49af9de95cc9ecf52c",
+      "sha256": "e748f8df468fe5590a91a6beb3925bb430664deced6e65ee84c3dd314646a372",
       "forecast_status": "unavailable",
       "representative_point": [
         -46.644,
@@ -5943,7 +5944,7 @@
         ]
       },
       "url": "/analytics/pantanal.json",
-      "sha256": "39afc0b251c2208cdd3eca8332859242e9f4e617d6848021a64a41cc4af10376",
+      "sha256": "bc5a4beb2a17fa1e58dc1609ba988b683f80ebcae889216245320941f39c40f9",
       "forecast_status": "unavailable",
       "representative_point": [
         -56.3853,
@@ -8009,7 +8010,7 @@
         ]
       },
       "url": "/analytics/caatinga.json",
-      "sha256": "5885b9fa76417ae130d7c08c653425b413eaf33a7350232dd88ce5a6cc6dcf6c",
+      "sha256": "24a44e67656ef51a692bd049997efda820370910966b28c204aee5ca1d037048",
       "forecast_status": "unavailable",
       "representative_point": [
         -40.2364,
@@ -10207,7 +10208,7 @@
         ]
       },
       "url": "/analytics/pampa.json",
-      "sha256": "20cdc95b316cdda3239c76a0ddd89a8859f21e2b1df8cba04c5c3a38962853d5",
+      "sha256": "d507db481b6b7f894687174aae8e3d3991eec2c991f1ddae3dcd0b4f35c860e5",
       "forecast_status": "unavailable",
       "representative_point": [
         -53.3109,
