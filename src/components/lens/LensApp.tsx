@@ -213,7 +213,10 @@ export function LensApp() {
         ? " · VIIRS starts April 2018"
         : ""}
     </p>
-  ) : null;
+  ) : (
+    // Before any area, the key says what loads the dots.
+    <p role="status">Select an area to load detections</p>
+  );
   function analyze() {
     if (!area) return;
     setAnalyzed(area);
@@ -288,7 +291,6 @@ export function LensApp() {
           />
           <MapCard
             summary={periodSummary(period, sensors.length)}
-            hint={area ? undefined : "Select an area to load detections"}
           >
             <TemporalControl period={period} onChange={changePeriod} />
             <MapLayerControl sensors={sensors} onChange={setSensors} />

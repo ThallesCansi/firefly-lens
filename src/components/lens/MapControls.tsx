@@ -21,7 +21,7 @@ export function MapToolbar({
   onSearch?: () => void;
   searchActive?: boolean;
 }) {
-  // Two groups, each tool named on screen: find a place, then choose how to
+  // A column of named tools in two groups: find a place, then choose how to
   // select an area. Clearing lives on the selection card, resetting the view
   // in the map controls.
   return (
@@ -29,7 +29,7 @@ export function MapToolbar({
       className="map-toolbar map-surface"
       role="toolbar"
       aria-label="Spatial tools"
-      aria-orientation="horizontal"
+      aria-orientation="vertical"
     >
       {onSearch && (
         <>
@@ -113,13 +113,10 @@ export function MapLayerControl({
  */
 export function MapCard({
   summary,
-  hint,
   children,
 }: {
   /** One line for the folded chip, e.g. "Sep 2026 · 2 layers". */
   summary: string;
-  /** Shown under the controls, e.g. "Select an area to load detections". */
-  hint?: string;
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
@@ -136,7 +133,6 @@ export function MapCard({
       </button>
       <div className="map-card-body">
         {children}
-        {hint && <p className="map-card-hint">{hint}</p>}
       </div>
     </section>
   );

@@ -100,25 +100,26 @@
   left: 20px;
   z-index: 27;
   display: flex;
-  align-items: center;
-  max-width: calc(100% - 40px);
+  flex-direction: column;
+  width: 156px;
   padding: 5px;
   gap: 3px;
 }
-/* Each tool names itself: icon and label side by side.
+/* Each tool names itself: icon, then label, left-aligned in the column.
    Inner radius = card radius (14) − padding (5) − border (1). */
 .map-toolbar button {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 9px;
   height: 38px;
-  padding: 0 12px 0 10px;
+  padding: 0 10px;
   border-radius: 8px;
   cursor: pointer;
   color: var(--color-dim);
   font-size: 13px;
   font-weight: 500;
   white-space: nowrap;
+  text-align: left;
   transition-property: background-color, color, scale;
   transition-duration: 150ms;
   transition-timing-function: ease-out;
@@ -126,8 +127,10 @@
 .map-toolbar button svg {
   flex: none;
 }
+.map-tool-label {
+  flex: 1;
+}
 .map-toolbar kbd {
-  margin-left: 2px;
   padding: 0 5px;
   border-radius: 4px;
   background: var(--color-bark);
@@ -139,9 +142,8 @@
   color: inherit;
 }
 .map-toolbar-rule {
-  align-self: stretch;
-  width: 1px;
-  margin: 6px 3px;
+  height: 1px;
+  margin: 3px 6px;
   background: var(--color-line);
 }
 .map-toolbar button[aria-pressed="true"] {
@@ -209,60 +211,49 @@
     opacity: 0;
   }
 }
-/* Top-right: one map card, period and sensors in a single row. It never takes
-   more than half the map's width; past that it wraps onto a second row. */
+/* Top-right: the map card, one compact row as tall as the site card
+   (38px controls + 6px padding + 1px border, twice = 52px). */
 .map-card {
   position: absolute;
   top: 16px;
   right: 20px;
   z-index: 15;
-  max-width: 50cqw;
-  padding: 7px;
+  padding: 6px;
 }
 .map-card-chip {
   display: none;
 }
 .map-card-body {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  justify-content: flex-end;
-  gap: 6px 8px;
-}
-.map-card-hint {
-  flex-basis: 100%;
-  /* Wraps to the row's width instead of widening the card. */
-  contain: inline-size;
-  padding: 0 4px 2px;
-  font-size: 12px;
-  color: var(--color-dim);
-  text-align: right;
+  gap: 6px;
 }
 .map-layers {
   display: flex;
-  gap: 6px;
-  padding-left: 8px;
+  gap: 4px;
+  padding-left: 6px;
   border-left: 1px solid var(--color-line);
 }
+/* Inner radius = card radius (14) − padding (6) − border (1). */
 .layer-chip {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  min-height: 36px;
-  padding: 0 12px;
-  border: 1px solid var(--color-line);
-  border-radius: 8px;
+  gap: 7px;
+  height: 38px;
+  padding: 0 11px;
+  border: 1px solid transparent;
+  border-radius: 7px;
   font-size: 13px;
   font-weight: 500;
-  color: var(--color-dim);
+  color: var(--color-faint);
   cursor: pointer;
   transition-property: background-color, border-color, color, scale;
   transition-duration: 150ms;
   transition-timing-function: ease-out;
 }
 .layer-chip[aria-pressed="true"] {
-  border-color: var(--color-faint);
+  border-color: var(--color-line);
   background: var(--color-bark);
   color: var(--color-ink);
 }
@@ -288,12 +279,14 @@
   letter-spacing: 0.16em;
   margin-bottom: 8px;
 }
+/* Area cards sit under the tool column, so the left edge reads top to bottom:
+   site, tools, then the card. */
 .explore-hint,
 .selection-card {
   position: absolute;
   left: 20px;
-  top: 146px;
-  width: min(380px, calc(100% - 40px));
+  top: 326px;
+  width: min(372px, calc(100% - 40px));
   padding: 22px;
 }
 /* Above the shape's edit handles; actions stay on one row. */
@@ -303,50 +296,63 @@
 .selection-card .btn {
   padding-inline: 0.875rem;
 }
+/* Tool panels open beside the column, next to the tool that opened them. */
 .coordinates-panel {
   position: absolute;
-  top: 146px;
-  left: 20px;
-  width: min(490px, calc(100% - 40px));
+  top: 84px;
+  left: 188px;
+  width: min(490px, calc(100% - 208px));
   padding: 16px;
-  max-height: calc(100% - 250px);
+  max-height: calc(100% - 200px);
   overflow-y: auto;
   overscroll-behavior: contain;
 }
 .temporal-control {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 }
-/* "Map period / UTC", stacked so the card stays one row. */
-.temporal-head {
-  display: flex;
-  flex-direction: column;
-  padding: 0 4px 0 5px;
-  font-size: 9.5px;
-  font-weight: 500;
-  line-height: 1.45;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+.temporal-icon {
+  flex: none;
+  margin: 0 4px 0 6px;
   color: var(--color-dim);
-  white-space: nowrap;
 }
 .temporal-control .field {
-  height: 36px;
+  height: 38px;
+  padding: 0 8px;
+  border-radius: 7px;
+  font-size: 14px;
 }
-.temporal-control select[aria-label="Map month"] {
-  width: 128px;
+.day-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 10px;
+  border-radius: 7px;
+  background: var(--color-button);
+  color: var(--color-button-ink);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition-property: background-color, scale;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
 }
-.temporal-control .btn {
-  min-height: 36px;
-  font-size: 12px;
+.day-chip:active {
+  scale: 0.96;
+}
+@media (hover: hover) {
+  .day-chip:hover {
+    background: var(--color-button-hover);
+  }
 }
 /* Place search, opened from the magnifier, next to the tools. */
 .map-search-panel {
   position: absolute;
-  top: 146px;
-  left: 20px;
-  width: min(440px, calc(100% - 40px));
+  top: 84px;
+  left: 188px;
+  width: min(440px, calc(100% - 208px));
   padding: 14px;
   z-index: 26;
 }
@@ -702,11 +708,14 @@
     width: max(280px, calc(100% - 600px));
   }
 }
-/* Where the one-row card would reach the tools, it folds into a chip that
-   opens on click. */
-@container map (max-width: 1200px) {
+/* Where the row would reach the site card, it folds into a chip that opens
+   on click. */
+@container map (max-width: 760px) {
+  /* Under the site card, right of the slim tool column. */
   .map-card {
-    max-width: calc(100% - 24px);
+    top: 84px;
+    right: 12px;
+    max-width: calc(100% - 98px);
     padding: 0;
   }
   .map-card[data-open="true"] {
@@ -725,57 +734,50 @@
   }
   .map-card-body {
     display: none;
-    width: 252px;
-    padding: 0 12px 12px;
-    justify-content: stretch;
+    flex-direction: column;
+    align-items: stretch;
+    width: 236px;
+    padding: 0 10px 10px;
   }
   .map-card[data-open="true"] .map-card-body {
     display: flex;
   }
-  .temporal-control {
-    width: 100%;
+  .temporal-icon {
+    display: none;
   }
   .temporal-control .field {
     flex: 1;
   }
-  .temporal-head {
-    display: none;
-  }
   .map-layers {
-    width: 100%;
     padding-left: 0;
     border-left: 0;
   }
   .layer-chip {
     flex: 1;
-  }
-  .map-card-hint {
-    text-align: left;
+    border-color: var(--color-line);
   }
 }
-/* On a narrow map each tool stacks its label under the icon, so the five
-   still fit in one row. */
+/* On a narrow map the column slims down: each label sits under its icon. */
 @container map (max-width: 760px) {
   .map-toolbar {
     left: 12px;
-    right: 12px;
-    max-width: 480px;
+    width: 66px;
+    padding: 4px;
   }
   .map-toolbar button {
-    flex: 1;
     flex-direction: column;
     justify-content: center;
     gap: 3px;
-    min-width: 0;
-    height: 50px;
-    padding: 0 4px;
-    font-size: 10.5px;
+    height: 52px;
+    padding: 0 2px;
+    font-size: 10px;
+    text-align: center;
+  }
+  .map-tool-label {
+    flex: none;
   }
   .map-toolbar kbd {
     display: none;
-  }
-  .map-toolbar-rule {
-    margin: 8px 1px;
   }
 }
 @container map (max-width: 900px) {
@@ -794,20 +796,21 @@
   .map-toolbar {
     top: 70px;
   }
-  /* The folded map card sits under the tools. */
+  /* The folded map card sits right of the tools; cards open beside the
+     slim tool column, under the chip. */
   .map-card {
-    top: 142px;
+    top: 70px;
     right: 12px;
   }
   .map-search-panel {
-    top: 142px;
-    left: 12px;
-    width: calc(100% - 24px);
+    top: 122px;
+    left: 86px;
+    width: calc(100% - 98px);
   }
   .explore-hint {
-    left: 12px;
-    top: 194px;
-    width: calc(100% - 24px);
+    left: 86px;
+    top: 122px;
+    width: calc(100% - 98px);
     padding: 16px;
   }
   .explore-hint h1 {
@@ -875,9 +878,9 @@
     bottom: 250px;
   }
   .coordinates-panel {
-    left: 12px;
-    top: 142px;
-    width: calc(100% - 24px);
+    left: 86px;
+    top: 122px;
+    width: calc(100% - 98px);
   }
   .analysis-drawer {
     position: absolute;
