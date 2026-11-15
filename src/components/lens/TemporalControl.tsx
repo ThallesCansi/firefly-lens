@@ -1,5 +1,11 @@
 import { fireData } from "@/lib/data/source";
 import { MONTHS } from "@/lib/format";
+import { Picker } from "@/components/ui/Picker";
+
+const YEARS = Array.from({ length: fireData.lastYear - fireData.firstYear + 1 }, (_, i) => {
+  const y = String(fireData.lastYear - i);
+  return { value: y, label: y };
+});
 
 /** The map's month, as month and year selects; a chosen day shows as a removable chip. */
 export function TemporalControl({
@@ -11,7 +17,7 @@ export function TemporalControl({
 }) {
   const day = period.length === 10 ? Number(period.slice(8, 10)) : null;
   return (
-    <div className="temporal-control" role="group" aria-label="Map period, UTC">
+    <div data-tour="period" className="temporal-control" role="group" aria-label="Map period, UTC">
       <svg
         className="temporal-icon"
         width="16"
@@ -27,33 +33,21 @@ export function TemporalControl({
         <rect x="3" y="5" width="18" height="16" rx="2" />
         <path d="M3 10h18M8 3v4M16 3v4" />
       </svg>
-      <select
-        aria-label="Map month"
+      <Picker
+        label="Map month"
         title="Map month (UTC)"
-        className="field"
         value={period.slice(5, 7)}
-        onChange={(e) => onChange(`${period.slice(0, 4)}-${e.target.value}`)}
-      >
-        {MONTHS.map((m, i) => (
-          <option key={m} value={String(i + 1).padStart(2, "0")}>
-            {m.slice(0, 3)}
-          </option>
-        ))}
-      </select>
-      <select
-        aria-label="Map year"
+        options={MONTHS.map((m, i) => ({ value: String(i + 1).padStart(2, "0"), label: m.slice(0, 3) }))}
+        onChange={(v) => onChange(`${period.slice(0, 4)}-${v}`)}
+      />
+      <Picker
+        label="Map year"
         title="Map year (UTC)"
         className="field num"
         value={period.slice(0, 4)}
-        onChange={(e) => onChange(`${e.target.value}-${period.slice(5, 7)}`)}
-      >
-        {Array.from(
-          { length: fireData.lastYear - fireData.firstYear + 1 },
-          (_, i) => fireData.lastYear - i,
-        ).map((y) => (
-          <option key={y}>{y}</option>
-        ))}
-      </select>
+        options={YEARS}
+        onChange={(v) => onChange(`${v}-${period.slice(5, 7)}`)}
+      />
       {day !== null && (
         <button
           type="button"

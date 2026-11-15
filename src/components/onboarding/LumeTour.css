@@ -1,0 +1,52 @@
+.driver-popover.lume-tour-card {
+  --driver-popover-font-family: var(--font-funnel-sans), sans-serif;
+  box-sizing: border-box;
+  width: min(350px, calc(100vw - 24px));
+  min-width: 0;
+  max-width: min(350px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px - env(safe-area-inset-bottom));
+  overflow-y: auto;
+  padding: 48px 22px 18px;
+  border: 1px solid var(--color-line);
+  border-radius: 18px;
+  background: var(--color-night);
+  color: var(--color-ink);
+  box-shadow: var(--surface-shadow);
+  animation: lume-tour-arrive 180ms ease-out;
+}
+.lume-tour-card .driver-popover-title { font-family: var(--font-funnel-display), sans-serif; font-size: 23px; font-weight: 500; line-height: 1.2; }
+.lume-tour-card .driver-popover-description { font-size: 14px; line-height: 1.65; color: var(--color-dim); margin-top: 12px; }
+.lume-tour-card .driver-popover-footer { gap: 12px; align-items: center; margin-top: 16px; }
+.lume-tour-card .driver-popover-progress-text { font: 12px var(--font-dm-mono), monospace; color: var(--color-dim); flex-shrink: 0; }
+.lume-tour-card .driver-popover-navigation-btns { display: flex; gap: 6px; }
+.lume-tour-card .driver-popover-footer button, .lume-tour-card .lume-tour-actions button {
+  font: inherit; font-size: 13px; line-height: 1.3; cursor: pointer; padding: 9px 12px;
+  color: var(--color-ink); border: 1px solid var(--color-line); border-radius: 10px;
+  background: var(--color-bark); text-shadow: none; box-shadow: none;
+}
+.lume-tour-card .driver-popover-footer .driver-popover-next-btn, .lume-tour-card .lume-tour-actions .lume-tour-primary { background: var(--color-button); color: var(--color-button-ink); border-color: transparent; }
+.lume-tour-card button:focus-visible { outline: 2px solid var(--color-lume); outline-offset: 3px; }
+.lume-tour-card .driver-popover-close-btn { color: var(--color-dim); font-size: 22px; width: 38px; height: 38px; }
+.lume-tour-mascot { position: absolute; top: -6px; left: 8px; pointer-events: none; }
+.lume-tour-signature { position: absolute; top: 19px; left: 86px; font: 10px var(--font-dm-mono), monospace; letter-spacing: .08em; color: var(--color-dim); }
+.lume-tour-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.lume-tour-actions p { font-size: 13px; line-height: 1.5; color: var(--color-dim); }
+.lume-tour-card .lume-tour-actions .lume-tour-skip { padding: 4px 0; border: 0; background: transparent; color: var(--color-dim); text-decoration: underline; }
+.lume-tour-card .driver-popover-arrow { border-color: transparent; }
+.lume-tour-card .driver-popover-arrow-side-top { border-top-color: var(--color-night); }
+.lume-tour-card .driver-popover-arrow-side-bottom { border-bottom-color: var(--color-night); }
+.lume-tour-card .driver-popover-arrow-side-left { border-left-color: var(--color-night); }
+.lume-tour-card .driver-popover-arrow-side-right { border-right-color: var(--color-night); }
+@keyframes lume-tour-arrive { from { opacity: 0; translate: 0 4px; } to { opacity: 1; translate: 0 0; } }
+@media (max-width: 700px) {
+  .driver-popover.lume-tour-card { padding: 48px 16px 14px; max-height: min(55dvh, calc(100dvh - 24px)); }
+  .lume-tour-mascot { top: 0; left: 8px; }
+  .lume-tour-mascot .lume { width: 56px; height: 56px; }
+  .lume-tour-signature { left: 70px; top: 18px; }
+  .lume-tour-card .driver-popover-title { font-size: 21px; }
+  .lume-tour-card .driver-popover-description { font-size: 13px; line-height: 1.55; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .driver-popover.lume-tour-card { animation: none; }
+  .driver-popover.lume-tour-card *, .driver-active-element { transition: none !important; }
+}

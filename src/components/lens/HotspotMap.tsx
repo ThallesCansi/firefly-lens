@@ -27,6 +27,7 @@ import {
 } from "@/lib/map/projection";
 import type { MapDestination } from "./LocationSearch";
 import { ProjectionToggle } from "./map/ProjectionToggle";
+import { Starfield } from "./Starfield";
 import { useTheme } from "@/components/ui/ThemeProvider";
 import { BASEMAP_ATTRIBUTION, basemapFor, loadBasemap } from "@/lib/map/basemap";
 import type { FireflySignal } from "@/lib/analytics/signals";
@@ -62,11 +63,12 @@ const blankStyle = (): StyleSpecification => ({
 
 /**
  * One feature per 0.25° grid cell. `km` and `kv` size the MODIS ring and the
- * VIIRS dot against the busiest cell of the period, per sensor.
+ * VIIRS dot against the busiest cell of the period, per sensor, or against
+ * `scale` when frames of a time-lapse must share one.
  */
-function points(cells: CellCount[]) {
-  const topM = Math.max(1, ...cells.map((c) => c.modis));
-  const topV = Math.max(1, ...cells.map((c) => c.viirs));
+function points(cells: CellCount[], scale?: { modis: number; viirs: number }) {
+  const topM = scale?.modis ?? Math.max(1, ...cells.map((c) => c.modis));
+  const topV = scale?.viirs ?? Math.max(1, ...cells.map((c) => c.viirs));
   const k = (n: number, top: number) =>
     n > 0 ? Math.max(0.3, Math.sqrt(n / top)) : 0;
   return {
@@ -156,6 +158,7 @@ export function HotspotMap({
   frame,
   areaName,
   cells,
+  scale,
   drawing,
   onDraw,
   sensors = ["MODIS", "VIIRS"],
@@ -181,6 +184,8 @@ export function HotspotMap({
   areaName: string;
   /** Detections per grid cell; null while they load. */
   cells: CellCount[] | null;
+  /** Busiest cell per sensor to size the marks against; by default, the busiest of `cells`. */
+  scale?: { modis: number; viirs: number };
   /** When true, dragging on the map draws a new area instead of panning. */
   drawing: boolean;
   onDraw: (bbox: BBox) => void;
@@ -217,6 +222,7 @@ export function HotspotMap({
   const bbox = area?.bbox ?? null;
   const latest = useRef({
     cells,
+    scale,
     area,
     onDraw,
     sensors,
@@ -241,6 +247,7 @@ export function HotspotMap({
   useEffect(() => {
     latest.current = {
       cells,
+      scale,
       area,
       onDraw,
       sensors,
@@ -248,7 +255,7 @@ export function HotspotMap({
       onReady,
       onProjectionChange,
     };
-  }, [cells, area, onDraw, sensors, theme, onReady, onProjectionChange]);
+  }, [cells, scale, area, onDraw, sensors, theme, onReady, onProjectionChange]);
 
   useEffect(() => {
     let dead = false;
@@ -305,7 +312,7 @@ export function HotspotMap({
         });
         m.addSource("hotspots", {
           type: "geojson",
-          data: points(latest.current.cells ?? []),
+          data: points(latest.current.cells ?? [], latest.current.scale),
         });
         m.addSource("brazil", { type: "geojson", data: OUTLINE_URL });
         m.addLayer({
@@ -466,9 +473,9 @@ export function HotspotMap({
   useEffect(() => {
     if (!ready) return;
     (map.current?.getSource("hotspots") as GeoJSONSource | undefined)?.setData(
-      points(cells ?? []),
+      points(cells ?? [], scale),
     );
-  }, [cells, ready]);
+  }, [cells, scale, ready]);
 
   useEffect(() => {
     if (!ready) return;
@@ -632,6 +639,7 @@ export function HotspotMap({
       data-map-theme={paintedTheme}
       data-projection={ready ? mode : undefined}
     >
+      <Starfield />
       {/* MapLibre's stylesheet makes its container position: relative, so it fills a positioned parent. */}
       <div className="absolute inset-0">
         <div
@@ -639,6 +647,7 @@ export function HotspotMap({
           className="size-full"
           role="application"
           aria-label={`Map of detections in ${areaName}`}
+          data-tour="map-canvas"
         />
       </div>
       {!ready && !failed && (
@@ -690,7 +699,7 @@ export function HotspotMap({
       {signalMarkers}
       {/* One column of view controls: projection, zoom, reset. */}
       {ready && (
-        <div className="map-view-controls">
+        <div data-tour="map-controls" className="map-view-controls">
           {showProjectionToggle && !projection && (
             <ProjectionToggle
               value={mode}

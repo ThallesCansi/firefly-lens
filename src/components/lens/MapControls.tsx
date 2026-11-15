@@ -111,7 +111,7 @@ export function MapLayerControl({
   onChange: (sensors: Sensor[]) => void;
 }) {
   return (
-    <div className="map-layers" role="group" aria-label="Visible detection layers">
+    <div data-tour="sensors" className="map-layers" role="group" aria-label="Visible detection layers">
       {(["MODIS", "VIIRS"] as Sensor[]).map((sensor) => {
         const on = sensors.includes(sensor);
         return (
@@ -139,19 +139,25 @@ export function MapLayerControl({
 export function MapCard({
   summary,
   children,
+  open: controlledOpen,
+  onOpenChange,
 }: {
   /** One line for the folded chip, e.g. "Sep 2026 · 2 layers". */
   summary: string;
   children: ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
-  const [open, setOpen] = useState(false);
+  const [localOpen, setLocalOpen] = useState(false);
+  const open = controlledOpen ?? localOpen;
+  const setOpen = onOpenChange ?? setLocalOpen;
   return (
     <section className="map-card map-surface" data-open={open} aria-label="Map period and layers">
       <button
         type="button"
         className="map-card-chip"
         aria-expanded={open}
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => setOpen(!open)}
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></svg>
         {summary}

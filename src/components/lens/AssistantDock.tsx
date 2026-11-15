@@ -3,6 +3,7 @@
 import type { AssistantResponse, AssistantTurn, ChatTurn, ToolResult } from "@/lib/assistant/protocol";
 import { useEffect, useId, useRef, useState, type RefObject } from "react";
 import { describeHost, runTool, type AssistantHost } from "@/lib/assistant/execute";
+import { FireflySwarm } from "./FireflySwarm";
 
 const EXAMPLES = [
   "Show Santa Catarina in 2006",
@@ -112,6 +113,7 @@ export function AssistantDock({ host }: { host: RefObject<AssistantHost | null> 
       ref={root}
       className="assistant-dock"
       data-open={open}
+      data-busy={busy}
       onKeyDown={(e) => {
         if (e.key === "Escape") {
           setOpen(false);
@@ -182,6 +184,8 @@ export function AssistantDock({ host }: { host: RefObject<AssistantHost | null> 
           )}
         </section>
       )}
+      {/* While the assistant thinks, a few fireflies wander round its window. */}
+      <FireflySwarm active={busy} />
       <form className="assistant-bar map-surface" onSubmit={submit} role="search" aria-label="Ask the map assistant">
         <span className="assistant-spark" aria-hidden="true" />
         <input

@@ -438,3 +438,92 @@ a {
 .maplibregl-ctrl-attrib a {
   color: var(--color-dim) !important;
 }
+
+/* ── Picker: a compact select whose list scrolls (Picker.tsx) ── */
+.picker {
+  position: relative;
+  display: inline-flex;
+}
+.picker-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  white-space: nowrap;
+}
+.picker-button svg {
+  flex: none;
+  color: var(--color-faint);
+  transition: rotate 150ms ease-out;
+}
+.picker[data-open="true"] .picker-button svg {
+  rotate: 180deg;
+}
+.picker-list {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 60;
+  min-width: 100%;
+  max-height: 228px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 4px;
+  border: 1px solid var(--color-line);
+  border-radius: 12px;
+  background: var(--surface-floating, var(--color-canopy));
+  box-shadow: var(--surface-shadow);
+  outline: none;
+  scrollbar-width: thin;
+  transform-origin: top;
+}
+.picker-list[data-placement="up"] {
+  top: auto;
+  bottom: calc(100% + 6px);
+  transform-origin: bottom;
+}
+.picker-list li {
+  padding: 7px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  white-space: nowrap;
+  color: var(--color-ink);
+  cursor: pointer;
+}
+.picker-list li[data-active="true"] {
+  background: var(--color-bark);
+}
+.picker-list li[aria-selected="true"] {
+  color: var(--color-lume);
+  font-weight: 500;
+}
+.picker-list li[aria-disabled="true"] {
+  color: var(--color-faint);
+  opacity: 0.5;
+  cursor: default;
+}
+.picker-list:focus-visible {
+  outline: 2px solid var(--color-lume);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .picker-list {
+    animation: picker-in 150ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .picker-list {
+    animation: picker-fade 150ms ease-out;
+  }
+}
+@keyframes picker-in {
+  from {
+    opacity: 0;
+    scale: 0.97;
+  }
+}
+@keyframes picker-fade {
+  from {
+    opacity: 0;
+  }
+}

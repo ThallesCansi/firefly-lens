@@ -19,8 +19,11 @@ async function count(n) {
   await page.waitForFunction((n) => document.querySelectorAll(".firefly-signal-marker").length === n, n);
 }
 async function period(year, month, target = page) {
-  await target.getByRole("combobox", { name: "Map year", exact: true }).selectOption(year);
-  await target.getByRole("combobox", { name: "Map month", exact: true }).selectOption(month);
+  await target.getByRole("button", { name: /^Map year:/ }).click();
+  await target.getByRole("option", { name: year, exact: true }).click();
+  await target.getByRole("button", { name: /^Map month:/ }).click();
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  await target.getByRole("option", { name: months[Number(month) - 1], exact: true }).click();
 }
 try {
   await page.goto(`${base}/lens`);
@@ -39,6 +42,15 @@ try {
   await page.getByRole("button", { name: "Close analysis", exact: true }).waitFor();
   assert.match(await page.locator(".analysis-heading").innerText(), /Pantanal/);
   await page.getByRole("button", { name: "Close analysis", exact: true }).click();
+  // Main's time-lapse and guided tour must remain available beside highlights.
+  await page.getByRole("button", { name: "Time-lapse", exact: true }).click();
+  await page.getByRole("region", { name: "Time-lapse", exact: true }).waitFor();
+  await page.getByRole("button", { name: "Close the time-lapse", exact: true }).click();
+  await period("2024", "06");
+  await page.getByRole("button", { name: "Tour with Lume", exact: true }).click();
+  await page.locator(".lume-tour-card:visible").waitFor();
+  await page.getByRole("button", { name: "Skip tour", exact: true }).click();
+  await page.waitForFunction(() => document.querySelector("#main")?.getAttribute("data-tour-active") === "false");
   await toggle.uncheck();
   await count(0);
   await toggle.check();
@@ -74,6 +86,7 @@ try {
   const touch = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
   touch.on("pageerror", (error) => errors.push(error.message));
   await touch.goto(`${base}/lens`);
+  await touch.getByRole("button", { name: "Close the introduction", exact: true }).tap();
   await touch.locator(".map-card-chip").tap();
   await period("2024", "06", touch);
   await touch.locator(".map-card-chip").tap();
