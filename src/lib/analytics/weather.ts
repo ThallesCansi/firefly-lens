@@ -110,3 +110,22 @@ export async function loadFireDanger(geometry: PolygonGeometry, signal: AbortSig
     throw new Error("Fire danger geometry mismatch");
   return validateDanger(result.data);
 }
+
+const dangerCache = new Map<string, { at: number; result: Promise<DangerData> }>();
+/** How long one area's assessment is reused: the source products change daily at most. */
+const DANGER_TTL = 10 * 60 * 1000;
+/**
+ * One shared request per area: the report and the side panel's summary both
+ * show the same assessment. A failed or unavailable answer is not kept, so a
+ * retry asks again. Callers that stop waiting do not cancel it for the others.
+ */
+export function fireDangerFor(geometry: PolygonGeometry): Promise<DangerData> {
+  const key = geometryKey(geometry);
+  const hit = dangerCache.get(key);
+  if (hit && Date.now() - hit.at < DANGER_TTL) return hit.result;
+  const result = loadFireDanger(geometry, new AbortController().signal);
+  dangerCache.set(key, { at: Date.now(), result });
+  const forget = () => { if (dangerCache.get(key)?.result === result) dangerCache.delete(key); };
+  result.then((data) => { if (data.status !== "available") forget(); }, forget);
+  return result;
+}

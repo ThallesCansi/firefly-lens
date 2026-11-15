@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useId, useState } from "react";
 import type { AnalysisArea } from "../../../lib/data/types";
 import { geometryKey } from "../../../lib/analytics/client";
-import { loadFireDanger, type DangerData } from "../../../lib/analytics/weather";
+import type { DangerData } from "../../../lib/analytics/weather";
+import { DangerVerdict, useFireDanger } from "./DangerVerdict";
 import { numeric } from "./ScientificChart";
 
 const percent = (value: number) => `${numeric(value * 100)}%`;
@@ -18,6 +19,7 @@ export function DangerValues({ data }: { data: DangerData }) {
     </div>
   );
   return <>
+    <DangerVerdict row={row} />
     <p className="analytics-notice"><strong>{data.product_kind === "experimental_deterministic" ? "NASA GFWED / GEOS-5 · experimental forecast" : "Delayed seasonal forecast · ECMWF SEAS5 / GEFF"}</strong><br />
       {data.product_kind === "experimental_deterministic" ? "Numeric research forecast · daily local-noon fields." : "Delayed seasonal outlook · separate ensemble members."}</p>
     <label>Validity and member{" "}
@@ -25,7 +27,7 @@ export function DangerValues({ data }: { data: DangerData }) {
         {data.forecasts.map((r, i) => <option key={`${r.issued_at}:${r.valid_date ?? r.valid_at}:${r.member}`} value={i}>{r.valid_date ?? r.valid_at} · {r.member === "deterministic" ? "deterministic" : `member ${r.member}`}</option>)}
       </select>
     </label>
-    <p className="analytics-insight">{row.value === null ? "Numeric weather coverage is missing for this validity and member." : `${row.danger_class} meteorological fire danger · area average FWI ${numeric(row.value)}.`}</p>
+    {row.value === null && <p className="analytics-insight">Numeric weather coverage is missing for this validity and member.</p>}
     <div className="weather-summary">
       <div><span>FWI · area average</span><strong>{numeric(row.value)}</strong></div>
       <div><span>Highest grid cell</span><strong>{numeric(row.maximum)}</strong></div>
@@ -63,18 +65,8 @@ export function FireDangerAssessment({ area }: { area: AnalysisArea }) {
   const headingId = useId();
   const key = geometryKey(area.geometry);
   const [attempt, setAttempt] = useState(0);
-  const [state, setState] = useState<{ key: string; attempt: number; data: DangerData } | null>(null);
-  useEffect(() => {
-    const controller = new AbortController();
-    let live = true;
-    const publish = (data: DangerData) => { if (live) setState({ key, attempt, data }); };
-    void loadFireDanger(area.geometry, controller.signal).then(publish).catch(() => publish({
-      status: "unavailable", reason: "numeric_weather_could_not_be_verified", index: "FWI", units: "dimensionless", forecasts: [],
-    }));
-    return () => { live = false; controller.abort(); };
-  }, [area, key, attempt]);
-  const current = state?.key === key && state.attempt === attempt ? state.data : null;
-  return <section className="analytics-card weather-assessment" aria-labelledby={headingId} data-weather-status={current?.status ?? "loading"}>
+  const current = useFireDanger(area, attempt);
+  return <section id="fire-danger-assessment" className="analytics-card weather-assessment" aria-labelledby={headingId} data-weather-status={current?.status ?? "loading"}>
     <span className="analytics-eyebrow">Meteorological Fire Danger</span>
     <h3 id={headingId}>Fire Danger Assessment</h3>
     <p className="analytics-footnote">Current weather outlook for {area.name}, independent of the historical month selected on the map.</p>

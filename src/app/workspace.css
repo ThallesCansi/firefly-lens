@@ -1,8 +1,13 @@
 .lume-replay { position:absolute; right:76px; bottom:120px; z-index:29; display:flex; align-items:center; gap:4px; min-height:36px; padding:2px 8px 2px 4px; white-space:nowrap; font-size:11px; color:var(--color-dim); cursor:pointer; }
 .workspace-map:has(.playback-bar) .lume-replay { right:20px; bottom:min(370px,calc(100% - 56px)); }
 .lume-replay:disabled { opacity: .4; cursor: default; }
+/* With the full map, the tour button sits on the line of the zoom controls' bottom edge. */
+@media (min-width: 1100px) {
+  .workspace-body:not([data-analysis="true"]) .workspace-map:not(:has(.playback-bar)) .lume-replay { bottom: 40px; }
+}
 .camera-control { position: relative; font-size: 12px; }
-.camera-trigger { cursor: pointer; padding: 10px 6px; }
+.camera-trigger { cursor: pointer; display: grid; place-items: center; width: 38px; height: 38px; color: var(--color-dim); }
+.camera-trigger:hover:not(:disabled) { color: var(--color-ink); }
 .camera-trigger:focus-visible, .camera-menu :focus-visible { outline: 2px solid var(--color-lume); outline-offset: 2px; }
 .camera-menu { position: fixed; inset: auto; margin: 0; box-sizing: border-box; width: min(280px, calc(100vw - 96px)); overflow-y: auto; padding: 10px; border: 1px solid var(--color-line); border-radius: 14px; background: var(--color-night); color: var(--color-ink); box-shadow: var(--surface-shadow); font-size: 12px; }
 .camera-menu:popover-open { display: grid; gap: 6px; }
@@ -456,6 +461,17 @@
 .selection-card[data-compact="true"] > :not(.selection-actions) {
   display: none;
 }
+/* Beside the tool column, as a strip of icons: nothing of the map under it is covered. */
+@media (min-width: 701px) {
+  .selection-card[data-compact="true"] { top: 84px; left: 188px; padding: 5px; }
+  .selection-card[data-compact="true"] .selection-actions { flex-direction: column; flex-wrap: nowrap; gap: 3px; }
+  .selection-card[data-compact="true"] .btn { width: 38px; height: 38px; min-height: 0; padding: 0; justify-content: center; border-color: transparent; background: transparent; color: var(--color-dim); border-radius: 8px; }
+  .selection-card[data-compact="true"] .btn:hover { background: var(--color-bark); color: var(--color-ink); }
+  .selection-card[data-compact="true"] .selection-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .selection-card[data-compact="true"] [role="status"]:not(:empty) { position: absolute; left: calc(100% + 8px); top: 50%; translate: 0 -50%; padding: 6px 10px; border-radius: 8px; background: var(--surface-floating); box-shadow: var(--surface-shadow); white-space: nowrap; }
+  .selection-card[data-compact="true"] [role="status"]:empty { display: none; }
+}
+.selection-card:not([data-compact="true"]) .selection-icon { display: none; }
 /* On a phone the analysis takes the lower screen; the map keeps only the area. */
 @media (max-width: 700px) {
   .selection-card[data-compact="true"] {

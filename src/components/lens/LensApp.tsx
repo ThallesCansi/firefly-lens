@@ -928,8 +928,11 @@ export function LensApp() {
                       tools.stop();
                       setDrawing(true);
                     }}
+                    aria-label={analysis ? "Redraw the area" : undefined}
+                    title={analysis ? "Redraw the area" : undefined}
                   >
-                    Redraw
+                    <svg className="selection-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4Z" /><path d="m13.5 6.5 4 4" /></svg>
+                    <span className="selection-label">Redraw</span>
                   </button>
                   <button
                     className="btn btn-text"
@@ -938,22 +941,29 @@ export function LensApp() {
                       setArea(null);
                       setAnalysis(false);
                     }}
+                    aria-label={analysis ? "Clear the area" : undefined}
+                    title={analysis ? "Clear the area" : undefined}
                   >
-                    Clear
+                    <svg className="selection-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+                    <span className="selection-label">Clear</span>
                   </button>
                   <button
                     className="btn btn-text"
                     title="Copy a link to this area, period and sensors"
                     onClick={share}
+                    aria-label={analysis ? "Copy a link to this view" : undefined}
                   >
-                    Share
+                    <svg className="selection-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1" /><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" /></svg>
+                    <span className="selection-label">Share</span>
                   </button>
                   <button
                     className="btn btn-text"
                     title={rawPilot ? "Download raw country cell totals for the selected period" : "Download the cells on the map for this period as a CSV file"}
                     onClick={downloadMapCsv}
+                    aria-label={analysis ? "Download the map cells as CSV" : undefined}
                   >
-                    CSV
+                    <svg className="selection-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 4v11M7 11l5 5 5-5M5 20h14" /></svg>
+                    <span className="selection-label">CSV</span>
                   </button>
                   <span role="status" className="text-xs text-dim">
                     {shared === "copied" ? "Link copied" : shared === "address" ? "Link is in the address bar" : shared === "failed" ? "Download failed, try again" : ""}

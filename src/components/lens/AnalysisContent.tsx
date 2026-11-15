@@ -1,5 +1,6 @@
 "use client";
 
+import { DangerChip } from "./analytics/DangerVerdict";
 import { Picker } from "@/components/ui/Picker";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
@@ -145,6 +146,7 @@ function HarmonizedAnalysisCalendar({
           className={`calendar-history transition-opacity duration-200 ${loading ? "opacity-50" : ""}`}
           aria-busy={loading}
         >
+          <DangerChip area={area} onOpen={() => document.getElementById("fire-danger-assessment")?.scrollIntoView({ behavior: "smooth", block: "start" })} />
           <p className="calendar-intro">Each square is a month. Select one to explore its days.</p>
           <PagedHistory record={record} from={from} to={to} period={period} onPeriod={onPeriod}
             onMonth={(month)=>{ onPeriod(month); setMonthOpen(true); }} />
