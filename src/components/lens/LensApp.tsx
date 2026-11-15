@@ -14,7 +14,7 @@ import {
 import type { AdministrativeCandidate } from "@/lib/interactions/administrative";
 import type { Vertex } from "@/lib/interactions/polygon-editor";
 import { AreaForm } from "./AreaForm";
-import { AnalysisContent } from "./AnalysisContent";
+import { AnalysisCalendar, AnalysisReport } from "./AnalysisContent";
 import { HotspotMap } from "./HotspotMap";
 import { LocationSearch, type MapDestination } from "./LocationSearch";
 import { AssistantDock } from "./AssistantDock";
@@ -154,7 +154,13 @@ export function LensApp() {
     if (month < from) setFrom(month);
     if (month > to) setTo(month);
   };
+  const report = useRef<HTMLElement>(null);
+  const showReport = () => {
+    report.current?.scrollIntoView({ behavior: reducedMotion() ? "auto" : "smooth" });
+    report.current?.focus({ preventScroll: true });
+  };
   const close = () => {
+    window.scrollTo({ top: 0 });
     setAnalysis(false);
     setExpanded(false);
     requestAnimationFrame(() => analyzeButton.current?.focus());
@@ -470,35 +476,78 @@ export function LensApp() {
               </div>
             </div>
             <div className="analysis-scroll">
-              <p className="mb-5 text-xs text-dim">
-                Real detections, harmonized to the MODIS Aqua scale. Hot spots
-                are detected pixels, not independent fires.{" "}
-                <Link href="/method">
-                  Read the methodology and limitations.
-                </Link>
-              </p>
-              <AnalysisContent
+              <AnalysisCalendar
                 key={analyzed.id}
                 area={analyzed}
                 period={period}
                 onPeriod={changePeriod}
                 from={from}
                 to={to}
-                onFrom={(v) => {
-                  setFrom(v);
-                  if (period.slice(0, 7) < v) setPeriod(v);
-                }}
-                onTo={(v) => {
-                  setTo(v);
-                  if (period.slice(0, 7) > v) setPeriod(v);
-                }}
+                onReport={showReport}
               />
             </div>
           </ResizableAnalysisPanel>
         )}
       </div>
+      {analyzed && (
+        <section
+          ref={report}
+          id="area-report"
+          className="analysis-report"
+          aria-labelledby="report-title"
+          tabIndex={-1}
+          hidden={!analysis}
+        >
+          <div className="analysis-report-inner">
+            <header className="analysis-report-head">
+              <p className="eyebrow">AREA REPORT</p>
+              <h2 id="report-title" className="text-3xl md:text-4xl">
+                {analyzed.name}
+              </h2>
+              <p className="num text-xs text-dim">{describe(analyzed)}</p>
+              <p className="mt-3 max-w-[70ch] text-[0.9375rem] text-dim">
+                Real detections, harmonized to the MODIS Aqua scale. Hot spots
+                are detected pixels, not independent fires.{" "}
+                <Link href="/method">Read the methodology and limitations.</Link>
+              </p>
+            </header>
+            <AnalysisReport
+              key={analyzed.id}
+              area={analyzed}
+              period={period}
+              onPeriod={changePeriod}
+              from={from}
+              to={to}
+              onFrom={(v) => {
+                setFrom(v);
+                if (period.slice(0, 7) < v) setPeriod(v);
+              }}
+              onTo={(v) => {
+                setTo(v);
+                if (period.slice(0, 7) > v) setPeriod(v);
+              }}
+            />
+            <button
+              type="button"
+              className="btn btn-quiet self-start"
+              onClick={() =>
+                window.scrollTo({ top: 0, behavior: reducedMotion() ? "auto" : "smooth" })
+              }
+            >
+              Back to the map
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M12 19V5M6 11l6-6 6 6" />
+              </svg>
+            </button>
+          </div>
+        </section>
+      )}
     </main>
   );
+}
+
+function reducedMotion() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
 /** The one close control used by every card and panel. */

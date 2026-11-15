@@ -15,6 +15,9 @@ import { ScientificInfo } from "@/components/ui/ScientificInfo";
 
 export type CalendarMode = "harmonized" | Sensor;
 
+/** Weeks start on Monday, as the offset below assumes. */
+const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
 /** Each day is a point of light: it grows and warms as fire activity rises. */
 const DOT_SIZE: Record<Level, string> = {
   0: "16%",
@@ -49,6 +52,7 @@ export function FireCalendar({
   onSelect,
   months,
   gridClassName = "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6",
+  detailed = false,
 }: {
   summary: YearSummary;
   mode: CalendarMode;
@@ -58,6 +62,8 @@ export function FireCalendar({
   months?: number[];
   /** Column classes for the month blocks. */
   gridClassName?: string;
+  /** One large month: weekday names, day numbers and roomier cells. */
+  detailed?: boolean;
 }) {
   const root = useRef<HTMLDivElement>(null);
   const moveFocus = useRef(false);
@@ -142,10 +148,20 @@ export function FireCalendar({
       >
         {blocks.map(({ month, days, offset }) => (
           <div key={month} role="rowgroup">
-            <h3 className="mb-2 font-sans text-[0.8125rem] font-medium tracking-normal text-dim">
-              {MONTHS[month]}
-            </h3>
-            <div className="grid grid-cols-7" role="row">
+            {detailed ? (
+              <div className="mb-2 grid grid-cols-7 gap-1.5" aria-hidden="true">
+                {WEEKDAYS.map((d) => (
+                  <span key={d} className="text-center text-[0.75rem] text-faint">
+                    {d}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <h3 className="mb-2 font-sans text-[0.8125rem] font-medium tracking-normal text-dim">
+                {MONTHS[month]}
+              </h3>
+            )}
+            <div className={`grid grid-cols-7 ${detailed ? "gap-1.5" : ""}`} role="row">
               {Array.from({ length: offset }, (_, i) => (
                 <span key={`pad-${i}`} aria-hidden="true" />
               ))}
@@ -166,26 +182,40 @@ export function FireCalendar({
                     onPointerEnter={(e) => showTip(e.currentTarget, day)}
                     onFocus={(e) => showTip(e.currentTarget, day)}
                     onBlur={() => setTipShown(false)}
-                    className={`group relative grid aspect-square cursor-pointer place-items-center outline-offset-0 ${seasonal ? "bg-bark" : ""}`}
+                    className={`group relative grid aspect-square cursor-pointer place-items-center outline-offset-0 ${detailed ? `rounded-lg ${seasonal ? "bg-bark" : "bg-canopy"}` : seasonal ? "bg-bark" : ""}`}
                   >
+                    {detailed && (
+                      <span
+                        aria-hidden="true"
+                        className="num absolute left-1.5 top-1 text-[0.6875rem] leading-none text-faint"
+                      >
+                        {Number(day.date.slice(8))}
+                      </span>
+                    )}
+                    {/* In the large month the light sits in the middle 60%,
+                        clear of the day number. */}
                     <span
                       aria-hidden="true"
-                      className="calendar-dot block aspect-square rounded-full transition-[width,background-color] duration-300 ease-out-expo group-hover:brightness-125"
-                      style={{
-                        width: DOT_SIZE[level],
-                        background: DOT_COLOR[level],
-                      }}
-                    />
+                      className={detailed ? "absolute inset-[20%] grid place-items-center" : "contents"}
+                    >
+                      <span
+                        className="calendar-dot block aspect-square rounded-full transition-[width,background-color] duration-300 ease-out-expo group-hover:brightness-125"
+                        style={{
+                          width: DOT_SIZE[level],
+                          background: DOT_COLOR[level],
+                        }}
+                      />
+                    </span>
                     {day.anomaly && (
                       <span
                         aria-hidden="true"
-                        className="absolute inset-[6%] rounded-full border-[1.5px] border-marker shadow-[inset_0_0_0_1px_var(--color-night)]"
+                        className={`absolute rounded-full border-[1.5px] border-marker shadow-[inset_0_0_0_1px_var(--color-night)] ${detailed ? "inset-[18%]" : "inset-[6%]"}`}
                       />
                     )}
                     {isSelected && (
                       <span
                         aria-hidden="true"
-                        className="absolute inset-0 rounded-[3px] border-2 border-ink"
+                        className={`absolute inset-0 border-2 border-ink ${detailed ? "rounded-lg" : "rounded-[3px]"}`}
                       />
                     )}
                   </button>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
 import { cellDays } from "@/lib/data/area";
 import { fireData } from "@/lib/data/source";
@@ -15,6 +15,7 @@ import {
   monthlyCsv,
 } from "@/lib/export";
 import { MONTHS, count, shortDate } from "@/lib/format";
+import type { FireRecord } from "@/lib/harmonize";
 import { yearView } from "@/lib/harmonize";
 import { useFireRecord } from "@/lib/useFireRecord";
 import {
@@ -46,7 +47,244 @@ const lastDay = (ym: string) =>
     Date.UTC(Number(ym.slice(0, 4)), Number(ym.slice(5, 7)), 0),
   ).getUTCDate();
 
-export function AnalysisContent({
+/** Years shown for a range, newest first. */
+function useYears(from: string, to: string) {
+  const fromYear = Number(from.slice(0, 4));
+  const toYear = Number(to.slice(0, 4));
+  return useMemo(
+    () => ALL_YEARS.filter((y) => y >= fromYear && y <= toYear).reverse(),
+    [fromYear, toYear],
+  );
+}
+
+function RecordStatus({
+  areaName,
+  loading,
+  error,
+}: {
+  areaName: string;
+  loading: boolean;
+  error: string | null;
+}) {
+  if (error)
+    return (
+      <p role="alert" className="rounded-xl bg-canopy p-5">
+        {error}
+      </p>
+    );
+  if (!loading) return null;
+  return (
+    <div role="status" className="flex items-center gap-4 text-[0.9375rem] text-dim">
+      <span className="h-1 w-48 overflow-hidden rounded-full bg-bark">
+        <span className="block h-full w-1/3 animate-pulse bg-lume" />
+      </span>
+      Reading {FIRST} to {LAST} for {areaName}
+    </div>
+  );
+}
+
+/**
+ * The side panel: every month on record as one heatmap. Selecting a month
+ * opens its days; everything else lives in the report below the map.
+ */
+export function AnalysisCalendar({
+  area,
+  period,
+  onPeriod,
+  from,
+  to,
+  onReport,
+}: {
+  area: AnalysisArea;
+  period: string;
+  onPeriod: (period: string) => void;
+  from: string;
+  to: string;
+  /** Scrolls to the full report under the map. */
+  onReport: () => void;
+}) {
+  const { record, loading, error } = useFireRecord(area);
+  const years = useYears(from, to);
+  const [monthOpen, setMonthOpen] = useState(false);
+  const year = Number(period.slice(0, 4));
+  const shownYear = Math.min(Number(to.slice(0, 4)), Math.max(Number(from.slice(0, 4)), year));
+
+  return (
+    <div className="analysis-content flex flex-col gap-6">
+      <RecordStatus areaName={area.name} loading={loading} error={error} />
+      {record && monthOpen ? (
+        <MonthDetail
+          record={record}
+          month={period.slice(0, 7)}
+          selected={period.length === 10 ? period : ""}
+          onSelect={onPeriod}
+          onMonth={onPeriod}
+          onBack={() => setMonthOpen(false)}
+        />
+      ) : record ? (
+        <div
+          className={`flex flex-col gap-4 transition-opacity duration-200 ${loading ? "opacity-50" : ""}`}
+          aria-busy={loading}
+        >
+          <p className="text-[0.875rem] text-dim">
+            Each square is one month of hot spots on the MODIS Aqua scale.
+            Select a month to open its days.
+          </p>
+          <HistoryHeatmap
+            record={record}
+            years={years}
+            from={from}
+            to={to}
+            selectedYear={shownYear}
+            selectedMonth={period.slice(0, 7)}
+            onSelect={(y) => onPeriod(`${y}${period.slice(4, 7)}`)}
+            onSelectMonth={(y, m) => {
+              onPeriod(stamp(y, m));
+              setMonthOpen(true);
+            }}
+          />
+        </div>
+      ) : (
+        !error && (
+          <div aria-hidden="true" className="grid gap-[2px]">
+            {Array.from({ length: 10 }, (_, i) => (
+              <div key={i} className="h-7 animate-pulse rounded bg-canopy" />
+            ))}
+          </div>
+        )
+      )}
+      <button type="button" className="btn btn-quiet self-start" onClick={onReport}>
+        Full report below
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M12 5v14M6 13l6 6 6-6" />
+        </svg>
+      </button>
+    </div>
+  );
+}
+
+const ARROW = {
+  prev: <path d="m15 6-6 6 6 6" />,
+  next: <path d="m9 6 6 6-6 6" />,
+};
+
+/** One month, day by day, with the chosen day's figures under it. */
+function MonthDetail({
+  record,
+  month,
+  selected,
+  onSelect,
+  onMonth,
+  onBack,
+}: {
+  record: FireRecord;
+  /** YYYY-MM */
+  month: string;
+  selected: string;
+  onSelect: (date: string) => void;
+  onMonth: (month: string) => void;
+  onBack: () => void;
+}) {
+  const year = Number(month.slice(0, 4));
+  const m = Number(month.slice(5, 7)) - 1;
+  const [mode, setMode] = useState<CalendarMode>("harmonized");
+  const summary = useMemo(() => yearView(record, year), [record, year]);
+  const cell = record.months.find((c) => c.year === year && c.month === m);
+  const day = summary.days.find((d) => d.date === selected);
+  const title = useRef<HTMLHeadingElement>(null);
+  useEffect(() => title.current?.focus(), []);
+
+  const shift = (step: number) => {
+    const d = new Date(Date.UTC(year, m + step, 1));
+    return stamp(d.getUTCFullYear(), d.getUTCMonth());
+  };
+  const prev = shift(-1);
+  const next = shift(1);
+  const sentence = cell ? againstMedian(cell) : null;
+
+  return (
+    <div className="flex flex-col gap-5">
+      <div className="flex items-center justify-between gap-3">
+        <button type="button" className="btn btn-text -ml-2" onClick={onBack}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M19 12H5M11 18l-6-6 6-6" />
+          </svg>
+          All months
+        </button>
+        <div className="flex gap-1">
+          {(["prev", "next"] as const).map((dir) => {
+            const target = dir === "prev" ? prev : next;
+            const out = target < fireData.firstMonth || target > fireData.lastMonth;
+            return (
+              <button
+                key={dir}
+                type="button"
+                className="icon-btn"
+                disabled={out}
+                aria-label={dir === "prev" ? "Previous month" : "Next month"}
+                onClick={() => onMonth(target)}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  {ARROW[dir]}
+                </svg>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+      <div>
+        <h3 ref={title} tabIndex={-1} className="text-2xl outline-none">
+          {MONTHS[m]} {year}
+        </h3>
+        {cell && sentence && (
+          <p className="mt-1 text-[0.9375rem] text-dim">
+            {sentence[0].toUpperCase() + sentence.slice(1)}
+            {" · "}
+            {cell.partial ? "month in progress" : `rank ${cell.rank} of ${cell.rankOf}`}
+            {" · "}
+            <span className="num text-ink">{count(cell.value)}</span> hot spots
+            {cell.source === "modeled" && cell.lo !== null && cell.hi !== null && (
+              <>
+                , 95% range <span className="num">{count(cell.lo)}</span>–
+                <span className="num">{count(cell.hi)}</span>, estimated from VIIRS
+              </>
+            )}
+          </p>
+        )}
+      </div>
+      <SegmentedTabs label="Calendar source" options={MODES} value={mode} onChange={setMode} />
+      {mode === "VIIRS" && month < fireData.viirsStart.slice(0, 7) && (
+        <p className="rounded-lg bg-canopy p-3 text-[0.9375rem] text-dim">
+          The VIIRS NOAA-20 record starts in April {VIIRS_YEAR}, so this month
+          has no VIIRS detections.
+        </p>
+      )}
+      <FireCalendar
+        summary={summary}
+        mode={mode}
+        selected={selected}
+        onSelect={onSelect}
+        months={[m]}
+        gridClassName="grid-cols-1"
+        detailed
+      />
+      <CalendarLegend />
+      {day ? (
+        <DayDetail day={day} />
+      ) : (
+        <p className="text-sm text-dim">
+          Select a day to see its figures and its detections on the map.
+        </p>
+      )}
+    </div>
+  );
+}
+
+/**
+ * The full report under the map: the range, the year's calendar, the selected
+ * day, the two sensors side by side and the downloads.
+ */
+export function AnalysisReport({
   area,
   period,
   onPeriod,
@@ -63,8 +301,6 @@ export function AnalysisContent({
   onFrom: (value: string) => void;
   onTo: (value: string) => void;
 }) {
-  const setFrom = onFrom;
-  const setTo = onTo;
   const year = Number(period.slice(0, 4));
   const setYear = (y: number) => onPeriod(`${y}${period.slice(4, 7)}`);
   const [mode, setMode] = useState<CalendarMode>("harmonized");
@@ -78,10 +314,7 @@ export function AnalysisContent({
   const fromYear = Number(from.slice(0, 4));
   const toYear = Number(to.slice(0, 4));
   const shownYear = Math.min(toYear, Math.max(fromYear, year));
-  const years = useMemo(
-    () => ALL_YEARS.filter((y) => y >= fromYear && y <= toYear).reverse(),
-    [fromYear, toYear],
-  );
+  const years = useYears(from, to);
   const summary = useMemo(
     () => (record ? yearView(record, shownYear) : null),
     [record, shownYear],
@@ -89,7 +322,6 @@ export function AnalysisContent({
 
   const selected = period.length === 10 ? period : "";
   const day = summary?.days.find((d) => d.date === selected);
-  const select = onPeriod;
 
   const latest = record?.months.find(
     (m) => stamp(m.year, m.month) === period.slice(0, 7),
@@ -105,11 +337,7 @@ export function AnalysisContent({
     setExporting(true);
     setExportError(null);
     try {
-      const rows = await cellDays(
-        shownArea,
-        `${from}-01`,
-        `${to}-${lastDay(to)}`,
-      );
+      const rows = await cellDays(shownArea, `${from}-01`, `${to}-${lastDay(to)}`);
       download(`${fileBase}_cell_days.csv`, cellDaysCsv(rows), "text/csv");
     } catch {
       setExportError("The download could not be prepared. Please try again.");
@@ -121,28 +349,17 @@ export function AnalysisContent({
     date.slice(0, 7) >= from && date.slice(0, 7) <= to;
 
   return (
-    <div className="analysis-content flex flex-col gap-8">
-      <div className="flex flex-col gap-4">
-        <div
-          role="group"
-          aria-label="Date range"
-          className="flex shrink-0 flex-wrap items-end gap-x-5 gap-y-3"
-        >
-          <MonthPicker
-            label="From"
-            value={from}
-            min={fireData.firstMonth}
-            max={to}
-            onChange={setFrom}
-          />
-          <MonthPicker
-            label="To"
-            value={to}
-            min={from}
-            max={fireData.lastMonth}
-            onChange={setTo}
-          />
-        </div>
+    <div className="analysis-content flex flex-col gap-12">
+      <div
+        role="group"
+        aria-label="Date range"
+        className="flex flex-wrap items-end gap-x-5 gap-y-3"
+      >
+        <MonthPicker label="From" value={from} min={fireData.firstMonth} max={to} onChange={onFrom} />
+        <MonthPicker label="To" value={to} min={from} max={fireData.lastMonth} onChange={onTo} />
+        <p className="pb-2 text-[0.8125rem] text-faint">
+          The range applies to the heatmap, the calendar and the downloads.
+        </p>
       </div>
 
       {exportError && (
@@ -150,187 +367,137 @@ export function AnalysisContent({
           {exportError}
         </p>
       )}
-      {error && (
-        <p role="alert" className="rounded-xl bg-canopy p-5">
-          {error}
-        </p>
-      )}
-
-      {loading && (
-        <div
-          role="status"
-          className="flex items-center gap-4 text-[0.9375rem] text-dim"
-        >
-          <span className="h-1 w-48 overflow-hidden rounded-full bg-bark">
-            <span className="block h-full w-1/3 animate-pulse bg-lume" />
-          </span>
-          Reading {FIRST} to {LAST} for {areaName}
-        </div>
-      )}
+      <RecordStatus areaName={areaName} loading={loading} error={error} />
 
       {record && summary && (
         <div
-          className={`flex flex-col gap-12 transition-opacity duration-200 ${loading ? "opacity-50" : ""}`}
+          className={`flex flex-col gap-14 transition-opacity duration-200 ${loading ? "opacity-50" : ""}`}
           aria-busy={loading}
         >
-          <section
-            aria-labelledby="history-title"
-            className="flex flex-col gap-5"
-          >
-            <div>
-              <h2 id="history-title" className="text-xl md:text-2xl">
-                {latest ? (
-                  <>
-                    {MONTHS[latest.month]} {latest.year}{" "}
-                    {latest.partial ? "so far is" : "was"}{" "}
-                    {againstMedian(latest)},{" "}
-                    <span className="text-dim">
-                      {latest.partial
-                        ? "the month is still in progress"
-                        : `rank ${latest.rank} of ${latest.rankOf} for the month`}
-                      {latest.source === "modeled" &&
-                        latest.lo !== null &&
-                        latest.hi !== null &&
-                        ` · ${count(latest.value)} hot spots, 95% range ${count(latest.lo)}–${count(latest.hi)}, estimated from VIIRS`}
-                    </span>
-                  </>
-                ) : (
-                  "Burning activity by month and year"
-                )}
-              </h2>
-              <p className="mt-2 max-w-[70ch] text-[0.9375rem] text-dim">
-                Each square is one month, in hot spots on the MODIS Aqua scale:
-                observed by MODIS Aqua through {fireData.observedUntil}, and from{" "}
-                {fireData.observedUntil + 1} converted from VIIRS NOAA-20 by the
-                harmonization model, with a 95% range.
-                {record.overlap && record.overlap.modis > 0 && (
-                  <>
-                    {" "}
-                    Here, from {record.overlap.from} to {record.overlap.to}, VIIRS
-                    reported{" "}
-                    <span className="num text-ink">
-                      {(record.overlap.viirs / record.overlap.modis).toFixed(1)}×
-                    </span>{" "}
-                    as many hot spots as MODIS Aqua; harmonized, it comes to{" "}
-                    <span className="num text-ink">
-                      {Math.round(
-                        (record.overlap.viirsHarmonized / record.overlap.modis) *
-                          100,
-                      )}
-                      %
-                    </span>{" "}
-                    of the MODIS count.
-                  </>
-                )}{" "}
-                {count(record.cells)} grid cells
-                {record.biomes[0]
-                  ? `, ${Math.round(record.biomes[0].share * 100)}% ${record.biomes[0].name}`
-                  : ""}
-                . Select a year to open its calendar.
-              </p>
-            </div>
-            <HistoryHeatmap
-              record={record}
-              years={years}
-              from={from}
-              to={to}
-              selectedYear={shownYear}
-              selectedMonth={period.slice(0, 7)}
-              onSelect={setYear}
-              onSelectMonth={(y, m) => onPeriod(stamp(y, m))}
-            />
-          </section>
-
-          <section
-            aria-labelledby="calendar-title"
-            className="flex flex-col gap-5"
-          >
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-                <label className="flex items-center gap-2 text-[0.9375rem] text-dim">
-                  <span className="sr-only">Year shown in the calendar</span>
-                  <select
-                    value={shownYear}
-                    onChange={(e) => setYear(Number(e.target.value))}
-                    className="field num text-lg"
-                  >
-                    {years.map((y) => (
-                      <option key={y} value={y}>
-                        {y}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <h2 id="calendar-title" className="text-xl">
-                  {summary.criticalPeriod ? (
-                    <>
-                      Fire season typically runs{" "}
-                      {shortDate(summary.criticalPeriod.start)} to{" "}
-                      {shortDate(summary.criticalPeriod.end)},{" "}
-                      <span className="text-dim">
-                        {summary.anomalies.length} unusual{" "}
-                        {summary.anomalies.length === 1 ? "day" : "days"} this
-                        year
-                      </span>
-                    </>
-                  ) : (
-                    "No fire season found in this area"
-                  )}
-                </h2>
-              </div>
-              <SegmentedTabs
-                label="Calendar source"
-                options={MODES}
-                value={mode}
-                onChange={setMode}
-              />
-            </div>
-            {mode === "VIIRS" && shownYear < VIIRS_YEAR && (
-              <p className="rounded-lg bg-canopy p-3 text-[0.9375rem] text-dim">
-                The VIIRS NOAA-20 record starts in April {VIIRS_YEAR}. This year
-                has no VIIRS detections, so its calendar is empty.
-              </p>
-            )}
-            <FireCalendar
-              summary={summary}
-              mode={mode}
-              selected={selected}
-              onSelect={select}
-              gridClassName="grid-cols-2 sm:grid-cols-3"
-            />
-            <CalendarLegend />
-          </section>
-
-          {day ? (
-            <DayDetail day={day} />
-          ) : (
-            <p className="text-sm text-dim">
-              Select a day in the calendar or sensor chart to inspect its
-              figures and detections on the map.
+          <section aria-labelledby="history-title" className="flex max-w-[78ch] flex-col gap-3">
+            <h3 id="history-title" className="text-2xl md:text-[1.75rem]">
+              {latest ? (
+                <>
+                  {MONTHS[latest.month]} {latest.year}{" "}
+                  {latest.partial ? "so far is" : "was"} {againstMedian(latest)},{" "}
+                  <span className="text-dim">
+                    {latest.partial
+                      ? "the month is still in progress"
+                      : `rank ${latest.rank} of ${latest.rankOf} for the month`}
+                    {latest.source === "modeled" &&
+                      latest.lo !== null &&
+                      latest.hi !== null &&
+                      ` · ${count(latest.value)} hot spots, 95% range ${count(latest.lo)}–${count(latest.hi)}, estimated from VIIRS`}
+                  </span>
+                </>
+              ) : (
+                "Burning activity by month and year"
+              )}
+            </h3>
+            <p className="text-[0.9375rem] text-dim">
+              Counts are hot spots on the MODIS Aqua scale: observed by MODIS
+              Aqua through {fireData.observedUntil}, and from{" "}
+              {fireData.observedUntil + 1} converted from VIIRS NOAA-20 by the
+              harmonization model, with a 95% range.
+              {record.overlap && record.overlap.modis > 0 && (
+                <>
+                  {" "}
+                  Here, from {record.overlap.from} to {record.overlap.to}, VIIRS
+                  reported{" "}
+                  <span className="num text-ink">
+                    {(record.overlap.viirs / record.overlap.modis).toFixed(1)}×
+                  </span>{" "}
+                  as many hot spots as MODIS Aqua; harmonized, it comes to{" "}
+                  <span className="num text-ink">
+                    {Math.round((record.overlap.viirsHarmonized / record.overlap.modis) * 100)}%
+                  </span>{" "}
+                  of the MODIS count.
+                </>
+              )}{" "}
+              {count(record.cells)} grid cells
+              {record.biomes[0]
+                ? `, ${Math.round(record.biomes[0].share * 100)}% ${record.biomes[0].name}`
+                : ""}
+              .
             </p>
-          )}
+          </section>
 
-          <section
-            aria-labelledby="compare-title"
-            className="flex flex-col gap-4"
-          >
+          <div className="analysis-report-grid">
+            <section aria-labelledby="calendar-title" className="flex min-w-0 flex-col gap-5">
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                  <label className="flex items-center gap-2 text-[0.9375rem] text-dim">
+                    <span className="sr-only">Year shown in the calendar</span>
+                    <select
+                      value={shownYear}
+                      onChange={(e) => setYear(Number(e.target.value))}
+                      className="field num text-lg"
+                    >
+                      {years.map((y) => (
+                        <option key={y} value={y}>
+                          {y}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <h3 id="calendar-title" className="text-xl">
+                    {summary.criticalPeriod ? (
+                      <>
+                        Fire season typically runs {shortDate(summary.criticalPeriod.start)} to{" "}
+                        {shortDate(summary.criticalPeriod.end)},{" "}
+                        <span className="text-dim">
+                          {summary.anomalies.length} unusual{" "}
+                          {summary.anomalies.length === 1 ? "day" : "days"} this year
+                        </span>
+                      </>
+                    ) : (
+                      "No fire season found in this area"
+                    )}
+                  </h3>
+                </div>
+                <SegmentedTabs label="Calendar source" options={MODES} value={mode} onChange={setMode} />
+              </div>
+              {mode === "VIIRS" && shownYear < VIIRS_YEAR && (
+                <p className="rounded-lg bg-canopy p-3 text-[0.9375rem] text-dim">
+                  The VIIRS NOAA-20 record starts in April {VIIRS_YEAR}. This year
+                  has no VIIRS detections, so its calendar is empty.
+                </p>
+              )}
+              <FireCalendar
+                summary={summary}
+                mode={mode}
+                selected={selected}
+                onSelect={onPeriod}
+                gridClassName="grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
+              />
+              <CalendarLegend />
+            </section>
+            <aside aria-label="Selected day" className="analysis-report-day">
+              {day ? (
+                <DayDetail day={day} />
+              ) : (
+                <p className="rounded-xl bg-canopy p-5 text-sm text-dim">
+                  Select a day in the calendar or the sensor chart to inspect
+                  its figures and its detections on the map.
+                </p>
+              )}
+            </aside>
+          </div>
+
+          <section aria-labelledby="compare-title" className="flex flex-col gap-4">
             <div>
-              <h2 id="compare-title" className="text-xl">
+              <h3 id="compare-title" className="text-xl">
                 {shownYear}, as each sensor saw it
-              </h2>
+              </h3>
               <p className="mt-1 max-w-[70ch] text-[0.9375rem] text-dim">
                 MODIS Aqua reported{" "}
-                <span className="num text-ink">
-                  {count(summary.totals.MODIS.detections)}
-                </span>{" "}
+                <span className="num text-ink">{count(summary.totals.MODIS.detections)}</span>{" "}
                 detections
                 {shownYear >= VIIRS_YEAR ? (
                   <>
                     {" "}
                     and VIIRS NOAA-20{" "}
-                    <span className="num text-ink">
-                      {count(summary.totals.VIIRS.detections)}
-                    </span>
+                    <span className="num text-ink">{count(summary.totals.VIIRS.detections)}</span>
                     . The counts differ because the pixels differ, so each row
                     keeps its own scale.
                   </>
@@ -340,120 +507,93 @@ export function AnalysisContent({
                 Select a day to inspect it.
               </p>
             </div>
-            <SensorCompare
-              summary={summary}
-              selected={selected}
-              onSelect={select}
-            />
+            <SensorCompare summary={summary} selected={selected} onSelect={onPeriod} />
           </section>
         </div>
       )}
 
-      <section aria-label="Export analysis">
-        <div className="flex flex-col gap-2 xl:items-end">
-          <p className="text-[0.8125rem] text-dim">
-            Download for this area and range
+      <section aria-labelledby="export-title" className="flex flex-col gap-3 border-t border-line pt-8">
+        <h3 id="export-title" className="text-lg">
+          Download for this area and range
+        </h3>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            className="btn btn-quiet"
+            disabled={!record || exporting || rangeMonths > HOTSPOT_CSV_MONTHS}
+            onClick={exportHotspots}
+          >
+            {exporting ? "Preparing the file…" : "Grid-cell counts CSV"}
+          </button>
+          <button
+            type="button"
+            className="btn btn-quiet"
+            disabled={!record}
+            onClick={() =>
+              record &&
+              download(
+                `${fileBase}_daily.csv`,
+                dailyCsv(record.days.filter((d) => inRange(d.date))),
+                "text/csv",
+              )
+            }
+          >
+            Daily series CSV
+          </button>
+          <button
+            type="button"
+            className="btn btn-quiet"
+            disabled={!record}
+            onClick={() =>
+              record &&
+              download(
+                `${fileBase}_monthly.csv`,
+                monthlyCsv(record.months.filter((m) => inRange(stamp(m.year, m.month)))),
+                "text/csv",
+              )
+            }
+          >
+            Monthly table CSV
+          </button>
+          <button
+            type="button"
+            className="btn btn-quiet"
+            disabled={!record}
+            onClick={() =>
+              record &&
+              download(
+                `${fileBase}_heatmap.svg`,
+                heatmapSvg(record.months, years, areaName, {
+                  source: fireData.simulated
+                    ? "Simulated FIRMS-shaped detections — not observations"
+                    : "NASA FIRMS Brazil - MODIS Aqua / VIIRS NOAA-20",
+                  period: `${from} to ${to}`,
+                  processing: "0.25 degree grid - offline NB2 model - MODIS Aqua reference",
+                  exportedAt: new Date().toISOString(),
+                  from,
+                  to,
+                }),
+                "image/svg+xml",
+              )
+            }
+          >
+            Heatmap SVG
+          </button>
+          <button
+            type="button"
+            className="btn btn-quiet"
+            onClick={() => download(`${fileBase}_area.geojson`, areaGeoJson(area), "application/geo+json")}
+          >
+            Area GeoJSON
+          </button>
+        </div>
+        {rangeMonths > HOTSPOT_CSV_MONTHS && (
+          <p className="text-[0.8125rem] text-faint">
+            The grid-cell file covers up to {HOTSPOT_CSV_MONTHS} months. Narrow
+            the range to download it.
           </p>
-          <div className="flex flex-wrap gap-2 xl:justify-end">
-            <button
-              type="button"
-              className="btn btn-quiet"
-              disabled={
-                !record || exporting || rangeMonths > HOTSPOT_CSV_MONTHS
-              }
-              onClick={exportHotspots}
-            >
-              {exporting ? "Preparing the file…" : "Grid-cell counts CSV"}
-            </button>
-            <button
-              type="button"
-              className="btn btn-quiet"
-              disabled={!record}
-              onClick={() =>
-                record &&
-                download(
-                  `${fileBase}_daily.csv`,
-                  dailyCsv(record.days.filter((d) => inRange(d.date))),
-                  "text/csv",
-                )
-              }
-            >
-              Daily series CSV
-            </button>
-            <button
-              type="button"
-              className="btn btn-quiet"
-              disabled={!record}
-              onClick={() =>
-                record &&
-                download(
-                  `${fileBase}_monthly.csv`,
-                  monthlyCsv(
-                    record.months.filter((m) =>
-                      inRange(stamp(m.year, m.month)),
-                    ),
-                  ),
-                  "text/csv",
-                )
-              }
-            >
-              Monthly table CSV
-            </button>
-            <button
-              type="button"
-              className="btn btn-quiet"
-              disabled={!record}
-              onClick={() =>
-                record &&
-                download(
-                  `${fileBase}_heatmap.svg`,
-                  heatmapSvg(record.months, years, areaName, {
-                    source: fireData.simulated
-                      ? "Simulated FIRMS-shaped detections — not observations"
-                      : "NASA FIRMS Brazil - MODIS Aqua / VIIRS NOAA-20",
-                    period: `${from} to ${to}`,
-                    processing:
-                      "0.25 degree grid - offline NB2 model - MODIS Aqua reference",
-                    exportedAt: new Date().toISOString(),
-                    from,
-                    to,
-                  }),
-                  "image/svg+xml",
-                )
-              }
-            >
-              Heatmap SVG
-            </button>
-            <button
-              type="button"
-              className="btn btn-quiet"
-              onClick={() =>
-                download(
-                  `${fileBase}_area.geojson`,
-                  areaGeoJson(area),
-                  "application/geo+json",
-                )
-              }
-            >
-              Area GeoJSON
-            </button>
-          </div>
-          {rangeMonths > HOTSPOT_CSV_MONTHS && (
-            <p className="text-[0.8125rem] text-faint">
-              The grid-cell file covers up to {HOTSPOT_CSV_MONTHS} months. Narrow
-              the range to download it.
-            </p>
-          )}
-        </div>
+        )}
       </section>
-
-      {!record && !error && (
-        <div aria-hidden="true" className="grid gap-[2px]">
-          {Array.from({ length: 10 }, (_, i) => (
-            <div key={i} className="h-7 animate-pulse rounded bg-canopy" />
-          ))}
-        </div>
-      )}
     </div>
   );
 }
