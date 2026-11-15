@@ -16,5 +16,11 @@ export function lockTourInteractions(): () => void {
   };
   const events = ["pointerdown", "pointerup", "mousedown", "mouseup", "click", "dblclick", "auxclick", "contextmenu", "touchstart", "touchmove", "touchend", "wheel", "keydown", "keyup", "beforeinput"];
   for (const type of events) window.addEventListener(type, block, { capture: true, passive: false });
-  return () => { for (const type of events) window.removeEventListener(type, block, true); };
+  
+  return () => {
+    for (const type of events) {
+      window.removeEventListener(type, block, { capture: true });
+    }
+  };
 }
+
