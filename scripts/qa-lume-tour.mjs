@@ -78,6 +78,8 @@ async function start(p) {
   const confirm=p.getByRole("button",{name:"Start tour",exact:true});
   if(p.viewportSize().width<=700) await confirm.click();
   await at(p, "welcome");
+  assert.equal(await p.locator('[data-tour="selection"]').count(),0,"A saved selection must not leak into the demonstration");
+  assert.equal(await p.locator('.ff-interaction-panel:visible').count(),0,"Start with the calendar closed");
 }
 async function exit(p, name = "Skip tour") {
   await card(p).getByRole("button", { name, exact: true }).click();

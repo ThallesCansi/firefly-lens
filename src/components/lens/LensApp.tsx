@@ -51,6 +51,8 @@ import { ScientificInfo } from "@/components/ui/ScientificInfo";
 import { AutoStartTour } from "@/components/onboarding/AutoStartTour";
 import { lockTourInteractions } from "@/lib/onboarding/interaction-lock";
 import { afterPaint, type TourWorkspace, type WorkspaceSnapshot } from "@/lib/onboarding/session";
+import { scrollTourTo } from "@/lib/onboarding/scroll";
+import { HOME } from "@/lib/map/camera";
 import { TOUR_PERIOD, stepIndex, type TourStepId } from "@/lib/onboarding/steps";
 import { clearHandoff, readHandoff } from "@/lib/onboarding/handoff";
 
@@ -604,6 +606,16 @@ export function LensApp() {
       setDestination(null);
       setExpanded(false);
       setCardOpen(id === "sensors" || id === "period");
+      if (index < stepIndex("pantanal")) {
+        // The saved workspace belongs to restore(), never to the demonstration.
+        tools.clear();
+        setArea(null); setAnalyzed(null); setMonthOpen(false);
+        setPlayback(false); setAutoPlay(0); setFlight(null); setColumnsChosen(false);
+        setSensors(["MODIS", "VIIRS"]); changePeriod(TOUR_PERIOD);
+        setFrom(fireData.firstMonth); setTo(fireData.lastMonth); setAnalyticsTab("history");
+        if (id === "welcome") controller?.navigate({ id:"tour-home", center:HOME.center,
+          zoom:HOME.zoom[controller.getProjection()], bearing:0, pitch:0, animation:"jump", source:"tutorial" });
+      }
       if (index < stepIndex("history")) setAnalysis(false);
       if (id === "welcome") window.scrollTo({ top: 0, behavior: "instant" });
       // The last step keeps the example; coming back from About and Method, it is set up again.
@@ -627,8 +639,8 @@ export function LensApp() {
       if (id === "range") { setFrom("2023-01"); setTo("2023-12"); }
       await afterPaint(signal);
       if (signal.aborted) return;
-      if (index >= stepIndex("report") && id !== "complete" && id !== "pages") showReport();
-      else window.scrollTo({ top: 0, behavior: "instant" });
+      const below = index >= stepIndex("report") && id !== "complete" && id !== "pages";
+      await scrollTourTo(below && report.current ? window.scrollY + report.current.getBoundingClientRect().top : 0, signal);
       await afterPaint(signal);
     },
     // Remount only on explicit retry. Existing hooks evict failed cache entries.
