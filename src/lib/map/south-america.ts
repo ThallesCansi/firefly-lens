@@ -6,6 +6,12 @@ import { wrapLng } from "./camera";
 export const SOUTH_AMERICA: BBox = COVERAGE;
 export const MIN_CONTINENT_ZOOM = 1.6;
 
+export function nearContinentEdge(lng:number,lat:number) {
+  const [w,s,e,n]=SOUTH_AMERICA;
+  const x=wrapLng(lng);
+  return x-w<4 || e-x<4 || lat-s<4 || n-lat<4;
+}
+
 export function continentCenter(lng:number,lat:number): [number,number] {
   const [w,s,e,n]=SOUTH_AMERICA;
   return [Math.max(w,Math.min(e,wrapLng(lng))),Math.max(s,Math.min(n,lat))];

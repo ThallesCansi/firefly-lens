@@ -1,6 +1,29 @@
 .lume-replay { position:absolute; right:76px; bottom:120px; z-index:29; display:flex; align-items:center; gap:4px; min-height:36px; padding:2px 8px 2px 4px; white-space:nowrap; font-size:11px; color:var(--color-dim); cursor:pointer; }
 .workspace-map:has(.playback-bar) .lume-replay { right:20px; bottom:min(370px,calc(100% - 56px)); }
 .lume-replay:disabled { opacity: .4; cursor: default; }
+.lume-tour-intro { position:fixed; inset:auto; margin:0; padding:14px; max-width:calc(100vw - 24px); border-radius:14px; color:var(--color-ink); font-size:13px; }
+.lume-tour-intro:popover-open { display:grid; gap:10px; }
+.lume-tour-intro::backdrop { background:transparent; pointer-events:none; }
+.lume-tour-intro p { color:var(--color-dim); line-height:1.45; }
+.lume-tour-intro .btn { min-height:40px; font-size:13px; }
+.nasa-firms-link { display:inline-flex; flex-wrap:wrap; align-items:center; gap:4px; margin-top:4px; font-size:11px; text-decoration:underline; color:var(--color-ink); }
+.nasa-firms-scope { color:var(--color-dim); }
+.future-areas-notice { pointer-events:none; position:absolute; left:50%; top:48%; translate:-50% -50%; z-index:5; display:grid; gap:4px; width:max-content; max-width:calc(100% - 100px); padding:12px 18px; text-align:center; border-radius:14px; color:var(--color-ink); background:color-mix(in srgb,var(--color-night) 65%,transparent); backdrop-filter:blur(8px); }
+.future-areas-notice strong { font-size:18px; font-weight:500; }
+.future-areas-notice span { font-size:11px; color:var(--color-dim); }
+.workspace-map .maplibregl-ctrl-attrib.maplibregl-compact { background:var(--surface-floating); color:var(--color-ink); }
+.workspace-map .maplibregl-ctrl-attrib .maplibregl-ctrl-attrib-button { background-image:none; background-color:transparent; }
+.map-source-preview { display:none; }
+.map-source-info { display:inline-grid; width:24px; height:24px; place-items:center; font-size:18px; color:var(--color-ink); }
+@media (min-width:701px) {
+  .workspace-map .maplibregl-ctrl-attrib.maplibregl-compact:not([open]) { padding:0; }
+  .workspace-map .maplibregl-ctrl-attrib.maplibregl-compact:not([open]) .maplibregl-ctrl-attrib-button { position:relative; width:auto; height:auto; display:flex; align-items:center; padding-left:8px; }
+  .maplibregl-ctrl-attrib:not([open]) .map-source-preview { display:block; max-width:min(240px,calc(100cqw - 70px)); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:11px; color:var(--color-ink); }
+}
+@media (max-width:700px) {
+  .workspace-map .lume-replay { width:44px; height:44px; justify-content:center; padding:0; }
+  .lume-replay-label { display:none; }
+}
 /* With the full map, the tour button sits on the line of the zoom controls' bottom edge. */
 @media (min-width: 1100px) {
   .workspace-body:not([data-analysis="true"]) .workspace-map:not(:has(.playback-bar)) .lume-replay { bottom: 40px; }

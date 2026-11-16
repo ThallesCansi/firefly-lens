@@ -73,7 +73,12 @@ async function visitPages(p) {
   await at(p, "complete");
   assert.equal(await card(p).locator(".driver-popover-progress-text").textContent(), "24 of 24");
 }
-async function start(p) { await p.locator('[data-tour="replay"]').click(); await at(p, "welcome"); }
+async function start(p) {
+  await p.locator('[data-tour="replay"]').click();
+  const confirm=p.getByRole("button",{name:"Start tour",exact:true});
+  if(p.viewportSize().width<=700) await confirm.click();
+  await at(p, "welcome");
+}
 async function exit(p, name = "Skip tour") {
   await card(p).getByRole("button", { name, exact: true }).click();
   await p.waitForFunction(() => document.querySelector("main.lens-workspace")?.getAttribute("data-tour-active") === "false");

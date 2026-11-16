@@ -42,7 +42,9 @@ async function creditsClear(p) {
   const credit = p.locator(".maplibregl-ctrl-attrib");
   assert.equal(await credit.evaluate((el) => el.classList.contains("maplibregl-compact-show")), false);
   const box = await credit.boundingBox();
-  assert.ok(box.width <= 40 && box.height <= 40, "Closed native attribution occupies only its compact button");
+  const desktop=p.viewportSize().width>700;
+  assert.ok(box.width <= (desktop?300:40) && box.height <= 40, "Closed attribution fits its desktop source label or mobile icon");
+  assert.equal(await credit.locator('.map-source-preview').isVisible(),desktop);
   assert.equal(await p.locator(".workspace-map").evaluate((el) => el.style.getPropertyValue("--imagery-credit-height")), "");
 }
 async function checkAttribution(p) {
@@ -60,6 +62,7 @@ try {
     const { context, p } = await setup(width);
     await p.goto(`${base}/lens`); await p.locator(".camera-trigger").waitFor(); await ready(p);
     assert.equal(await p.locator(".hotspot-map").getAttribute("data-imagery-provider"), "eox-sentinel-2025");
+    await p.waitForFunction(()=>document.querySelector('.map-source-preview')?.textContent==='EOX · Sentinel-2');
     await creditsClear(p); await checkAttribution(p); await menu(p);
     assert.equal(await p.locator(".imagery-control").innerText().then((text) => text.includes("CC BY-NC-SA")), false, "Camera menu has no full licensing paragraph");
     assert.equal(await p.getByRole("combobox", { name: "Satellite source", exact: true }).inputValue(), "eox-sentinel-2025");
@@ -69,6 +72,7 @@ try {
     await close(p);
     const center = await p.locator('[data-tour="map-canvas"]').getAttribute("data-camera-center");
     await choose(p, "nasa-blue-marble"); await close(p);
+    await p.waitForFunction(()=>document.querySelector('.map-source-preview')?.textContent==='NASA GIBS · Blue Marble');
     assert.equal(await p.locator('[data-tour="map-canvas"]').getAttribute("data-camera-center"), center);
     await choose(p, "eox-sentinel-2025"); await close(p);
     await p.getByRole("button", { name: "Satellite imagery", exact: true }).click(); await ready(p, "off");
