@@ -1,0 +1,86 @@
+{
+  "results": [
+    {
+      "width": 1440,
+      "height": 1000,
+      "cameraAndProjectionWidth": 46,
+      "stateSelected": true,
+      "pickerHeight": 255.46875,
+      "mapHeight": 1000,
+      "collapsedCards": true
+    },
+    {
+      "width": 1100,
+      "height": 900,
+      "cameraAndProjectionWidth": 46,
+      "stateSelected": true,
+      "pickerHeight": 255.46875,
+      "mapHeight": 900,
+      "collapsedCards": true
+    },
+    {
+      "width": 1000,
+      "height": 720,
+      "cameraAndProjectionWidth": 46,
+      "stateSelected": true,
+      "pickerHeight": 255.46875,
+      "mapHeight": 720,
+      "collapsedCards": true
+    },
+    {
+      "width": 900,
+      "height": 800,
+      "cameraAndProjectionWidth": 46,
+      "stateSelected": true,
+      "pickerHeight": 199.96875,
+      "mapHeight": 800,
+      "collapsedCards": true
+    },
+    {
+      "width": 760,
+      "height": 800,
+      "cameraAndProjectionWidth": 46,
+      "stateSelected": true,
+      "pickerHeight": 178.28125,
+      "mapHeight": 800,
+      "collapsedCards": true
+    },
+    {
+      "width": 720,
+      "height": 800,
+      "cameraAndProjectionWidth": 46,
+      "stateSelected": true,
+      "pickerHeight": 178.28125,
+      "mapHeight": 800,
+      "collapsedCards": true
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "cameraAndProjectionWidth": 46,
+      "stateSelected": true,
+      "pickerHeight": 199.96875,
+      "mapHeight": 844,
+      "collapsedCards": true
+    },
+    {
+      "width": 320,
+      "height": 740,
+      "cameraAndProjectionWidth": 46,
+      "stateSelected": true,
+      "pickerHeight": 199.96875,
+      "mapHeight": 740,
+      "collapsedCards": true
+    },
+    {
+      "width": 844,
+      "height": 420,
+      "cameraAndProjectionWidth": 46,
+      "stateSelected": true,
+      "pickerHeight": 101.78125,
+      "mapHeight": 420,
+      "collapsedCards": true
+    }
+  ],
+  "errors": []
+}

@@ -90,6 +90,7 @@ try {
   const daily=JSON.parse((body[0]===0x1f ? gunzipSync(body):body).toString("utf8"));
   const first=daily.find((row)=>row[0]==="2003-09-01");
   const downloadReady=page.waitForEvent("download");
+  if(!await page.getByRole("button",{name:"CSV",exact:true}).isVisible()) await page.locator('.selection-card-chip').click();
   await page.getByRole("button",{name:"CSV",exact:true}).click();
   const csv=(await readFile(await (await downloadReady).path(),"utf8")).trim().split("\n");
   assert.equal(csv[0],"period,cell_id,longitude,latitude,modis_aqua_raw,viirs_noaa20_raw");
