@@ -18,6 +18,9 @@ import { DEFAULT_CAMERA_PROFILE, HOME } from "@/lib/map/camera";
 import { presetRequest, type CameraAction } from "@/lib/map/camera-presets";
 import { fireData } from "@/lib/data/source";
 import { CameraControls } from "./map/CameraControls";
+import { ImageryControls } from "./map/ImageryControls";
+import { createImagery, type ImageryManager, type ImageryPhase } from "@/lib/map/imagery";
+import { DEFAULT_IMAGERY, IMAGERY_PROVIDERS, type ImageryProviderId } from "@/lib/map/imagery-providers";
 import { addCoverageMask,continentCenter,MIN_CONTINENT_ZOOM } from "@/lib/map/south-america";
 import { GLOW, glowAt } from "@/lib/map/glow";
 import {
@@ -53,8 +56,8 @@ import { useTheme } from "@/components/ui/ThemeProvider";
 import {
   BASEMAP_ATTRIBUTION,
   DEFAULT_BASEMAP,
-  IMAGERY_LAYER,
   basemapFor,
+  withImagery,
   loadBasemap,
   readBasemap,
   saveBasemap,
@@ -301,6 +304,7 @@ export function HotspotMap({
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<MapLibreMap | null>(null);
   const control = useRef<EngineController | null>(null);
+  const imagery = useRef<ImageryManager | null>(null);
   const motion = useRef<ColumnMotion | null>(null);
   const isDrawing = drawing || interactionMode === "draw-rectangle";
   const bbox = area?.bbox ?? null;
@@ -342,8 +346,10 @@ export function HotspotMap({
   const [cameraMoving, setCameraMoving] = useState(false);
   // A regional flight shows every stop in 3D, whatever was chosen before it.
   const inColumns = forceColumns || columnsChosen;
-  /** NASA's satellite picture under the data, or the drawn map alone. */
+  /** Reference satellite imagery under the data, or the drawn map alone. */
   const [basemap, setBasemap] = useState<BasemapKind>(DEFAULT_BASEMAP);
+  const [imageryProvider, setImageryProvider] = useState<ImageryProviderId>(DEFAULT_IMAGERY);
+  const [imageryPhase, setImageryPhase] = useState<ImageryPhase>("off");
   /** The glow under unusually high cells; the key switches it off. */
   const [showUnusual, setShowUnusual] = useState(true);
   /** The cell under the pointer, whose numbers the readout shows. */
@@ -432,7 +438,7 @@ export function HotspotMap({
         instance = makeMap(
           maplibregl,
           el.current,
-          base ? basemapFor(base, latest.current.theme, kind) : blankStyle(),
+          base ? basemapFor(base, latest.current.theme, "map") : withImagery(blankStyle(), latest.current.theme, "map"),
           initial,
         );
         instance.touchPitch.disable();
@@ -440,6 +446,14 @@ export function HotspotMap({
           new maplibregl.AttributionControl({ compact: true, customAttribution: BASEMAP_ATTRIBUTION }),
           "bottom-right",
         );
+        // compact:true still starts expanded in MapLibre. Initialize both its
+        // CSS state and native <details> closed, without a synthetic toggle.
+        const credit = el.current.querySelector<HTMLDetailsElement>(".maplibregl-ctrl-attrib");
+        if (credit) {
+          credit.classList.add("maplibregl-compact");
+          credit.classList.remove("maplibregl-compact-show");
+          credit.open = false;
+        }
       } catch {
         // No WebGL: the map cannot draw at all on this device.
         setFailed(true);
@@ -460,6 +474,9 @@ export function HotspotMap({
       });
       controller.setCameraProfile(latest.current.cameraProfile);
       control.current = controller;
+      const imageryManager = createImagery(instance, (phase) => { if (!dead) setImageryPhase(phase); });
+      imagery.current = imageryManager;
+      imageryManager.configure(DEFAULT_IMAGERY, kind === "satellite", latest.current.theme);
 
       const addLayers = () => {
         const m = instance;
@@ -633,6 +650,7 @@ export function HotspotMap({
           // A style without sky support still draws; only the atmosphere is missing.
         }
         controller.styleLoaded();
+        imageryManager.styleLoaded();
         if (!announced) {
           announced = true;
           latest.current.onReady?.(controller);
@@ -651,7 +669,7 @@ export function HotspotMap({
         if (styled.current || dead || fellBack.current) return;
         fellBack.current = true;
         setOffline(true);
-        instance.setStyle(blankStyle());
+        instance.setStyle(withImagery(blankStyle(), latest.current.theme, "map"));
       });
     });
 
@@ -659,6 +677,8 @@ export function HotspotMap({
       dead = true;
       motion.current?.stop();
       motion.current = null;
+      imagery.current?.dispose();
+      imagery.current = null;
       // Next may preserve the workspace state across client navigation while
       // destroying its effects. Never rebind tools to that removed engine.
       latest.current.onReady?.(null);
@@ -677,12 +697,13 @@ export function HotspotMap({
     styled.current = false;
     fellBack.current = false;
     control.current?.styleUnloading();
+    imagery.current?.styleLoading();
     // Only replace the style. style.load restores data and layer visibility; camera and handlers stay intact.
     loadBasemap().then((base) => {
       if (map.current !== m || appliedTheme.current !== theme) return;
       fellBack.current = !base;
       m.setStyle(
-        base ? basemapFor(base, theme, latest.current.basemap) : blankStyle(),
+        base ? basemapFor(base, theme, "map") : withImagery(blankStyle(), theme, "map"),
         { diff: false },
       );
     });
@@ -866,16 +887,10 @@ export function HotspotMap({
     el.style.transform = `translate(${Math.round(left)}px, ${Math.round(top)}px)`;
   }, [hovered, ready]);
 
-  // The satellite picture is a layer of the basemap: shown or hidden in place.
+  // Only raster resources change; scientific layers and the camera survive.
   useEffect(() => {
-    const m = map.current;
-    if (ready && m?.getLayer(IMAGERY_LAYER))
-      m.setLayoutProperty(
-        IMAGERY_LAYER,
-        "visibility",
-        basemap === "satellite" ? "visible" : "none",
-      );
-  }, [basemap, ready]);
+    if (ready) imagery.current?.configure(imageryProvider, basemap === "satellite", theme);
+  }, [basemap, imageryProvider, theme, ready]);
 
   // A search result: fly there, framing its extent when it has one.
   useEffect(() => {
@@ -1040,6 +1055,8 @@ export function HotspotMap({
       className={`hotspot-map map-space relative h-full overflow-hidden ${isDrawing ? "ring-2 ring-[var(--color-selected)] ring-inset" : ""}`}
       data-map-theme={paintedTheme}
       data-projection={ready ? mode : undefined}
+      data-imagery-provider={imageryProvider}
+      data-imagery-phase={imageryPhase}
     >
       <Starfield />
       {/* MapLibre's stylesheet makes its container position: relative, so it fills a positioned parent. */}
@@ -1194,7 +1211,10 @@ export function HotspotMap({
         <div data-tour="map-controls" className="map-view-controls">
           <CameraControls profile={cameraProfile} onProfile={(next) => { control.current?.setCameraProfile(next); setCameraProfile(next); }} onAction={cameraAction}
             onStop={() => control.current?.stopNavigation()} running={cameraMoving} disabled={isDrawing || tourActive}
-            hasSelection={!!bbox} globeAvailable={!globeUnavailable && (!projection || projection === "globe")} />
+            hasSelection={!!bbox} globeAvailable={!globeUnavailable && (!projection || projection === "globe")}
+            imageryControl={<ImageryControls provider={imageryProvider} phase={imageryPhase} disabled={isDrawing || tourActive}
+              onChange={(next) => { setImageryProvider(next); setBasemap("satellite"); saveBasemap("satellite"); }}
+              onRetry={() => imagery.current?.retry()} />} />
           {showProjectionToggle && !projection && (
             <ProjectionToggle
               value={mode}
@@ -1210,7 +1230,7 @@ export function HotspotMap({
               title={
                 basemap === "satellite"
                   ? "Back to the drawn map"
-                  : "Show NASA Blue Marble satellite imagery"
+                  : `Show ${IMAGERY_PROVIDERS[imageryProvider].label} satellite imagery`
               }
               disabled={offline}
               onClick={() => {

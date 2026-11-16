@@ -1,0 +1,124 @@
+{
+  "viewport": {
+    "width": 960,
+    "height": 640
+  },
+  "sourceBranch": "feature/hires-satellite-poc",
+  "cases": [
+    {
+      "revision": "production",
+      "place": "andes",
+      "pose": {
+        "center": [
+          -70.01,
+          -32.68
+        ],
+        "zoom": 12,
+        "pitch": 55.00000000000001,
+        "bearing": 0,
+        "projection": "mercator"
+      },
+      "screenshot": "andes-production.jpg",
+      "sha256": "34aaba7cd985bc0a59b3ead633a0a9fd7b917c515ada1584a641c7cb6e4d6b2e"
+    },
+    {
+      "revision": "production",
+      "place": "serra-do-mar",
+      "pose": {
+        "center": [
+          -43.04,
+          -22.46
+        ],
+        "zoom": 12,
+        "pitch": 55.00000000000001,
+        "bearing": 0,
+        "projection": "mercator"
+      },
+      "screenshot": "serra-do-mar-production.jpg",
+      "sha256": "75338a347dd7f2d7b46e9e6f07584895ab93978398f6159ba3389b2777e0c73b"
+    },
+    {
+      "revision": "production",
+      "place": "pantanal",
+      "pose": {
+        "center": [
+          -56.5,
+          -19
+        ],
+        "zoom": 12,
+        "pitch": 55.00000000000001,
+        "bearing": 0,
+        "projection": "mercator"
+      },
+      "screenshot": "pantanal-production.jpg",
+      "sha256": "b3cb095a559fad9343cdea02203b03f896c6109d771f2830f3327f011dfba5c9"
+    },
+    {
+      "revision": "poc",
+      "place": "andes",
+      "pose": {
+        "center": [
+          -70.01,
+          -32.68
+        ],
+        "zoom": 12,
+        "pitch": 55.00000000000001,
+        "bearing": 0,
+        "projection": "mercator"
+      },
+      "screenshot": "andes-poc.jpg",
+      "sha256": "34aaba7cd985bc0a59b3ead633a0a9fd7b917c515ada1584a641c7cb6e4d6b2e"
+    },
+    {
+      "revision": "poc",
+      "place": "serra-do-mar",
+      "pose": {
+        "center": [
+          -43.04,
+          -22.46
+        ],
+        "zoom": 12,
+        "pitch": 55.00000000000001,
+        "bearing": 0,
+        "projection": "mercator"
+      },
+      "screenshot": "serra-do-mar-poc.jpg",
+      "sha256": "75338a347dd7f2d7b46e9e6f07584895ab93978398f6159ba3389b2777e0c73b"
+    },
+    {
+      "revision": "poc",
+      "place": "pantanal",
+      "pose": {
+        "center": [
+          -56.5,
+          -19
+        ],
+        "zoom": 12,
+        "pitch": 55.00000000000001,
+        "bearing": 0,
+        "projection": "mercator"
+      },
+      "screenshot": "pantanal-poc.jpg",
+      "sha256": "b3cb095a559fad9343cdea02203b03f896c6109d771f2830f3327f011dfba5c9"
+    }
+  ],
+  "comparisons": [
+    {
+      "place": "andes",
+      "identicalScreenshot": true,
+      "matchedPose": true
+    },
+    {
+      "place": "serra-do-mar",
+      "identicalScreenshot": true,
+      "matchedPose": true
+    },
+    {
+      "place": "pantanal",
+      "identicalScreenshot": true,
+      "matchedPose": true
+    }
+  ],
+  "errors": [],
+  "forbiddenRequests": []
+}

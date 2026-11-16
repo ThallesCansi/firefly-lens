@@ -40,6 +40,37 @@ export function DataGuide() {
           detections or every original FIRMS attribute.
         </p>
       </MethodSection>
+      <MethodSection id="background-imagery" title="Background satellite imagery">
+        <p>
+          <strong>EOxCloudless Sentinel-2 2025</strong> is the default map background.
+          NASA GIBS Blue Marble remains available under Camera → Satellite source.
+          These images provide geographic context; they are separate from the
+          MODIS/VIIRS thermal-detection datasets used in fire analyses.
+        </p>
+        <p>
+          The 2025 mosaic is independent of the selected fire-analysis period.
+          Imagery can contain seasonal variation, shadows, mosaic seams and
+          display color adjustments. Its appearance does not validate detection
+          counts, harmonization or forecasts.
+        </p>
+        <p>
+          <a href="https://cloudless.eox.at">EOxCloudless</a> by{" "}
+          <a href="https://eox.at">EOX IT Services GmbH</a> (Contains modified
+          Copernicus Sentinel data 2025). Eligible non-commercial use is subject to{" "}
+          <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>{" "}
+          and the <a href="https://cloudless.eox.at/documentation/license">EOX licensing conditions</a>.
+        </p>
+        <p>
+          Open the map’s attribution control (ⓘ) for provider credits. Before
+          capturing or sharing a screenshot containing EOX imagery, expand the
+          credits and keep them visible in the image. Images and videos containing
+          this imagery require embedded attribution. The scientific CSV and chart
+          exports do not contain the satellite background.
+        </p>
+      </MethodSection>
+      <References ids={["eox", "eox-license", "cc-nc-sa"]}
+        title="Background imagery sources and licensing"
+        description="Provider documentation and usage terms for geographic context imagery." />
       <MethodSection id="coverage" title="Data coverage">
         <p>The dates below describe the original spatially calibrated Brazilian tiles. Additional South American countries have separate whole-country reports for July 2002–December 2025, documented under <a href="/method#geographic-expansion">Geographic expansion</a>. They do not extend the Brazilian cell calibration across borders.</p>
         <p>

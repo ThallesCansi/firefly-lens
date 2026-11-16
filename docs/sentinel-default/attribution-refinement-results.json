@@ -1,0 +1,112 @@
+{
+  "checkedAt": "2026-11-15T23:59:56.831Z",
+  "branch": "feature/sentinel-default",
+  "unitTests": {
+    "files": 43,
+    "tests": 264,
+    "passed": true
+  },
+  "eslint": "passed",
+  "typescript": "passed",
+  "productionBuild": "passed",
+  "customCreditCard": false,
+  "attributionResizeObserverAndOffsets": false,
+  "fullRasterAttribution": true,
+  "nativeControlInitiallyCollapsed": true,
+  "nativeKeyboardToggleWidths": [
+    1440,
+    1000,
+    390,
+    320
+  ],
+  "methodAnchor": "/method#background-imagery",
+  "methodTabsUnchanged": 4,
+  "methodLinksVerified": 4,
+  "screenshotPolicy": "Expand native provider attribution during capture and restore its previous state afterward. No basemap-image export exists; OS screenshots cannot be intercepted.",
+  "eoxRequirements": "https://cloudless.eox.at/documentation/faq",
+  "application": [
+    {
+      "width": 1440,
+      "sentinelDefault": true,
+      "nasaSelectable": true,
+      "preferenceRetainedOnReload": true,
+      "sourceSwitchPreservesCenter": true,
+      "columnsRetained": true,
+      "creditsClear": true
+    },
+    {
+      "width": 1000,
+      "sentinelDefault": true,
+      "nasaSelectable": true,
+      "preferenceRetainedOnReload": true,
+      "sourceSwitchPreservesCenter": true,
+      "columnsRetained": true,
+      "creditsClear": true
+    },
+    {
+      "width": 390,
+      "sentinelDefault": true,
+      "nasaSelectable": true,
+      "preferenceRetainedOnReload": true,
+      "sourceSwitchPreservesCenter": true,
+      "columnsRetained": true,
+      "creditsClear": true
+    },
+    {
+      "width": 320,
+      "sentinelDefault": true,
+      "nasaSelectable": true,
+      "preferenceRetainedOnReload": true,
+      "sourceSwitchPreservesCenter": true,
+      "columnsRetained": true,
+      "creditsClear": true
+    },
+    {
+      "eox503Isolated": true,
+      "nasaFallback": true,
+      "explicitRetry": true
+    }
+  ],
+  "camera": {
+    "checks": [
+      {
+        "width": 1440,
+        "theme": "light",
+        "motion": "no-preference",
+        "passed": true
+      },
+      {
+        "width": 390,
+        "theme": "dark",
+        "motion": "reduce",
+        "passed": true
+      },
+      {
+        "width": 320,
+        "theme": "light",
+        "motion": "reduce",
+        "passed": true
+      }
+    ],
+    "errors": [],
+    "sentinelTiles": 351,
+    "sentinelSuccesses": 351
+  },
+  "lume": {
+    "status": "passed",
+    "steps": 24,
+    "layouts": [
+      1440,
+      1000,
+      390,
+      320
+    ],
+    "errors": [],
+    "pantanalSeptember2023": 355.68,
+    "automaticVisits": true,
+    "explicitOptOut": true,
+    "readOnly": true
+  },
+  "errors": [],
+  "forbiddenRequests": []
+}
