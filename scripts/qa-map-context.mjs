@@ -70,8 +70,7 @@ try {
         await page.mouse.move(canvas.x+canvas.width*.95,canvas.y+canvas.height*.8,{steps:12});await page.mouse.up();
       }
       console.log(width,mode,'center',await page.locator('[data-tour="map-canvas"]').getAttribute('data-camera-center'));
-      await page.locator('.future-areas-notice').waitFor();
-      assert.equal(await page.locator('.future-areas-notice').evaluate(el=>getComputedStyle(el).pointerEvents),'none');
+      assert.equal(await page.locator('.future-areas-notice').isVisible(),false,'Coverage notice stays hidden at camera limits');
     }
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
     await page.screenshot({path:`${process.env.TEMP}/firefly-context-${width}.png`});
