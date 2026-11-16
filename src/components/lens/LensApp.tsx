@@ -901,7 +901,8 @@ export function LensApp() {
             !tools.administrativeActive && (
               <MapDisclosure
                 kind="selection-card"
-                summary={<>Area of interest <strong>{area.name}</strong></>}
+                summary={<><small>Area of interest</small><strong title={area.name}>{area.name}</strong></>}
+                primaryAction={<button ref={analyzeButton} type="button" data-tour="analyze" className="btn btn-primary" onClick={() => analyze()}>Show analysis</button>}
                 key={area.id}
                 data-tour="selection"
                 data-compact={analysis}
@@ -914,17 +915,6 @@ export function LensApp() {
                   {tools.editor && <PolygonEditStatus editor={tools.editor} />}
                 </div>
                 <div className="selection-actions flex flex-wrap items-center gap-2">
-                  {/* The analysis opens by itself; this brings it back after it was closed. */}
-                  {!analysis && (
-                    <button
-                      ref={analyzeButton}
-                      data-tour="analyze"
-                      className="btn btn-primary"
-                      onClick={() => analyze()}
-                    >
-                      Show analysis
-                    </button>
-                  )}
                   <button
                     className="btn btn-quiet"
                     onClick={() => {

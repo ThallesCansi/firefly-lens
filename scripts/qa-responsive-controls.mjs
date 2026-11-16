@@ -7,6 +7,9 @@ const output=process.env.QA_OUTPUT || "docs/responsive-controls-qa";
 await mkdir(output,{recursive:true});
 const browser=await chromium.launch({channel:"chrome",headless:true,args:["--enable-unsafe-swiftshader"]});
 const results=[],errors=[];
+async function reachable(locator) {
+  assert.equal(await locator.evaluate(el=>{const r=el.getBoundingClientRect(); return el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));}),true,"Control is covered by another panel");
+}
 try {
   for(const [width,height] of (process.env.QA_SIZES ? JSON.parse(process.env.QA_SIZES) : [[1440,1000],[1100,900],[900,800],[760,800],[390,844],[320,740],[844,420]])) {
     const context=await browser.newContext({viewport:{width,height},reducedMotion:"reduce",hasTouch:width<900});
@@ -19,7 +22,7 @@ try {
     await page.locator(".camera-trigger").waitFor({timeout:90000});
     const sizes=await page.locator(".map-view-controls").evaluate(el=>({camera:el.querySelector(".camera-control").getBoundingClientRect().width,projection:el.querySelector(".map-projection").getBoundingClientRect().width}));
     assert.ok(Math.abs(sizes.camera-sizes.projection)<=1,JSON.stringify(sizes));
-    if(width<=900) {
+    {
       const key=page.locator(".map-key");
       assert.equal(await key.locator(".map-key-rows").isVisible(),false);
       await key.getByRole("button",{name:"Legend",exact:true}).click();
@@ -54,16 +57,21 @@ try {
     await picker.getByRole("button",{name:"Use this state",exact:true}).waitFor();
     await page.screenshot({path:`${output}/${width}-state-picking.png`});
     await picker.getByRole("button",{name:"Use this state",exact:true}).click();
-    const splitWidth=await page.locator(".workspace-map").evaluate(el=>el.clientWidth);
-    if(splitWidth<=900) {
+    {
       const chip=page.locator('.selection-card-chip');await chip.waitFor();
       assert.equal(await page.locator('.selection-card-body').isVisible(),false);
+      await reachable(page.getByRole("region",{name:"Selected area",exact:true}).getByRole("button",{name:"Show analysis",exact:true}));
     }
     await page.getByRole("button",{name:"Close analysis",exact:true}).click();
     const selected=page.getByRole("region",{name:"Selected area",exact:true});
     await selected.waitFor();
-    if(width<=900) {
+    {
       assert.equal(await selected.locator(".selection-card-body").isVisible(),false);
+      assert.equal(await selected.getByRole("button",{name:"Show analysis",exact:true}).isVisible(),true);
+      await reachable(selected.getByRole("button",{name:"Show analysis",exact:true}));
+      await reachable(page.locator(".map-key-chip"));
+      await selected.getByRole("button",{name:"Show analysis",exact:true}).click();
+      await page.getByRole("button",{name:"Close analysis",exact:true}).click();
       const chip=selected.locator(".selection-card-chip");
       assert.match(await chip.innerText(),/Area of interest/);
       await chip.click();assert.equal(await selected.locator(".selection-card-body").isVisible(),true);
@@ -71,7 +79,7 @@ try {
     }
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
     await page.screenshot({path:`${output}/${width}-selected.png`});
-    results.push({width,height,cameraAndProjectionWidth:sizes.camera,stateSelected:true,pickerHeight:box.height,mapHeight:map.height,collapsedCards:width<=900});
+    results.push({width,height,cameraAndProjectionWidth:sizes.camera,stateSelected:true,pickerHeight:box.height,mapHeight:map.height,collapsedCards:true});
     await context.close();console.log(`${width}x${height}: camera, disclosures, map tap and state confirmation passed`);
   }
   assert.deepEqual(errors,[]);
