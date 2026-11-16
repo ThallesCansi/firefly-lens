@@ -40,7 +40,9 @@ async function state(p) { return p.evaluate(() => ({
   analysis: document.querySelector(".workspace-body")?.getAttribute("data-analysis"),
 })); }
 async function picker(p, label, option) {
-  await p.getByRole("button", { name: new RegExp(`^${label}:`) }).click();
+  const trigger = p.getByRole("button", { name: new RegExp(`^${label}:`) });
+  if (!await trigger.isVisible()) await p.locator(".map-card-chip").click();
+  await trigger.click();
   await p.getByRole("listbox", { name: label, exact: true }).getByRole("option", { name: option, exact: true }).click();
 }
 try {
@@ -123,7 +125,9 @@ try {
       await p.getByRole("button", { name: "Use this state", exact: true }).click(); await settled(p);
       assert.match((await state(p)).area, /Paulo/);
       // RegionFlight retains its real study-region and period semantics.
-      await p.getByRole("button", { name: "Regions", exact: true }).click(); await settled(p);
+      const regions = p.getByRole("button", { name: "Regions", exact: true });
+      if (!await regions.isVisible()) await p.locator(".map-card-chip").click();
+      await regions.click(); await settled(p);
       const flight = p.getByRole("region", { name: "Regional flight", exact: true });
       await flight.getByRole("button", { name: "Next", exact: true }).click(); await settled(p);
       await shot(p, "desktop-regional-flight.png");

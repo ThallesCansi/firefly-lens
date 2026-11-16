@@ -1,4 +1,5 @@
 "use client";
+import { useSyncExternalStore } from "react";
 import { AdministrativeSelectionCard } from "./AdministrativeSelectionCard";
 import { PolygonEditOverlay } from "./PolygonEditOverlay";
 import type { useWorkspaceTools } from "./useWorkspaceTools";
@@ -11,6 +12,7 @@ export function WorkspaceSelectionTools({
   coordinates: boolean;
   drawing: boolean;
 }) {
+  const selection = useSyncExternalStore(tools.administrative.subscribe,tools.administrative.snapshot,tools.administrative.snapshot);
   return (
     <>
       {(tools.administrativeActive || tools.boundary) &&
@@ -18,27 +20,22 @@ export function WorkspaceSelectionTools({
         !drawing && (
           <section
             className="ff-workspace-tools-card"
+            data-phase={selection.phase}
             aria-label="Country or state selection"
           >
             {tools.administrativeActive ? (
               <>
-                <label>
-                  Selection level
-                  <select
-                    className="field"
-                    value={tools.level}
-                    onChange={(e) => {
+                <fieldset className="ff-selection-level">
+                  <legend>Selection level</legend>
+                  <div role="group" aria-label="Selection level">
+                    {(["country","state"] as const).map(level=><button
+                      key={level} type="button" aria-pressed={tools.level===level}
+                      onClick={() => {
                       tools.administrative.cancel();
-                      tools.setLevel(e.target.value as "country" | "state");
-                    }}
-                  >
-                    <option value="country">Country</option>
-                    <option value="state">Brazilian state</option>
-                  </select>
-                </label>
-                <p className="px-4 text-sm text-dim">
-                  Click the map to identify a region. Drag to keep exploring.
-                </p>
+                      tools.setLevel(level);
+                    }}>{level==="country"?"Country":"Brazilian state"}</button>)}
+                  </div>
+                </fieldset>
                 <AdministrativeSelectionCard
                   controller={tools.administrative}
                   onCancel={tools.cancelAdministrative}

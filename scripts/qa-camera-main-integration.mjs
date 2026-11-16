@@ -32,6 +32,8 @@ try {
     // Main hides projection/columns controls while the mobile calendar is open.
     assert.equal(await p.locator('button[aria-label="3D columns"]').getAttribute("aria-pressed"), "true");
     if (width === 1440) {
+      const disclosure = p.locator(".selection-card-chip");
+      if (await disclosure.isVisible() && await disclosure.getAttribute("aria-expanded") === "false") await disclosure.click();
       const download = p.waitForEvent("download");
       await p.getByRole("button", { name: "Download the map cells as CSV", exact: true }).click();
       const csv = readFileSync(await (await download).path(), "utf8").trim().split("\n");

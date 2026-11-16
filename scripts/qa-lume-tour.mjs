@@ -82,7 +82,9 @@ async function exit(p, name = "Skip tour") {
 }
 async function shot(p, name) { await p.screenshot({ path: join(output, name), animations: "disabled" }); }
 async function pick(p, label, value) {
-  await p.getByRole("button", { name: new RegExp(`^${label}:`) }).click();
+  const trigger=p.getByRole("button", { name: new RegExp(`^${label}:`) });
+  if(!await trigger.isVisible()) await p.locator('.map-card-chip').click();
+  await trigger.click();
   await p.getByRole("listbox", { name: label, exact: true }).getByRole("option", { name: value, exact: true }).click();
 }
 async function state(p) {
