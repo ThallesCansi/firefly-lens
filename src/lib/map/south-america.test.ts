@@ -2,10 +2,11 @@ import { describe,expect,it } from "vitest";
 import { continentCenter,SOUTH_AMERICA,nearContinentEdge } from "./south-america";
 
 describe("South American navigation",()=>{
-  it("shows future coverage near each camera edge and clears it in the interior",()=>{
+  it("shows future coverage at the rotation stop without warning near the coast",()=>{
     expect(nearContinentEdge(-60,-22)).toBe(false);
-    for(const [x,y] of [[-84,-20],[-33,-20],[-60,-57],[-60,13]])expect(nearContinentEdge(x,y)).toBe(true);
-    expect(nearContinentEdge(276,-20)).toBe(true);
+    for(const [x,y] of [[-84,-20],[-33,-20],[-60,-57],[-60,13]])expect(nearContinentEdge(x,y)).toBe(false);
+    for(const [x,y] of [[-85,-20],[-32,-20],[-60,-58],[-60,14]])expect(nearContinentEdge(x,y)).toBe(true);
+    expect(nearContinentEdge(275,-20)).toBe(true);
   });
   it("keeps the Southern Cone, Caribbean coast and western countries reachable",()=>{
     for (const center of [[-70,-55],[-75,-10],[-62,12],[-35,-8]]) expect(continentCenter(center[0],center[1])).toEqual(center);

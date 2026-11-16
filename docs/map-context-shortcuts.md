@@ -2,7 +2,7 @@
 
 - On viewports up to 700px, the firefly launcher opens a dismissible introduction. Only “Start tour” launches the guided tour. Desktop retains one-click launch.
 - The native MapLibre attribution keeps all credits and licence links. Its closed desktop button names the current basemap; mobile retains the information icon. Satellite labels appear only after that imagery is active.
-- Within four degrees of a South America camera boundary, a translucent “Future areas” notice explains current coverage. It does not intercept map input or change the existing camera constraints or cloud overlay.
+- At a South America camera boundary (0.01° tolerance), a translucent “Future areas” notice explains current coverage. Exploring near the coast does not trigger it. It does not intercept map input or change the existing camera constraints or cloud overlay.
 - The analysis heading links to NASA FIRMS using the analyzed outline, selected day or inclusive month, and selected MODIS Aqua / VIIRS NOAA-20 platforms. Long outlines exceeding 7,000 URL characters use their enclosing extent, explicitly labelled in the link. NASA shows original detections; its availability and processing may differ from Lens.
 
 ## FIRMS protocol verification

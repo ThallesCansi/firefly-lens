@@ -9,7 +9,9 @@ export const MIN_CONTINENT_ZOOM = 1.6;
 export function nearContinentEdge(lng:number,lat:number) {
   const [w,s,e,n]=SOUTH_AMERICA;
   const x=wrapLng(lng);
-  return x-w<4 || e-x<4 || lat-s<4 || n-lat<4;
+  // Show the notice at the rotation stop, rather than while exploring the coast.
+  const margin=0.01;
+  return x-w<margin || e-x<margin || lat-s<margin || n-lat<margin;
 }
 
 export function continentCenter(lng:number,lat:number): [number,number] {

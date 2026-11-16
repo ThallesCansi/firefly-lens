@@ -15,7 +15,9 @@
 .lume-tour-intro::backdrop { background:transparent; pointer-events:none; }
 .lume-tour-intro p { color:var(--color-dim); line-height:1.45; }
 .lume-tour-intro .btn { min-height:40px; font-size:13px; }
-.nasa-firms-link { display:inline-flex; flex-wrap:wrap; align-items:center; gap:4px; margin-top:4px; font-size:11px; text-decoration:underline; color:var(--color-ink); }
+.nasa-firms-link { display:inline-flex; flex-wrap:wrap; align-items:center; gap:4px; margin-top:4px; padding:6px 9px; border:1px solid var(--color-ember-4); border-radius:8px; background:color-mix(in srgb,var(--color-ember-4) 16%,var(--color-night)); font-size:11px; text-decoration:none; color:var(--color-ink); }
+.nasa-firms-link:hover { background:color-mix(in srgb,var(--color-ember-4) 28%,var(--color-night)); }
+.nasa-firms-link:focus-visible { outline:2px solid var(--color-ember-4); outline-offset:2px; }
 .nasa-firms-scope { color:var(--color-dim); }
 .future-areas-notice { pointer-events:none; position:absolute; left:50%; top:48%; translate:-50% -50%; z-index:5; display:grid; gap:4px; width:max-content; max-width:calc(100% - 100px); padding:12px 18px; text-align:center; border-radius:14px; color:var(--color-ink); background:color-mix(in srgb,var(--color-night) 65%,transparent); backdrop-filter:blur(8px); }
 .future-areas-notice strong { font-size:18px; font-weight:500; }
