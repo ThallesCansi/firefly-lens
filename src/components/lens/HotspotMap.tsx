@@ -1093,7 +1093,7 @@ export function HotspotMap({
         </p>
       )}
       {/* The map key: what the marks mean, and what is on screen now. */}
-      <MapDisclosure kind="map-key" summary="Legend" aria-label="Map key">
+      <MapDisclosure kind="map-key" summary={<>Legend <span className="legend-symbols" aria-hidden="true"><span title="MODIS Aqua" className={inColumns ? "sensor-column sensor-column-modis" : "sensor-ring"} /><span title="VIIRS NOAA-20" className={inColumns ? "sensor-column sensor-column-viirs" : "sensor-dot"} /><span title="Area of interest" className="map-key-area" />{unusual && showUnusual && <span title="Unusually high" className="unusual-glow" />}</span></>} aria-label="Map key">
         <ul className="map-key-rows">
           <li>
             <span

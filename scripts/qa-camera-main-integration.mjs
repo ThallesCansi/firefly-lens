@@ -33,6 +33,7 @@ try {
     assert.equal(await p.locator('button[aria-label="3D columns"]').getAttribute("aria-pressed"), "true");
     if (width === 1440) {
       const download = p.waitForEvent("download");
+      if(!await p.getByRole("button", { name: "CSV", exact: true }).isVisible()) await p.locator('.selection-card-chip').click();
       await p.getByRole("button", { name: "CSV", exact: true }).click();
       const csv = readFileSync(await (await download).path(), "utf8").trim().split("\n");
       assert.equal(csv[0], "period,cell_id,longitude,latitude,modis_aqua_raw,viirs_noaa20_raw");

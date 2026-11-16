@@ -4,14 +4,20 @@ The camera trigger now uses a side-view video camera icon and stretches to the
 width of the projection controls below it. The mobile analysis layout retains
 the compact camera button beside zoom without stretching its enclosing card.
 
-When the available **map** width is 900 px or less, the selected area becomes
-an “Area of interest” button with its full accessible place name. The name is
-ellipsized visually where necessary. Clicking expands the existing actions and
-description; Escape closes it and returns focus. The map legend becomes a
-“Legend” disclosure. Both remain full cards on roomy maps. Their layout uses
-container queries so a sidebar or the analysis drawer can reduce the available
-space independently of the browser's outer width. Date/layer controls now fold
-at the same width.
+The selected area and map legend are collapsed by default on **every device**.
+The area header keeps its accessible place name and a separate, persistent
+**Show analysis** button, so opening the calendar does not require finding an
+action inside a disclosure. Secondary actions expand on click; Escape closes
+them and returns focus. The legend header previews the actual sensor/area
+symbols, including unusual activity when applicable; full labels and controls
+expand on demand. Names ellipsize visually only where needed.
+
+Container queries adapt docking when the map is 900 px or narrower, including
+when a sidebar or analysis drawer reduces its space independently of the outer
+viewport. Date/layer controls fold at that width. A narrow desktop map leaves
+the assistant clear; mobile analysis stacks camera over zoom to leave the area
+header accessible. Current screenshots are in
+[compact-map-cards-qa](compact-map-cards-qa/).
 
 State selection uses two explicit level buttons instead of a native select
 picker. A height-bounded, scrollable card leaves the canvas available for taps
