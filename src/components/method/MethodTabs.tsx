@@ -30,6 +30,7 @@ const sectionTabs: Record<string, Tab> = {
   example: "historical-anomalies",
   interpretation: "historical-anomalies",
   "data-sources": "data-limitations",
+  "background-imagery": "data-limitations",
   coverage: "data-limitations",
   hotspot: "data-limitations",
   frp: "data-limitations",

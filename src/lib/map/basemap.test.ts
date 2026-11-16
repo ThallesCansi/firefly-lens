@@ -22,6 +22,11 @@ const ids = (s: StyleSpecification) => s.layers.map((l) => l.id);
 const imagery = (s: StyleSpecification) => s.layers.find((l) => l.id === IMAGERY_LAYER) as unknown as Raster;
 
 describe("withImagery", () => {
+  it("defaults to Sentinel without applying NASA's local-zoom fade", () => {
+    const output = withImagery(style, "light", "satellite");
+    expect(output.sources[IMAGERY_LAYER]).toMatchObject({ maxzoom: 14, tiles: ["https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2025_3857/default/g/{z}/{y}/{x}.jpg"] });
+    expect(imagery(output).paint["raster-opacity"]).toBe(1);
+  });
   it("puts the picture over land and water, under roads, borders and names", () => {
     expect(ids(withImagery(style, "light", "satellite"))).toEqual([
       "background",
@@ -46,7 +51,7 @@ describe("withImagery", () => {
   });
 
   it("asks NASA GIBS for tiles without a key and credits it", () => {
-    const source = withImagery(style, "light", "satellite").sources[IMAGERY_LAYER] as {
+    const source = withImagery(style, "light", "satellite", "nasa-blue-marble").sources[IMAGERY_LAYER] as {
       tiles: string[];
       attribution: string;
     };

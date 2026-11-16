@@ -15,8 +15,13 @@ const SOURCES = [
     href: "https://www.earthdata.nasa.gov/data/instruments/viirs",
   },
   {
+    name: "EOxCloudless Sentinel-2 2025",
+    detail: "Default reference imagery by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2025), under CC BY-NC-SA 4.0 for eligible non-commercial use. Independent of the selected fire-analysis period.",
+    href: "https://cloudless.eox.at",
+  },
+  {
     name: "NASA GIBS, Blue Marble",
-    detail: "The satellite picture under the map: a cloud-free MODIS composite with shaded relief, served by the Global Imagery Browse Services.",
+    detail: "Selectable alternative reference imagery: a cloud-free MODIS composite with shaded relief, served by the Global Imagery Browse Services.",
     href: "https://www.earthdata.nasa.gov/engage/open-data-services-software/earthdata-developer-portal/gibs-api",
   },
 ];

@@ -1,0 +1,65 @@
+{
+  "checks": [
+    {
+      "width": 1440,
+      "sentinelDefault": true,
+      "nasaSelectable": true,
+      "preferenceRetainedOnReload": true,
+      "sourceSwitchPreservesCenter": true,
+      "columnsRetained": true,
+      "creditsClear": true
+    },
+    {
+      "width": 1000,
+      "sentinelDefault": true,
+      "nasaSelectable": true,
+      "preferenceRetainedOnReload": true,
+      "sourceSwitchPreservesCenter": true,
+      "columnsRetained": true,
+      "creditsClear": true
+    },
+    {
+      "width": 390,
+      "sentinelDefault": true,
+      "nasaSelectable": true,
+      "preferenceRetainedOnReload": true,
+      "sourceSwitchPreservesCenter": true,
+      "columnsRetained": true,
+      "creditsClear": true
+    },
+    {
+      "width": 320,
+      "sentinelDefault": true,
+      "nasaSelectable": true,
+      "preferenceRetainedOnReload": true,
+      "sourceSwitchPreservesCenter": true,
+      "columnsRetained": true,
+      "creditsClear": true
+    },
+    {
+      "eox503Isolated": true,
+      "nasaFallback": true,
+      "explicitRetry": true
+    }
+  ],
+  "errors": [],
+  "forbiddenRequests": [],
+  "network": {
+    "tiles.maps.eox.at": {
+      "responses": 782,
+      "bytes": 947083,
+      "statuses": {
+        "200": 776,
+        "503": 6
+      },
+      "cancelled": 27
+    },
+    "gibs.earthdata.nasa.gov": {
+      "responses": 162,
+      "bytes": 951241,
+      "statuses": {
+        "200": 162
+      }
+    }
+  }
+}

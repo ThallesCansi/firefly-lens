@@ -7,6 +7,27 @@ type Reference = {
   doi?: string;
 };
 const references: Record<string, Reference> = {
+  eox: {
+    authors: "EOX IT Services GmbH",
+    year: "2025 mosaic",
+    title: "EOxCloudless Sentinel-2 reference imagery",
+    publication: "Background imagery provider",
+    url: "https://cloudless.eox.at",
+  },
+  "eox-license": {
+    authors: "EOX IT Services GmbH",
+    year: "Current terms",
+    title: "EOxCloudless licensing conditions",
+    publication: "Imagery usage and attribution",
+    url: "https://cloudless.eox.at/documentation/license",
+  },
+  "cc-nc-sa": {
+    authors: "Creative Commons",
+    year: "Version 4.0",
+    title: "Attribution-NonCommercial-ShareAlike 4.0 International",
+    publication: "Imagery license",
+    url: "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+  },
   modis: {
     authors: "Giglio, L.; Schroeder, W.; Justice, C. O.",
     year: "2016",
@@ -63,13 +84,12 @@ const references: Record<string, Reference> = {
     url: "https://search.r-project.org/R/refmans/stats/html/mad.html",
   },
 };
-export function References({ ids }: { ids: string[] }) {
+export function References({ ids, title = "Scientific references", description }: { ids: string[]; title?: string; description?: string }) {
   return (
-    <section className="method-references" aria-label="Scientific references">
-      <h2>Scientific references</h2>
+    <section className="method-references" aria-label={title}>
+      <h2>{title}</h2>
       <p>
-        These sources describe the instruments and statistical concepts. They do
-        not validate FireFly Lens’s provisional harmonization.
+        {description ?? "These sources describe the instruments and statistical concepts. They do not validate FireFly Lens’s provisional harmonization."}
       </p>
       <ol>
         {ids.map((id) => {

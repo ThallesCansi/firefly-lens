@@ -1,0 +1,103 @@
+{
+  "checkedAt": "2026-11-15T23:59:56.831Z",
+  "branch": "feature/sentinel-default",
+  "baseCommit": "59ff514f4129e384b82414e0f7ce55bf8f2cdf80",
+  "sourceBranchUntouched": true,
+  "coreScientificCameraCoverageAndDependenciesUnchanged": true,
+  "unitTests": {
+    "files": 43,
+    "tests": 264,
+    "passed": true
+  },
+  "eslint": "passed",
+  "typescript": "passed",
+  "productionBuild": "passed",
+  "diffCheck": "passed",
+  "camera": {
+    "checks": [
+      {
+        "width": 1440,
+        "theme": "light",
+        "motion": "no-preference",
+        "passed": true
+      },
+      {
+        "width": 390,
+        "theme": "dark",
+        "motion": "reduce",
+        "passed": true
+      },
+      {
+        "width": 320,
+        "theme": "light",
+        "motion": "reduce",
+        "passed": true
+      }
+    ],
+    "errors": [],
+    "sentinelTiles": 351,
+    "sentinelSuccesses": 351
+  },
+  "lume": {
+    "status": "passed",
+    "steps": 24,
+    "layouts": [
+      1440,
+      1000,
+      390,
+      320
+    ],
+    "errors": [],
+    "pantanalSeptember2023": 355.68,
+    "automaticVisits": true,
+    "explicitOptOut": true,
+    "readOnly": true
+  },
+  "science": {
+    "checks": [
+      {
+        "width": 1440,
+        "realCountryDailyCsv": true,
+        "fittedCalendar": true,
+        "profiles": true,
+        "forecastAvailability": true,
+        "continentConstraints": true
+      },
+      {
+        "width": 390,
+        "realCountryDailyCsv": false,
+        "fittedCalendar": true,
+        "profiles": true,
+        "forecastAvailability": true,
+        "continentConstraints": true
+      },
+      {
+        "width": 320,
+        "realCountryDailyCsv": false,
+        "fittedCalendar": true,
+        "profiles": true,
+        "forecastAvailability": true,
+        "continentConstraints": true
+      }
+    ],
+    "errors": [],
+    "scope": "Published real data; no dynamic Python forecast validation"
+  },
+  "gestures": {
+    "engine": "6.18.0",
+    "baseline": "5d457c7",
+    "workingCases": 20,
+    "manualStops": 0,
+    "errors": []
+  },
+  "finalApplicationWidths": [
+    1440,
+    1000,
+    390,
+    320
+  ],
+  "finalApplicationErrors": [],
+  "forbiddenProviderRequests": [],
+  "identicalPocComparisons": 3,
+  "attributionRefinement": "attribution-refinement-results.json"
+}

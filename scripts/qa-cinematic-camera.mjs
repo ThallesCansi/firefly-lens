@@ -1,3 +1,4 @@
+import { attributedScreenshot } from "./attributed-screenshot.mjs";
 import assert from "node:assert/strict";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -31,7 +32,7 @@ async function settled(p) {
 }
 async function action(p, label) { await open(p); await menu(p).getByRole("button", { name: label, exact: true }).click(); await settled(p); }
 async function close(p) { if (await menu(p).locator(".camera-menu").isVisible()) await menu(p).locator(".camera-trigger").click(); }
-async function shot(p, file) { await close(p); await p.screenshot({ path: join(output, file), animations: "disabled" }); }
+async function shot(p, file) { await close(p); await attributedScreenshot(p, { path: join(output, file), animations: "disabled" }); }
 async function state(p) { return p.evaluate(() => ({
   area: document.querySelector('[data-tour="map-canvas"]')?.getAttribute("aria-label"),
   period: document.querySelector('[data-tour="period"]')?.textContent,
@@ -39,7 +40,9 @@ async function state(p) { return p.evaluate(() => ({
   analysis: document.querySelector(".workspace-body")?.getAttribute("data-analysis"),
 })); }
 async function picker(p, label, option) {
-  await p.getByRole("button", { name: new RegExp(`^${label}:`) }).click();
+  const trigger = p.getByRole("button", { name: new RegExp(`^${label}:`) });
+  if (!await trigger.isVisible()) await p.locator(".map-card-chip").click();
+  await trigger.click();
   await p.getByRole("listbox", { name: label, exact: true }).getByRole("option", { name: option, exact: true }).click();
 }
 try {
@@ -55,11 +58,11 @@ try {
     const p = await context.newPage(); p.setDefaultTimeout(30000);
     activePage = p;
     p.on("pageerror", (e) => errors.push(e.message));
-    p.on("response", (r) => { if (r.url().includes("gibs.earthdata.nasa.gov")) imagery.push({ status: r.status(), url: r.url() }); });
-    p.on("requestfailed", (r) => { if (r.url().includes("gibs.earthdata.nasa.gov") && r.failure()?.errorText !== "net::ERR_ABORTED") console.log("NASA request:", r.failure()?.errorText); });
+    p.on("response", (r) => { if (r.url().includes("tiles.maps.eox.at")) imagery.push({ status: r.status(), url: r.url() }); });
+    p.on("requestfailed", (r) => { if (r.url().includes("tiles.maps.eox.at") && r.failure()?.errorText !== "net::ERR_ABORTED") console.log("Sentinel request:", r.failure()?.errorText); });
     await p.goto(`${base}/lens`); await menu(p).waitFor();
     await open(p);
-    await p.screenshot({ path: join(output, `${width}-${theme}-camera-menu.png`), animations: "disabled" });
+    await attributedScreenshot(p, { path: join(output, `${width}-${theme}-camera-menu.png`), animations: "disabled" });
     // Native popover supports light dismissal and returns keyboard focus.
     await p.keyboard.press("Escape"); assert.equal(await menu(p).locator(".camera-menu").isVisible(), false);
     await open(p); await p.mouse.click(4, 500);
@@ -92,7 +95,7 @@ try {
     await action(p, "Earth overview"); await shot(p, `${width}-${theme}-earth-satellite.png`);
     await action(p, "Focus Brazil"); await p.waitForTimeout(800); await shot(p, `${width}-${theme}-brazil-satellite.png`);
     await action(p, "Focus Pantanal"); await p.waitForTimeout(800); await shot(p, `${width}-${theme}-pantanal-satellite.png`);
-    await open(p); await p.screenshot({ path: join(output, `${width}-${theme}-camera-menu-satellite.png`), animations: "disabled" });
+    await open(p); await attributedScreenshot(p, { path: join(output, `${width}-${theme}-camera-menu-satellite.png`), animations: "disabled" });
     await close(p);
     assert.deepEqual(await state(p), original);
     assert.equal(await p.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false);
@@ -122,7 +125,9 @@ try {
       await p.getByRole("button", { name: "Use this state", exact: true }).click(); await settled(p);
       assert.match((await state(p)).area, /Paulo/);
       // RegionFlight retains its real study-region and period semantics.
-      await p.getByRole("button", { name: "Regions", exact: true }).click(); await settled(p);
+      const regions = p.getByRole("button", { name: "Regions", exact: true });
+      if (!await regions.isVisible()) await p.locator(".map-card-chip").click();
+      await regions.click(); await settled(p);
       const flight = p.getByRole("region", { name: "Regional flight", exact: true });
       await flight.getByRole("button", { name: "Next", exact: true }).click(); await settled(p);
       await shot(p, "desktop-regional-flight.png");
@@ -141,10 +146,21 @@ try {
       const beforeTour = await state(p);
       await p.locator('[data-tour="replay"]').click();
       await p.locator('.lume-tour-card[data-tour-step="welcome"]').waitFor();
-      for (const id of ["map", "search", "region", "pantanal", "sensors", "period", "analyze", "history", "month", "report", "science", "forecast", "range", "exports", "complete"]) {
+      for (const id of ["map", "search", "region", "pantanal", "sensors", "period", "analyze", "history", "month", "report", "science", "forecast", "range", "exports", "pages", "complete"]) {
         await p.locator(".lume-tour-card .driver-popover-next-btn").click();
+        if (id === "complete") {
+          // Main's tour now visits About and Method before restoring the Lens.
+          for (const [path, count, first] of [["about", 4, 17], ["method", 3, 21]]) {
+            await p.waitForURL(`**/${path}`);
+            for (let i = 0; i < count; i++) {
+              await p.waitForFunction((n) => document.querySelector(".lume-tour-card .driver-popover-progress-text")?.textContent === `${n} of 24`, first + i);
+              await p.locator(".lume-tour-card .driver-popover-next-btn").click();
+            }
+          }
+          await p.waitForURL("**/lens");
+        }
         await p.locator(`.lume-tour-card[data-tour-step="${id}"]`).waitFor();
-        if (id === "month") assert.match(await p.locator('[data-tour="month"]').innerText(), /535 hot spots/);
+        if (id === "month") assert.match(await p.locator('[data-tour="month"]').innerText(), /356 hot spots/);
       }
       await p.getByRole("button", { name: "Restore previous workspace", exact: true }).click();
       await p.waitForFunction(() => !document.querySelector("main.lens-workspace").inert); await settled(p);
@@ -174,12 +190,12 @@ try {
     console.log(`Cinematic QA: ${width}px ${theme} passed`);
   }
   assert.deepEqual(errors, []);
-  assert.ok(imagery.some((r) => r.status === 200), "Live NASA imagery was exercised");
-  writeFileSync(join(output, "results.json"), JSON.stringify({ checks, errors, nasaTiles: imagery.length, nasaSuccesses: imagery.filter((r) => r.status === 200).length }, null, 2));
+  assert.ok(imagery.some((r) => r.status === 200), "Live default Sentinel imagery was exercised");
+  writeFileSync(join(output, "results.json"), JSON.stringify({ checks, errors, sentinelTiles: imagery.length, sentinelSuccesses: imagery.filter((r) => r.status === 200).length }, null, 2));
   console.log(`Cinematic camera QA passed: ${output}`);
 } catch (error) {
   if (activePage && !activePage.isClosed()) {
-    await activePage.screenshot({ path: join(output, "issue.png") });
+    await attributedScreenshot(activePage, { path: join(output, "issue.png") });
     console.log("QA state:", (await activePage.locator("body").innerText()).slice(-2200));
   }
   throw error;

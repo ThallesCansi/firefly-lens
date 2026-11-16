@@ -1,4 +1,6 @@
 import type { StyleSpecification } from "maplibre-gl";
+import { DEFAULT_IMAGERY, IMAGERY_LAYER, IMAGERY_PROVIDERS, imageryLayer, type ImageryProviderId } from "./imagery-providers";
+export { IMAGERY_LAYER } from "./imagery-providers";
 
 /**
  * The basemap: OpenFreeMap "Liberty", a free OpenStreetMap style with classic
@@ -12,7 +14,7 @@ export const BASEMAP_URL = "https://tiles.openfreemap.org/styles/liberty";
 /** Shown with the source attributions MapLibre reads from the tiles. */
 export const BASEMAP_ATTRIBUTION = '<a href="https://www.naturalearthdata.com/" target="_blank" rel="noreferrer">Natural Earth</a>';
 
-/** What covers the land and the sea: NASA's satellite picture, or the drawn map alone. */
+/** Satellite reference imagery, or the drawn map alone. */
 export type BasemapKind = "satellite" | "map";
 
 /** The satellite picture shows first; the drawn map is one press away. */
@@ -39,17 +41,6 @@ export function saveBasemap(kind: BasemapKind): void {
   }
 }
 
-/**
- * The satellite picture: NASA's Blue Marble with shaded relief and ocean
- * depth, a cloud-free composite of MODIS images at 500 m, served as plain
- * image tiles by NASA GIBS with no API key. It is a still picture of the land,
- * not the day's image: forest, savanna and cleared land read at a glance.
- */
-export const IMAGERY_LAYER = "nasa-imagery";
-const IMAGERY_TILES =
-  "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/{z}/{y}/{x}.jpeg";
-const IMAGERY_ATTRIBUTION =
-  '<a href="https://www.earthdata.nasa.gov/engage/open-data-services-software/earthdata-developer-portal/gibs-api" target="_blank" rel="noreferrer">Imagery: NASA GIBS, Blue Marble</a>';
 
 /** Drawn layers the picture replaces; roads, borders and names stay on top of it. */
 const UNDER_IMAGERY = new Set(["park", "landuse", "landcover", "waterway", "water"]);
@@ -57,32 +48,21 @@ const UNDER_IMAGERY = new Set(["park", "landuse", "landcover", "waterway", "wate
 /**
  * Adds the satellite picture to a style, above the drawn land and water and
  * below roads, borders and names. The layer is always present and hidden for
- * the drawn map, so switching is a visibility change, not a new style. Past
- * the picture's detail (zoom 8) it fades into the drawn map underneath.
+ * the drawn map. Runtime switching replaces only raster resources, not styles.
+ * NASA fades beyond its detail; Sentinel keeps its provider-specific opacity.
  */
-export function withImagery(style: StyleSpecification, theme: "light" | "dark", kind: BasemapKind): StyleSpecification {
+export function withImagery(style: StyleSpecification, theme: "light" | "dark", kind: BasemapKind, provider: ImageryProviderId = DEFAULT_IMAGERY): StyleSpecification {
   const layers = style.layers as unknown as { id: string; type: string; "source-layer"?: string }[];
   const first = layers.findIndex(
     (l) => l.type !== "background" && l.type !== "raster" && !UNDER_IMAGERY.has(l["source-layer"] ?? ""),
   );
   const at = first === -1 ? layers.length : first;
-  const imagery = {
-    id: IMAGERY_LAYER,
-    type: "raster",
-    source: IMAGERY_LAYER,
-    layout: { visibility: kind === "satellite" ? "visible" : "none" },
-    paint: {
-      "raster-opacity": ["interpolate", ["linear"], ["zoom"], 9, 1, 11.5, 0],
-      // At night the covered continent stays as clear as by day; the fog
-      // outside South America does the darkening (see addCoverageMask).
-      ...(theme === "dark" ? { "raster-brightness-max": 0.92, "raster-saturation": -0.08 } : {}),
-    },
-  };
+  const imagery = imageryLayer(provider, theme, IMAGERY_LAYER, kind === "satellite");
   return {
     ...style,
     sources: {
       ...style.sources,
-      [IMAGERY_LAYER]: { type: "raster", tiles: [IMAGERY_TILES], tileSize: 256, maxzoom: 8, attribution: IMAGERY_ATTRIBUTION },
+      [IMAGERY_LAYER]: { ...IMAGERY_PROVIDERS[provider].source },
     },
     layers: [...layers.slice(0, at), imagery, ...layers.slice(at)],
   } as unknown as StyleSpecification;

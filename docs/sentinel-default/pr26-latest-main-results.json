@@ -1,0 +1,267 @@
+{
+  "checkedAt": "2026-11-16T00:44:22.873Z",
+  "previousValidatedIntegration": "706d300a31b76ee9baf660e598abddb3b86485d9",
+  "mainHeadIntegrated": "b22df7361fdaeaaa087cbb98d056009aafc07788",
+  "actualConflictFiles": [
+    "src/app/workspace.css",
+    "scripts/qa-camera-main-integration.mjs"
+  ],
+  "checks": {
+    "unitFiles": 43,
+    "unitTests": 264,
+    "eslint": "passed",
+    "typescript": "passed",
+    "productionBuild": "passed",
+    "diffCheck": "passed"
+  },
+  "sentinel": {
+    "checks": [
+      {
+        "width": 1440,
+        "sentinelDefault": true,
+        "nasaSelectable": true,
+        "preferenceRetainedOnReload": true,
+        "sourceSwitchPreservesCenter": true,
+        "columnsRetained": true,
+        "creditsClear": true
+      },
+      {
+        "width": 1000,
+        "sentinelDefault": true,
+        "nasaSelectable": true,
+        "preferenceRetainedOnReload": true,
+        "sourceSwitchPreservesCenter": true,
+        "columnsRetained": true,
+        "creditsClear": true
+      },
+      {
+        "width": 390,
+        "sentinelDefault": true,
+        "nasaSelectable": true,
+        "preferenceRetainedOnReload": true,
+        "sourceSwitchPreservesCenter": true,
+        "columnsRetained": true,
+        "creditsClear": true
+      },
+      {
+        "width": 320,
+        "sentinelDefault": true,
+        "nasaSelectable": true,
+        "preferenceRetainedOnReload": true,
+        "sourceSwitchPreservesCenter": true,
+        "columnsRetained": true,
+        "creditsClear": true
+      },
+      {
+        "eox503Isolated": true,
+        "nasaFallback": true,
+        "explicitRetry": true
+      }
+    ],
+    "errors": [],
+    "forbiddenRequests": [],
+    "network": {
+      "tiles.maps.eox.at": {
+        "responses": 774,
+        "bytes": 953370,
+        "statuses": {
+          "200": 759,
+          "503": 15
+        },
+        "cancelled": 32
+      },
+      "gibs.earthdata.nasa.gov": {
+        "responses": 162,
+        "bytes": 1127586,
+        "statuses": {
+          "200": 162
+        }
+      }
+    }
+  },
+  "camera": {
+    "checks": [
+      {
+        "width": 1440,
+        "theme": "light",
+        "motion": "no-preference",
+        "passed": true
+      },
+      {
+        "width": 390,
+        "theme": "dark",
+        "motion": "reduce",
+        "passed": true
+      },
+      {
+        "width": 320,
+        "theme": "light",
+        "motion": "reduce",
+        "passed": true
+      }
+    ],
+    "errors": [],
+    "sentinelTiles": 341,
+    "sentinelSuccesses": 341
+  },
+  "lume": {
+    "status": "passed",
+    "steps": 24,
+    "layouts": [
+      1440,
+      1000,
+      390,
+      320
+    ],
+    "errors": [],
+    "pantanalSeptember2023": 355.68,
+    "automaticVisits": true,
+    "explicitOptOut": true,
+    "readOnly": true
+  },
+  "responsive": {
+    "results": [
+      {
+        "width": 1440,
+        "height": 1000,
+        "cameraAndProjectionWidth": 46,
+        "stateSelected": true,
+        "pickerHeight": 255.46875,
+        "mapHeight": 1000,
+        "collapsedCards": true
+      },
+      {
+        "width": 1100,
+        "height": 900,
+        "cameraAndProjectionWidth": 46,
+        "stateSelected": true,
+        "pickerHeight": 255.46875,
+        "mapHeight": 900,
+        "collapsedCards": true
+      },
+      {
+        "width": 900,
+        "height": 800,
+        "cameraAndProjectionWidth": 46,
+        "stateSelected": true,
+        "pickerHeight": 199.96875,
+        "mapHeight": 800,
+        "collapsedCards": true
+      },
+      {
+        "width": 760,
+        "height": 800,
+        "cameraAndProjectionWidth": 46,
+        "stateSelected": true,
+        "pickerHeight": 178.28125,
+        "mapHeight": 800,
+        "collapsedCards": true
+      },
+      {
+        "width": 390,
+        "height": 844,
+        "cameraAndProjectionWidth": 46,
+        "stateSelected": true,
+        "pickerHeight": 199.96875,
+        "mapHeight": 844,
+        "collapsedCards": true
+      },
+      {
+        "width": 320,
+        "height": 740,
+        "cameraAndProjectionWidth": 46,
+        "stateSelected": true,
+        "pickerHeight": 199.96875,
+        "mapHeight": 740,
+        "collapsedCards": true
+      },
+      {
+        "width": 844,
+        "height": 420,
+        "cameraAndProjectionWidth": 46,
+        "stateSelected": true,
+        "pickerHeight": 101.78125,
+        "mapHeight": 420,
+        "collapsedCards": true
+      }
+    ],
+    "errors": []
+  },
+  "science": {
+    "checks": [
+      {
+        "width": 1440,
+        "realCountryDailyCsv": true,
+        "fittedCalendar": true,
+        "profiles": true,
+        "forecastAvailability": true,
+        "continentConstraints": true
+      },
+      {
+        "width": 390,
+        "realCountryDailyCsv": false,
+        "fittedCalendar": true,
+        "profiles": true,
+        "forecastAvailability": true,
+        "continentConstraints": true
+      },
+      {
+        "width": 320,
+        "realCountryDailyCsv": false,
+        "fittedCalendar": true,
+        "profiles": true,
+        "forecastAvailability": true,
+        "continentConstraints": true
+      }
+    ],
+    "errors": [],
+    "scope": "Published real data; no dynamic Python forecast validation"
+  },
+  "attribution": {
+    "rows": [
+      {
+        "width": 1440,
+        "theme": "light",
+        "minimumContrast": null,
+        "initialCollapsed": true,
+        "mouseToggle": true,
+        "keyboardToggle": true
+      },
+      {
+        "width": 1440,
+        "theme": "dark",
+        "minimumContrast": 14.250291722327031,
+        "initialCollapsed": true,
+        "mouseToggle": true,
+        "keyboardToggle": true
+      },
+      {
+        "width": 320,
+        "theme": "light",
+        "minimumContrast": null,
+        "initialCollapsed": true,
+        "mouseToggle": true,
+        "keyboardToggle": true
+      },
+      {
+        "width": 320,
+        "theme": "dark",
+        "minimumContrast": 14.250291722327031,
+        "initialCollapsed": true,
+        "mouseToggle": true,
+        "keyboardToggle": true
+      }
+    ],
+    "errors": []
+  },
+  "gestures": {
+    "baseline": "5d457c7",
+    "engine": "6.18.0",
+    "controllerSha256": "eb47b15ff3ed635d68b3f606db77ae61fad7d8fea914d92a2ec181c4373dfa03",
+    "controllerUnchangedSinceTrace": true,
+    "workingCases": 20,
+    "manualStops": 0,
+    "errors": []
+  },
+  "scientificCameraAndDependenciesUnchangedFromMain": true
+}

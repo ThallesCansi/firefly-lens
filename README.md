@@ -42,7 +42,7 @@ FireFly Lens writes the whole record on the **MODIS Aqua scale**, so 2002 and 20
 
 |  |  |
 |---|---|
-| 🗺️ **Explore** | Pan a 3D globe with MODIS and VIIRS detections per grid cell, over NASA Blue Marble imagery. |
+| 🗺️ **Explore** | Pan a 3D globe with MODIS and VIIRS detections per grid cell, over Sentinel-2 2025 reference imagery (NASA Blue Marble remains available). |
 | ✏️ **Select** | Draw a polygon, pick a state or country, type coordinates, or choose a study region. |
 | 📅 **Read the history** | Every month of every year in one grid, unusual months ringed, each year opening into a daily calendar. |
 | 🔥 **Check fire danger** | Current Fire Weather Index for the area, from NASA GFWED / GEOS-5 forecasts. |
@@ -113,3 +113,11 @@ Built with Next.js, React, TypeScript, Tailwind CSS, MapLibre, Motion and d3.
 <div align="center">
 <sub>Made for the NASA Space Apps Challenge 2026 · <i>Harmonization of MODIS and VIIRS Hot Spots</i><br/>Not endorsed by NASA · <a href="LICENSE">MIT License</a></sub>
 </div>
+
+## Satellite reference imagery
+
+The default satellite provider is **EOxCloudless Sentinel-2 · 2025**. Use **Camera → Satellite source** to select NASA Blue Marble instead. The existing satellite/cartographic preference is preserved; provider selection stays local to the workspace and never changes scientific URLs, dates or exports. If EOX fails, cartography remains usable and the menu offers **Retry imagery** and **Use NASA Blue Marble**.
+
+The mosaic is a reference image independent of MODIS/VIIRS analysis dates. EOX imagery requires eligible non-commercial use and CC BY-NC-SA 4.0 attribution; the public service has fair-use limits and no production SLA. Confirm the deployment model with EOX before release. Scientific data and application code retain their own licenses. See [isolated imagery implementation and QA](docs/sentinel-default-validation.md).
+
+Full background-imagery documentation is under [Method - Data & Limitations](/method#background-imagery). The map uses its standard compact attribution control; open it before capturing or sharing images so the provider credits remain visible in the resulting media.
