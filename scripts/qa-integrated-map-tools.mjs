@@ -92,7 +92,7 @@ try {
   await page
     .getByRole("button", { name: "Select Country / State", exact: true })
     .click();
-  await page.getByLabel("Selection level").selectOption("state");
+  await page.getByRole("group",{name:"Selection level",exact:true}).getByRole("button",{name:"Brazilian state",exact:true}).click();
   await clickCenter(page);
   await page.getByRole("heading", { name: /Paulo/ }).waitFor();
   await page
