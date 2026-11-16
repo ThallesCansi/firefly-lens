@@ -593,7 +593,7 @@ export function LensApp() {
     capture: () => tourSnapshot.current ?? ({ area, analyzed, analysis, expanded, drawing, coordinates, searching,
       period, from, to, sensors: [...sensors], monthOpen, cardOpen, analyticsTab,
       bounds: controller?.getBounds(), projection: controller?.getProjection(), scrollY: window.scrollY,
-      camera: controller?.getCameraPose(), columnsChosen, flight,
+      camera: controller?.getCameraPose(), columnsChosen, flight, playback,
       panelScrollTop: document.querySelector<HTMLElement>('[data-tour-scroll="analysis-panel"]')?.scrollTop ?? 0 }),
     async prepare(id: TourStepId, signal: AbortSignal) {
       if (signal.aborted) return;
@@ -656,6 +656,7 @@ export function LensApp() {
       setMonthOpen(saved.monthOpen); setCardOpen(saved.cardOpen); setAnalyticsTab(saved.analyticsTab);
       controller?.stopNavigation();
       setColumnsChosen(saved.columnsChosen ?? false); setFlight(saved.flight ?? null);
+      setPlayback(saved.playback ?? false); setAutoPlay(0);
       setDestination(null);
       restoredView.current?.abort();
       const view = new AbortController();

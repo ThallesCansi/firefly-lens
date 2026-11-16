@@ -22,6 +22,7 @@ export interface WorkspaceSnapshot {
   camera?: CameraPose;
   columnsChosen?: boolean;
   flight?: number | null;
+  playback?: boolean;
   scrollY?: number;
   panelScrollTop?: number;
 }
