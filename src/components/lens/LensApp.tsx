@@ -17,6 +17,8 @@ import {
 } from "@/lib/data/types";
 import type { AdministrativeCandidate } from "@/lib/interactions/administrative";
 import type { Vertex } from "@/lib/interactions/polygon-editor";
+import { TourLauncher } from "./TourLauncher";
+import { NasaFirmsLink } from "./NasaFirmsLink";
 import { MapDisclosure } from "./MapDisclosure";
 import { AreaForm } from "./AreaForm";
 import { AnalysisCalendar, AnalysisReport } from "./AnalysisContent";
@@ -47,7 +49,6 @@ import type { MapController } from "@/lib/map/map-contract";
 import "@/components/interactions/WorkspaceTools.css";
 import { ScientificInfo } from "@/components/ui/ScientificInfo";
 import { AutoStartTour } from "@/components/onboarding/AutoStartTour";
-import { Lume } from "@/components/firefly/Lume";
 import { lockTourInteractions } from "@/lib/onboarding/interaction-lock";
 import { afterPaint, type TourWorkspace, type WorkspaceSnapshot } from "@/lib/onboarding/session";
 import { TOUR_PERIOD, stepIndex, type TourStepId } from "@/lib/onboarding/steps";
@@ -711,7 +712,7 @@ export function LensApp() {
             }}
           />
           <SiteNav current="/lens" className="map-site-card" />
-          <button ref={tourLauncher} data-tour="replay" type="button" className="lume-replay map-surface" onClick={startTour} disabled={tourRunning}><Lume size={24} />Tour with FireFlighter</button>
+          <TourLauncher ref={tourLauncher} onStart={startTour} disabled={tourRunning} />
           <MapToolbar
             onSearch={() => {
               tools.stop();
@@ -1009,6 +1010,7 @@ export function LensApp() {
               <div className="min-w-0">
                 <h2 className="text-2xl">{analyzed.name}</h2>
                 <p className="num text-xs text-dim">{describe(analyzed)}</p>
+                <NasaFirmsLink area={analyzed} period={period} sensors={sensors} />
               </div>
               <div className="flex gap-2">
                 <button

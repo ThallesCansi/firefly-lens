@@ -22,7 +22,7 @@ import { CameraControls } from "./map/CameraControls";
 import { ImageryControls } from "./map/ImageryControls";
 import { createImagery, type ImageryManager, type ImageryPhase } from "@/lib/map/imagery";
 import { DEFAULT_IMAGERY, IMAGERY_PROVIDERS, type ImageryProviderId } from "@/lib/map/imagery-providers";
-import { addCoverageMask,continentCenter,MIN_CONTINENT_ZOOM } from "@/lib/map/south-america";
+import { addCoverageMask,continentCenter, nearContinentEdge,MIN_CONTINENT_ZOOM } from "@/lib/map/south-america";
 import { GLOW, glowAt } from "@/lib/map/glow";
 import {
   COLUMN_MOTION_MS,
@@ -345,12 +345,27 @@ export function HotspotMap({
   const setInColumns = (on: boolean) => { setLocalColumns(on); onColumnsChange?.(on); };
   const [cameraProfile, setCameraProfile] = useState<CameraProfile>(DEFAULT_CAMERA_PROFILE);
   const [cameraMoving, setCameraMoving] = useState(false);
+  const [nearBoundary,setNearBoundary]=useState(false);
+  const boundaryState=useRef(false);
   // A regional flight shows every stop in 3D, whatever was chosen before it.
   const inColumns = forceColumns || columnsChosen;
   /** Reference satellite imagery under the data, or the drawn map alone. */
   const [basemap, setBasemap] = useState<BasemapKind>(DEFAULT_BASEMAP);
   const [imageryProvider, setImageryProvider] = useState<ImageryProviderId>(DEFAULT_IMAGERY);
   const [imageryPhase, setImageryPhase] = useState<ImageryPhase>("off");
+  useEffect(()=>{
+    if(!ready)return;
+    const summary=el.current?.querySelector<HTMLElement>(".maplibregl-ctrl-attrib-button");
+    if(!summary)return;
+    const source=basemap==="satellite" && imageryPhase==="active"
+      ? (imageryProvider==="eox-sentinel-2025"?"EOX · Sentinel-2":"NASA GIBS · Blue Marble")
+      : (offline?"Natural Earth":"OpenFreeMap / OSM");
+    const name=document.createElement("span");name.className="map-source-preview";name.textContent=source;
+    const info=document.createElement("span");info.className="map-source-info";info.textContent="ⓘ";info.setAttribute("aria-hidden","true");
+    summary.replaceChildren(name,info);
+    summary.setAttribute("aria-label",`Map source: ${source}. Toggle full attribution`);
+    summary.title=`${source} · full attribution and licences`;
+  },[ready,basemap,imageryProvider,imageryPhase,offline]);
   /** The glow under unusually high cells; the key switches it off. */
   const [showUnusual, setShowUnusual] = useState(true);
   /** The cell under the pointer, whose numbers the readout shows. */
@@ -659,6 +674,11 @@ export function HotspotMap({
       });
       instance.on("idle", () => {
         if (!dead) setPaintedTheme(appliedTheme.current);
+      });
+      instance.on("move", () => {
+        const center=instance.getCenter();
+        const near=nearContinentEdge(center.lng,center.lat);
+        if(!dead && boundaryState.current!==near){boundaryState.current=near;setNearBoundary(near);}
       });
       instance.on("moveend", () => {
         const center=instance.getCenter();
@@ -1206,6 +1226,7 @@ export function HotspotMap({
           <p className="map-key-note">Globe unavailable here: flat map shown</p>
         )}
       </MapDisclosure>
+      {nearBoundary && <div className="future-areas-notice" role="status"><strong>Future areas</strong><span>Current coverage: South America</span></div>}
       {signalMarkers}
       {/* One column of view controls: projection, zoom, reset. */}
       {ready && (
